@@ -114,4 +114,29 @@ describe('parse-ementa', () => {
       expect(isLikelyTruncated('Texto completo terminado com ponto final.')).toBe(false);
     });
   });
+  describe('marcadores de tramitação', () => {
+    it('remove "(Vide Decreto ...)" e o "Vigência" que vem colado', () => {
+      const raw =
+        'I - para contratação que envolva valores inferiores a R$ 100.000,00 ' +
+        '(cem mil reais);        (Vide Decreto nº 10.922, de 2021)      (Vigência)      ' +
+        '(Vide Decreto nº 12.343, de 2024)    Vigência';
+      const out = normalizeEmenta(raw);
+      expect(out).not.toContain('Vide Decreto');
+      expect(out).not.toContain('Vigência');
+      expect(out).toContain('R$ 100.000,00 (cem mil reais);');
+    });
+
+    it('remove "(Redação dada ...)" e "(Incluído ...)"', () => {
+      const raw = 'XVII - texto do inciso; (Redação dada pela Lei nº 14.628, de 2023) (Incluído pela Medida Provisória nº 1.166, de 2023)';
+      const out = normalizeEmenta(raw);
+      expect(out).not.toContain('Redação dada');
+      expect(out).not.toContain('Incluído pela');
+      expect(out).toContain('texto do inciso;');
+    });
+
+    it('preserva (VETADO), que é texto oficial', () => {
+      const out = normalizeEmenta('Art. 1º Isto é (VETADO) parte do texto.');
+      expect(out).toContain('(VETADO)');
+    });
+  });
 });

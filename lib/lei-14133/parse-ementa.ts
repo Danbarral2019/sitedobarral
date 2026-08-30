@@ -42,6 +42,21 @@ export interface ParsedSegment {
 }
 
 /**
+ * Marcadores de tramitação que o Planalto embute no meio da frase do artigo:
+ * "(Vide Decreto nº 10.922, de 2021)", "(Vigência)", "(Redação dada pela Lei
+ * nº X)", "(Incluído pela Medida Provisória nº Y)". São metadados de
+ * publicação, não texto da lei, e no corpo do artigo quebram a leitura.
+ *
+ * Fica de fora deste corte o "(VETADO)", que é parte do texto oficial e tem
+ * tratamento próprio em EmentaParagraph.
+ */
+const MARCADOR_TRAMITACAO =
+  /\s*\((?:Vide|Vigência|Redação dada|Incluído|Incluída|Revogado|Revogada|Renumerado)[^)]*\)/gi;
+
+/** "Vigência" solto, sem parênteses, como aparece depois de alguns "(Vide …)". */
+const VIGENCIA_SOLTA = /\s+Vigência\b/g;
+
+/**
  * Garante que cada inciso, alínea e parágrafo começa em linha nova.
  * Não destrói formatação que já existe.
  */
@@ -50,6 +65,9 @@ export function normalizeEmenta(raw: string): string {
 
   // 0. Remove sufixo ALL CAPS de capítulo que vazou do scrape
   text = stripTrailingChapterJunk(text);
+
+  // 0.1. Remove os marcadores de tramitação do corpo do artigo
+  text = text.replace(MARCADOR_TRAMITACAO, '').replace(VIGENCIA_SOLTA, '');
 
   // 1. Antes de cada inciso romano "I - ", "II - ", etc., garantir \n\n
   //    (a menos que já esteja precedido por \n)

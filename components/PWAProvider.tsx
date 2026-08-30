@@ -192,7 +192,7 @@ export function PWAProvider() {
           <div className="flex items-center gap-3 min-w-0">
             <RefreshCw className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
-              Nova versao disponivel
+              Nova versão disponível
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -246,7 +246,7 @@ export function PWAProvider() {
           <div className="flex items-center gap-3 min-w-0">
             <Bell className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
-              Ative as notificacoes para receber avisos de novos materiais
+              Ative as notificações para receber avisos de novos materiais
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
