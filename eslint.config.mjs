@@ -41,6 +41,7 @@ const eslintConfig = [
       "components/layout/**/*.tsx",
       "app/lei-14133/**/*.tsx",
       "components/lei-14133/**/*.tsx",
+      "app/(acervo)/jurisprudencia/**/*.tsx",
     ],
     rules: {
       "no-restricted-syntax": [

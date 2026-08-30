@@ -51,18 +51,24 @@ function extractSituacao(themes: string[]): string | null {
   return tag ? tag.slice('situacao:'.length) : null;
 }
 
+/**
+ * Situação do enunciado. Só "Cancelada" recebe cor, porque é a única que muda
+ * o que o leitor pode fazer com a peça. As demais ficam neutras: cor como
+ * codificação de estado vira ruído quando todos os estados são normais.
+ */
 function situacaoBadge(situacao: string): { label: string; className: string } {
+  const neutro = 'bg-surface-deep text-ink-secondary';
   switch (situacao) {
     case 'CRIADA':
-      return { label: 'Criada', className: 'bg-emerald-100 text-emerald-800' };
+      return { label: 'Criada', className: neutro };
     case 'ALTERADA':
-      return { label: 'Alterada', className: 'bg-amber-100 text-amber-800' };
+      return { label: 'Alterada', className: neutro };
     case 'CANCELADA':
-      return { label: 'Cancelada', className: 'bg-red-100 text-red-800' };
+      return { label: 'Cancelada', className: 'bg-surface-deep text-semantic-error' };
     case 'REVISTA':
-      return { label: 'Revista', className: 'bg-gray-200 text-gray-700' };
+      return { label: 'Revista', className: neutro };
     default:
-      return { label: situacao, className: 'bg-gray-100 text-gray-700' };
+      return { label: situacao, className: neutro };
   }
 }
 
@@ -90,24 +96,16 @@ function tribunalLabel(code: string): string {
   return TRIBUNALS.find(t => t.code === code)?.label || code.toUpperCase();
 }
 
-function tribunalColor(code: string): string {
-  // Aceita ambos cases pra retro-compat com decisões antigas, mas a forma
-  // canônica pós-normalização (2026-05-01) é UPPERCASE.
-  const colors: Record<string, string> = {
-    'TCU': 'bg-amber-100 text-amber-900',
-    'TCE-SP': 'bg-blue-100 text-blue-800',
-    'TCE-MG': 'bg-green-100 text-green-800',
-    'TCE-PR': 'bg-purple-100 text-purple-800',
-    'TCE-SC': 'bg-sky-100 text-sky-800',
-    'TCE-RJ': 'bg-orange-100 text-orange-800',
-    'TCE-RS': 'bg-violet-100 text-violet-800',
-    'TCE-PE': 'bg-teal-100 text-teal-800',
-    'STJ': 'bg-red-100 text-red-800',
-    'STF': 'bg-rose-100 text-rose-800',
-    'TST': 'bg-pink-100 text-pink-800',
-  };
-  return colors[code.toUpperCase()] || 'bg-gray-100 text-gray-800';
-}
+/**
+ * Selo de fonte, um só para todos os tribunais.
+ *
+ * Antes havia onze matizes, um por corte (TCU âmbar, STF rosa, TCE-SP azul,
+ * TCE-PE turquesa…). O DESIGN.md nomeia isso como anti-referência: "paleta
+ * presa a qual ente publicou", o traço de portal de tribunal antigo. Quem
+ * distingue as fontes é a sigla, que já está escrita no selo; a cor não
+ * acrescenta informação e gasta o orçamento visual da página.
+ */
+const SELO_FONTE = 'bg-surface-raised text-ink-secondary';
 
 export default function JurisprudenciaClient() {
   const searchParams = useSearchParams();
@@ -198,35 +196,58 @@ export default function JurisprudenciaClient() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Hero */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="inline-flex p-3 bg-white/20 backdrop-blur-sm rounded-xl mb-4">
-            <Scale className="w-10 h-10" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Jurisprudência sobre Licitações e Contratos
-          </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto mb-4">
-            Compilação das principais decisões de Tribunais de Contas Estaduais e do Poder Judiciário sobre licitações e contratos administrativos na Lei 14.133/2021.
+    <main className="min-h-screen bg-surface-page">
+      {/* Cabeçalho da listagem: alinhado à esquerda, com a contagem à vista.
+          O número é o argumento; o ícone em vidro fosco sobre gradiente não
+          era. Padrão que vale para as demais listagens do acervo. */}
+      <header className="border-b border-border-subtle">
+        <div className="container mx-auto px-4 max-w-[1280px] pt-6 pb-8">
+          <p className="text-[0.8125rem] text-ink-muted mb-3">
+            <Link href="/" className="hover:text-ink-primary transition-colors">
+              Início
+            </Link>
+            {' · '}
+            <Link href="/base-conhecimento" className="hover:text-ink-primary transition-colors">
+              Acervo
+            </Link>
+            {' · '}
+            <span className="text-ink-primary">Jurisprudência</span>
           </p>
-          <p className="text-sm text-white/70 max-w-3xl mx-auto">
-            A Área do Aluno reúne um acervo ainda mais amplo, incluindo acórdãos do TCU, decisões do CNJ e análises enriquecidas por inteligência artificial proprietária do site.
-          </p>
-        </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <h1 className="font-display text-[2rem] md:text-[2.5rem] text-ink-primary mb-2">
+                Jurisprudência
+              </h1>
+              <p className="text-[0.9375rem] leading-relaxed text-ink-secondary max-w-[74ch]">
+                Decisões de Tribunais de Contas e do Poder Judiciário sobre licitações e contratos
+                administrativos, com ementa, relator e link para a publicação oficial.
+              </p>
+            </div>
+            {total > 0 && (
+              <div className="text-right">
+                <p className="font-mono text-[2rem] leading-none text-brand-600">
+                  {total.toLocaleString('pt-BR')}
+                </p>
+                <p className="font-label text-ink-muted mt-1.5">
+                  {total === 1 ? 'decisão encontrada' : 'decisões encontradas'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 max-w-[1280px] py-8">
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+        <div className="bg-surface-page rounded-md border border-border-subtle p-6 mb-8">
           <div className="flex flex-wrap gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tribunal</label>
+              <label className="block text-sm font-medium text-ink-secondary mb-1">Tribunal</label>
               <select
                 value={tribunal}
                 onChange={(e) => setTribunal(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[150px]"
+                className="px-3 py-2 border rounded-[3px] text-sm bg-surface-page min-w-[150px]"
               >
                 <option value="">Todos</option>
                 {TRIBUNALS.map(t => (
@@ -236,11 +257,11 @@ export default function JurisprudenciaClient() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+              <label className="block text-sm font-medium text-ink-secondary mb-1">Ano</label>
               <select
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[120px]"
+                className="px-3 py-2 border rounded-[3px] text-sm bg-surface-page min-w-[120px]"
               >
                 <option value="">Todos</option>
                 {years.map(y => (
@@ -250,11 +271,11 @@ export default function JurisprudenciaClient() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <label className="block text-sm font-medium text-ink-secondary mb-1">Tipo</label>
               <select
                 value={decisionType}
                 onChange={(e) => setDecisionType(e.target.value)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[150px]"
+                className="px-3 py-2 border rounded-[3px] text-sm bg-surface-page min-w-[150px]"
               >
                 <option value="">Todos</option>
                 <option value="acordao">Acórdão</option>
@@ -269,11 +290,11 @@ export default function JurisprudenciaClient() {
             {/* Sub-filtro de série de OJ — visível só quando decisionType=orientacao_jurisprudencial */}
             {isOjView && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Série</label>
+                <label className="block text-sm font-medium text-ink-secondary mb-1">Série</label>
                 <select
                   value={ojSerie}
                   onChange={(e) => setOjSerie(e.target.value)}
-                  className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[170px]"
+                  className="px-3 py-2 border rounded-[3px] text-sm bg-surface-page min-w-[170px]"
                 >
                   <option value="">Todas</option>
                   <option value="oj-sbdi-1">SBDI-I</option>
@@ -286,11 +307,11 @@ export default function JurisprudenciaClient() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ordenar</label>
+              <label className="block text-sm font-medium text-ink-secondary mb-1">Ordenar</label>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as typeof sort)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white min-w-[160px]"
+                className="px-3 py-2 border rounded-[3px] text-sm bg-surface-page min-w-[160px]"
               >
                 <option value="recent">Mais recentes</option>
                 <option value="oldest">Mais antigos</option>
@@ -300,15 +321,15 @@ export default function JurisprudenciaClient() {
             </div>
 
             <form onSubmit={handleSearch} className="flex-1 min-w-[250px]">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Busca</label>
+              <label className="block text-sm font-medium text-ink-secondary mb-1">Busca</label>
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
                 <input
                   type="text"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Buscar por ementa, número..."
-                  className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm"
+                  className="w-full pl-9 pr-3 py-2 border rounded-[3px] text-sm"
                 />
               </div>
             </form>
@@ -318,12 +339,12 @@ export default function JurisprudenciaClient() {
               (Súmulas, OJs, PNs). Acórdãos/decisões não têm tag situacao em themes. */}
           {isCanonicalView && (
             <div className="flex items-center gap-2 mt-4">
-              <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+              <label className="inline-flex items-center gap-2 text-sm text-ink-secondary cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={showInactive}
                   onChange={(e) => setShowInactive(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-border-strong text-brand-600 focus:ring-amber-accent"
                 />
                 Mostrar canceladas/revistas (texto preservado por valor histórico)
               </label>
@@ -338,8 +359,8 @@ export default function JurisprudenciaClient() {
                 onClick={() => setSelectedTheme(selectedTheme === theme ? '' : theme)}
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   selectedTheme === theme
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-brand-600 text-white'
+                    : 'bg-surface-deep text-ink-secondary hover:bg-surface-deep'
                 }`}
               >
                 {theme}
@@ -349,19 +370,19 @@ export default function JurisprudenciaClient() {
         </div>
 
         {/* CTA Teaser */}
-        <div className="bg-gradient-to-r from-amber-50 to-blue-50 border border-amber-200 rounded-xl p-6 mb-8">
+        <div className="bg-surface-raised border border-border-strong rounded-md p-6 mb-8">
           <div className="flex items-start gap-4">
-            <div className="p-2 bg-amber-100 rounded-lg shrink-0">
-              <Sparkles className="w-6 h-6 text-amber-600" />
+            <div className="p-2 bg-amber-accent-soft rounded-[3px] shrink-0">
+              <Sparkles className="w-6 h-6 text-amber-accent" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-gray-900 mb-1">Consulte com Inteligência Artificial</h3>
-              <p className="text-sm text-gray-600 mb-3">
+              <h3 className="font-bold text-ink-primary mb-1">Consulte com Inteligência Artificial</h3>
+              <p className="text-sm text-ink-secondary mb-3">
                 Na Área do Aluno, faça perguntas sobre acórdãos e receba análises com referências à Lei 14.133/2021
               </p>
               <Link
                 href="/planos"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-[3px] hover:bg-brand-700 transition-colors"
               >
                 Acesse a Área do Aluno <ArrowRight className="w-4 h-4" />
               </Link>
@@ -371,37 +392,36 @@ export default function JurisprudenciaClient() {
 
         {/* Results */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="border-b border-border-subtle">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-sm border p-6 animate-pulse">
+              <div key={i} className="py-5 border-t border-border-subtle animate-pulse">
                 <div className="flex gap-2 mb-3">
-                  <div className="h-5 w-16 bg-gray-200 rounded-full" />
-                  <div className="h-5 w-20 bg-gray-200 rounded" />
+                  <div className="h-5 w-16 bg-surface-deep rounded-[3px]" />
+                  <div className="h-5 w-20 bg-surface-deep rounded-[3px]" />
                 </div>
-                <div className="h-5 w-3/4 bg-gray-200 rounded mb-2" />
-                <div className="h-4 w-full bg-gray-200 rounded mb-1" />
-                <div className="h-4 w-full bg-gray-200 rounded mb-1" />
-                <div className="h-4 w-2/3 bg-gray-200 rounded" />
+                <div className="h-5 w-3/4 bg-surface-deep rounded-[3px] mb-2" />
+                <div className="h-4 w-full bg-surface-deep rounded-[3px] mb-1" />
+                <div className="h-4 w-full bg-surface-deep rounded-[3px] mb-1" />
+                <div className="h-4 w-2/3 bg-surface-deep rounded-[3px]" />
               </div>
             ))}
           </div>
         ) : decisions.length === 0 ? (
           <div className="text-center py-16">
-            <Scale className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="font-heading text-[1.25rem] text-ink-primary mb-2">
               Nenhuma decisão encontrada
             </h3>
-            <p className="text-gray-500">
-              Tente ajustar os filtros selecionados
+            <p className="text-sm text-ink-secondary max-w-[52ch] mx-auto">
+              Tente remover um filtro, ampliar o período, ou buscar pelo número da decisão.
             </p>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-600 mb-4">
-              {total} decisão(ões) encontrada(s)
+            <p className="text-sm text-ink-muted pb-3 border-b border-border-subtle">
+              Da mais recente para a mais antiga
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border-b border-border-subtle">
               {decisions.map((decision) => {
                 const themes = parseJsonArray(decision.themes);
                 const situacao = CANONICAL_TYPES.includes(decision.decisionType) ? extractSituacao(themes) : null;
@@ -411,43 +431,43 @@ export default function JurisprudenciaClient() {
                   <Link
                     key={decision.id}
                     href={`/jurisprudencia/${decision.id}`}
-                    className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md hover:border-blue-200 transition-all group"
+                    className="block py-5 border-t border-border-subtle group"
                   >
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
-                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
+                      <span className={`px-2 py-0.5 text-[0.6875rem] font-medium tracking-[0.06em] uppercase rounded-[3px] ${SELO_FONTE}`}>
                         {tribunalLabel(decision.tribunalCode)}
                       </span>
-                      <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-700">
+                      <span className="font-mono text-xs text-ink-muted">
                         {decision.decisionType}
                       </span>
                       {sitBadge && (
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${sitBadge.className}`}>
+                        <span className={`px-2 py-0.5 text-[0.6875rem] font-medium tracking-[0.06em] uppercase rounded-[3px] ${sitBadge.className}`}>
                           {sitBadge.label}
                         </span>
                       )}
                       {decision.dataJulgamento && (
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <span className="text-xs text-ink-muted flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {new Date(decision.dataJulgamento).toLocaleDateString('pt-BR')}
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-serif font-medium text-[1.1875rem] text-ink-primary mb-1.5 group-hover:text-brand-600 transition-colors">
                       {decision.title || decision.decisionNumber}
                     </h3>
 
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                    <p className="font-serif text-[0.9375rem] leading-relaxed text-ink-secondary mb-3 line-clamp-3 max-w-[84ch]">
                       {decision.ementa}
                     </p>
 
                     {decision.summary && (
-                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3">
-                        <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 mb-1">
+                      <div className="bg-surface-raised border border-border-subtle rounded-[3px] p-3 mb-3 max-w-[84ch]">
+                        <div className="flex items-center gap-1.5 font-label text-ink-muted mb-1.5">
                           <Sparkles className="w-3 h-3" />
-                          Resumo IA
+                          Resumo por IA
                         </div>
-                        <p className="text-sm text-blue-800 line-clamp-3">{decision.summary}</p>
+                        <p className="font-serif text-sm leading-relaxed text-ink-secondary line-clamp-3">{decision.summary}</p>
                       </div>
                     )}
 
@@ -466,12 +486,12 @@ export default function JurisprudenciaClient() {
                       return (
                         <div className="flex flex-wrap gap-1 mb-3">
                           {visibleThemes.slice(0, 4).map((theme, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full">
+                            <span key={i} className="px-2 py-0.5 bg-surface-raised text-brand-700 text-xs rounded-full">
                               {theme}
                             </span>
                           ))}
                           {visibleThemes.length > 4 && (
-                            <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-full">
+                            <span className="px-2 py-0.5 bg-surface-raised text-ink-muted text-xs rounded-full">
                               +{visibleThemes.length - 4}
                             </span>
                           )}
@@ -479,7 +499,7 @@ export default function JurisprudenciaClient() {
                       );
                     })()}
 
-                    <div className="flex items-center text-blue-600 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
+                    <div className="flex items-center text-brand-600 text-sm font-medium group-hover:gap-2 gap-1 transition-all">
                       Ver detalhes <ArrowRight className="w-4 h-4" />
                     </div>
                   </Link>
@@ -495,7 +515,7 @@ export default function JurisprudenciaClient() {
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-2 border rounded-[3px] text-sm hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             >
               <ChevronLeft className="w-4 h-4" /> Anterior
             </button>
@@ -515,10 +535,10 @@ export default function JurisprudenciaClient() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-2 border rounded-lg text-sm ${
+                  className={`px-3 py-2 border rounded-[3px] text-sm ${
                     currentPage === page
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'hover:bg-gray-50'
+                      ? 'bg-brand-600 text-white border-brand-600'
+                      : 'hover:bg-surface-raised'
                   }`}
                 >
                   {page}
@@ -529,7 +549,7 @@ export default function JurisprudenciaClient() {
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-2 border rounded-[3px] text-sm hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             >
               Próxima <ChevronRight className="w-4 h-4" />
             </button>
