@@ -108,6 +108,7 @@ export function normalizarEspelho(
     numeroRegistro: registro,
     tema: limpar(e.tema) || null,
     tese: limpar(e.teseJuridica) || null,
+    referenciasLegislativas: e.referenciasLegislativas ?? null,
     artigos14133,
     citaLei14133: citaLei14133(e.referenciasLegislativas),
   };

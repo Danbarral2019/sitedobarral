@@ -560,17 +560,20 @@ describe('mapFiltersToSemanticOptions — todos os filtros estruturais', () => {
     const opts = mapFiltersToSemanticOptions({
       tribunal: 'TCU',
       ano: 2024, tema: 'terceirização', artigo: '75', relator: 'Fulano',
-      orgao: 'Plenário', dataFrom: '2024-01-01', dataTo: '2024-12-31', q: 'pregão',
+      orgao: 'Plenário', dataFrom: new Date('2024-01-01'), dataTo: new Date('2024-12-31'), q: 'pregão',
     });
     const vals = (opts.extraWhere!.document as { values: unknown[] }).values;
-    expect(vals).toEqual(expect.arrayContaining(['75', '%Plenário%', '2024-01-01', '2024-12-31', 2024]));
+    expect(vals).toEqual(
+      expect.arrayContaining(['75', '%Plenário%', new Date('2024-01-01'), new Date('2024-12-31'), 2024]),
+    );
   });
 
   it('TCE: aplica todos os filtros no extraWhere de TribunalDecision', () => {
     const opts = mapFiltersToSemanticOptions({
       tribunal: 'TCE-SP',
       ano: 2024, tema: 'terceirização', artigo: '75', decisionType: 'consulta',
-      relator: 'Fulano', orgao: 'Plenário', dataFrom: '2024-01-01', dataTo: '2024-12-31', q: 'pregão',
+      relator: 'Fulano', orgao: 'Plenário',
+      dataFrom: new Date('2024-01-01'), dataTo: new Date('2024-12-31'), q: 'pregão',
     });
     const vals = (opts.extraWhere!.tribunalDecision as { values: unknown[] }).values;
     expect(vals).toEqual(expect.arrayContaining(['75', 'consulta', '%Fulano%', 2024]));

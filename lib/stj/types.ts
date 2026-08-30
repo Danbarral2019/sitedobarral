@@ -46,6 +46,13 @@ export interface StjDecisaoNormalizada {
   url: string;
   tema: string | null;
   tese: string | null;
+  /**
+   * Bloco bruto de referências legislativas do espelho, preservado para
+   * auditoria. Mesma razão do `legislacaoCitada` do STF: sem o insumo no
+   * banco, não há como medir depois se a amarração à Lei 14.133 está certa —
+   * foi exatamente o que impediu de auditar o STJ em 30/08/2026.
+   */
+  referenciasLegislativas: string[] | null;
   artigos14133: string[];
   citaLei14133: boolean;
 }

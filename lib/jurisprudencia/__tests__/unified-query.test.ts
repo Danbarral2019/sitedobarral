@@ -267,8 +267,8 @@ describe('buildTribunalDecisionWhere', () => {
       decisionType: 'consulta',
       relator: 'Fulano',
       orgao: 'Plenário',
-      dataFrom: '2024-01-01',
-      dataTo: '2024-12-31',
+      dataFrom: new Date('2024-01-01'),
+      dataTo: new Date('2024-12-31'),
       q: 'pregão',
       excludeInactive: true,
     });
@@ -276,7 +276,7 @@ describe('buildTribunalDecisionWhere', () => {
     expect(where.values).toEqual(
       expect.arrayContaining([
         'TCE-SP', 2024, '%terceirização%', '75', 'consulta',
-        '%Fulano%', '%Plenário%', '2024-01-01', '2024-12-31',
+        '%Fulano%', '%Plenário%', new Date('2024-01-01'), new Date('2024-12-31'),
       ]),
     );
     // exclui situações inativas (CANCELADA/REVISTA) — literais ficam em .values
@@ -330,12 +330,12 @@ describe('buildDocumentTcuWhere', () => {
       artigo: '75',
       relator: 'Fulano',
       orgao: 'Plenário',
-      dataFrom: '2024-01-01',
-      dataTo: '2024-12-31',
+      dataFrom: new Date('2024-01-01'),
+      dataTo: new Date('2024-12-31'),
       q: 'contrato',
     });
     expect(where.values).toEqual(
-      expect.arrayContaining(['75', '%Plenário%', '2024-01-01', '2024-12-31']),
+      expect.arrayContaining(['75', '%Plenário%', new Date('2024-01-01'), new Date('2024-12-31')]),
     );
     expect(where.sql).toMatch(/"leiArticlesArr" @>/);
     expect(where.sql).toMatch(/"tcuOrgaoJulgador" ILIKE/);
