@@ -96,7 +96,7 @@ export const Header = memo(function Header() {
               </button>
 
               {isMounted && isCoursesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-gray-200">
+                <div className="absolute top-full left-0 mt-2 w-80 bg-surface-page rounded-md py-2 max-h-96 overflow-y-auto z-[9999] border border-border-subtle shadow-xl">
                   <Link
                     href="/cursos"
                     className="block px-4 py-2 text-sm font-semibold text-brand-600 hover:bg-brand-50 hover:text-brand-700"
@@ -109,7 +109,7 @@ export const Header = memo(function Header() {
                     <Link
                       key={course.id}
                       href={`/cursos/${course.slug}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-600"
+                      className="block px-4 py-2 text-sm text-ink-secondary hover:bg-brand-50 hover:text-brand-600"
                       onClick={() => setIsCoursesOpen(false)}
                     >
                       {course.title}
