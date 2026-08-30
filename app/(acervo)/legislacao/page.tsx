@@ -39,7 +39,7 @@ export default function LegislacaoPage() {
     : 'atos normativos';
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <main className="min-h-screen bg-surface-raised">
       <LegislacaoHero tab={l.activeTab} theme={theme} />
       <LegislacaoTabs activeTab={l.activeTab} counts={l.tabCounts} onSwitch={l.switchTab} />
       <LegislacaoHighlightCard />
@@ -112,15 +112,15 @@ export default function LegislacaoPage() {
             <div
               className={`inline-block w-12 h-12 border-4 ${theme.spinnerBorder} border-t-transparent rounded-full animate-spin`}
             />
-            <p className="mt-4 text-gray-600 text-lg">{theme.loadingMessage}</p>
+            <p className="mt-4 text-ink-secondary text-lg">{theme.loadingMessage}</p>
           </div>
         ) : l.acts.length === 0 ? (
-          <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-gray-200">
-            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <div className="text-center py-16 bg-surface-raised rounded-md border-2 border-border-subtle">
+            <FileText className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-ink-primary mb-2">
               {isBoasPraticas ? 'Nenhum ato normativo encontrado' : 'Nenhum ato encontrado'}
             </h3>
-            <p className="text-gray-600 max-w-md mx-auto">
+            <p className="text-ink-secondary max-w-md mx-auto">
               {l.hasActiveFilters
                 ? 'Tente ajustar os filtros ou fazer uma nova busca.'
                 : isBoasPraticas
@@ -131,11 +131,11 @@ export default function LegislacaoPage() {
         ) : (
           <>
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-gray-600">
+              <p className="text-ink-secondary">
                 Mostrando <span className="font-semibold">{l.acts.length}</span> de{' '}
                 <span className="font-semibold">{l.total}</span> {itemsLabel}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-ink-muted">
                 Página {l.page} de {l.totalPages}
               </p>
             </div>
@@ -148,12 +148,12 @@ export default function LegislacaoPage() {
                   const headerLabel = meta?.pluralLabel ?? 'Outros atos (sem nível definido)';
                   return (
                     <section key={level}>
-                      <h3 className="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-gray-200">
+                      <h3 className="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-border-subtle">
                         <span className="text-2xl" aria-hidden="true">
                           {headerEmoji}
                         </span>
-                        <span className="text-xl font-bold text-gray-900">{headerLabel}</span>
-                        <span className="text-sm font-normal text-gray-500">
+                        <span className="text-xl font-bold text-ink-primary">{headerLabel}</span>
+                        <span className="text-sm font-normal text-ink-muted">
                           ({levelActs.length} {levelActs.length === 1 ? 'ato' : 'atos'} nesta página)
                         </span>
                       </h3>

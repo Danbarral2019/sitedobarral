@@ -130,9 +130,9 @@ export default async function BaseConhecimentoPage() {
     Object.values(categoryCounts).reduce((s, c) => s + c, 0) + tribunalDecisionCount;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-brand-600 to-brand-700 text-white py-14 md:py-20">
+      <section className="bg-surface-raised text-white py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-4 tracking-wide">
@@ -157,15 +157,15 @@ export default async function BaseConhecimentoPage() {
               <Link
                 key={cat.key}
                 href={cat.href}
-                className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
               >
-                <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+                <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                   <Icon className="w-6 h-6 text-brand-700" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+                <h2 className="text-lg font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                   {cat.label}
                 </h2>
-                <p className="text-sm text-gray-600 mb-2 leading-relaxed">{cat.description}</p>
+                <p className="text-sm text-ink-secondary mb-2 leading-relaxed">{cat.description}</p>
                 <p className="text-xs font-semibold text-brand-700">
                   {cat.count.toLocaleString('pt-BR')} {cat.suffix}
                 </p>
@@ -176,15 +176,15 @@ export default async function BaseConhecimentoPage() {
           {tribunalOthersCount > 0 && (
             <Link
               href="/jurisprudencia"
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+              <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <Landmark className="w-6 h-6 text-brand-700" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+              <h2 className="text-lg font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                 Jurisprudência (TCEs e CNJ)
               </h2>
-              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+              <p className="text-sm text-ink-secondary mb-2 leading-relaxed">
                 Decisões selecionadas dos Tribunais de Contas estaduais e do CNJ.
               </p>
               <p className="text-xs font-semibold text-brand-700">
@@ -197,15 +197,15 @@ export default async function BaseConhecimentoPage() {
           {tstSumulaCount > 0 && (
             <Link
               href="/jurisprudencia?tribunal=TST&decisionType=sumula"
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+              <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <Briefcase className="w-6 h-6 text-brand-700" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+              <h2 className="text-lg font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                 Súmulas do TST
               </h2>
-              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+              <p className="text-sm text-ink-secondary mb-2 leading-relaxed">
                 Jurisprudência consolidada do Tribunal Superior do Trabalho — relevante em terceirização, fiscalização de contratos e repactuação.
               </p>
               <p className="text-xs font-semibold text-brand-700">
@@ -218,15 +218,15 @@ export default async function BaseConhecimentoPage() {
           {tstOjCount > 0 && (
             <Link
               href="/jurisprudencia?tribunal=TST&decisionType=orientacao_jurisprudencial"
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+              <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <BookMarked className="w-6 h-6 text-brand-700" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+              <h2 className="text-lg font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                 Orientações Jurisprudenciais (TST)
               </h2>
-              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+              <p className="text-sm text-ink-secondary mb-2 leading-relaxed">
                 OJs das subseções SBDI-I, SBDI-I Transitória, SBDI-II e SDC, mais o Tribunal Pleno/Órgão Especial — jurisprudência consolidada das subseções especializadas.
               </p>
               <p className="text-xs font-semibold text-brand-700">
@@ -239,15 +239,15 @@ export default async function BaseConhecimentoPage() {
           {tstPnCount > 0 && (
             <Link
               href="/jurisprudencia?tribunal=TST&decisionType=precedente_normativo"
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+              <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <Gavel className="w-6 h-6 text-brand-700" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+              <h2 className="text-lg font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                 Precedentes Normativos (TST)
               </h2>
-              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+              <p className="text-sm text-ink-secondary mb-2 leading-relaxed">
                 Decisões vinculantes da Seção de Dissídios Coletivos — negociação coletiva, cláusulas normativas e dissídios.
               </p>
               <p className="text-xs font-semibold text-brand-700">
@@ -260,15 +260,15 @@ export default async function BaseConhecimentoPage() {
           {glossaryCount > 0 && (
             <Link
               href="/glossario"
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
+              <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <BookOpen className="w-6 h-6 text-brand-700" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-700 transition-colors">
+              <h2 className="text-lg font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                 Glossário Jurídico
               </h2>
-              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+              <p className="text-sm text-ink-secondary mb-2 leading-relaxed">
                 Termos técnicos da matéria explicados em linguagem clara.
               </p>
               <p className="text-xs font-semibold text-brand-700">
@@ -280,22 +280,22 @@ export default async function BaseConhecimentoPage() {
         </div>
 
         {/* Teaser pra alunos (modelo jurisprudência) */}
-        <div className="mt-14 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 md:p-8">
+        <div className="mt-14 bg-surface-raised border border-border-subtle rounded-md p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-start gap-4 max-w-4xl mx-auto">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-brand-600 rounded-md flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl md:text-2xl font-bold text-ink-primary mb-2">
                 Consulte com Inteligência Artificial
               </h2>
-              <p className="text-gray-700 leading-relaxed mb-5">
+              <p className="text-ink-secondary leading-relaxed mb-5">
                 Alunos têm acesso a busca semântica em todo o acervo, resumo automático de
                 documentos longos, e ferramentas exclusivas de pesquisa indexada.
               </p>
               <Link
                 href="/planos"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md"
+                className="inline-flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-brand-700 transition-colors"
               >
                 Conhecer planos
               </Link>

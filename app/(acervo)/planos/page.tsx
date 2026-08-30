@@ -23,7 +23,7 @@ type BillingCycle = 'monthly' | 'yearly';
 
 function CheckIcon({ className }: { className?: string }) {
   return (
-    <svg className={className || 'w-5 h-5 text-green-500 mt-0.5 flex-shrink-0'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className={className || 'w-5 h-5 text-ink-secondary mt-0.5 flex-shrink-0'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   );
@@ -82,7 +82,7 @@ export default function PlanosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-surface-raised py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -247,7 +247,7 @@ export default function PlanosPage() {
           </div>
 
           {/* Plano Premium */}
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-xl p-8 border-2 border-blue-500 relative flex flex-col">
+          <div className="bg-surface-raised rounded-2xl shadow-xl p-8 border-2 border-blue-500 relative flex flex-col">
             {/* Badge */}
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
               <span className="inline-block px-5 py-1.5 bg-yellow-400 text-yellow-900 rounded-full font-bold text-sm shadow-md">
@@ -262,13 +262,13 @@ export default function PlanosPage() {
                 <span className="text-5xl font-bold text-white">
                   R$ {isYearly ? PRICE_PREMIUM_ANUAL : PRICE_PREMIUM}
                 </span>
-                <span className="text-blue-200 text-lg">
+                <span className="text-ink-muted text-lg">
                   {isYearly ? '/ano' : '/mês'}
                 </span>
               </div>
               {isYearly && (
                 <div className="mt-3 space-y-1">
-                  <p className="text-sm text-blue-300 line-through">
+                  <p className="text-sm text-ink-muted line-through">
                     R$ {(89.90 * 12).toFixed(2).replace('.', ',')}/ano no plano mensal
                   </p>
                   <span className="inline-block bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-full">

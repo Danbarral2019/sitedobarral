@@ -386,9 +386,9 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
   const hasActiveFilter = !!(searchTerm || tipoFilter || orgaoFilter || vigenciaFilter || enteFilter || anoFilter || cursoFilter || (sortFilter && sortFilter !== 'recent'));
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-brand-600 to-brand-700 text-white py-12 md:py-16">
+      <section className="bg-surface-raised text-white py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <Link
@@ -400,7 +400,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
             </Link>
 
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center flex-shrink-0">
+              <div className="w-14 h-14 bg-surface-page/15 rounded-md flex items-center justify-center flex-shrink-0">
                 <Icon className="w-7 h-7 text-white" />
               </div>
               <div className="flex-1">
@@ -431,13 +431,13 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
       <section className="container mx-auto px-4 py-10 md:py-12 max-w-5xl">
         <Form action={`/base-conhecimento/${categoria}`} scroll={false} className="mb-6">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted pointer-events-none" />
             <input
               type="text"
               name="q"
               defaultValue={searchTerm}
               placeholder={`Buscar em ${cfg.label.toLowerCase()}...`}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent text-base font-poppins"
+              className="w-full pl-12 pr-4 py-3 bg-surface-page border border-border-strong rounded-md focus:ring-2 focus:ring-brand-500 focus:border-transparent text-base font-poppins"
               aria-label={`Buscar em ${cfg.label}`}
             />
           </div>
@@ -454,11 +454,11 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
         {/* Filtro por ente (enunciados) */}
         {cfg.enteFilter && (
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-600 font-medium mr-1">Ente:</span>
+            <span className="text-sm text-ink-secondary font-medium mr-1">Ente:</span>
             <Link
               href={buildFilterUrl(categoria, currentParams, { ente: '', page: 1 })}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                !enteFilter ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                !enteFilter ? 'bg-brand-600 text-white' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-brand-400'
               }`}
             >
               Todos
@@ -468,7 +468,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                 key={e}
                 href={buildFilterUrl(categoria, currentParams, { ente: e, page: 1 })}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  enteFilter === e ? 'bg-brand-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-brand-400'
+                  enteFilter === e ? 'bg-brand-600 text-white' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-brand-400'
                 }`}
               >
                 {e}
@@ -491,11 +491,11 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           };
           const basePath = `/base-conhecimento/${categoria}`;
           return (
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-sm space-y-4 mb-6">
+            <div className="bg-surface-page border-2 border-border-subtle rounded-md p-6 space-y-4 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {cfg.tipoFilter && (
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Tipo</label>
+                    <label className="block text-sm font-bold text-ink-secondary mb-2">Tipo</label>
                     <NavigateSelect
                       basePath={basePath}
                       param="tipo"
@@ -503,13 +503,13 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       value={tipoFilter}
                       options={cfg.tipoFilter.options.map(o => ({ value: o.value, label: o.label }))}
                       ariaLabel="Filtrar por tipo"
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
                 {cfg.orgaoFilter && (
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Câmara</label>
+                    <label className="block text-sm font-bold text-ink-secondary mb-2">Câmara</label>
                     <NavigateSelect
                       basePath={basePath}
                       param="orgao"
@@ -517,13 +517,13 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       value={orgaoFilter}
                       options={cfg.orgaoFilter.orgaos.map(o => ({ value: o, label: o }))}
                       ariaLabel="Filtrar por câmara"
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
                 {cfg.vigenciaFilter && (
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Vigência</label>
+                    <label className="block text-sm font-bold text-ink-secondary mb-2">Vigência</label>
                     <NavigateSelect
                       basePath={basePath}
                       param="vigencia"
@@ -536,13 +536,13 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       ]}
                       emptyLabel="Todas"
                       ariaLabel="Filtrar por vigência"
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
                 {cfg.yearFilter && (
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Ano</label>
+                    <label className="block text-sm font-bold text-ink-secondary mb-2">Ano</label>
                     <NavigateSelect
                       basePath={basePath}
                       param="ano"
@@ -550,7 +550,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       value={anoFilter}
                       options={cfg.yearFilter.years.map(y => ({ value: String(y), label: String(y) }))}
                       ariaLabel="Filtrar por ano"
-                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
@@ -559,7 +559,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
               {/* Curso — chips (igual aos Temas dos atos normativos) */}
               {cfg.cursoFilter && (
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Cursos relevantes</label>
+                  <label className="block text-sm font-bold text-ink-secondary mb-2">Cursos relevantes</label>
                   <div className="flex flex-wrap gap-2">
                     {cfg.cursoFilter.cursos.map((c) => (
                       <Link
@@ -567,8 +567,8 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                         href={buildFilterUrl(categoria, currentParams, { curso: cursoFilter === c.id ? '' : c.id, page: 1 })}
                         className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
                           cursoFilter === c.id
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                            ? 'bg-brand-600 text-white border-brand-600'
+                            : 'bg-surface-page text-ink-secondary border-border-strong hover:border-border-strong'
                         }`}
                       >
                         {c.label}
@@ -580,17 +580,17 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
               {/* Ordenar + Limpar */}
               {(cfg.sortOptions || hasActiveFilter) && (
-                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
+                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border-subtle">
                   {cfg.sortOptions && (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600 font-medium">Ordenar:</span>
+                      <span className="text-sm text-ink-secondary font-medium">Ordenar:</span>
                       <div className="flex flex-wrap gap-1">
                         {cfg.sortOptions.map((opt) => (
                           <Link
                             key={opt.value}
                             href={buildFilterUrl(categoria, currentParams, { sort: opt.value, page: 1 })}
                             className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                              sortFilter === opt.value ? 'bg-gray-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:border-gray-400'
+                              sortFilter === opt.value ? 'bg-brand-600 text-surface-page' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-border-strong'
                             }`}
                           >
                             {opt.label}
@@ -602,7 +602,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                   {hasActiveFilter && (
                     <Link
                       href={`/base-conhecimento/${categoria}`}
-                      className="ml-auto text-xs font-medium text-gray-500 hover:text-brand-700 underline"
+                      className="ml-auto text-xs font-medium text-ink-muted hover:text-brand-700 underline"
                     >
                       Limpar todos os filtros
                     </Link>
@@ -615,9 +615,9 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
         {/* Disclaimer pra ONs */}
         {categoria === 'orientacoes-normativas' && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-900 leading-relaxed">
+          <div className="mb-6 bg-surface-raised border border-border-subtle rounded-md p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-ink-primary leading-relaxed">
               <p className="font-semibold mb-1">Texto oficial</p>
               <p>
                 Os enunciados abaixo reproduzem a redação oficial publicada pela AGU. Para o link
@@ -629,7 +629,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
         {/* Banner de resultados de busca — deixa claro que a lista é resposta à query */}
         {searchTerm && (
-          <div className="mb-4 flex items-center justify-between gap-3 bg-brand-50 border border-brand-200 rounded-xl px-4 py-3">
+          <div className="mb-4 flex items-center justify-between gap-3 bg-brand-50 border border-brand-200 rounded-md px-4 py-3">
             <div className="text-sm text-brand-900 leading-snug">
               <span className="font-semibold">{total.toLocaleString('pt-BR')}</span>
               {' '}{total === 1 ? 'resultado' : 'resultados'} para
@@ -647,8 +647,8 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
         )}
 
         {docs.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
-            <p className="text-gray-600">
+          <div className="bg-surface-page border border-border-subtle rounded-md p-12 text-center">
+            <p className="text-ink-secondary">
               {hasActiveFilter
                 ? 'Nenhum documento encontrado com os filtros atuais.'
                 : 'Nenhum documento disponível nesta categoria no momento.'}
@@ -682,7 +682,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                 <li key={doc.id}>
                   <Link
                     href={`/documento/${doc.id}`}
-                    className="block bg-white border border-gray-200 rounded-xl p-5 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                    className="block bg-surface-page border border-border-subtle rounded-md p-5 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                   >
                     <div className="flex items-start gap-2 mb-1 flex-wrap">
                       {enteTag && (
@@ -691,33 +691,33 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                         </span>
                       )}
                       {tipoLabel && (
-                        <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-md mt-0.5">
+                        <span className="inline-block px-2 py-0.5 bg-surface-raised text-brand-700 text-xs font-semibold rounded-md mt-0.5">
                           {tipoLabel}
                         </span>
                       )}
                       {v === 'revogado' && (
-                        <span className="inline-block px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wide rounded-md mt-0.5">
+                        <span className="inline-block px-2 py-0.5 bg-surface-deep text-semantic-error text-xs font-bold uppercase tracking-wide rounded-md mt-0.5">
                           Revogado
                         </span>
                       )}
                       {v === 'modificado' && (
-                        <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wide rounded-md mt-0.5">
+                        <span className="inline-block px-2 py-0.5 bg-amber-accent-soft text-amber-accent-deep text-xs font-bold uppercase tracking-wide rounded-md mt-0.5">
                           Modificado
                         </span>
                       )}
-                      <h2 className="text-base md:text-lg font-semibold text-gray-900 group-hover:text-brand-700 transition-colors leading-snug flex-1 basis-full sm:basis-auto">
+                      <h2 className="text-base md:text-lg font-semibold text-ink-primary group-hover:text-brand-700 transition-colors leading-snug flex-1 basis-full sm:basis-auto">
                         {doc.title}
                       </h2>
                     </div>
                     {cfg.showDescription && (() => {
                       const desc = getDisplayDescription(doc.aiClassification, doc.description);
                       return desc ? (
-                        <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 ml-0">
+                        <p className="text-sm text-ink-secondary leading-relaxed line-clamp-2 ml-0">
                           {desc}
                         </p>
                       ) : null;
                     })()}
-                    <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+                    <div className="mt-2 flex items-center gap-3 text-xs text-ink-muted">
                       {doc.acordaoAno && doc.acordaoNumero && (
                         <span>Acórdão {doc.acordaoNumero}/{doc.acordaoAno}</span>
                       )}
@@ -742,19 +742,19 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
             {page > 1 && (
               <Link
                 href={buildFilterUrl(categoria, currentParams, { page: page - 1 })}
-                className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-400 hover:text-brand-700"
+                className="inline-flex items-center gap-1 px-4 py-2 bg-surface-page border border-border-strong rounded-[3px] text-sm font-medium text-ink-secondary hover:border-brand-400 hover:text-brand-700"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Anterior
               </Link>
             )}
-            <span className="px-4 py-2 text-sm text-gray-600 font-medium">
+            <span className="px-4 py-2 text-sm text-ink-secondary font-medium">
               Página {page} de {totalPages}
             </span>
             {page < totalPages && (
               <Link
                 href={buildFilterUrl(categoria, currentParams, { page: page + 1 })}
-                className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-400 hover:text-brand-700"
+                className="inline-flex items-center gap-1 px-4 py-2 bg-surface-page border border-border-strong rounded-[3px] text-sm font-medium text-ink-secondary hover:border-brand-400 hover:text-brand-700"
               >
                 Próxima
                 <ChevronRight className="w-4 h-4" />

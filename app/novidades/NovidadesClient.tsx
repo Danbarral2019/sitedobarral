@@ -78,14 +78,14 @@ const categoryIcons: Record<string, typeof FileText> = {
 };
 
 const tribunalColors: Record<string, string> = {
-  'TCU': 'bg-purple-100 text-purple-800',
-  'TCE-SP': 'bg-blue-100 text-blue-800',
-  'TCE-MG': 'bg-green-100 text-green-800',
-  'TCE-PR': 'bg-cyan-100 text-cyan-800',
-  'STJ': 'bg-red-100 text-red-800',
-  'STF': 'bg-red-100 text-red-900',
-  'CNJ': 'bg-indigo-100 text-indigo-800',
-  'TST': 'bg-rose-100 text-rose-800',
+  'TCU': 'bg-surface-deep text-ink-primary',
+  'TCE-SP': 'bg-surface-deep text-ink-primary',
+  'TCE-MG': 'bg-surface-deep text-ink-primary',
+  'TCE-PR': 'bg-surface-deep text-ink-primary',
+  'STJ': 'bg-surface-deep text-semantic-error',
+  'STF': 'bg-surface-deep text-ink-primary',
+  'CNJ': 'bg-surface-deep text-ink-primary',
+  'TST': 'bg-surface-deep text-ink-primary',
 };
 
 function formatDate(date: Date | string): string {
@@ -133,34 +133,34 @@ export default function NovidadesClient({
   const hasAuthorContent = blogPosts.length > 0 || publications.length > 0 || videos.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-raised">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-blue-600 text-white">
+      <div className="bg-surface-raised text-white">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          <Link href="/" className="text-blue-200 hover:text-white text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
+          <Link href="/" className="text-ink-muted hover:text-white text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
           <h1 className="text-3xl font-bold font-serif mb-2">Novidades da Plataforma</h1>
-          <p className="text-blue-200">Todos os documentos e conteúdos adicionados no período</p>
+          <p className="text-ink-muted">Todos os documentos e conteúdos adicionados no período</p>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Month Navigation */}
-        <div className="flex items-center justify-between mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-8 bg-surface-page rounded-md border border-border-subtle p-4">
           <button
             onClick={() => navigateMonth(-1)}
-            className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50"
+            className="flex items-center gap-1 text-ink-secondary hover:text-brand-600 transition-colors px-3 py-2 rounded-[3px] hover:bg-surface-raised"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="hidden sm:inline">Mês anterior</span>
           </button>
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-900">{monthLabel}</h2>
-            <p className="text-sm text-gray-500">{totalItems} documento{totalItems !== 1 ? 's' : ''} no período</p>
+            <h2 className="text-xl font-bold text-ink-primary">{monthLabel}</h2>
+            <p className="text-sm text-ink-muted">{totalItems} documento{totalItems !== 1 ? 's' : ''} no período</p>
           </div>
           <button
             onClick={() => navigateMonth(1)}
             disabled={isCurrentMonth}
-            className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors ${isCurrentMonth ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'}`}
+            className={`flex items-center gap-1 px-3 py-2 rounded-[3px] transition-colors ${isCurrentMonth ? 'text-border-strong cursor-not-allowed' : 'text-ink-secondary hover:text-brand-600 hover:bg-surface-raised'}`}
           >
             <span className="hidden sm:inline">Próximo mês</span>
             <ChevronRight className="w-5 h-5" />
@@ -169,10 +169,10 @@ export default function NovidadesClient({
 
         {/* Empty state */}
         {totalItems === 0 && !hasAuthorContent && legislativeActs.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">Nenhum conteúdo neste período</h3>
-            <p className="text-gray-400">Navegue para outro mês para ver os documentos disponíveis.</p>
+          <div className="text-center py-16 bg-surface-page rounded-md border border-border-subtle">
+            <FileText className="w-12 h-12 text-border-strong mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-ink-secondary mb-2">Nenhum conteúdo neste período</h3>
+            <p className="text-ink-muted">Navegue para outro mês para ver os documentos disponíveis.</p>
           </div>
         )}
 
@@ -182,35 +182,35 @@ export default function NovidadesClient({
             title="Conteúdos do Professor"
             icon={<Newspaper className="w-5 h-5" />}
             count={blogPosts.length + publications.length + videos.length}
-            color="border-amber-500"
+            color="border-amber-accent"
             expanded={expandedSections.has('author')}
             onToggle={() => toggleSection('author')}
           >
             {blogPosts.map(post => (
-              <div key={post.slug} className="p-4 border border-amber-100 rounded-lg bg-amber-50 mb-3">
-                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Artigo no Blog</span>
-                <h4 className="font-semibold text-gray-900 mt-1">
-                  <Link href={`/blog/${post.slug}`} className="hover:text-blue-600">{post.title}</Link>
+              <div key={post.slug} className="p-4 border border-border-subtle rounded-[3px] bg-surface-raised mb-3">
+                <span className="text-xs font-semibold text-amber-accent-deep uppercase tracking-wider">Artigo no Blog</span>
+                <h4 className="font-semibold text-ink-primary mt-1">
+                  <Link href={`/blog/${post.slug}`} className="hover:text-brand-600">{post.title}</Link>
                 </h4>
-                <p className="text-sm text-gray-600 mt-1">{post.excerpt.substring(0, 200)}{post.excerpt.length > 200 ? '...' : ''}</p>
-                <p className="text-xs text-gray-400 mt-2">{formatDate(post.publishedAt)}</p>
+                <p className="text-sm text-ink-secondary mt-1">{post.excerpt.substring(0, 200)}{post.excerpt.length > 200 ? '...' : ''}</p>
+                <p className="text-xs text-ink-muted mt-2">{formatDate(post.publishedAt)}</p>
               </div>
             ))}
             {publications.map((pub, i) => (
-              <div key={i} className="p-4 border border-amber-100 rounded-lg bg-amber-50 mb-3">
-                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider">{pub.type === 'livro' ? 'Livro' : pub.type === 'artigo' ? 'Artigo Publicado' : 'Notícia'}</span>
-                <h4 className="font-semibold text-gray-900 mt-1">{pub.title}</h4>
-                <p className="text-sm text-gray-600 mt-1">{pub.description.substring(0, 200)}{pub.description.length > 200 ? '...' : ''}</p>
+              <div key={i} className="p-4 border border-border-subtle rounded-[3px] bg-surface-raised mb-3">
+                <span className="text-xs font-semibold text-amber-accent-deep uppercase tracking-wider">{pub.type === 'livro' ? 'Livro' : pub.type === 'artigo' ? 'Artigo Publicado' : 'Notícia'}</span>
+                <h4 className="font-semibold text-ink-primary mt-1">{pub.title}</h4>
+                <p className="text-sm text-ink-secondary mt-1">{pub.description.substring(0, 200)}{pub.description.length > 200 ? '...' : ''}</p>
                 {pub.externalUrl && (
-                  <a href={pub.externalUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-700 font-medium hover:underline mt-2 inline-block">Acessar &rarr;</a>
+                  <a href={pub.externalUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-accent-deep font-medium hover:underline mt-2 inline-block">Acessar &rarr;</a>
                 )}
               </div>
             ))}
             {videos.map((video, i) => (
-              <div key={i} className="p-4 border border-amber-100 rounded-lg bg-amber-50 mb-3">
-                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo</span>
-                <h4 className="font-semibold text-gray-900 mt-1">{video.title}</h4>
-                <a href={video.youtubeUrl ?? ''} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-700 font-medium hover:underline mt-1 inline-block">Assistir &rarr;</a>
+              <div key={i} className="p-4 border border-border-subtle rounded-[3px] bg-surface-raised mb-3">
+                <span className="text-xs font-semibold text-amber-accent-deep uppercase tracking-wider flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo</span>
+                <h4 className="font-semibold text-ink-primary mt-1">{video.title}</h4>
+                <a href={video.youtubeUrl ?? ''} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-accent-deep font-medium hover:underline mt-1 inline-block">Assistir &rarr;</a>
               </div>
             ))}
           </Section>
@@ -222,22 +222,22 @@ export default function NovidadesClient({
             title="Decisões de Tribunais"
             icon={<Scale className="w-5 h-5" />}
             count={tribunalDecisions.length}
-            color="border-purple-500"
+            color="border-brand-600"
             expanded={expandedSections.has('decisions')}
             onToggle={() => toggleSection('decisions')}
           >
             {tribunalDecisions.map(decision => (
-              <div key={decision.id} className="p-4 border border-gray-100 rounded-lg bg-white mb-3">
+              <div key={decision.id} className="p-4 border border-border-subtle rounded-[3px] bg-surface-page mb-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${tribunalColors[decision.tribunalCode] || 'bg-gray-100 text-gray-700'}`}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${tribunalColors[decision.tribunalCode] || 'bg-surface-deep text-ink-secondary'}`}>
                     {decision.tribunalCode}
                   </span>
                 </div>
-                <h4 className="font-semibold text-gray-900 text-sm leading-relaxed">{decision.title}</h4>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-3">
+                <h4 className="font-semibold text-ink-primary text-sm leading-relaxed">{decision.title}</h4>
+                <p className="text-sm text-ink-secondary mt-1 line-clamp-3">
                   {decision.summary || decision.ementa.substring(0, 250)}{(!decision.summary && decision.ementa.length > 250) ? '...' : ''}
                 </p>
-                <p className="text-xs text-gray-400 mt-2">{formatDate(decision.createdAt)}</p>
+                <p className="text-xs text-ink-muted mt-2">{formatDate(decision.createdAt)}</p>
               </div>
             ))}
           </Section>
@@ -257,12 +257,12 @@ export default function NovidadesClient({
               onToggle={() => toggleSection(category)}
             >
               {docs.map((doc, i) => (
-                <div key={doc.id} className="p-4 border border-gray-100 rounded-lg bg-white mb-3">
-                  <h4 className="font-semibold text-gray-900 text-sm">{i + 1}. {doc.title}</h4>
+                <div key={doc.id} className="p-4 border border-border-subtle rounded-[3px] bg-surface-page mb-3">
+                  <h4 className="font-semibold text-ink-primary text-sm">{i + 1}. {doc.title}</h4>
                   {doc.description && (
-                    <p className="text-sm text-gray-600 mt-1">{doc.description.substring(0, 200)}{doc.description.length > 200 ? '...' : ''}</p>
+                    <p className="text-sm text-ink-secondary mt-1">{doc.description.substring(0, 200)}{doc.description.length > 200 ? '...' : ''}</p>
                   )}
-                  <p className="text-xs text-gray-400 mt-2">{formatDate(doc.uploadedAt)}</p>
+                  <p className="text-xs text-ink-muted mt-2">{formatDate(doc.uploadedAt)}</p>
                 </div>
               ))}
             </Section>
@@ -275,30 +275,30 @@ export default function NovidadesClient({
             title="Alterações Legislativas"
             icon={<ScrollText className="w-5 h-5" />}
             count={legislativeActs.length}
-            color="border-red-500"
+            color="border-semantic-error"
             expanded={expandedSections.has('legislative')}
             onToggle={() => toggleSection('legislative')}
           >
             {legislativeActs.map((act, i) => (
-              <div key={i} className="p-4 border border-red-100 rounded-lg bg-red-50 mb-3">
-                <span className="text-xs font-semibold text-red-700 uppercase tracking-wider">{act.fullNumber}</span>
-                <h4 className="font-semibold text-gray-900 mt-1">{act.title}</h4>
-                <p className="text-sm text-gray-600 mt-1">{act.ementa.substring(0, 250)}{act.ementa.length > 250 ? '...' : ''}</p>
-                <p className="text-xs text-gray-400 mt-2">{formatDate(act.publishDate)}</p>
+              <div key={i} className="p-4 border border-border-subtle rounded-[3px] bg-surface-raised mb-3">
+                <span className="text-xs font-semibold text-semantic-error uppercase tracking-wider">{act.fullNumber}</span>
+                <h4 className="font-semibold text-ink-primary mt-1">{act.title}</h4>
+                <p className="text-sm text-ink-secondary mt-1">{act.ementa.substring(0, 250)}{act.ementa.length > 250 ? '...' : ''}</p>
+                <p className="text-xs text-ink-muted mt-2">{formatDate(act.publishDate)}</p>
               </div>
             ))}
           </Section>
         )}
 
         {/* Newsletter CTA */}
-        <div className="mt-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white text-center">
+        <div className="mt-8 bg-surface-raised rounded-md p-6 text-white text-center">
           <h3 className="text-lg font-bold mb-2">Receba os destaques por email</h3>
-          <p className="text-blue-100 text-sm mb-4">
+          <p className="text-ink-muted text-sm mb-4">
             Assine a newsletter mensal e receba uma curadoria com as decisões mais relevantes e os destaques do mês.
           </p>
           <Link
             href="/blog#newsletter"
-            className="inline-block bg-white text-blue-600 font-semibold px-6 py-2.5 rounded-lg hover:bg-blue-50 transition-colors"
+            className="inline-block bg-surface-page text-brand-600 font-semibold px-6 py-2.5 rounded-[3px] hover:bg-surface-raised transition-colors"
           >
             Assinar Newsletter
           </Link>
@@ -330,17 +330,17 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`mb-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${color ? `border-l-4 ${color}` : ''}`}>
+    <div className={`mb-6 bg-surface-page rounded-md border border-border-subtle overflow-hidden ${color ? `border-l-4 ${color}` : ''}`}>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-surface-raised transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="text-gray-500">{icon}</span>
-          <h3 className="font-bold text-gray-900">{title}</h3>
-          <span className="text-sm text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{count}</span>
+          <span className="text-ink-muted">{icon}</span>
+          <h3 className="font-bold text-ink-primary">{title}</h3>
+          <span className="text-sm text-ink-muted bg-surface-deep px-2 py-0.5 rounded-full">{count}</span>
         </div>
-        {expanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+        {expanded ? <ChevronUp className="w-5 h-5 text-ink-muted" /> : <ChevronDown className="w-5 h-5 text-ink-muted" />}
       </button>
       {expanded && (
         <div className="px-4 pb-4">

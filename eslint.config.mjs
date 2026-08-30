@@ -42,6 +42,14 @@ const eslintConfig = [
       "app/lei-14133/**/*.tsx",
       "components/lei-14133/**/*.tsx",
       "app/(acervo)/jurisprudencia/**/*.tsx",
+      "app/(acervo)/legislacao/**/*.tsx",
+      "app/(acervo)/base-conhecimento/**/*.tsx",
+      "app/(acervo)/glossario/**/*.tsx",
+      "app/(acervo)/publicacoes/**/*.tsx",
+      "app/(acervo)/blog/**/*.tsx",
+      "app/novidades/**/*.tsx",
+      "app/documento/**/*.tsx",
+      "components/legislacao/**/*.tsx",
     ],
     rules: {
       "no-restricted-syntax": [
