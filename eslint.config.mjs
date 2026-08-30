@@ -39,6 +39,8 @@ const eslintConfig = [
       "app/page.tsx",
       "components/home/**/*.tsx",
       "components/layout/**/*.tsx",
+      "app/lei-14133/**/*.tsx",
+      "components/lei-14133/**/*.tsx",
     ],
     rules: {
       "no-restricted-syntax": [

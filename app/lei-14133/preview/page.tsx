@@ -36,10 +36,10 @@ function PreviewContent() {
 
   if (preview.loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-raised flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Carregando Lei 14.133/2021…</p>
+          <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-ink-secondary">Carregando Lei 14.133/2021…</p>
         </div>
       </div>
     );
@@ -47,11 +47,11 @@ function PreviewContent() {
 
   if (preview.error || !preview.apiData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-red-900 text-center mb-2">Erro ao carregar</h2>
-          <p className="text-red-700 text-center mb-4">{preview.error || 'Erro desconhecido'}</p>
+      <div className="min-h-screen bg-surface-raised flex items-center justify-center p-4">
+        <div className="bg-surface-raised border border-border-subtle rounded-lg p-6 max-w-md">
+          <AlertCircle className="w-12 h-12 text-semantic-error mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-ink-primary text-center mb-2">Erro ao carregar</h2>
+          <p className="text-ink-secondary text-center mb-4">{preview.error || 'Erro desconhecido'}</p>
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ function PreviewContent() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-raised">
       <LeiPreviewHeader
         searchQuery={preview.searchQuery}
         onSearchChange={preview.setSearchQuery}
@@ -92,10 +92,10 @@ function PreviewContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sidebar desktop */}
           <div className="hidden lg:block lg:col-span-4">
-            <div className="bg-white rounded-lg shadow-md sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">Estrutura da Lei</h2>
-                <p className="text-sm text-gray-600">
+            <div className="bg-surface-page rounded-md border border-border-subtle sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
+              <div className="p-4 border-b border-border-subtle">
+                <h2 className="text-lg font-bold text-ink-primary">Estrutura da Lei</h2>
+                <p className="text-sm text-ink-secondary">
                   {Object.keys(preview.filteredHierarchy || {}).length} títulos
                 </p>
               </div>
@@ -136,10 +136,10 @@ function PreviewContent() {
                 )}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 text-lg mb-2">Selecione um artigo</p>
-                <p className="text-gray-500 text-sm">
+              <div className="bg-surface-page rounded-md border border-border-subtle p-12 text-center">
+                <BookOpen className="w-16 h-16 text-border-strong mx-auto mb-4" />
+                <p className="text-ink-secondary text-lg mb-2">Selecione um artigo</p>
+                <p className="text-ink-muted text-sm">
                   Navegue pela estrutura da lei ao lado e selecione um artigo
                 </p>
               </div>
@@ -151,7 +151,7 @@ function PreviewContent() {
       {/* Mobile FAB */}
       <button
         onClick={preview.openMobileDrawer}
-        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
+        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-brand-600 text-white rounded-full flex items-center justify-center hover:bg-brand-800 transition-colors"
         aria-label="Abrir navegação"
       >
         <BookOpen className="w-6 h-6" />
@@ -168,8 +168,8 @@ export default function LeiPreviewPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+        <div className="min-h-screen bg-surface-raised flex items-center justify-center">
+          <Loader2 className="w-12 h-12 animate-spin text-brand-600" />
         </div>
       }
     >

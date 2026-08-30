@@ -40,7 +40,7 @@ export function LeiAreaHeader({
   const aiDisabled = searchQuery.trim().length < 3 || isAISearching;
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
+    <div className="bg-brand-600 text-surface-page">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-4">
           <Link
@@ -53,14 +53,14 @@ export function LeiAreaHeader({
           <div className="flex items-center gap-3">
             <Link
               href="/area-restrita/historico-ia"
-              className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
+              className="flex items-center gap-2 bg-surface-page/20 px-3 py-1.5 rounded-lg hover:bg-surface-page/30 transition-colors"
             >
               <History className="w-5 h-5" />
               <span className="hidden sm:inline">Histórico</span>
             </Link>
             <Link
               href="/area-restrita/favoritos"
-              className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
+              className="flex items-center gap-2 bg-surface-page/20 px-3 py-1.5 rounded-lg hover:bg-surface-page/30 transition-colors"
             >
               <Heart className="w-5 h-5" />
               <span className="hidden sm:inline">Favoritos</span>
@@ -72,13 +72,13 @@ export function LeiAreaHeader({
           <Scale className="w-8 h-8" />
           <div>
             <h1 className="text-3xl font-bold">Lei 14.133/2021 Comentada</h1>
-            <p className="text-blue-100">Nova Lei de Licitações e Contratos Administrativos</p>
+            <p className="text-ink-muted">Nova Lei de Licitações e Contratos Administrativos</p>
           </div>
         </div>
 
         <div className="flex gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
             <input
               type="text"
               placeholder="Pergunte algo como: 'Quando usar dispensa de licitação?' ou busque por artigo…"
@@ -87,7 +87,7 @@ export function LeiAreaHeader({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !aiDisabled) onAISearch();
               }}
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-300"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-surface-page text-ink-primary placeholder:text-ink-muted focus:ring-2 focus:ring-amber-accent"
             />
           </div>
           <button
@@ -95,8 +95,8 @@ export function LeiAreaHeader({
             disabled={aiDisabled}
             className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
               aiDisabled
-                ? 'bg-purple-300 text-white cursor-not-allowed'
-                : 'bg-purple-600 text-white hover:bg-purple-700'
+                ? 'bg-border-strong text-white cursor-not-allowed'
+                : 'bg-brand-600 text-white hover:bg-brand-700'
             }`}
             title="Busca semântica com IA"
           >
@@ -110,7 +110,7 @@ export function LeiAreaHeader({
           <button
             onClick={onToggleOnlyWithDocs}
             className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
-              onlyWithDocuments ? 'bg-white text-blue-700' : 'bg-blue-500 text-white hover:bg-blue-400'
+              onlyWithDocuments ? 'bg-surface-page text-brand-700' : 'bg-surface-raised0 text-white hover:bg-brand-400'
             }`}
           >
             <Filter className="w-5 h-5" />

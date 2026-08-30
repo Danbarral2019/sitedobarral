@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Scale, Search, Sparkles, Filter, BookOpen, FileText, Target } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 
 interface LeiPreviewHeaderProps {
   searchQuery: string;
@@ -12,6 +12,14 @@ interface LeiPreviewHeaderProps {
   totalWithDocs: number;
 }
 
+/**
+ * Cabeçalho da Lei 14.133 pública.
+ *
+ * Removido daqui o botão "Buscar com IA": ele não tinha onClick nem prop de
+ * handler, então habilitava ao digitar e não fazia nada ao ser clicado. A
+ * busca semântica existe (/api/documents/query) mas só na área restrita;
+ * expô-la ao público é trabalho próprio, não um botão morto.
+ */
 export function LeiPreviewHeader({
   searchQuery,
   onSearchChange,
@@ -21,81 +29,80 @@ export function LeiPreviewHeader({
   totalWithDocs,
 }: LeiPreviewHeaderProps) {
   const coveragePct = totalArticles > 0 ? Math.round((totalWithDocs / totalArticles) * 100) : 0;
-  const aiDisabled = searchQuery.trim().length < 3;
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">Início</span>
+    <header className="bg-surface-page border-b border-border-subtle">
+      <div className="container mx-auto px-4 max-w-[1280px] pt-6 pb-7">
+        <p className="text-[0.8125rem] text-ink-muted mb-3">
+          <Link href="/" className="hover:text-ink-primary transition-colors">
+            Início
           </Link>
-          <Link
-            href="/area-restrita"
-            className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors text-sm"
-          >
-            Área Restrita
+          {' · '}
+          <Link href="/base-conhecimento" className="hover:text-ink-primary transition-colors">
+            Acervo
           </Link>
-        </div>
+          {' · '}
+          <span className="text-ink-primary">Lei 14.133/2021</span>
+        </p>
 
-        <div className="flex items-center gap-3 mb-4">
-          <Scale className="w-8 h-8" />
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold">Lei 14.133/2021 Comentada</h1>
-            <p className="text-blue-100">Nova Lei de Licitações e Contratos Administrativos</p>
+            <h1 className="font-display text-[2rem] md:text-[2.25rem] text-ink-primary mb-1.5">
+              Lei 14.133/2021, comentada
+            </h1>
+            <p className="text-[0.9375rem] text-ink-secondary max-w-[70ch]">
+              Nova Lei de Licitações e Contratos Administrativos, com o texto oficial de cada artigo
+              e o que o acervo reúne sobre ele.
+            </p>
+          </div>
+
+          <div className="flex gap-2 lg:flex-shrink-0">
+            <div className="flex items-center gap-2.5 bg-surface-page border border-border-strong rounded-[3px] px-3.5 h-11 w-full lg:w-[360px] focus-within:border-brand-600 focus-within:ring-[3px] focus-within:ring-amber-accent/25 transition-colors">
+              <Search className="w-4 h-4 text-ink-muted flex-shrink-0" aria-hidden="true" />
+              <label htmlFor="lei-busca" className="sr-only">
+                Buscar artigo da lei
+              </label>
+              <input
+                id="lei-busca"
+                type="search"
+                placeholder="Buscar por número do artigo ou termo"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="w-full bg-transparent text-ink-primary placeholder:text-ink-muted outline-none text-[0.9375rem]"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={onToggleOnlyWithDocs}
+              aria-pressed={onlyWithDocuments}
+              className={`flex items-center gap-2 rounded-[3px] px-3.5 h-11 text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-amber-accent/25 ${
+                onlyWithDocuments
+                  ? 'bg-brand-600 text-surface-page border-brand-600'
+                  : 'bg-surface-page text-ink-secondary border-border-strong hover:bg-surface-raised'
+              }`}
+            >
+              <Filter className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">
+                {onlyWithDocuments ? 'Todos os artigos' : 'Só com documentos'}
+              </span>
+            </button>
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Pergunte algo como: 'Quando usar dispensa de licitação?' ou busque por artigo…"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-300"
-            />
-          </div>
-          <button
-            disabled={aiDisabled}
-            className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
-              aiDisabled
-                ? 'bg-purple-300 text-white cursor-not-allowed'
-                : 'bg-purple-600 text-white hover:bg-purple-700'
-            }`}
-            title="Busca semântica com IA"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span className="hidden sm:inline">Buscar com IA</span>
-          </button>
-          <button
-            onClick={onToggleOnlyWithDocs}
-            className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
-              onlyWithDocuments ? 'bg-white text-blue-700' : 'bg-blue-500 text-white hover:bg-blue-400'
-            }`}
-          >
-            <Filter className="w-5 h-5" />
-            <span className="hidden sm:inline">{onlyWithDocuments ? 'Mostrar todos' : 'Apenas com docs'}</span>
-          </button>
-        </div>
-
-        <div className="mt-4 flex gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4" />
-            <span>{totalArticles} artigos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            <span>{totalWithDocs} com documentos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            <span>{coveragePct}% cobertura</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-5 text-[0.8125rem] text-ink-muted">
+          <span>
+            <span className="font-mono text-ink-primary">{totalArticles}</span> artigos
+          </span>
+          <span>
+            <span className="font-mono text-ink-primary">{totalWithDocs}</span> com documentos
+            ligados
+          </span>
+          <span>
+            <span className="font-mono text-ink-primary">{coveragePct}%</span> de cobertura
+          </span>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

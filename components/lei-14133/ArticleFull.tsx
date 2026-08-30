@@ -112,20 +112,20 @@ export function ArticleFull({ numero, ementa, counts, withDropCap }: ArticleFull
       id={`art-${numero}`}
       className="scroll-mt-24 py-7 border-b border-border-subtle last:border-b-0"
     >
-      {/* Header do artigo: numeral em destaque */}
-      <Link
-        href={`/artigo/${numero}`}
-        className="inline-block mb-3 group"
-        aria-label={`Página dedicada do artigo ${numero}`}
-      >
-        <span className="font-serif text-2xl font-semibold text-ink-primary group-hover:text-amber-accent-deep transition-colors">
-          Art. {numero}
-          {shouldUseOrdinal(numero) && <span className="text-ink-muted">º</span>}
-        </span>
-      </Link>
+      {/* Numeral do artigo: o componente de assinatura do DESIGN.md §5.
+          Monoespaçado em petróleo, não serif, porque o número é um
+          identificador técnico imutável e aparece assim na sidebar, na
+          busca e nas remissões. Deixou de ser link: apontava para
+          /artigo/N, que é só um 301 para esta mesma página. */}
+      <span className="inline-block font-mono text-2xl text-brand-600 mb-3">
+        Art. {numero}
+        {shouldUseOrdinal(numero) && <span className="text-ink-muted">º</span>}
+      </span>
 
-      {/* Texto integral renderizado */}
-      <div className="font-reading text-ink-primary leading-[1.75] text-[1.0625rem]">
+      {/* Texto integral. A coluna é limitada a 65 caracteres pela regra do
+          texto da lei (DESIGN.md §3): em tela larga, sem o teto, a linha
+          passa de 100 caracteres e a leitura longa fica desconfortável. */}
+      <div className="font-reading text-ink-primary leading-[1.75] text-[1.0625rem] max-w-[65ch]">
         {/* Caput com drop cap opcional */}
         {useDropCap ? (
           <p className="mb-4 text-justify hyphens-auto">
@@ -168,7 +168,7 @@ export function ArticleFull({ numero, ementa, counts, withDropCap }: ArticleFull
       <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
         {acordaos > 0 && (
           <Link
-            href={`/artigo/${numero}#jurisprudencia`}
+            href={`/lei-14133?artigo=${numero}#jurisprudencia`}
             className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-accent-soft text-amber-accent-deep font-sans font-medium rounded hover:bg-amber-accent hover:text-surface-page transition-colors"
           >
             <Scale className="w-3 h-3" aria-hidden="true" />
@@ -177,7 +177,7 @@ export function ArticleFull({ numero, ementa, counts, withDropCap }: ArticleFull
         )}
         {pareceresOns > 0 && (
           <Link
-            href={`/artigo/${numero}#pareceres`}
+            href={`/lei-14133?artigo=${numero}#pareceres`}
             className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-accent-soft text-amber-accent-deep font-sans font-medium rounded hover:bg-amber-accent hover:text-surface-page transition-colors"
           >
             <FileText className="w-3 h-3" aria-hidden="true" />
