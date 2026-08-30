@@ -1,0 +1,245 @@
+{
+  "runAt": "2026-07-09T20:16:02.412Z",
+  "answerModel": "claude-sonnet-5 + Citations API",
+  "judgeModel": "claude-sonnet-5",
+  "results": [
+    {
+      "id": "q-data-a-data",
+      "query": "sistema data a data",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.65,
+        "citationAccuracy": 0.9,
+        "completeness": 0.75,
+        "overall": 0.77,
+        "issues": [
+          "Extrapola ao afirmar que o art. 183 da Lei 14.133/2021 rege especificamente a contagem de prazos de vigência contratual (ex.: contrato de 12 meses), quando o material não faz essa ligação explícita - o art. 183 trata de prazos gerais da Lei, e a vigência contratual sob a lei antiga era regida por remissão ao Código Civil/Lei 810/1949 via art. 54 da Lei 8.666/93",
+          "A afirmação de 'continuidade metodológica' entre o parecer AGU (2013) e o art. 183 é uma inferência do assistente não comprovada pelas fontes fornecidas",
+          "Não há menção a jurisprudência do TCU sobre prorrogação/vigência que poderia contextualizar melhor o tema, embora não seja estritamente necessário para a pergunta pontual"
+        ],
+        "rationale": "A resposta é tecnicamente bem construída e cita corretamente os dispositivos legais e o parecer AGU, mas comete uma extrapolação ao vincular diretamente o art. 183 à contagem específica de vigência contratual, apresentando isso como conclusão do material sem base explícita para tal correspondência."
+      },
+      "latencyMs": 50503
+    },
+    {
+      "id": "q-dispensa-valor",
+      "query": "dispensa de licitação por valor",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 0.8,
+        "overall": 0.92,
+        "issues": [
+          "Omite a preferência de contratação a ME/EPP até R$ 80.000,00 mencionada no Manual TCU",
+          "Não cita a IN SEGES/ME 65/2021 sobre pesquisa de preços em contratação direta, presente no quadro do manual",
+          "Inclui inferência própria (ligação do precedente de 2019 com art. 72, VI e VII) sem base explícita no material, apresentada como conclusão"
+        ],
+        "rationale": "A resposta é bem fundamentada e as citações (artigos, enunciados, pareceres, ONs) conferem fielmente com o material, mas omite o ponto sobre preferência a ME/EPP até R$80.000,00 e a referência à IN 65/2021, reduzindo levemente a completude."
+      },
+      "latencyMs": 70881
+    },
+    {
+      "id": "q-inexigibilidade-notoria",
+      "query": "inexigibilidade notória especialização",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.95,
+        "completeness": 0.9,
+        "overall": 0.92,
+        "issues": [
+          "Completa trecho truncado da ON AGU 18/2009 ('singularidade do objeto') que não está literalmente no material",
+          "Poderia ter citado o Enunciado IBDA 36, embora de relevância marginal ao tema",
+          "Repete alertas de forma extensa, mas sem erros factuais graves"
+        ],
+        "rationale": "A resposta é bem fundamentada, com citações fiéis aos textos legais e jurisprudenciais fornecidos, e cobre de forma completa os principais dispositivos e precedentes pertinentes. Há apenas uma pequena inferência ao completar um trecho truncado da ON AGU 18/2009."
+      },
+      "latencyMs": 63726
+    },
+    {
+      "id": "q-pregao-bens-comuns",
+      "query": "pregão bens e serviços comuns",
+      "empty": false,
+      "sourceCount": 25,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.9,
+        "issues": [
+          "Extrapola ao afirmar que o Art. 2º, VII 'amplia expressamente o alcance do pregão' às contratações de TI, quando o artigo apenas define o âmbito geral de aplicação da Lei, não trata especificamente da modalidade pregão",
+          "Aviso sobre o informativo ser 'anterior à Lei 14.133/2021' é correto mas a formulação sugere incerteza desnecessária, já que o próprio material trata o precedente como doutrina consolidada e ainda aplicável",
+          "Não menciona o Checklist de Conformidade nem a ON 82/2024, embora estes tenham baixa relevância substantiva ao tema"
+        ],
+        "rationale": "A resposta é bem fundamentada, com citações fiéis e corretamente atribuídas ao material fornecido, cobrindo os pontos-chave sobre pregão e bens/serviços comuns. Há uma pequena extrapolação ao vincular o Art. 2º, VII à ampliação do pregão para TI, o que não está expressamente dito no material."
+      },
+      "latencyMs": 60413
+    },
+    {
+      "id": "q-dialogo-competitivo",
+      "query": "diálogo competitivo hipóteses cabimento",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.94,
+        "issues": [
+          "Afirma que as condições dos incisos I e II do art. 32 são 'cumulativas' sem que o material explicite essa relação, sendo uma inferência não sustentada diretamente pelo texto",
+          "Pequenos erros de redação ao colar trechos legais ('deve vise a contratar', 'deve verifique') que comprometem a clareza mas não a fidelidade do conteúdo",
+          "Não menciona a ON 82/2024 nem o Parecer AGU sobre critérios de exclusão, que embora sejam mais sobre procedimento, complementam o tema de cabimento/pré-seleção"
+        ],
+        "rationale": "A resposta é majoritariamente fiel e bem fundamentada nas fontes corretas (Art. 32, Art. 6º, Enunciado INCP 8, Arts. 179/180), mas insere uma interpretação (cumulatividade) não explicitamente respaldada pelo material."
+      },
+      "latencyMs": 34673
+    },
+    {
+      "id": "q-srp-adesao-carona",
+      "query": "adesão ata registro de preços carona",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.9,
+        "completeness": 0.85,
+        "overall": 0.89,
+        "issues": [
+          "Não menciona a ON 88/2024 item II sobre § 4º art. 5º (trecho cortado no material, mas assistente não sinaliza omissão)",
+          "Manual TCU 5.9.4 citado indiretamente via reprodução dos artigos, sem menção explícita à fonte 'Manual TCU'",
+          "Observação final sobre 'ausência de jurisprudência recente' é adequada, mas poderia mencionar a IN SGD/ME 94/2022 como fonte correlata não explorada",
+          "Pequena imprecisão: afirma que lógica do Acórdão 2015 'foi mantida' no art. 86 - trata-se de inferência do assistente, não do material"
+        ],
+        "rationale": "A resposta é predominantemente fiel e bem estruturada, com citações corretas de artigos, parecer, enunciado e informativo; a completude é boa mas deixa de explorar plenamente o Manual TCU e a ON 88/2024 completa."
+      },
+      "latencyMs": 46772
+    },
+    {
+      "id": "q-reequilibrio-economico",
+      "query": "reequilíbrio econômico-financeiro do contrato",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.85,
+        "completeness": 0.8,
+        "overall": 0.86,
+        "issues": [
+          "Não cita nominalmente o Acórdão 1563/2004-TCU-Plenário nem o Acórdão 25/2010-TCU-Plenário (que traz os 4 requisitos clássicos: elevação de encargos, evento posterior, nexo causal, imprevisibilidade), apenas parafraseia o conteúdo sem atribuição precisa",
+          "Omite o Parecer nº 003/2015/DECOR/CGU/AGU sobre reequilíbrio em concessões, presente no material",
+          "Pequena extrapolação ao concluir sobre 'eventos globais' que devem 'ser tratados via reequilíbrio quando efetivamente ocorrerem' - inferência não expressa literalmente no informativo",
+          "No mais, citações de artigos da Lei 14.133/2021 (124, 130, 103, 104, 131, 134, 135) e acórdãos/ON estão corretas e bem atribuídas"
+        ],
+        "rationale": "A resposta é fiel ao material, com citações corretas dos artigos da Lei 14.133/2021 e da jurisprudência do TCU, mas omite fontes relevantes (Acórdão 25/2010, Parecer AGU) e não atribui nominalmente todos os acórdãos usados."
+      },
+      "latencyMs": 65216
+    },
+    {
+      "id": "q-sancoes-impedimento-licitar",
+      "query": "sanções impedimento de licitar e contratar",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.85,
+        "citationAccuracy": 0.9,
+        "completeness": 0.8,
+        "overall": 0.86,
+        "issues": [
+          "Seção 4 trata o Acórdão TCU 2530/2023 como 'caso análogo sob a nova lei', mas o texto-fonte usa terminologia da Lei 8.666/93 ('suspensão de licitar'), criando uma narrativa de 'tensão jurisprudencial' não totalmente sustentada pelo material",
+          "Não menciona os Acórdãos 754/2015 e 1831/2014-TCU-Plenário sobre desconsideração da personalidade jurídica, relevantes ao tema de abrangência/extensão de sanções",
+          "Cita Art. 72 e outros normativos genéricos (Portaria MPU, Decretos) de forma secundária sem conexão direta clara com a pergunta, ocupando espaço sem agregar precisão ao ponto central"
+        ],
+        "rationale": "A resposta é predominantemente fiel e bem referenciada ao material, com citações corretas de artigos, informativos e pareceres, mas introduz uma interpretação especulativa sobre o Acórdão 2530/2023 estar 'sob a nova lei' que não é claramente sustentada pelo texto-fonte, e omite jurisprudência correlata presente no material sobre extensão de efeitos sancionatórios."
+      },
+      "latencyMs": 102917
+    },
+    {
+      "id": "q-fiscal-contrato-responsabilidade",
+      "query": "responsabilidades do fiscal de contrato",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.94,
+        "issues": [
+          "Insere aviso de que o Informativo 57/2011 seria 'anterior à Lei 14.133/2021' - observação não constante do material, embora factualmente plausível pela data",
+          "Não menciona a fiscalização setorial prevista no Decreto 11.246/2022, tema presente no Manual TCU e pertinente ao papel do fiscal",
+          "Poderia ter citado o Enunciado IBDA 57 de forma mais integrada à responsabilidade do fiscal, não apenas como nota final"
+        ],
+        "rationale": "A resposta é fiel ao material, com citações corretas de artigos, enunciados e acórdãos, cobrindo bem as fontes relevantes sobre responsabilidades do fiscal. Pequena penalização por uma inferência não fundamentada explicitamente no contexto e por não explorar a fiscalização setorial do Decreto 11.246/2022."
+      },
+      "latencyMs": 56981
+    },
+    {
+      "id": "q-etp-obrigatoriedade",
+      "query": "estudo técnico preliminar obrigatório",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 1,
+        "citationAccuracy": 1,
+        "completeness": 0.9,
+        "overall": 0.98,
+        "issues": [
+          "Omitiu o Acórdão 3266/2008-TCU-Plenário sobre justificativas em contratação direta, que era pertinente à seção sobre ETP na contratação direta",
+          "A observação sobre os acórdãos serem anteriores à Lei 14.133/2021 é uma inferência do assistente não explicitada no material, embora factualmente plausível"
+        ],
+        "rationale": "A resposta é fiel ao material, com citações corretas de artigos, enunciados e acórdãos, e cobre de forma abrangente os pontos-chave sobre obrigatoriedade do ETP. Pequena omissão de uma fonte correlata (Acórdão 3266/2008) reduz levemente a completude."
+      },
+      "latencyMs": 58095
+    },
+    {
+      "id": "q-matriz-risco",
+      "query": "matriz de riscos contratos",
+      "empty": false,
+      "sourceCount": 24,
+      "verdict": {
+        "faithfulness": 0.9,
+        "citationAccuracy": 0.95,
+        "completeness": 0.8,
+        "overall": 0.9,
+        "issues": [
+          "Omite o Acórdão 544/2021-TCU-Plenário do Quadro 207, que trata diretamente de matriz de riscos em contratação integrada",
+          "Omite o primeiro risco do Quadro 208 (desconsideração da alocação de riscos no cálculo da estimativa de valor)",
+          "Adiciona comentário editorial não fundamentado no material sobre 'aplicabilidade' e 'incorporação pela nova lei' dos acórdãos anteriores a 2021",
+          "Não menciona o Parecer Vinculante GQ-90, embora seja tema correlato (equilíbrio econômico-financeiro)"
+        ],
+        "rationale": "A resposta é predominantemente fiel e bem fundamentada, com citações literais corretas dos acórdãos, artigos e enunciado, mas omite algumas fontes relevantes do material (Acórdão 544/2021, um risco do Quadro 208) e insere pequenas opiniões não sustentadas diretamente pelo texto."
+      },
+      "latencyMs": 75608
+    },
+    {
+      "id": "q-habilitacao-fiscal-trabalhista",
+      "query": "habilitação fiscal social trabalhista documentos",
+      "empty": false,
+      "sourceCount": 23,
+      "verdict": {
+        "faithfulness": 0.85,
+        "citationAccuracy": 0.9,
+        "completeness": 0.9,
+        "overall": 0.88,
+        "issues": [
+          "A seção final sobre 'inconsistência de numeração' interpreta erroneamente uma tag de metadado (lista de artigos associada à fonte) como se fosse uma afirmação substantiva do Manual TCU, criando uma confusão não fundamentada no conteúdo real do material",
+          "Poderia ter mencionado brevemente que o trecho sobre Inf. 2/2010 (filial) estava disponível, ainda que incompleto, para sinalizar sua existência",
+          "Pequena redundância na repetição de trechos do Manual TCU sobre habilitação trabalhista"
+        ],
+        "rationale": "A resposta é predominantemente fiel e bem citada, reproduzindo corretamente artigos da Lei 14.133/2021, o Enunciado CJF 5 e os acórdãos do TCU conforme o material; a única falha relevante é a interpretação equivocada de um metadado de fonte como se fosse uma inconsistência normativa real. A cobertura dos pontos-chave da pergunta é ampla e bem estruturada."
+      },
+      "latencyMs": 66229
+    }
+  ],
+  "summary": {
+    "evaluated": 12,
+    "empty": 0,
+    "faithfulness": 0.8791666666666668,
+    "citationAccuracy": 0.9375,
+    "completeness": 0.8500000000000001,
+    "overall": 0.8966666666666668
+  }
+}
