@@ -65,7 +65,7 @@ Rodada com o parser real do projeto sobre a fonte de 16/08 e cruzada com o acerv
 
 | | n | o que são |
 |---|---:|---|
-| **captura errada** | **13** | 11 com `LEG-FED ANO-2020` → é a **Lei 14.113/2020 (FUNDEB)**, digitada como 14.133; e 2 com `LEG-MUN ANO-2006` → **lei municipal 14.133/2006 de São Paulo** |
+| **captura errada** | **13** | 11 com `LEG-FED ANO-2020` → é a **Lei 14.113/2020 (FUNDEB)**, digitada como 14.133; e 2 com `LEG-MUN ANO-2006` → **lei municipal 14.133/2006 de São Paulo**. *(Ao implementar a correção apareceu um 14º, invisível a qualquer análise por ano: o **ARE 1489537**, lei municipal de São Paulo declarada como `LEG-MUN ANO-2021`.)* |
 | **captura certa, ano errado na fonte** | **9** | `ANO-2023` (2), `ANO-2022` (3), `ANO-2001` (2), `ANO-1921` (1), sem `ANO-` (1). Todos tratam de licitação, art. 89/90 da 8.666 ou art. 337-E do CP — e em dois deles o próprio STF escreveu "lei 14.133/2001" e "Lei nº 14.133/22" na ementa |
 
 **No acervo** (STF: 600 registros, 254 aprovados), 10 dos 22 chegaram a `TribunalDecision`:
@@ -80,9 +80,9 @@ Exigir `ANO-2021` mataria 9 capturas legítimas na fonte (5 no acervo) para elim
 1. **Exigir `LEG-FED`.** A Lei 14.133 é federal por definição, então isso elimina as 2 municipais sem nenhum falso negativo possível. O parser hoje ignora o prefixo de esfera.
 2. **Rejeitar `ANO-2020`.** A Lei 14.133 foi sancionada em 01/04/2021 — `ANO-2020` é impossível para ela. Elimina as 11 do FUNDEB, e nenhuma das 9 capturas legítimas usa 2020.
 
-Juntos: **13 de 13 falsos positivos eliminados, 0 falso negativo**, nos dados medidos.
+Juntos: **14 de 14 falsos positivos eliminados, 0 falso negativo**, nos dados medidos — 1.071 → 1.057 julgados capturados. Implementado em #199; o acervo já gravado é saneado em #200.
 
-**Defeito vizinho, no mesmo caminho:** `ARE 1578097` cita `ART-0047A` — o art. **47-A** da Lei do FUNDEB. `RE_ARTIGO` só reconhece o sufixo com hífen (`ART-00184-A`), então extraiu `47` e amarrou o art. 47 da Lei 14.133. Vale tratar junto.
+**Defeito vizinho, no mesmo caminho:** `ARE 1578097` cita `ART-0047A` — o art. **47-A** da Lei do FUNDEB. `RE_ARTIGO` só reconhecia o sufixo com hífen (`ART-00184-A`), então extraiu `47` e amarrou o art. 47 da Lei 14.133. Medido depois: das 10 ocorrências de sufixo na fonte, **10 vêm coladas e nenhuma hifenizada** — o formato reconhecido não existe ali, e `ART-0337L` virava `337`, `ART-0005A` virava `5`. Corrigido junto, em #199.
 
 **STJ — não mensurável hoje.** O parser é compartilhado e o formato do STJ traz a mesma esfera (`LEG:FED LEI:014133 ANO:2021`), então o defeito é possível por construção. Mas o `sourceRawData` dos 396 registros do STJ guarda apenas `classe`, `tema` e `tese` — a legislação citada não é persistida. Medir exigiria recoletar os espelhos.
 
