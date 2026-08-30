@@ -139,7 +139,7 @@ function ConfirmedView() {
       <p className="text-gray-600 mb-6">Redirecionando para a área restrita…</p>
       <Link
         href="/area-restrita"
-        className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+        className="block w-full bg-blue-600 hover:bg-blue-700 text-surface-page font-semibold py-3 px-6 rounded-xl transition-colors"
       >
         Ir para área restrita
       </Link>
@@ -165,7 +165,7 @@ function TimeoutView() {
       <div className="space-y-3">
         <Link
           href="/area-restrita"
-          className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+          className="block w-full bg-blue-600 hover:bg-blue-700 text-surface-page font-semibold py-3 px-6 rounded-xl transition-colors"
         >
           Ir para área restrita
         </Link>
@@ -192,7 +192,7 @@ function ErrorView() {
       <div className="space-y-3">
         <Link
           href="/planos"
-          className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+          className="block w-full bg-blue-600 hover:bg-blue-700 text-surface-page font-semibold py-3 px-6 rounded-xl transition-colors"
         >
           Ver planos
         </Link>

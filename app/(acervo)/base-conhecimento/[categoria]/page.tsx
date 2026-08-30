@@ -388,12 +388,12 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
   return (
     <main className="min-h-screen bg-surface-raised">
       {/* Hero */}
-      <section className="bg-surface-raised text-white py-12 md:py-16">
+      <section className="bg-surface-raised text-ink-primary py-12 md:py-16 border-b border-border-subtle">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <Link
               href="/base-conhecimento"
-              className="inline-flex items-center gap-2 text-brand-100 hover:text-white mb-6 transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-brand-100 hover:text-surface-page mb-6 transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               Base de Conhecimento
@@ -401,7 +401,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 bg-surface-page/15 rounded-md flex items-center justify-center flex-shrink-0">
-                <Icon className="w-7 h-7 text-white" />
+                <Icon className="w-7 h-7 text-surface-page" />
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-cinzel font-semibold mb-2 tracking-wide">
@@ -458,7 +458,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
             <Link
               href={buildFilterUrl(categoria, currentParams, { ente: '', page: 1 })}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                !enteFilter ? 'bg-brand-600 text-white' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-brand-400'
+                !enteFilter ? 'bg-brand-600 text-surface-page' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-brand-400'
               }`}
             >
               Todos
@@ -468,7 +468,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                 key={e}
                 href={buildFilterUrl(categoria, currentParams, { ente: e, page: 1 })}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  enteFilter === e ? 'bg-brand-600 text-white' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-brand-400'
+                  enteFilter === e ? 'bg-brand-600 text-surface-page' : 'bg-surface-page border border-border-strong text-ink-secondary hover:border-brand-400'
                 }`}
               >
                 {e}
@@ -491,7 +491,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
           };
           const basePath = `/base-conhecimento/${categoria}`;
           return (
-            <div className="bg-surface-page border-2 border-border-subtle rounded-md p-6 space-y-4 mb-6">
+            <div className="bg-surface-page border border-border-subtle rounded-md p-6 space-y-4 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {cfg.tipoFilter && (
                   <div>
@@ -503,7 +503,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       value={tipoFilter}
                       options={cfg.tipoFilter.options.map(o => ({ value: o.value, label: o.label }))}
                       ariaLabel="Filtrar por tipo"
-                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+                      className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
@@ -517,7 +517,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       value={orgaoFilter}
                       options={cfg.orgaoFilter.orgaos.map(o => ({ value: o, label: o }))}
                       ariaLabel="Filtrar por câmara"
-                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+                      className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
@@ -536,7 +536,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       ]}
                       emptyLabel="Todas"
                       ariaLabel="Filtrar por vigência"
-                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+                      className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
@@ -550,7 +550,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                       value={anoFilter}
                       options={cfg.yearFilter.years.map(y => ({ value: String(y), label: String(y) }))}
                       ariaLabel="Filtrar por ano"
-                      className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+                      className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
                     />
                   </div>
                 )}
@@ -567,7 +567,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                         href={buildFilterUrl(categoria, currentParams, { curso: cursoFilter === c.id ? '' : c.id, page: 1 })}
                         className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
                           cursoFilter === c.id
-                            ? 'bg-brand-600 text-white border-brand-600'
+                            ? 'bg-brand-600 text-surface-page border-brand-600'
                             : 'bg-surface-page text-ink-secondary border-border-strong hover:border-border-strong'
                         }`}
                       >
@@ -682,7 +682,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                 <li key={doc.id}>
                   <Link
                     href={`/documento/${doc.id}`}
-                    className="block bg-surface-page border border-border-subtle rounded-md p-5 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                    className="block bg-surface-page border border-border-subtle rounded-md p-5 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                   >
                     <div className="flex items-start gap-2 mb-1 flex-wrap">
                       {enteTag && (

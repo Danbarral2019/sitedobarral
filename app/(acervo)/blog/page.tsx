@@ -134,7 +134,7 @@ export default async function BlogPage() {
 
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-2 text-white bg-surface-raised px-6 py-3 rounded-md font-bold hover: hover: transition-all hover:shadow-lg"
+                    className="inline-flex items-center gap-2 text-surface-page bg-brand-600 px-6 py-3 rounded-md font-bold hover: transition-all hover:shadow-lg"
                   >
                     Ler artigo completo
                     <ArrowRight className="w-5 h-5" />
@@ -157,14 +157,14 @@ export default async function BlogPage() {
             <div className="relative z-10">
               <div className="inline-block mb-4">
                 <div className="bg-surface-page/20 px-4 py-2 rounded-full">
-                  <span className="text-white font-semibold text-sm">📰 Blog Jurídico</span>
+                  <span className="text-surface-page font-semibold text-sm">📰 Blog Jurídico</span>
                 </div>
               </div>
 
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-surface-page">
                 Receba Novos Artigos
               </h2>
-              <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-xl text-surface-page mb-10 max-w-2xl mx-auto leading-relaxed">
                 Cadastre-se para receber notificações sobre novos artigos e materiais exclusivos
                 diretamente no seu e-mail
               </p>
@@ -173,7 +173,7 @@ export default async function BlogPage() {
                 <NewsletterForm variant="inline" className="[&_input]:bg-surface-page [&_input]:text-ink-primary [&_input]:placeholder:text-ink-muted [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-amber-accent/25 [&_input]:border-0 [&_button]:bg-brand-600 [&_button]: [&_button]: [&_button]:text-ink-primary [&_button]:font-bold [&_button]:hover: [&_button]:hover: [&_button]:" />
               </div>
 
-              <p className="text-white/80 text-sm mt-4">
+              <p className="text-surface-page/80 text-sm mt-4">
                 ✓ Conteúdo semanal · ✓ Sem spam · ✓ Cancele quando quiser
               </p>
             </div>

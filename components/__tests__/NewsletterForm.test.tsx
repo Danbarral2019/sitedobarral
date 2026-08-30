@@ -77,7 +77,7 @@ describe('NewsletterForm', () => {
       const interestButton = screen.getByText('Lei 14.133/2021');
 
       // Inicialmente nao selecionado
-      expect(interestButton).toHaveClass('bg-gray-200');
+      expect(interestButton).toHaveClass('bg-surface-deep');
 
       // Clicar para selecionar
       await user.click(interestButton);
@@ -85,7 +85,7 @@ describe('NewsletterForm', () => {
 
       // Clicar novamente para deselecionar
       await user.click(interestButton);
-      expect(interestButton).toHaveClass('bg-gray-200');
+      expect(interestButton).toHaveClass('bg-surface-deep');
     });
 
     it('deve permitir selecionar multiplos interesses', async () => {

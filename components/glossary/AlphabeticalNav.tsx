@@ -21,7 +21,7 @@ export function AlphabeticalNav({
           className={`
             px-3 py-2 rounded-md font-semibold text-sm transition-colors
             ${!activeLetter
-              ? 'bg-blue-600 text-white'
+              ? 'bg-blue-600 text-surface-page'
               : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }
           `}
@@ -40,7 +40,7 @@ export function AlphabeticalNav({
               className={`
                 w-10 h-10 rounded-md font-semibold transition-colors
                 ${isActive
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-600 text-surface-page'
                   : isAvailable
                     ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                     : 'bg-gray-50 text-gray-300 cursor-not-allowed'

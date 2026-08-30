@@ -156,7 +156,7 @@ export default function VerificarEmailPage() {
 
               <Link
                 href="/area-restrita"
-                className="inline-block bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="inline-block bg-blue-600 text-surface-page py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
                 Acessar Área Restrita Agora
               </Link>
@@ -195,7 +195,7 @@ export default function VerificarEmailPage() {
                 <button
                   type="submit"
                   disabled={verifyLoading || !manualToken.trim()}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full bg-blue-600 text-surface-page py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
                 >
                   {verifyLoading ? 'Verificando...' : 'Verificar'}
                 </button>
@@ -211,7 +211,7 @@ export default function VerificarEmailPage() {
                     {resendLoading ? 'Reenviando...' : 'Reenviar link de verificação'}
                   </button>
                   {resendMessage && (
-                    <p className={`mt-2 text-sm ${resendMessage.includes('reenviado') ? 'text-green-600' : 'text-yellow-600'}`}>
+                    <p className={`mt-2 text-sm ${resendMessage.includes('reenviado') ? 'text-green-600' : 'text-amber-accent-deep'}`}>
                       {resendMessage}
                     </p>
                   )}
@@ -269,7 +269,7 @@ export default function VerificarEmailPage() {
                 <div className="space-y-3">
                   <Link
                     href="/login"
-                    className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    className="block w-full bg-blue-600 text-surface-page py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                   >
                     Tentar Fazer Login
                   </Link>

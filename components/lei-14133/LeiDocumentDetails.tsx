@@ -176,7 +176,7 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
           <ul className="space-y-2">
             {keyPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2 text-sm">
-                <span className="flex-shrink-0 w-5 h-5 bg-brand-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                <span className="flex-shrink-0 w-5 h-5 bg-brand-600 text-surface-page rounded-full flex items-center justify-center text-xs font-bold">
                   {index + 1}
                 </span>
                 <p className="text-ink-primary">{point}</p>
@@ -278,7 +278,7 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
               <Link
                 key={artNum}
                 href={`/area-restrita/lei-comentada?artigo=${artNum}`}
-                className="px-2 py-1 bg-brand-600 text-white rounded text-xs font-medium hover:bg-brand-700 transition-colors flex items-center gap-1"
+                className="px-2 py-1 bg-brand-600 text-surface-page rounded text-xs font-medium hover:bg-brand-800 transition-colors flex items-center gap-1"
               >
                 Art. {artNum}
                 <ChevronRight className="w-3 h-3" />
@@ -299,7 +299,7 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
           }}
           className={`px-4 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${
             isFavorite(documentId)
-              ? 'bg-surface-raised0 text-white hover:bg-semantic-error'
+              ? 'bg-surface-raised0 text-surface-page hover:bg-semantic-error'
               : 'bg-surface-deep text-ink-secondary hover:bg-border-strong'
           }`}
           aria-label={isFavorite(documentId) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}

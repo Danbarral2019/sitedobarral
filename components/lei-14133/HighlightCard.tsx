@@ -38,7 +38,7 @@ export function HighlightCard({ doc }: { doc: EnrichedDoc }) {
       href={getDocHref(doc)}
       target={doc.url ? '_blank' : undefined}
       rel={doc.url ? 'noopener noreferrer' : undefined}
-      className={`block border-2 ${accent} rounded-xl p-4 hover:shadow-md transition-all group`}
+      className={`block border-2 ${accent} rounded-xl p-4  transition-all group`}
     >
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 w-10 h-10 bg-surface-page rounded-[3px] flex items-center justify-center border border-border-subtle">

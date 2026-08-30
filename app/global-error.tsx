@@ -65,7 +65,7 @@ export default function GlobalError({
             <div className="flex flex-col gap-3">
               <button
                 onClick={reset}
-                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="w-full bg-blue-600 text-surface-page px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
                 Tentar novamente
               </button>

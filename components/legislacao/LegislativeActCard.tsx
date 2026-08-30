@@ -146,7 +146,7 @@ export function LegislativeActCard({
           {act.summary && (
             <div className={`mb-6 rounded-md overflow-hidden ${theme.summaryGradient}`}>
               <div className={`px-4 py-3 ${theme.summaryHeader}`}>
-                <h3 className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-wide">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-surface-page uppercase tracking-wide">
                   <BookOpen className="w-5 h-5" />
                   Resumo Didático
                 </h3>
@@ -166,7 +166,7 @@ export function LegislativeActCard({
                 {act.leiArticles.map((art) => (
                   <span
                     key={art}
-                    className="px-3 py-1.5 bg-surface-deep text-ink-primary text-sm font-semibold rounded-[3px] border-2 border-border-strong"
+                    className="px-3 py-1.5 bg-surface-deep text-ink-primary text-sm font-semibold rounded-[3px] border border-border-strong"
                   >
                     Art. {art}
                   </span>
@@ -181,7 +181,7 @@ export function LegislativeActCard({
                 href={act.officialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center gap-2 px-4 py-2.5 text-white rounded-[3px] transition-colors font-semibold ${theme.primaryActionBg}`}
+                className={`flex items-center gap-2 px-4 py-2.5 text-surface-page rounded-[3px] transition-colors font-semibold ${theme.primaryActionBg}`}
               >
                 <ExternalLink className="w-5 h-5" />
                 {tabIsBoasPraticasOrOrientacoes ? 'Ver Fonte Original' : 'Ver Texto Oficial'}
@@ -192,7 +192,7 @@ export function LegislativeActCard({
                 href={act.pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-[3px] hover:bg-brand-700 transition-colors font-semibold"
+                className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors font-semibold"
               >
                 <Download className="w-5 h-5" />
                 Download PDF

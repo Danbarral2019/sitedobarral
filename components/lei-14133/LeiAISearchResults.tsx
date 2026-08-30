@@ -145,7 +145,7 @@ function AIResultsContent({
               <button
                 key={result.articleNumber}
                 onClick={() => onResultClick(result.articleNumber)}
-                className="w-full text-left bg-surface-page border border-border-subtle rounded-lg p-4 hover:border-border-strong hover:shadow-md transition-all"
+                className="w-full text-left bg-surface-page border border-border-subtle rounded-lg p-4 hover:border-border-strong  transition-all"
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-surface-deep text-ink-secondary rounded-full flex items-center justify-center font-bold text-sm">
@@ -185,7 +185,7 @@ function AIResultsContent({
                 href={doc.type === 'legislativeAct' ? `/api/legislative-acts/${doc.id}` : `/api/documents/${doc.id}/download`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-left bg-surface-page border border-border-subtle rounded-lg p-3 hover:border-border-strong hover:shadow-md transition-all"
+                className="block w-full text-left bg-surface-page border border-border-subtle rounded-lg p-3 hover:border-border-strong  transition-all"
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 bg-surface-deep text-ink-secondary rounded-full flex items-center justify-center">
@@ -229,7 +229,7 @@ function AIResultsContent({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 bg-brand-600 text-white text-xs font-bold rounded">
+                      <span className="px-2 py-0.5 bg-brand-600 text-surface-page text-xs font-bold rounded">
                         {enunciado.orgao} {enunciado.numero}
                       </span>
                       <span className="text-xs bg-surface-deep text-ink-secondary px-2 py-0.5 rounded">

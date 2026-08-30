@@ -45,7 +45,7 @@ export function LeiAreaHeader({
         <div className="flex items-center justify-between mb-4">
           <Link
             href="/area-restrita"
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-surface-page/80 hover:text-surface-page transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="hidden sm:inline">Área Restrita</span>
@@ -95,8 +95,8 @@ export function LeiAreaHeader({
             disabled={aiDisabled}
             className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
               aiDisabled
-                ? 'bg-border-strong text-white cursor-not-allowed'
-                : 'bg-brand-600 text-white hover:bg-brand-700'
+                ? 'bg-border-strong text-surface-page cursor-not-allowed'
+                : 'bg-brand-600 text-surface-page hover:bg-brand-800'
             }`}
             title="Busca semântica com IA"
           >
@@ -110,7 +110,7 @@ export function LeiAreaHeader({
           <button
             onClick={onToggleOnlyWithDocs}
             className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
-              onlyWithDocuments ? 'bg-surface-page text-brand-700' : 'bg-surface-raised0 text-white hover:bg-brand-400'
+              onlyWithDocuments ? 'bg-surface-page text-brand-700' : 'bg-surface-raised0 text-surface-page hover:bg-brand-400'
             }`}
           >
             <Filter className="w-5 h-5" />

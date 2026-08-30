@@ -51,7 +51,7 @@ export default function EducationalContent({
           <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-blue-600 rounded-lg">
-                <BookOpen className="w-5 h-5 text-white" />
+                <BookOpen className="w-5 h-5 text-surface-page" />
               </div>
               <h3 className="text-lg font-bold text-blue-900">Resumo</h3>
             </div>
@@ -77,14 +77,14 @@ export default function EducationalContent({
         <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 bg-purple-600 rounded-lg">
-              <Target className="w-5 h-5 text-white" />
+              <Target className="w-5 h-5 text-surface-page" />
             </div>
             <h3 className="text-lg font-bold text-purple-900">Pontos-Chave</h3>
           </div>
           <ul className="space-y-2">
             {keyPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
+                <div className="flex-shrink-0 w-6 h-6 bg-purple-600 text-surface-page rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
                   {index + 1}
                 </div>
                 <p className="text-gray-800 flex-1">{point}</p>
@@ -99,7 +99,7 @@ export default function EducationalContent({
         <div className="bg-green-50 border-2 border-green-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 bg-green-600 rounded-lg">
-              <Lightbulb className="w-5 h-5 text-white" />
+              <Lightbulb className="w-5 h-5 text-surface-page" />
             </div>
             <h3 className="text-lg font-bold text-green-900">Aplicacao Pratica</h3>
           </div>
@@ -116,7 +116,7 @@ export default function EducationalContent({
         <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-2 bg-amber-600 rounded-lg">
-              <BookOpen className="w-5 h-5 text-white" />
+              <BookOpen className="w-5 h-5 text-surface-page" />
             </div>
             <h3 className="text-lg font-bold text-amber-900">Observacoes do Prof. Barral</h3>
           </div>
@@ -168,7 +168,7 @@ export default function EducationalContent({
                 key={artNum}
                 href={`/area-restrita/artigo/${artNum}`}
                 onClick={onClose}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-1"
+                className="px-3 py-2 bg-blue-600 text-surface-page rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-1"
               >
                 Art. {artNum}
                 <ChevronRight className="w-4 h-4" />

@@ -112,7 +112,7 @@ export default function RedefinirSenhaPage() {
               <div className="space-y-3">
                 <Link
                   href="/esqueci-senha"
-                  className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="block w-full bg-blue-600 text-surface-page py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
                   Solicitar Novo Link
                 </Link>
@@ -238,7 +238,7 @@ export default function RedefinirSenhaPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-surface-page py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
             >
               {loading ? 'Redefinindo...' : 'Redefinir Senha'}
             </button>

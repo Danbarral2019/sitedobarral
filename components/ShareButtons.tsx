@@ -59,7 +59,7 @@ export default function ShareButtons({ url, title, description, className = '' }
           href={shareLinks.linkedin}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-[#0077B5] text-white rounded-lg hover:bg-[#006399] transition-colors font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0077B5] text-surface-page rounded-lg hover:bg-[#006399] transition-colors font-medium text-sm"
           aria-label="Compartilhar no LinkedIn"
         >
           <Linkedin className="w-4 h-4" />
@@ -71,7 +71,7 @@ export default function ShareButtons({ url, title, description, className = '' }
           href={shareLinks.twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-black text-surface-page rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
           aria-label="Compartilhar no Twitter/X"
         >
           <Twitter className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function ShareButtons({ url, title, description, className = '' }
           href={shareLinks.facebook}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#0C63D4] transition-colors font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1877F2] text-surface-page rounded-lg hover:bg-[#0C63D4] transition-colors font-medium text-sm"
           aria-label="Compartilhar no Facebook"
         >
           <Facebook className="w-4 h-4" />
@@ -95,7 +95,7 @@ export default function ShareButtons({ url, title, description, className = '' }
           href={shareLinks.whatsapp}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#1DA851] transition-colors font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-surface-page rounded-lg hover:bg-[#1DA851] transition-colors font-medium text-sm"
           aria-label="Compartilhar no WhatsApp"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -109,7 +109,7 @@ export default function ShareButtons({ url, title, description, className = '' }
           onClick={copyToClipboard}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium text-sm ${
             copied
-              ? 'bg-green-500 text-white'
+              ? 'bg-green-500 text-surface-page'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
           aria-label="Copiar link"
@@ -131,7 +131,7 @@ export default function ShareButtons({ url, title, description, className = '' }
         {typeof navigator !== 'undefined' && 'share' in navigator && (
           <button
             onClick={handleNativeShare}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-surface-page rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm"
             aria-label="Compartilhar"
           >
             <Share2 className="w-4 h-4" />

@@ -154,7 +154,7 @@ export default function ArticleChatHistory({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-surface-page p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
@@ -162,7 +162,7 @@ export default function ArticleChatHistory({
               </div>
               <div>
                 <h3 className="text-2xl font-bold">Histórico de Conversas</h3>
-                <p className="text-white/90 text-sm">
+                <p className="text-surface-page/90 text-sm">
                   Artigo {articleNumber} da Lei 14.133/2021
                 </p>
               </div>
@@ -331,7 +331,7 @@ export default function ArticleChatHistory({
             </p>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm"
+              className="px-4 py-2 bg-purple-600 text-surface-page rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm"
             >
               Fechar
             </button>

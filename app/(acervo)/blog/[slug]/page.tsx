@@ -256,7 +256,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 />
                 <button
                   type="submit"
-                  className="bg-primary-600 text-white px-6 py-3 rounded-[3px] font-semibold hover:bg-primary-700 transition-colors"
+                  className="bg-primary-600 text-surface-page px-6 py-3 rounded-[3px] font-semibold hover:bg-primary-700 transition-colors"
                 >
                   Cadastrar
                 </button>

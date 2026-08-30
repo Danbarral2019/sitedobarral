@@ -34,14 +34,14 @@ export function LegislacaoToolbar({
           placeholder={searchPlaceholder}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-4 border-2 border-border-strong rounded-md focus:ring-2 focus:ring-amber-accent focus:border-transparent text-lg"
+          className="w-full pl-12 pr-4 py-4 border border-border-strong rounded-md focus:ring-2 focus:ring-amber-accent focus:border-transparent text-lg"
         />
       </div>
 
       <select
         value={sortFilter}
         onChange={(e) => onSortChange(e.target.value)}
-        className="px-4 py-4 bg-surface-page border-2 border-border-strong rounded-md hover:border-brand-600 font-semibold text-sm focus:ring-2 focus:ring-amber-accent cursor-pointer"
+        className="px-4 py-4 bg-surface-page border border-border-strong rounded-md hover:border-brand-600 font-semibold text-sm focus:ring-2 focus:ring-amber-accent cursor-pointer"
         aria-label="Ordenar por"
         title="Ordenar por"
       >
@@ -58,7 +58,7 @@ export function LegislacaoToolbar({
 
       <button
         onClick={onToggleFilters}
-        className="flex items-center justify-center gap-2 px-6 py-4 bg-surface-page border-2 border-border-strong rounded-md hover:border-brand-600 hover:bg-surface-raised transition-all"
+        className="flex items-center justify-center gap-2 px-6 py-4 bg-surface-page border border-border-strong rounded-md hover:border-brand-600 hover:bg-surface-raised transition-all"
       >
         <Filter className="w-5 h-5" />
         <span className="font-semibold">Filtros</span>

@@ -109,7 +109,7 @@ export function LeiSidebar({
                               >
                                 <span
                                   className={`px-2 py-1 rounded text-xs font-bold ${
-                                    sel ? 'bg-brand-600 text-white' : 'bg-surface-deep text-ink-secondary'
+                                    sel ? 'bg-brand-600 text-surface-page' : 'bg-surface-deep text-ink-secondary'
                                   }`}
                                 >
                                   Art. {art.numero}

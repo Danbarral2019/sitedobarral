@@ -158,7 +158,7 @@ export default function BatchClassifyPanel({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+        <div className="p-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-surface-page">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-white/20 rounded-lg">
@@ -215,7 +215,7 @@ export default function BatchClassifyPanel({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-600" />
+                    <Zap className="w-5 h-5 text-amber-accent-deep" />
                     <span className="font-semibold">Aplicar Automaticamente (Alta Confiança)</span>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
@@ -229,7 +229,7 @@ export default function BatchClassifyPanel({
               <button
                 onClick={handleClassify}
                 disabled={isClassifying}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 font-medium"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-surface-page rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 font-medium"
               >
                 {isClassifying ? (
                   <>
@@ -270,7 +270,7 @@ export default function BatchClassifyPanel({
                 <div className="text-sm text-gray-600 mt-1">Aplicados</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600">{stats.averageConfidence}%</div>
+                <div className="text-3xl font-bold text-amber-accent-deep">{stats.averageConfidence}%</div>
                 <div className="text-sm text-gray-600 mt-1">Confiança Média</div>
               </div>
               <div className="text-center">
@@ -301,7 +301,7 @@ export default function BatchClassifyPanel({
                 <button
                   onClick={applySelectedClassifications}
                   disabled={selectedForApply.size === 0 || isClassifying}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
+                  className="px-4 py-2 bg-purple-600 text-surface-page rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
                 >
                   <CheckCircle className="w-4 h-4" />
                   Aplicar Selecionados ({selectedForApply.size})

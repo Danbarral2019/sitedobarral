@@ -78,7 +78,7 @@ export default async function PublicacoesPage() {
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-surface-raised rounded-md flex items-center justify-center">
-                <BookOpen className="w-7 h-7 text-white" />
+                <BookOpen className="w-7 h-7 text-surface-page" />
               </div>
               <h2 className="text-3xl font-bold text-ink-primary">Livros</h2>
             </div>
@@ -135,7 +135,7 @@ export default async function PublicacoesPage() {
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-surface-raised rounded-md flex items-center justify-center">
-                <FileText className="w-7 h-7 text-white" />
+                <FileText className="w-7 h-7 text-surface-page" />
               </div>
               <h2 className="text-3xl font-bold text-ink-primary">Artigos Científicos</h2>
             </div>
@@ -168,7 +168,7 @@ export default async function PublicacoesPage() {
                           href={artigo.externalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-[3px] font-semibold hover:bg-brand-700 transition-colors"
+                          className="inline-flex items-center gap-2 bg-brand-600 text-surface-page px-4 py-2 rounded-[3px] font-semibold hover:bg-brand-800 transition-colors"
                         >
                           Ler artigo
                           <ExternalLink className="w-4 h-4" />
@@ -185,7 +185,7 @@ export default async function PublicacoesPage() {
           <section>
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-surface-raised rounded-md flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-white" />
+                <Calendar className="w-7 h-7 text-surface-page" />
               </div>
               <h2 className="text-3xl font-bold text-ink-primary">Notícias & Eventos</h2>
             </div>

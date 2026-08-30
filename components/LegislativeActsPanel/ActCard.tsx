@@ -145,7 +145,7 @@ export default function ActCard({ act, expandedAct, setExpandedAct, isBoasPratic
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
                   : 'bg-gradient-to-r from-blue-600 to-indigo-600'
               }`}>
-                <h4 className="flex items-center gap-1.5 text-xs font-bold text-white uppercase tracking-wide">
+                <h4 className="flex items-center gap-1.5 text-xs font-bold text-surface-page uppercase tracking-wide">
                   <BookOpen className="w-4 h-4" />
                   Resumo Didático
                 </h4>
@@ -182,7 +182,7 @@ export default function ActCard({ act, expandedAct, setExpandedAct, isBoasPratic
                 href={act.officialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white rounded-lg transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-surface-page rounded-lg transition-colors ${
                   isBoasPraticas
                     ? 'bg-emerald-600 hover:bg-emerald-700'
                     : 'bg-blue-600 hover:bg-blue-700'

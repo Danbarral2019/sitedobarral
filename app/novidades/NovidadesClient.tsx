@@ -135,9 +135,9 @@ export default function NovidadesClient({
   return (
     <div className="min-h-screen bg-surface-raised">
       {/* Header */}
-      <div className="bg-surface-raised text-white">
+      <div className="bg-surface-raised text-ink-primary">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          <Link href="/" className="text-ink-muted hover:text-white text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
+          <Link href="/" className="text-ink-muted hover:text-surface-page text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
           <h1 className="text-3xl font-bold font-serif mb-2">Novidades da Plataforma</h1>
           <p className="text-ink-muted">Todos os documentos e conteúdos adicionados no período</p>
         </div>
@@ -291,7 +291,7 @@ export default function NovidadesClient({
         )}
 
         {/* Newsletter CTA */}
-        <div className="mt-8 bg-surface-raised rounded-md p-6 text-white text-center">
+        <div className="mt-8 bg-surface-raised rounded-md p-6 text-ink-primary text-center">
           <h3 className="text-lg font-bold mb-2">Receba os destaques por email</h3>
           <p className="text-ink-muted text-sm mb-4">
             Assine a newsletter mensal e receba uma curadoria com as decisões mais relevantes e os destaques do mês.

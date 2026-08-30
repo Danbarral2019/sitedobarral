@@ -219,20 +219,20 @@ export default function JurisprudenciaDetailPage() {
   return (
     <main className="min-h-screen bg-surface-page">
       {/* Header */}
-      <div className="bg-surface-raised text-white py-12">
+      <div className="bg-surface-raised text-ink-primary py-12 border-b border-border-subtle">
         <div className="max-w-4xl mx-auto px-4">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Início</Link>
+          <nav className="flex items-center gap-2 text-sm text-surface-page/80 mb-6">
+            <Link href="/" className="hover:text-surface-page transition-colors">Início</Link>
             <span>/</span>
-            <Link href="/jurisprudencia" className="hover:text-white transition-colors">Jurisprudência</Link>
+            <Link href="/jurisprudencia" className="hover:text-surface-page transition-colors">Jurisprudência</Link>
             <span>/</span>
-            <span className="text-white">Decisão</span>
+            <span className="text-surface-page">Decisão</span>
           </nav>
 
           <Link
             href="/jurisprudencia"
-            className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-surface-page/90 hover:text-surface-page mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar para Jurisprudência
@@ -258,7 +258,7 @@ export default function JurisprudenciaDetailPage() {
             {decision.title || decision.decisionNumber}
           </h1>
           {decision.processNumber && (
-            <p className="text-white/80 text-sm">Processo: {decision.processNumber}</p>
+            <p className="text-surface-page/80 text-sm">Processo: {decision.processNumber}</p>
           )}
         </div>
       </div>
@@ -458,7 +458,7 @@ export default function JurisprudenciaDetailPage() {
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-md font-bold hover:bg-brand-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-surface-page rounded-md font-bold hover:bg-brand-800 transition-colors"
             >
               <ExternalLink className="w-5 h-5" />
               {isCanonical ? 'Inteiro teor no site do TST' : 'Ver decisão original'}

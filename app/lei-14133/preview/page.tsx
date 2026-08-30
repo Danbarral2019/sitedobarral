@@ -151,7 +151,7 @@ function PreviewContent() {
       {/* Mobile FAB */}
       <button
         onClick={preview.openMobileDrawer}
-        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-brand-600 text-white rounded-full flex items-center justify-center hover:bg-brand-800 transition-colors"
+        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-brand-600 text-surface-page rounded-full flex items-center justify-center hover:bg-brand-800 transition-colors"
         aria-label="Abrir navegação"
       >
         <BookOpen className="w-6 h-6" />

@@ -214,7 +214,7 @@ export default function LeiArticleSelector({
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+                  <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-surface-page font-bold shadow-sm">
                     {article.numero}
                   </div>
                   <div className="flex-1 min-w-0">

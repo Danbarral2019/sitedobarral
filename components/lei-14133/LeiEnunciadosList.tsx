@@ -21,7 +21,7 @@ export function LeiEnunciadosList({ enunciados }: LeiEnunciadosListProps) {
           const cardContent = (
             <>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <span className="px-2 py-1 bg-brand-600 text-white text-xs font-bold rounded">
+                <span className="px-2 py-1 bg-brand-600 text-surface-page text-xs font-bold rounded">
                   {e.orgao} {e.numero}
                 </span>
                 <span className="text-xs text-ink-secondary bg-surface-deep px-2 py-0.5 rounded">{e.tema}</span>

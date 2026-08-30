@@ -156,7 +156,7 @@ export default function SectionEditor({
                   })
                 }
                 disabled={isSaving || justification.trim().length < 20}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
               >
                 {isSaving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -200,7 +200,7 @@ export default function SectionEditor({
                 <button
                   onClick={() => onGenerate("fresh", hints || undefined)}
                   disabled={isGenerating}
-                  className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                  className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
                 >
                   <Sparkles className="h-3 w-3" />
                   Gerar do zero
@@ -281,7 +281,7 @@ export default function SectionEditor({
                 <button
                   onClick={() => onSave({ contentMd: content })}
                   disabled={isSaving || !dirty}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-surface-page hover:bg-gray-900 disabled:opacity-60"
                 >
                   {isSaving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -295,7 +295,7 @@ export default function SectionEditor({
                     onSave({ contentMd: content, status: "CONFIRMED" })
                   }
                   disabled={isSaving || content.trim().length < 20}
-                  className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
                 >
                   <Check className="h-4 w-4" />
                   Confirmar seção
@@ -394,7 +394,7 @@ function CheckpointBlock({
           <button
             onClick={() => submit("passed")}
             disabled={saving || answer.trim().length < 5}
-            className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1 text-xs font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1 text-xs font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
           >
             {saving ? (
               <Loader2 className="h-3 w-3 animate-spin" />

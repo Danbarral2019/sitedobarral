@@ -168,7 +168,7 @@ export default function VersionHistoryButton({ documentId }: Props) {
               <button
                 onClick={createSnapshot}
                 disabled={saving}
-                className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1.5 text-sm font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
               >
                 {saving ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

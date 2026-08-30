@@ -80,7 +80,7 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
                 href={document.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-surface-page px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
               >
                 {document.type === 'link' ? (
                   <>
@@ -110,7 +110,7 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
             download
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-surface-page px-6 py-2 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
             Baixar

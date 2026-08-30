@@ -25,7 +25,7 @@ export function LeiCuratedCrossRefs({ refs, allArticles, onSelectArticle }: LeiC
               <button
                 onClick={() => target && onSelectArticle(target)}
                 disabled={!target}
-                className="flex-shrink-0 px-2.5 py-1 bg-brand-600 text-white text-xs font-bold rounded hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-shrink-0 px-2.5 py-1 bg-brand-600 text-surface-page text-xs font-bold rounded hover:bg-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Art. {ref.targetNumber}
               </button>

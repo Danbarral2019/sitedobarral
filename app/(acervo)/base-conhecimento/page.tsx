@@ -132,7 +132,7 @@ export default async function BaseConhecimentoPage() {
   return (
     <main className="min-h-screen bg-surface-raised">
       {/* Hero */}
-      <section className="bg-surface-raised text-white py-14 md:py-20">
+      <section className="bg-surface-raised text-ink-primary py-14 md:py-20 border-b border-border-subtle">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-4 tracking-wide">
@@ -157,7 +157,7 @@ export default async function BaseConhecimentoPage() {
               <Link
                 key={cat.key}
                 href={cat.href}
-                className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
               >
                 <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                   <Icon className="w-6 h-6 text-brand-700" />
@@ -176,7 +176,7 @@ export default async function BaseConhecimentoPage() {
           {tribunalOthersCount > 0 && (
             <Link
               href="/jurisprudencia"
-              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
               <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <Landmark className="w-6 h-6 text-brand-700" />
@@ -197,7 +197,7 @@ export default async function BaseConhecimentoPage() {
           {tstSumulaCount > 0 && (
             <Link
               href="/jurisprudencia?tribunal=TST&decisionType=sumula"
-              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
               <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <Briefcase className="w-6 h-6 text-brand-700" />
@@ -218,7 +218,7 @@ export default async function BaseConhecimentoPage() {
           {tstOjCount > 0 && (
             <Link
               href="/jurisprudencia?tribunal=TST&decisionType=orientacao_jurisprudencial"
-              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
               <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <BookMarked className="w-6 h-6 text-brand-700" />
@@ -239,7 +239,7 @@ export default async function BaseConhecimentoPage() {
           {tstPnCount > 0 && (
             <Link
               href="/jurisprudencia?tribunal=TST&decisionType=precedente_normativo"
-              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
               <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <Gavel className="w-6 h-6 text-brand-700" />
@@ -260,7 +260,7 @@ export default async function BaseConhecimentoPage() {
           {glossaryCount > 0 && (
             <Link
               href="/glossario"
-              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400 hover:shadow-md transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+              className="bg-surface-page border border-border-subtle rounded-md p-6 hover:border-brand-400  transition-all group focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
               <div className="w-12 h-12 bg-brand-100 rounded-md flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors">
                 <BookOpen className="w-6 h-6 text-brand-700" />
@@ -283,7 +283,7 @@ export default async function BaseConhecimentoPage() {
         <div className="mt-14 bg-surface-raised border border-border-subtle rounded-md p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-start gap-4 max-w-4xl mx-auto">
             <div className="w-12 h-12 bg-brand-600 rounded-md flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-white" />
+              <Sparkles className="w-6 h-6 text-surface-page" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl md:text-2xl font-bold text-ink-primary mb-2">
@@ -295,7 +295,7 @@ export default async function BaseConhecimentoPage() {
               </p>
               <Link
                 href="/planos"
-                className="inline-flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-brand-700 transition-colors"
+                className="inline-flex items-center gap-2 bg-brand-600 text-surface-page px-6 py-3 rounded-md font-semibold hover:bg-brand-800 transition-colors"
               >
                 Conhecer planos
               </Link>

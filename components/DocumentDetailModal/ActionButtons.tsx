@@ -32,7 +32,7 @@ export default function ActionButtons({
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleView}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
+          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-surface-page px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
         >
           <ExternalLink className="w-5 h-5" />
           Acessar Documento
@@ -41,7 +41,7 @@ export default function ActionButtons({
         <a
           href={`/api/documents/${documentId}/download`}
           onClick={handleDownload}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
+          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-surface-page px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
         >
           <Download className="w-5 h-5" />
           Download do Arquivo

@@ -570,7 +570,7 @@ export default function ChatInterface({
               <div
                 className={`group/msg max-w-3xl rounded-lg p-4 ${
                   message.role === 'user'
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-surface-page'
                     : 'bg-gray-100 text-gray-900'
                 }`}
               >
@@ -838,7 +838,7 @@ export default function ChatInterface({
                   className={
                     'px-3 py-1 text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ' +
                     (active
-                      ? 'bg-blue-600 text-white shadow-sm'
+                      ? 'bg-blue-600 text-surface-page shadow-sm'
                       : 'text-gray-600 hover:bg-gray-100')
                   }
                 >
@@ -869,7 +869,7 @@ export default function ChatInterface({
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-blue-600 text-surface-page rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

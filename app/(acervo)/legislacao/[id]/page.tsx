@@ -155,7 +155,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
         {/* Banner de ato revogado — o ato continua acessível por link direto,
             mas com aviso destacado (não aparece em buscas/listagens públicas). */}
         {act.revoked && (
-          <div className="mb-6 rounded-md border-2 border-border-strong bg-surface-raised p-5 flex items-start gap-3">
+          <div className="mb-6 rounded-md border border-border-strong bg-surface-raised p-5 flex items-start gap-3">
             <span className="text-2xl leading-none" aria-hidden="true">🚫</span>
             <div>
               <p className="font-bold text-semantic-error">Ato revogado</p>
@@ -231,7 +231,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-[3px] hover:bg-brand-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Ver no Planalto
@@ -242,7 +242,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-[3px] hover:bg-brand-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Baixar PDF
@@ -280,7 +280,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
           <div className="bg-surface-raised rounded-md overflow-hidden mb-6">
             {/* Header destacado */}
             <div className="bg-surface-raised px-6 py-4">
-              <h3 className="flex items-center gap-3 text-lg font-bold text-white">
+              <h3 className="flex items-center gap-3 text-lg font-bold text-surface-page">
                 <BookOpen className="w-6 h-6" />
                 Resumo Didático
               </h3>
@@ -368,7 +368,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-[3px] hover:bg-brand-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Consultar fonte oficial

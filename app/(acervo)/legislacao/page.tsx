@@ -115,7 +115,7 @@ export default function LegislacaoPage() {
             <p className="mt-4 text-ink-secondary text-lg">{theme.loadingMessage}</p>
           </div>
         ) : l.acts.length === 0 ? (
-          <div className="text-center py-16 bg-surface-raised rounded-md border-2 border-border-subtle">
+          <div className="text-center py-16 bg-surface-raised rounded-md border border-border-subtle">
             <FileText className="w-16 h-16 text-ink-muted mx-auto mb-4" />
             <h3 className="text-xl font-bold text-ink-primary mb-2">
               {isBoasPraticas ? 'Nenhum ato normativo encontrado' : 'Nenhum ato encontrado'}

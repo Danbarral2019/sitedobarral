@@ -27,7 +27,7 @@ export function CategoryFilter({
           className={`
             px-3 py-1.5 rounded-md text-sm font-medium transition-colors
             ${!activeCategory
-              ? 'bg-blue-600 text-white'
+              ? 'bg-blue-600 text-surface-page'
               : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }
           `}
@@ -41,7 +41,7 @@ export function CategoryFilter({
             className={`
               px-3 py-1.5 rounded-md text-sm font-medium transition-colors
               ${activeCategory === category
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-surface-page'
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
               }
             `}

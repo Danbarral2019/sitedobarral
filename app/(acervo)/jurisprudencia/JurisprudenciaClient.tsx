@@ -359,7 +359,7 @@ export default function JurisprudenciaClient() {
                 onClick={() => setSelectedTheme(selectedTheme === theme ? '' : theme)}
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   selectedTheme === theme
-                    ? 'bg-brand-600 text-white'
+                    ? 'bg-brand-600 text-surface-page'
                     : 'bg-surface-deep text-ink-secondary hover:bg-surface-deep'
                 }`}
               >
@@ -382,7 +382,7 @@ export default function JurisprudenciaClient() {
               </p>
               <Link
                 href="/planos"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-[3px] hover:bg-brand-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-surface-page text-sm font-medium rounded-[3px] hover:bg-brand-800 transition-colors"
               >
                 Acesse a Área do Aluno <ArrowRight className="w-4 h-4" />
               </Link>
@@ -537,7 +537,7 @@ export default function JurisprudenciaClient() {
                   onClick={() => setCurrentPage(page)}
                   className={`px-3 py-2 border rounded-[3px] text-sm ${
                     currentPage === page
-                      ? 'bg-brand-600 text-white border-brand-600'
+                      ? 'bg-brand-600 text-surface-page border-brand-600'
                       : 'hover:bg-surface-raised'
                   }`}
                 >

@@ -78,15 +78,15 @@ export default function RegistroPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-surface-raised py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-surface-page rounded-[3px] p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-ink-primary mb-2">
               Criar Conta
             </h1>
-            <p className="text-gray-600">
+            <p className="text-ink-secondary">
               {qrCode
                 ? 'Primeiro acesso - Crie suas credenciais'
                 : 'Cadastre-se para acessar conteúdo público e explorar os planos'}
@@ -95,8 +95,8 @@ export default function RegistroPage() {
 
           {/* Erro */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-6 p-4 bg-surface-raised border border-border-subtle rounded-[3px]">
+              <p className="text-sm text-semantic-error">{error}</p>
             </div>
           )}
 
@@ -104,7 +104,7 @@ export default function RegistroPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nome */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-ink-secondary mb-2">
                 Nome Completo
               </label>
               <input
@@ -112,7 +112,7 @@ export default function RegistroPage() {
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent focus:border-transparent"
                 placeholder="Seu nome completo"
                 disabled={loading}
               />
@@ -120,7 +120,7 @@ export default function RegistroPage() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-ink-secondary mb-2">
                 Email
               </label>
               <input
@@ -128,7 +128,7 @@ export default function RegistroPage() {
                 id="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent focus:border-transparent"
                 placeholder="seu@email.com"
                 disabled={loading}
               />
@@ -136,7 +136,7 @@ export default function RegistroPage() {
 
             {/* Senha */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-ink-secondary mb-2">
                 Senha
               </label>
               <input
@@ -144,7 +144,7 @@ export default function RegistroPage() {
                 id="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent focus:border-transparent"
                 placeholder="Mínimo 6 caracteres"
                 disabled={loading}
               />
@@ -152,7 +152,7 @@ export default function RegistroPage() {
 
             {/* Confirmar Senha */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink-secondary mb-2">
                 Confirmar Senha
               </label>
               <input
@@ -160,7 +160,7 @@ export default function RegistroPage() {
                 id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent focus:border-transparent"
                 placeholder="Digite a senha novamente"
                 disabled={loading}
               />
@@ -170,7 +170,7 @@ export default function RegistroPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-brand-600 text-surface-page py-3 px-4 rounded-[3px] font-semibold hover:bg-brand-800 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
             >
               {loading ? 'Criando conta...' : 'Criar Conta'}
             </button>
@@ -178,11 +178,11 @@ export default function RegistroPage() {
 
           {/* Link para login */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-ink-secondary">
               Já tem uma conta?{' '}
               <Link
                 href={`/login${courseId ? `?curso=${courseId}` : ''}`}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-brand-600 hover:text-brand-700 font-medium"
               >
                 Fazer login
               </Link>
@@ -193,7 +193,7 @@ export default function RegistroPage() {
         {/* Informações sobre QR Code */}
         {qrCode && (
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-ink-muted">
               Este registro está vinculado ao QR Code escaneado.
               <br />
               Após criar sua conta, você poderá fazer login diretamente.

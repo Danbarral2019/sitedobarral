@@ -204,7 +204,7 @@ export default async function DocumentoPage({ params }: PageProps) {
                 href={doc.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-[3px] hover:bg-brand-700 transition-colors font-semibold text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors font-semibold text-sm"
               >
                 <ExternalLink className="w-4 h-4" />
                 Ver fonte original

@@ -27,7 +27,7 @@ export function CategoryAccordion({ displayName, docs, expanded, onToggle }: Cat
         <div className="flex-1">
           <h4 className="font-semibold text-ink-primary text-sm">{displayName}</h4>
         </div>
-        <span className="px-2.5 py-0.5 bg-brand-600 text-white rounded-full text-xs font-bold">{docs.length}</span>
+        <span className="px-2.5 py-0.5 bg-brand-600 text-surface-page rounded-full text-xs font-bold">{docs.length}</span>
       </button>
 
       {expanded && (

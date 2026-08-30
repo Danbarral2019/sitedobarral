@@ -9,7 +9,7 @@ interface LegislacaoHeroProps {
 }
 
 function HeroIcon({ tab }: { tab: LegislacaoTab }) {
-  const iconClass = 'w-10 h-10 text-white';
+  const iconClass = 'w-10 h-10 text-surface-page';
   if (tab === 'orientacoes') return <Lightbulb className={iconClass} />;
   if (tab === 'tic') return <Monitor className={iconClass} />;
   if (tab === 'boas-praticas') return <FileText className={iconClass} />;

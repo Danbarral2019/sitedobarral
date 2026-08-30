@@ -57,7 +57,7 @@ export function CertificateActions({ certificate }: Props) {
       <button
         onClick={handleDownload}
         disabled={downloading}
-        className="inline-flex items-center gap-2 bg-[#20364e] text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#142232] transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 bg-[#20364e] text-surface-page px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#142232] transition-colors disabled:opacity-50"
       >
         {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
         Baixar PDF

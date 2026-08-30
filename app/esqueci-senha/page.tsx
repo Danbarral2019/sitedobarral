@@ -90,7 +90,7 @@ export default function EsqueciSenhaPage() {
             </div>
 
             {/* Aviso sobre validade */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="bg-surface-raised border border-border-subtle rounded-lg p-4 mb-6">
               <p className="text-sm text-yellow-800">
                 ⏰ O link de redefinição é válido por <strong>1 hora</strong>
               </p>
@@ -100,7 +100,7 @@ export default function EsqueciSenhaPage() {
             <div className="space-y-3">
               <Link
                 href="/login"
-                className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
+                className="block w-full bg-blue-600 text-surface-page py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-center"
               >
                 Voltar para o Login
               </Link>
@@ -190,7 +190,7 @@ export default function EsqueciSenhaPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-surface-page py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
             >
               {loading ? 'Enviando...' : 'Enviar Link de Redefinição'}
             </button>

@@ -331,7 +331,7 @@ export function DOUDocumentModal({
                       )}
                       className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                         selectedThemes.includes(tema.value)
-                          ? 'bg-green-600 text-white border-green-600'
+                          ? 'bg-green-600 text-surface-page border-green-600'
                           : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'
                       }`}
                     >
@@ -394,7 +394,7 @@ export function DOUDocumentModal({
           <button
             onClick={handleApprove}
             disabled={isApproving || isRejecting || selectedCourses.length === 0}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2 bg-green-600 text-surface-page rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <CheckCircle className="w-4 h-4" />
             {isApproving ? 'Aprovando...' : 'Aprovar e Incorporar'}

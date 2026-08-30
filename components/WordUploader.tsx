@@ -155,7 +155,7 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
               </p>
               <label
                 htmlFor="word-file-input"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-surface-page rounded-lg font-bold hover:bg-blue-700 transition-colors cursor-pointer"
               >
                 <FileText className="w-5 h-5" />
                 Selecionar Arquivo

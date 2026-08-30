@@ -60,7 +60,7 @@ export default function UpgradePage({ params }: PageProps) {
         <div className="bg-white rounded-2xl shadow-lg p-10 border border-gray-100">
           {/* Status do trial */}
           {enrollmentStatus && !enrollmentStatus.isLifetime && (
-            <div className={`mb-8 p-4 rounded-lg ${isExpired ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+            <div className={`mb-8 p-4 rounded-lg ${isExpired ? 'bg-red-50 border border-red-200' : 'bg-surface-raised border border-border-subtle'}`}>
               {isExpired ? (
                 <p className="text-red-800">
                   Seu período de acesso gratuito <strong>expirou</strong>.
@@ -84,7 +84,7 @@ export default function UpgradePage({ params }: PageProps) {
           <div className="space-y-3">
             <Link
               href={`/planos?curso=${courseId}`}
-              className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition-colors"
+              className="block w-full bg-blue-600 hover:bg-blue-700 text-surface-page font-semibold py-4 px-6 rounded-xl transition-colors"
             >
               Ver Planos de Assinatura
             </Link>

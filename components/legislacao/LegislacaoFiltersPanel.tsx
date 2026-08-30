@@ -49,7 +49,7 @@ export function LegislacaoFiltersPanel({
   onClear,
 }: LegislacaoFiltersPanelProps) {
   return (
-    <div className="bg-surface-page border-2 border-border-subtle rounded-md p-6 space-y-4">
+    <div className="bg-surface-page border border-border-subtle rounded-md p-6 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {showTypeFilter && (
           <div>
@@ -57,7 +57,7 @@ export function LegislacaoFiltersPanel({
             <select
               value={typeFilter}
               onChange={(e) => onTypeChange(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+              className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
             >
               <option value="">Todos</option>
               {availableTypes.map(({ type, count }) => (
@@ -79,14 +79,14 @@ export function LegislacaoFiltersPanel({
               value={issuerFilter}
               onChange={(e) => onIssuerChange(e.target.value)}
               placeholder="Ex: TCE-SP, CGE-MG..."
-              className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+              className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
               list="issuers-list"
             />
           ) : (
             <select
               value={issuerFilter}
               onChange={(e) => onIssuerChange(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+              className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
             >
               <option value="">Todos</option>
               {availableIssuers.map(({ issuer, count }) => (
@@ -110,7 +110,7 @@ export function LegislacaoFiltersPanel({
           <select
             value={esferaFilter}
             onChange={(e) => onEsferaChange(e.target.value)}
-            className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+            className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
           >
             <option value="">Todas</option>
             {availableEsferas.map(({ esfera, count }) => (
@@ -126,7 +126,7 @@ export function LegislacaoFiltersPanel({
           <select
             value={yearFilter}
             onChange={(e) => onYearChange(e.target.value)}
-            className="w-full px-4 py-2 border-2 border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
+            className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-amber-accent"
           >
             <option value="">Todos</option>
             {availableYears.map(({ year, count }) => (
@@ -147,7 +147,7 @@ export function LegislacaoFiltersPanel({
               onClick={() => onThemeChange(themeFilter === tema.value ? '' : tema.value)}
               className={`px-3 py-1.5 text-xs rounded-full border-2 transition-colors font-medium ${
                 themeFilter === tema.value
-                  ? `${theme.primaryActionBg} text-white border-transparent`
+                  ? `${theme.primaryActionBg} text-surface-page border-transparent`
                   : 'bg-surface-page text-ink-secondary border-border-strong hover:border-border-strong'
               }`}
             >

@@ -146,14 +146,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleReset}
-                  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="flex items-center justify-center gap-2 bg-blue-600 text-surface-page px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
                   <RefreshCw className="w-5 h-5" />
                   Tentar Novamente
                 </button>
                 <button
                   onClick={this.handleReload}
-                  className="flex items-center justify-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-center gap-2 bg-gray-600 text-surface-page px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
                 >
                   <RefreshCw className="w-5 h-5" />
                   Recarregar Página

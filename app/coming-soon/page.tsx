@@ -12,12 +12,12 @@ export const metadata: Metadata = {
 
 export default function ComingSoonPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-slate-50 to-slate-100">
+    <main className="min-h-screen flex items-center justify-center px-4 bg-surface-raised">
       <div className="max-w-xl w-full text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold text-ink-primary mb-4">
           Em breve
         </h1>
-        <p className="text-lg text-slate-600 mb-8">
+        <p className="text-lg text-ink-secondary mb-8">
           {/* Microcopy placeholder — Daniel revisa antes do deploy */}
           Algo novo está chegando para quem trabalha com licitações e contratos.
           Cadastre seu email para ser avisado primeiro.
@@ -27,7 +27,7 @@ export default function ComingSoonPage() {
         </div>
         <Link
           href="/blog"
-          className="inline-block text-slate-700 underline hover:text-slate-900 transition-colors"
+          className="inline-block text-ink-secondary underline hover:text-ink-primary transition-colors"
         >
           Enquanto isso, leia nossos artigos →
         </Link>

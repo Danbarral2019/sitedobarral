@@ -87,11 +87,11 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                   {/* Overlay com ícone de play */}
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
                     <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                      <Play className="w-8 h-8 text-white fill-white ml-1" />
+                      <Play className="w-8 h-8 text-surface-page fill-white ml-1" />
                     </div>
                   </div>
                   {/* Badge do YouTube */}
-                  <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                  <div className="absolute top-2 right-2 bg-red-600 text-surface-page px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                     <Youtube className="w-3 h-3" />
                     YouTube
                   </div>
@@ -184,7 +184,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header do Modal */}
-            <div className="sticky top-0 bg-gradient-to-r from-red-600 to-pink-600 text-white p-4 rounded-t-2xl flex items-center justify-between">
+            <div className="sticky top-0 bg-gradient-to-r from-red-600 to-pink-600 text-surface-page p-4 rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-3 flex-1">
                 <Youtube className="w-6 h-6" />
                 <h2 className="text-xl font-bold">{selectedVideo.title}</h2>
@@ -230,7 +230,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                     href={selectedVideo.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-red-600 text-surface-page px-6 py-3 rounded-xl font-bold hover:bg-semantic-error transition-colors flex items-center justify-center gap-2"
                   >
                     <ExternalLink className="w-5 h-5" />
                     Abrir no YouTube

@@ -176,7 +176,7 @@ export default function MatrixWizard({ sessionId }: Props) {
         <button
           type="submit"
           disabled={submitting || missingRequired.length > 0}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -241,7 +241,7 @@ function InputField({
               onClick={() => onChange(opt.v)}
               className={`rounded-lg border px-4 py-1.5 text-sm transition ${
                 value === opt.v
-                  ? "border-brand-700 bg-brand-700 text-white"
+                  ? "border-brand-700 bg-brand-700 text-surface-page"
                   : "border-gray-200 bg-white text-gray-700 hover:border-brand-300"
               }`}
             >
