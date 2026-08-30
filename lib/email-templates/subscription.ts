@@ -171,7 +171,9 @@ export type PixMandateFailedParams = CardFailedParams;
 
 export function renderPixMandateFailedEmail(p: PixMandateFailedParams): RenderedEmail {
   const safeName = escapeHtml(p.name || '');
-  const subject = 'Sua autoriza&ccedil;&atilde;o de Pix precisa ser renovada';
+  // Linha de assunto é texto puro: entidades HTML não são decodificadas pelo
+  // cliente de e-mail e apareceriam cruas na caixa de entrada.
+  const subject = 'Sua autorização de Pix precisa ser renovada';
 
   const contentHtml = `
     <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#1e3a5f;font-size:22px;">Autoriza&ccedil;&atilde;o de Pix expirada</h2>
