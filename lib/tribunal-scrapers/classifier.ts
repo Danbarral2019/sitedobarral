@@ -8,6 +8,7 @@
 import { KEYWORDS_RELEVANCIA, CURSOS_KEYWORDS, detectTemas } from '@/lib/shared-keywords';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { apiLogger } from "@/lib/logger";
+import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 
 // ===========================
 // Types
@@ -35,6 +36,16 @@ export interface ClassificationResult {
 // Lei article detection
 // ===========================
 
+/**
+ * Números que a Lei 14.133 realmente tem — inclui os arts. 337-E a 337-P, os
+ * crimes que ela inseriu no Código Penal e que o índice do projeto carrega.
+ *
+ * `LEI_14133_ARTIGOS` é importado estaticamente de propósito: o classifier só
+ * roda server-side (crons, rotas admin e scripts de scraping), nunca em
+ * componente de cliente, então o peso do índice não chega a bundle de browser.
+ */
+const ARTIGOS_DA_LEI = new Set(Object.keys(LEI_14133_ARTIGOS));
+
 export function detectLeiArticles(text: string): string[] {
   const articles = new Set<string>();
 
@@ -48,7 +59,14 @@ export function detectLeiArticles(text: string): string[] {
     let match;
     while ((match = pattern.exec(text)) !== null) {
       const num = match[1].replace(/^0+/, '');
-      if (num) {
+      // A regex casa QUALQUER "art. N" do texto, e o acórdão cita muitas leis —
+      // sem saber de qual delas é o artigo. Medido em 30/08/2026: 114
+      // amarrações do acervo apontavam para artigo inexistente na Lei 14.133,
+      // 109 delas do TCE-PE (art. 966 do CPC, 884 do Código Civil, 132-D da Lei
+      // Orgânica do TCE-PE). Exigir que o número exista na lei elimina tudo
+      // isso sem heurística. Não resolve o "art. 5º do CPC", cujo número
+      // também existe aqui — para esse caso não há sinal no texto.
+      if (num && ARTIGOS_DA_LEI.has(num)) {
         // Número puro ("75"), sem prefixo — formato canônico do índice
         // LEI_14133_ARTIGOS e dos campos leiArticlesArr de Document/
         // LegislativeAct. Gravar "Art. 75" quebra o cruzamento decisão↔artigo.

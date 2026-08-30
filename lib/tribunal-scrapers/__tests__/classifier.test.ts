@@ -20,8 +20,36 @@ describe('detectLeiArticles', () => {
     expect(detectLeiArticles('nos termos do art. 75 da Lei 14.133')).toEqual(['75']);
   });
 
-  it('preserva sufixo de letra (ex: 166-A) sem prefixo', () => {
-    expect(detectLeiArticles('conforme o art. 166-A')).toEqual(['166-A']);
+  it('preserva sufixo de letra (ex: 44-A) sem prefixo', () => {
+    // Era "166-A" — artigo que NÃO existe na Lei 14.133, e que a validação de
+    // existência passou a descartar. A intenção do teste (ler o sufixo) fica,
+    // com um artigo sufixado real.
+    expect(detectLeiArticles('conforme o art. 44-A')).toEqual(['44-A']);
+  });
+
+  /**
+   * O texto de um acórdão cita muitas leis, e a regex não sabe de qual delas é
+   * o artigo. Medido em 30/08/2026 no acervo: 114 amarrações apontavam para
+   * artigo inexistente na Lei 14.133 — 109 delas do TCE-PE, com números como
+   * o art. 966 (ação rescisória, CPC), 884 (enriquecimento sem causa, CC) e
+   * 132-D (Lei Orgânica do TCE-PE).
+   *
+   * A validação por existência não resolve o caso de um "art. 5º do CPC", cujo
+   * número também existe na Lei 14.133 — mas elimina, sem heurística, tudo que
+   * a lei sequer tem.
+   */
+  it('descarta artigo que não existe na Lei 14.133 (art. de outro diploma)', () => {
+    expect(detectLeiArticles('nos termos do art. 966 do CPC')).toEqual([]);
+    expect(detectLeiArticles('art. 132-D da Lei Orgânica do TCE-PE')).toEqual([]);
+    expect(detectLeiArticles('violação ao art. 199')).toEqual([]);
+  });
+
+  it('mantém os artigos reais quando o texto mistura diplomas', () => {
+    expect(detectLeiArticles('o art. 75 da Lei 14.133 e o art. 966 do CPC')).toEqual(['75']);
+  });
+
+  it('aceita os arts. 337-E a 337-P, crimes que a Lei 14.133 inseriu no CP', () => {
+    expect(detectLeiArticles('art. 337-E')).toEqual(['337-E']);
   });
 
   it('deduplica e ordena numericamente, tudo em número puro', () => {
