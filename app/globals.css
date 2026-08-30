@@ -76,6 +76,13 @@
   --color-amber-accent-deep: #8a6235;
   --color-amber-accent-soft: #e9d8b8;
 
+  /* ---- Semânticas (DESIGN.md §2) ----
+     Estavam declaradas no DESIGN.md e nunca chegaram ao CSS, então cada tela
+     inventava o seu verde e o seu vermelho a partir da paleta crua. */
+  --color-semantic-success: #2f6f4a;
+  --color-semantic-warning: #a86b1c;
+  --color-semantic-error: #a23830;
+
   /* ---- primary-* e accent-* (RESGATE) ----
      Estas escalas viviam em tailwind.config.ts, que nunca era carregado:
      no Tailwind 4 o config JS só é lido pela diretiva @config, que não

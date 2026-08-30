@@ -35,7 +35,11 @@ const eslintConfig = [
     // Ao migrar uma página, acrescente o caminho dela aqui, no mesmo commit.
     // Tokens disponíveis (app/globals.css, bloco @theme): brand-*, surface-*,
     // ink-*, border-subtle, border-strong, amber-accent-*.
-    files: ["components/layout/**/*.tsx"],
+    files: [
+      "app/page.tsx",
+      "components/home/**/*.tsx",
+      "components/layout/**/*.tsx",
+    ],
     rules: {
       "no-restricted-syntax": [
         "error",
