@@ -175,7 +175,7 @@ export default async function HomeNovidadesSection() {
           <div className="text-center mb-10">
             <h2 className="text-4xl font-bold text-gray-900 mb-2">Novidades</h2>
             <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full mx-auto"></div>
-            <p className="text-gray-500 mt-3">Ultimas atualizacoes de conteudo e materiais</p>
+            <p className="text-gray-500 mt-3">Últimas atualizações de conteúdo e materiais</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -233,7 +233,7 @@ export default async function HomeNovidadesSection() {
             {visibleItems.length > 0 && (
               <div className={blogPosts.length > 0 ? 'lg:col-span-2' : 'lg:col-span-5'}>
                 <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
-                  Conteudo Recente
+                  Conteúdo Recente
                 </h3>
                 <div className="space-y-2">
                   {visibleItems.map((item) => (
