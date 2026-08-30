@@ -57,7 +57,34 @@ A Lei 14.133 é de **2021**. O caso é FUNDEB — Lei **14.113**/2020. O erro na
 
 `lib/jurisprudencia/legislacao-citada.ts` casa `/LEI[-:]0*14133\b/i` e **ignora o `ANO-`**. Verificado por execução sobre o bloco real: `citaLei14133()` → `true`. Consequência dupla: o julgado entra no acervo como decisão que cita a Lei 14.133, e `extrairArtigos14133()` ainda amarra os arts. 20 e 21 a um caso de FUNDEB — justamente a amarração determinística que é a razão de ser destes conectores.
 
-**Não medido:** quantos registros do acervo têm `LEI-014133` com `ANO-` diferente de 2021. Antes de apertar a regex, medir — a fonte também pode omitir o `ANO-`, e exigi-lo derrubaria capturas legítimas.
+### Medição (30/08/2026)
+
+Rodada com o parser real do projeto sobre a fonte de 16/08 e cruzada com o acervo em produção.
+
+**Na fonte:** 1.071 julgados distintos capturados por `citaLei14133()`, dos quais **22 (2,1%)** declaram `ANO-` diferente de 2021. Nenhum registro tem mais de um bloco casando o token, então a atribuição de ano é inequívoca. Lendo bloco e assunto, os 22 se partem em dois grupos de tamanho parecido e natureza oposta:
+
+| | n | o que são |
+|---|---:|---|
+| **captura errada** | **13** | 11 com `LEG-FED ANO-2020` → é a **Lei 14.113/2020 (FUNDEB)**, digitada como 14.133; e 2 com `LEG-MUN ANO-2006` → **lei municipal 14.133/2006 de São Paulo** |
+| **captura certa, ano errado na fonte** | **9** | `ANO-2023` (2), `ANO-2022` (3), `ANO-2001` (2), `ANO-1921` (1), sem `ANO-` (1). Todos tratam de licitação, art. 89/90 da 8.666 ou art. 337-E do CP — e em dois deles o próprio STF escreveu "lei 14.133/2001" e "Lei nº 14.133/22" na ementa |
+
+**No acervo** (STF: 600 registros, 254 aprovados), 10 dos 22 chegaram a `TribunalDecision`:
+
+- **5 capturas erradas, todas visíveis (`auto_approved`) e todas com artigo amarrado:** ACO 3576 AgR `[36]`, ADI 5791 `[30]`, ARE 1474601 `[20, 21]`, ARE 1531099 `[64]`, ARE 1578097 `[47]`. São casos de FUNDEB carregando dispositivos da Lei 14.133.
+- 5 capturas certas (3 visíveis), que **seriam perdidas** se a regex exigisse `ANO-2021`.
+
+### A correção não é exigir o ano
+
+Exigir `ANO-2021` mataria 9 capturas legítimas na fonte (5 no acervo) para eliminar 13 erradas. O discriminador certo é outro, e é duplo:
+
+1. **Exigir `LEG-FED`.** A Lei 14.133 é federal por definição, então isso elimina as 2 municipais sem nenhum falso negativo possível. O parser hoje ignora o prefixo de esfera.
+2. **Rejeitar `ANO-2020`.** A Lei 14.133 foi sancionada em 01/04/2021 — `ANO-2020` é impossível para ela. Elimina as 11 do FUNDEB, e nenhuma das 9 capturas legítimas usa 2020.
+
+Juntos: **13 de 13 falsos positivos eliminados, 0 falso negativo**, nos dados medidos.
+
+**Defeito vizinho, no mesmo caminho:** `ARE 1578097` cita `ART-0047A` — o art. **47-A** da Lei do FUNDEB. `RE_ARTIGO` só reconhece o sufixo com hífen (`ART-00184-A`), então extraiu `47` e amarrou o art. 47 da Lei 14.133. Vale tratar junto.
+
+**STJ — não mensurável hoje.** O parser é compartilhado e o formato do STJ traz a mesma esfera (`LEG:FED LEI:014133 ANO:2021`), então o defeito é possível por construção. Mas o `sourceRawData` dos 396 registros do STJ guarda apenas `classe`, `tema` e `tese` — a legislação citada não é persistida. Medir exigiria recoletar os espelhos.
 
 ## 5. Cobertura de campos da API do STF
 
