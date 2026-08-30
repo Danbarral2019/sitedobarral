@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { isArtigoMalFormatado, revokerFromNote, contentMostraAlteracao } from '../checks';
+import {
+  isArtigoMalFormatado,
+  isArtigoInexistente,
+  revokerFromNote,
+  contentMostraAlteracao,
+} from '../checks';
 
 describe('isArtigoMalFormatado', () => {
   it('aceita número puro e sufixo -A como bem formatados', () => {
@@ -11,6 +16,41 @@ describe('isArtigoMalFormatado', () => {
   it('rejeita formato com prefixo "Art. " (regressão do classifier)', () => {
     expect(isArtigoMalFormatado('Art. 75')).toBe(true);
     expect(isArtigoMalFormatado('art.30')).toBe(true);
+  });
+});
+
+/**
+ * O formato bem-feito não garante que o artigo exista: "199" e "132-D" passam
+ * na validação de formato e não são dispositivos da Lei 14.133. Medido em
+ * 30/08/2026, 114 amarrações do acervo estavam nessa situação — invisíveis ao
+ * único check que havia.
+ */
+describe('isArtigoInexistente', () => {
+  it('aceita artigos reais da lei, inclusive os sufixados', () => {
+    expect(isArtigoInexistente('75')).toBe(false);
+    expect(isArtigoInexistente('184-A')).toBe(false);
+    expect(isArtigoInexistente('44-A')).toBe(false);
+  });
+
+  it('aceita os arts. 337-E a 337-P, que a lei inseriu no Código Penal', () => {
+    expect(isArtigoInexistente('337-E')).toBe(false);
+    expect(isArtigoInexistente('337-P')).toBe(false);
+  });
+
+  it('rejeita número que a lei não tem, ainda que bem formatado', () => {
+    // Vindos do acervo real: CPC, Código Civil e Lei Orgânica do TCE-PE.
+    expect(isArtigoMalFormatado('199')).toBe(false); // formato OK...
+    expect(isArtigoInexistente('199')).toBe(true); // ...mas não é da lei
+    expect(isArtigoInexistente('966')).toBe(true);
+    expect(isArtigoInexistente('132-D')).toBe(true);
+  });
+
+  it('rejeita o 166-A, que parece plausível e não existe', () => {
+    expect(isArtigoInexistente('166-A')).toBe(true);
+  });
+
+  it('ignora espaço em volta, como o check de formato faz', () => {
+    expect(isArtigoInexistente('  75  ')).toBe(false);
   });
 });
 
