@@ -26,6 +26,19 @@ const MAX_OUTPUT_TOKENS = 700;
  */
 const TRIBUNAL_FULLTEXT_MIN_LENGTH = 800;
 
+/**
+ * Tamanho mínimo de ementa para destilar bullets quando NÃO há inteiro teor.
+ *
+ * STF, STJ e TCE-PE não gravam `fullText` — medido em 21/08/2026, nenhum dos
+ * seus registros chega a 500 chars, e por isso o bloco "CONTEXTO E TESE" nunca
+ * apareceu para eles (0 de 4.006 `TribunalDecision` com bullets). O que eles
+ * têm é ementa: os 847 itens aprovados dos três passam de 400 caracteres.
+ *
+ * O piso preserva a razão original do gate — o TCE-RS, cuja ementa média é de
+ * 97 chars, continua de fora, porque abaixo disso não há o que destilar.
+ */
+const TRIBUNAL_EMENTA_MIN_LENGTH = 400;
+
 const PROCESSUAL_KEYWORDS = [
   'EMBARGOS DE DECLARAÇÃO',
   'TENTATIVA DE REDISCUSSÃO',
@@ -125,25 +138,65 @@ function parseBullets(rawText: string): string[] {
 /**
  * Decide se vale a pena gerar AI bullets para um item de TribunalDecision.
  *
- * TCE-PE → sempre (tem inteiro teor rico).
- * TCE-RS → só se fullText >= 800 chars (avg histórico é ~97, então quase nunca).
- * TCE-SP/PR/SC/RJ + STJ DataJud → nunca (não capturam fullText).
+ * Duas matérias-primas, nesta ordem de preferência:
+ *  - `fullText` >= 800 chars — inteiro teor, o mais rico (TCE-PE via RTF).
+ *  - `ementa` >= 400 chars — o que STF, STJ e TCE-PE efetivamente têm.
+ *
+ * Fora ficam apenas os itens sem nenhum texto aproveitável (TCE-RS, ementa
+ * média de 97 chars): ali o bullet sairia alucinado ou vazio.
  *
  * TCU não passa por aqui — usa `generateAiBullets` clássico via dispositivos.
  */
 export function shouldGenerateBulletsForTribunal(item: ClippingItem): boolean {
   if (item.sourceKind !== 'tribunal-decision') return false;
-  if (!item.fullText) return false;
-  return item.fullText.length >= TRIBUNAL_FULLTEXT_MIN_LENGTH;
+  if (item.fullText && item.fullText.length >= TRIBUNAL_FULLTEXT_MIN_LENGTH) return true;
+  return (item.ementa || '').trim().length >= TRIBUNAL_EMENTA_MIN_LENGTH;
+}
+
+/**
+ * Texto que termina no meio de uma frase chegou cortado na origem.
+ *
+ * Não é preciosismo: o índice do STF corta `decisao_texto` em 6.000 caracteres
+ * (113 das 254 decisões aprovadas) e o TCE-PE chega cortado em 2.000 (318 de
+ * 326). Sem esse aviso, o modelo completa por conta própria um desfecho que
+ * não está no texto.
+ *
+ * Medido em 21/08/2026: a heurística reconhece 110 das 113 decisões que o
+ * conector do STF marca como truncadas, e cobre sozinha as 318 do TCE-PE, onde
+ * marcação nenhuma existe. Pelos 3 casos de diferença não vale carregar o flag
+ * do `sourceRawData` através de `ClippingItem`, da fonte e da reidratação.
+ */
+export function pareceTruncado(texto: string): boolean {
+  const t = (texto || '').trim();
+  if (!t) return false;
+  return !/[.!?)"'\]]$/.test(t);
 }
 
 function buildPromptForTribunal(item: ClippingItem): string {
   const fullText = item.fullText || '';
+  const temTeor = fullText.length >= TRIBUNAL_FULLTEXT_MIN_LENGTH;
   const teor = fullText.length > MAX_INTEIRO_TEOR_CHARS
     ? fullText.slice(0, MAX_INTEIRO_TEOR_CHARS) + ' [...truncado]'
     : fullText;
 
-  return `Você é assistente editorial de um curso de Direito Administrativo. Sua tarefa é extrair, do texto integral abaixo, 2 a 4 bullets curtos que ajudem um aluno (servidor público) a entender O QUE o ${item.tribunalName} decidiu e POR QUÊ.
+  // A ementa entra no prompt sob o MESMO teto do inteiro teor: sem isso, uma
+  // ementa de 31 mil caracteres (máximo observado no STF) passaria inteira,
+  // enquanto o teor equivalente seria cortado em 18 mil.
+  const ementa = item.ementa.length > MAX_INTEIRO_TEOR_CHARS
+    ? item.ementa.slice(0, MAX_INTEIRO_TEOR_CHARS) + ' [...truncado]'
+    : item.ementa;
+
+  // Sem inteiro teor, a fonte é a ementa — e o prompt precisa dizer isso, em
+  // vez de mandar o modelo extrair de uma seção vazia.
+  const fonte = temTeor ? 'do texto integral e da ementa abaixo' : 'da ementa abaixo';
+
+  const secaoTeor = temTeor ? `\n\nTEXTO INTEGRAL DA DECISÃO:\n${teor}` : '';
+
+  const avisoTruncado = pareceTruncado(temTeor ? fullText : item.ementa)
+    ? '\n\nATENÇÃO: o texto acima chega truncado da fonte e termina no meio de uma frase. Não afirme desfecho, resultado ou dispositivo que não esteja escrito no trecho disponível.'
+    : '';
+
+  return `Você é assistente editorial de um curso de Direito Administrativo. Sua tarefa é extrair, ${fonte}, 2 a 4 bullets curtos que ajudem um aluno (servidor público) a entender O QUE o ${item.tribunalName} decidiu e POR QUÊ.
 
 REGRAS RÍGIDAS:
 1. Use APENAS informação presente no texto fornecido. Não invente. Não infira além do que está escrito.
@@ -151,14 +204,12 @@ REGRAS RÍGIDAS:
 3. Foque em: ratio decidendi, tese consolidada, e — se houver — implicação prática para gestores/fiscais.
 4. Se o texto não tem informação suficiente para gerar bullets seguros, retorne lista vazia.
 5. NÃO use marcadores como "•" ou "-" no início. NÃO use markdown.
+6. NÃO repita a ementa: ela aparece logo abaixo dos bullets, e o leitor já a tem. Seu trabalho é TRADUZIR, não resumir — troque a tarja processual em caixa alta por português corrente, e diga o que a decisão significa para quem trabalha com licitação e contrato.
 
 DECISÃO: ${item.tribunalCode} ${item.decisionType} ${item.decisionNumber}
 
 EMENTA OFICIAL:
-${item.ementa}
-
-TEXTO INTEGRAL DA DECISÃO:
-${teor}
+${ementa}${secaoTeor}${avisoTruncado}
 
 Responda EXCLUSIVAMENTE com JSON válido no formato:
 {"bullets": ["frase 1", "frase 2", "frase 3"]}
@@ -168,11 +219,11 @@ Se não houver informação segura, responda exatamente:
 }
 
 /**
- * Versão para TribunalDecision (TCE-PE, TCE-RS): recebe o ClippingItem e
- * gera bullets a partir do `fullText`. Sem seção de dispositivos (que
- * não existe fora do TCU).
+ * Versão para TribunalDecision (STF, STJ, TCE-PE, TCE-RS): recebe o
+ * ClippingItem e gera bullets a partir do `fullText` quando existe, ou da
+ * ementa quando não. Sem seção de dispositivos (que não existe fora do TCU).
  *
- * Para tribunais sem fullText suficiente, retorna [] sem chamar Gemini.
+ * Para itens sem texto aproveitável, retorna [] sem chamar Gemini.
  */
 export async function generateAiBulletsForTribunal(item: ClippingItem): Promise<string[]> {
   if (!shouldGenerateBulletsForTribunal(item)) {
