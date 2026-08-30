@@ -54,6 +54,7 @@ function decisao(over: Partial<StfDecisaoNormalizada> = {}): StfDecisaoNormaliza
     tema: 'Tema 1234',
     tese: 'É inconstitucional a dispensa genérica.',
     indexacao: null,
+    legislacaoCitada: null,
     artigos14133: ['75'],
     citaLei14133: true,
     ...over,
@@ -251,5 +252,28 @@ describe('persistirDecisoesStf — preserva julgamento humano em update', () => 
     const data = mockCreate.mock.calls[0][0].data;
     expect(data).toHaveProperty('approvalStatus');
     expect(data).toHaveProperty('isRelevant');
+  });
+});
+
+/**
+ * Em 30/08/2026, auditar por que um julgado entrou no acervo exigiu reabrir o
+ * corpus de coleta: o insumo da amarração não ficava em lugar nenhum do banco.
+ * No STJ a auditoria simplesmente não foi possível. O bloco bruto passa a ser
+ * preservado para que a mesma medição seja reproduzível a partir do banco.
+ */
+describe('sourceRawData preserva a legislação citada', () => {
+  it('grava o bloco bruto que originou a amarração', () => {
+    const bloco = 'LEG-FED   LEI-014133 ANO-2021\n    ART-00075\n    LEI ORDINÁRIA';
+    const dados = montarDadosStf(
+      decisao({ legislacaoCitada: bloco, artigos14133: ['75'] }),
+      CLASSIFICACAO,
+      null,
+    );
+    expect(JSON.parse(dados.sourceRawData).legislacaoCitada).toBe(bloco);
+  });
+
+  it('grava null quando o julgado não traz legislação citada', () => {
+    const dados = montarDadosStf(decisao({ legislacaoCitada: null }), CLASSIFICACAO, null);
+    expect(JSON.parse(dados.sourceRawData).legislacaoCitada).toBeNull();
   });
 });

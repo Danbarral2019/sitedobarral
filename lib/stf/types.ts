@@ -45,6 +45,16 @@ export interface StfDecisaoNormalizada {
   tema: string | null;
   tese: string | null;
   indexacao: string | null;
+  /**
+   * Bloco bruto de legislação citada, como o STF publica.
+   *
+   * Persistido em `sourceRawData` para que a amarração possa ser AUDITADA
+   * depois — em 30/08/2026 foi preciso reabrir o corpus original para medir
+   * quantos julgados citavam a Lei 14.133 por engano, porque o campo não
+   * ficava em lugar nenhum do banco. Guardar o insumo torna a mesma medição
+   * reproduzível sem depender do arquivo de coleta.
+   */
+  legislacaoCitada: string | null;
   artigos14133: string[];
   citaLei14133: boolean;
 }

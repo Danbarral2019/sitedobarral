@@ -93,7 +93,13 @@ export function montarDadosStj(
     suggestedCourses: classification.suggestedCourses,
     sourceApi: SOURCE_API_STJ,
     sourceId: d.sourceId,
-    sourceRawData: JSON.stringify({ classe: d.classe, tema: d.tema, tese: d.tese }),
+    sourceRawData: JSON.stringify({
+      classe: d.classe,
+      tema: d.tema,
+      tese: d.tese,
+      // Insumo da amarração à Lei 14.133 — ver types.ts.
+      referenciasLegislativas: d.referenciasLegislativas,
+    }),
     approvalStatus: classification.approvalStatus,
     confidence: classification.confidence,
     classificationReasoning: classification.reasoning,

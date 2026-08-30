@@ -95,6 +95,7 @@ export function normalizarDocumentoStf(
     tema: texto(doc.documental_tese_tema_texto) || null,
     tese: texto(doc.documental_tese_texto) || null,
     indexacao: texto(doc.documental_indexacao_texto) || null,
+    legislacaoCitada: texto(legislacao) || null,
     artigos14133: extrairArtigos14133(legislacao),
     citaLei14133: citaLei14133(legislacao),
   };

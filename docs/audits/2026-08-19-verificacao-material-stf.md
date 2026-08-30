@@ -18,7 +18,7 @@
 
 Nenhum título do documento deixou de ser encontrado na fonte. Os resumos são texto sintetizado e **não** constam da fonte — por construção, não é defeito.
 
-**As 4 divergências e 6 dos 7 alertas de resumo são falsos positivos do verificador.** Sobra **um** achado real (ADPF 1138) e **um** não investigado (ADI 7576). Detalhe abaixo.
+**As 4 divergências e 5 dos 7 alertas de resumo são falsos positivos do verificador.** Sobram **dois** achados reais — ADPF 1138 e ADI 7576 —, ambos resumos que atribuem a Lei 14.133 a um caso que a fonte não vincula a ela. São **2 de 290 verbetes (0,7%)**. Detalhe abaixo.
 
 ## 2. As 4 divergências de data: falso positivo
 
@@ -41,7 +41,7 @@ O verificador procurava a entidade só na ementa. Onde o texto vive em outro cam
 | ADI 2888 *(2×)* | "AGU" ausente | **falso positivo** — a fonte traz `ADVOCACIA-GERAL DA UNIÃO` na ementa, por extenso (base `acordaos`, 1.924 chars) |
 | ARE 1474601 *(3×)* | "Lei 14.113/2020" ausente | **falso positivo** — `LEI DO NOVO FUNDEB` está no `decisao_texto` (base `decisoes`, 5.360 chars), não na ementa. Mas ver §4 |
 | ADPF 1138 | "Lei 14.133/2021" ausente | **ACHADO REAL** — a legislação citada da fonte para a ADPF 1138 está **vazia** e não cita `LEI-014133`. O caso é prorrogação de concessão de transporte coletivo; o texto fala de licitação, não da Lei 14.133. O resumo atribui a lei; a fonte não. *(Para comparação: das 145 entradas da Parte II, 0 estão sem a Lei 14.133 na legislação citada — a ADPF 1138 é exceção isolada.)* |
-| ADI 7576 | "Lei 14.133/2021" ausente | **não investigado.** Lei estadual da Paraíba sobre corte de energia e água — assunto sem relação aparente com licitação. Provável mesmo padrão da ADPF 1138 |
+| ADI 7576 | "Lei 14.133/2021" ausente | **ACHADO REAL** *(investigado em 30/08)* — a legislação citada da fonte lista CF/1988, Lei 8.987/1995, Lei 9.427/1996, Lei 9.868/1999 e Res. ANEEL 414/2010; a Lei 14.133 não aparece, e o texto não a menciona. O caso é lei estadual da Paraíba sobre corte de energia e água — competência federativa, não licitação |
 
 ## 4. Achado operacional: `citaLei14133()` não confere o ano
 
@@ -84,7 +84,7 @@ Juntos: **14 de 14 falsos positivos eliminados, 0 falso negativo**, nos dados me
 
 **Defeito vizinho, no mesmo caminho:** `ARE 1578097` cita `ART-0047A` — o art. **47-A** da Lei do FUNDEB. `RE_ARTIGO` só reconhecia o sufixo com hífen (`ART-00184-A`), então extraiu `47` e amarrou o art. 47 da Lei 14.133. Medido depois: das 10 ocorrências de sufixo na fonte, **10 vêm coladas e nenhuma hifenizada** — o formato reconhecido não existe ali, e `ART-0337L` virava `337`, `ART-0005A` virava `5`. Corrigido junto, em #199.
 
-**STJ — não mensurável hoje.** O parser é compartilhado e o formato do STJ traz a mesma esfera (`LEG:FED LEI:014133 ANO:2021`), então o defeito é possível por construção. Mas o `sourceRawData` dos 396 registros do STJ guarda apenas `classe`, `tema` e `tese` — a legislação citada não é persistida. Medir exigiria recoletar os espelhos.
+**STJ — passa a ser mensurável nas coletas futuras.** O parser é compartilhado e o formato do STJ traz a mesma esfera (`LEG:FED LEI:014133 ANO:2021`), então o defeito era possível por construção — mas o `sourceRawData` guardava apenas `classe`, `tema` e `tese`, e sem o insumo não havia como medir. Os dois conectores passaram a preservar o bloco bruto (`legislacaoCitada` no STF, `referenciasLegislativas` no STJ). ⚠️ **Isso vale só para o que for coletado a partir de agora**: os 396 registros já no banco seguem sem o campo até a próxima coleta, que é mensal.
 
 ## 5. Cobertura de campos da API do STF
 

@@ -25,7 +25,7 @@ vi.mock('@/lib/tribunal-scrapers/classifier', () => ({
   generateDecisionSummary: (...a: unknown[]) => mockSummary(...a),
 }));
 
-import { persistirDecisoesStj, aplicarAmarracaoAutoritativa } from '../persistir';
+import { persistirDecisoesStj, aplicarAmarracaoAutoritativa, montarDadosStj } from '../persistir';
 
 function decisao(over: Partial<StjDecisaoNormalizada> = {}): StjDecisaoNormalizada {
   return {
@@ -34,6 +34,10 @@ function decisao(over: Partial<StjDecisaoNormalizada> = {}): StjDecisaoNormaliza
     decisionType: 'acordao',
     classe: 'REsp',
     decisionNumber: '202402187409',
+    // Obrigatório em StjDecisaoNormalizada e ausente aqui: o helper montava um
+    // objeto que o tipo não aceita, e só `tsc` via — o vitest não typechecka.
+    // É o campo do #194: identifica o PROCESSO, não o acórdão.
+    numeroRegistro: '202402187409',
     processNumber: '2669939',
     year: 2026,
     title: 'REsp 202402187409 - STJ',
@@ -45,6 +49,7 @@ function decisao(over: Partial<StjDecisaoNormalizada> = {}): StjDecisaoNormaliza
     url: 'https://processo.stj.jus.br/processo/pesquisa/?num_registro=202402187409',
     tema: null,
     tese: null,
+    referenciasLegislativas: null,
     artigos14133: [],
     citaLei14133: false,
     ...over,
@@ -185,5 +190,38 @@ describe('persistirDecisoesStj', () => {
     );
     expect(r.erros).toBe(1);
     expect(r.criados).toBe(2);
+  });
+});
+
+/**
+ * O `sourceRawData` do STJ guardava só classe, tema e tese. Em 30/08/2026 isso
+ * impediu de auditar a amarração à Lei 14.133 nos 396 registros já coletados —
+ * a medição feita no STF só foi possível porque o corpus de coleta estava à
+ * mão em disco, o que não vale para o STJ. O insumo passa a ser preservado.
+ */
+describe('sourceRawData preserva as referências legislativas', () => {
+  const classificacao = {
+    relevanceScore: 20,
+    approvalStatus: 'pending' as const,
+    themes: [],
+    leiArticles: [],
+    reasoning: 'escore baixo',
+    suggestedCourses: '',
+    confidence: 10,
+  };
+
+  it('grava o bloco bruto que originou a amarração', () => {
+    const refs = ['LEG:FED LEI:014133 ANO:2021 ART:00075'];
+    const dados = montarDadosStj(
+      decisao({ referenciasLegislativas: refs, artigos14133: ['75'] }),
+      classificacao,
+      null,
+    );
+    expect(JSON.parse(dados.sourceRawData).referenciasLegislativas).toEqual(refs);
+  });
+
+  it('grava null quando o espelho não traz referências', () => {
+    const dados = montarDadosStj(decisao({ referenciasLegislativas: null }), classificacao, null);
+    expect(JSON.parse(dados.sourceRawData).referenciasLegislativas).toBeNull();
   });
 });

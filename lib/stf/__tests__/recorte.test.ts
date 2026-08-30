@@ -25,6 +25,7 @@ function decisao(over: Partial<StfDecisaoNormalizada> = {}): StfDecisaoNormaliza
     tema: null,
     tese: null,
     indexacao: null,
+    legislacaoCitada: null,
     artigos14133: [],
     citaLei14133: false,
     ...over,

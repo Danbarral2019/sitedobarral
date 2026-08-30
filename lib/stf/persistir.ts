@@ -104,6 +104,9 @@ export function montarDadosStf(
       tese: d.tese,
       indexacao: d.indexacao,
       ementaTruncada: d.ementaTruncada,
+      // Insumo da amarração à Lei 14.133. Sem ele, auditar por que um julgado
+      // entrou no acervo exige reabrir o corpus de coleta — ver types.ts.
+      legislacaoCitada: d.legislacaoCitada,
     }),
     approvalStatus: classification.approvalStatus,
     confidence: classification.confidence,
