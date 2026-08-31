@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Search, Gavel, Scale, FileText, Lock, ArrowRight,
   X, Loader2, AlertCircle, BookOpen, Sparkles, Database, MessageCircle,
-  Newspaper, HelpCircle
+  Newspaper, HelpCircle, Landmark
 } from 'lucide-react';
 
 interface SearchResults {
@@ -47,6 +47,20 @@ interface SearchResults {
       hasAccess: boolean;
       requiresEnrollment: boolean;
     }>;
+    decisions: Array<{
+      id: string;
+      tribunalCode: string;
+      tribunalName: string;
+      decisionType: string;
+      decisionNumber: string;
+      title: string;
+      ementa: string;
+      summary: string | null;
+      relator: string | null;
+      orgaoJulgador: string | null;
+      dataJulgamento: string | null;
+      url: string | null;
+    }>;
     blogPosts: Array<{
       id: string;
       slug: string;
@@ -82,7 +96,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'informativo': 'Informativos de Licitação TCU',
 };
 
-type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'glossary' | 'blog' | 'faq';
+type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'juris' | 'glossary' | 'blog' | 'faq';
 
 function BuscaIntegradaContent() {
   const searchParams = useSearchParams();
@@ -133,6 +147,7 @@ function BuscaIntegradaContent() {
       results.results.articles.length +
       results.results.acts.length +
       results.results.documents.length +
+      (results.results.decisions?.length || 0) +
       (results.results.blogPosts?.length || 0) +
       (results.results.faqs?.length || 0)
     );
@@ -140,11 +155,12 @@ function BuscaIntegradaContent() {
 
   // Tab counts
   const tabCounts = useMemo(() => {
-    if (!results) return { lei: 0, acts: 0, docs: 0, glossary: 0, blog: 0, faq: 0 };
+    if (!results) return { lei: 0, acts: 0, docs: 0, juris: 0, glossary: 0, blog: 0, faq: 0 };
     return {
       lei: results.results.articles.length,
       acts: results.results.acts.length,
       docs: results.results.documents.length,
+      juris: results.results.decisions?.length || 0,
       glossary: results.results.glossaryTerms.length,
       blog: results.results.blogPosts?.length || 0,
       faq: results.results.faqs?.length || 0,
@@ -171,7 +187,7 @@ function BuscaIntegradaContent() {
             <div>
               <h1 className="text-4xl font-bold mb-2">Busca Integrada</h1>
               <p className="text-xl text-blue-100">
-                Pesquise em artigos da lei, atos normativos, documentos, blog e FAQ
+                Pesquise em artigos da lei, atos normativos, documentos, jurisprudência, blog e FAQ
               </p>
             </div>
           </div>
@@ -283,6 +299,20 @@ function BuscaIntegradaContent() {
                 >
                   <FileText className="w-4 h-4" />
                   Documentos ({tabCounts.docs})
+                </button>
+              )}
+
+              {tabCounts.juris > 0 && (
+                <button
+                  onClick={() => setActiveTab('juris')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'juris'
+                      ? 'border-emerald-600 text-emerald-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  <Landmark className="w-4 h-4" />
+                  Jurisprudência ({tabCounts.juris})
                 </button>
               )}
 
@@ -612,6 +642,66 @@ function BuscaIntegradaContent() {
                     </div>
                   </div>
                 )}
+              </section>
+            )}
+
+            {/* Jurisprudência — STF, STJ e Tribunais de Contas estaduais.
+                Os acórdãos do TCU aparecem na seção de Documentos, que é onde
+                eles vivem no acervo. */}
+            {results.results.decisions?.length > 0 && shouldShowSection('juris') && (
+              <section className="bg-white rounded-2xl shadow-lg border-2 border-emerald-200 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Landmark className="w-8 h-8 text-emerald-600" />
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Jurisprudência
+                  </h2>
+                  <span className="ml-auto px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold">
+                    {results.results.decisions.length} {results.results.decisions.length === 1 ? 'decisão' : 'decisões'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {results.results.decisions.map(decision => (
+                    <Link
+                      key={decision.id}
+                      href={`/jurisprudencia/${decision.id}`}
+                      className="block p-5 bg-emerald-50 rounded-xl border-2 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-100 transition-all group"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="px-3 py-1 bg-emerald-600 text-white text-sm font-bold rounded-lg text-center">
+                            {decision.tribunalCode}
+                          </div>
+                          <div className="text-center text-xs text-gray-600 mt-1">
+                            {decision.decisionNumber}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-emerald-700 transition-colors">
+                            {decision.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                            {decision.ementa}
+                          </p>
+                          <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                            {decision.orgaoJulgador && <span>{decision.orgaoJulgador}</span>}
+                            {decision.relator && <span>Rel. {decision.relator}</span>}
+                            {decision.dataJulgamento && (
+                              <span>
+                                {new Date(decision.dataJulgamento).toLocaleDateString('pt-BR', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </section>
             )}
 

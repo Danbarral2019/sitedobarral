@@ -7,6 +7,7 @@ import {
   searchLegislativeActs,
   searchBlogPosts,
   searchFAQs,
+  searchTribunalDecisions,
 } from '@/lib/search/full-text-search';
 import { handleApiError } from '@/lib/errors/error-handler';
 
@@ -23,6 +24,7 @@ export async function GET(request: NextRequest) {
           articles: [],
           acts: [],
           documents: [],
+          decisions: [],
           blogPosts: [],
           faqs: [],
         }
@@ -41,12 +43,14 @@ export async function GET(request: NextRequest) {
       glossaryResults,
       actResults,
       docResults,
+      decisionResults,
       blogResults,
       faqResults,
     ] = await Promise.all([
       searchGlossary(query, { limit: 5 }),
       searchLegislativeActs(query, { limit: 10 }),
       searchDocuments(query, { limit: 20 }),
+      searchTribunalDecisions(query, { limit: 20 }),
       searchBlogPosts(query, { limit: 5 }),
       searchFAQs(query, { limit: 5 }),
     ]);
@@ -102,6 +106,20 @@ export async function GET(request: NextRequest) {
           publishDate: data.publish_date,
         })),
         documents: processedDocuments,
+        decisions: decisionResults.map(({ data }) => ({
+          id: data.id,
+          tribunalCode: data.tribunal_code,
+          tribunalName: data.tribunal_name,
+          decisionType: data.decision_type,
+          decisionNumber: data.decision_number,
+          title: data.title,
+          ementa: data.ementa,
+          summary: data.summary,
+          relator: data.relator,
+          orgaoJulgador: data.orgao_julgador,
+          dataJulgamento: data.data_julgamento,
+          url: data.url,
+        })),
         blogPosts: blogResults.map(({ data }) => ({
           id: data.id,
           slug: data.slug,

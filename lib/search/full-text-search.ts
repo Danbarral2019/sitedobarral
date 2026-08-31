@@ -76,6 +76,23 @@ interface LegislativeActRow {
   rank: number;
 }
 
+interface TribunalDecisionRow {
+  id: string;
+  tribunal_code: string;
+  tribunal_name: string;
+  decision_type: string;
+  decision_number: string;
+  title: string;
+  ementa: string;
+  summary: string | null;
+  relator: string | null;
+  orgao_julgador: string | null;
+  data_julgamento: Date | null;
+  url: string | null;
+  lei_articles: string | null;
+  rank: number;
+}
+
 interface VideoRow {
   id: string;
   title: string;
@@ -242,6 +259,62 @@ export async function searchLegislativeActs(
   `;
 
   const rows = await prisma.$queryRawUnsafe<LegislativeActRow[]>(sql, sanitized);
+  return rows.map(row => ({ data: row, rank: row.rank }));
+}
+
+/**
+ * Tribunais que NÃO entram na busca integrada, e por quê:
+ *
+ * - `TCU` — os acórdãos do TCU já vêm por `searchDocuments`, e as 676 linhas
+ *   desta tabela são duplicata integral daquelas (conferido número a número).
+ *   Incluí-los aqui recriaria na busca a duplicação corrigida na listagem em
+ *   `lib/jurisprudencia/unified-query.ts`.
+ * - `TST` — 1.349 súmulas trabalhistas, fora do tema de licitações. Não casam
+ *   com termo do domínio, mas dominam o genérico: seriam 111 dos 269 acertos
+ *   de "prazo" e 162 dos 761 de "recurso". Seguem no acervo e na listagem de
+ *   jurisprudência; só não pesam nesta busca.
+ */
+const TRIBUNAIS_FORA_DA_BUSCA = ['TCU', 'TST'] as const;
+
+/**
+ * Busca decisões de STF, STJ e Tribunais de Contas estaduais.
+ *
+ * Aplica o mesmo portão de curadoria da listagem (`isRelevant` +
+ * `approvalStatus`): decisão pendente de revisão não aparece na busca pública.
+ */
+export async function searchTribunalDecisions(
+  query: string,
+  options: FTSOptions = {}
+): Promise<FTSResult<TribunalDecisionRow>[]> {
+  const sanitized = sanitizeQuery(query);
+  if (!sanitized) return [];
+
+  const { limit = 500 } = options;
+  const fora = TRIBUNAIS_FORA_DA_BUSCA.map(t => `'${t}'`).join(', ');
+
+  const sql = `
+    SELECT
+      id,
+      "tribunalCode" as tribunal_code,
+      "tribunalName" as tribunal_name,
+      "decisionType" as decision_type,
+      "decisionNumber" as decision_number,
+      title, ementa, summary, relator,
+      "orgaoJulgador" as orgao_julgador,
+      "dataJulgamento" as data_julgamento,
+      url,
+      to_jsonb("leiArticlesArr")::text as lei_articles,
+      ts_rank(search_vector, ${buildTsQueryExpr(1)}) as rank
+    FROM "TribunalDecision"
+    WHERE search_vector @@ ${buildTsQueryExpr(1)}
+      AND "isRelevant" = true
+      AND "approvalStatus" IN ('auto_approved', 'manually_approved')
+      AND "tribunalCode" NOT IN (${fora})
+    ORDER BY rank DESC, "dataJulgamento" DESC NULLS LAST
+    LIMIT ${limit}
+  `;
+
+  const rows = await prisma.$queryRawUnsafe<TribunalDecisionRow[]>(sql, sanitized);
   return rows.map(row => ({ data: row, rank: row.rank }));
 }
 
