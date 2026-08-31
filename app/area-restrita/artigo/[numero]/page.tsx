@@ -9,14 +9,14 @@ import { redirect } from 'next/navigation';
  */
 
 export default async function ArtigoRedirect({
-  params,
+ params,
 }: {
-  params: Promise<{ numero: string }>;
+ params: Promise<{ numero: string }>;
 }) {
-  const { numero } = await params;
-  const safe = String(numero).trim();
-  if (!safe || !/^\d+(-[A-Z])?$/.test(safe)) {
-    redirect('/area-restrita/lei-comentada');
-  }
-  redirect(`/area-restrita/lei-comentada?artigo=${encodeURIComponent(safe)}`);
+ const { numero } = await params;
+ const safe = String(numero).trim();
+ if (!safe || !/^\d+(-[A-Z])?$/.test(safe)) {
+ redirect('/area-restrita/lei-comentada');
+ }
+ redirect(`/area-restrita/lei-comentada?artigo=${encodeURIComponent(safe)}`);
 }

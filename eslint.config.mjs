@@ -65,6 +65,9 @@ const eslintConfig = [
       "components/NewsletterForm.tsx",
       "components/PWAProvider.tsx",
       "components/faq/**/*.tsx",
+      "app/area-restrita/**/*.tsx",
+      "components/area-restrita/**/*.tsx",
+      "components/lms/**/*.tsx",
     ],
     rules: {
       "no-restricted-syntax": [
