@@ -58,9 +58,16 @@ interface Article {
 
 interface Props {
   numero: string;
+  /**
+   * Próximo artigo pendente na fila. Quando existe, o editor oferece
+   * "Salvar e próximo" — escrever vinte comentários sem voltar à árvore a
+   * cada um era o que faltava, não o editor.
+   */
+  proximoNumero?: string | null;
+  onIrParaProximo?: (numero: string) => void;
 }
 
-export function ArticleEditorMain({ numero }: Props) {
+export function ArticleEditorMain({ numero, proximoNumero, onIrParaProximo }: Props) {
   const { error: errorToast, success: successToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [article, setArticle] = useState<Article | null>(null);
@@ -88,7 +95,7 @@ export function ArticleEditorMain({ numero }: Props) {
     fetchAll();
   }, [fetchAll]);
 
-  const handleSaveComment = async (markdown: string) => {
+  const salvarComentario = async (markdown: string) => {
     const r = await fetch(`/api/admin/lei-14133/articles/${numero}/comment`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -98,9 +105,20 @@ export function ArticleEditorMain({ numero }: Props) {
       const e = await r.json().catch(() => ({}));
       throw new Error(e.error || 'Erro ao salvar');
     }
+  };
+
+  const handleSaveComment = async (markdown: string) => {
+    await salvarComentario(markdown);
     successToast('Comentário salvo');
     setShowCommentEditor(false);
     fetchAll();
+  };
+
+  const handleSaveAndNext = async (markdown: string) => {
+    await salvarComentario(markdown);
+    successToast('Comentário salvo. Próximo artigo.');
+    setShowCommentEditor(false);
+    if (proximoNumero && onIrParaProximo) onIrParaProximo(proximoNumero);
   };
 
   if (loading || !article) {
@@ -180,6 +198,8 @@ export function ArticleEditorMain({ numero }: Props) {
         <CommentEditor
           initial={article.professorComment || ''}
           onSave={handleSaveComment}
+          onSaveAndNext={proximoNumero && onIrParaProximo ? handleSaveAndNext : undefined}
+          proximoNumero={proximoNumero ?? null}
           onCancel={() => setShowCommentEditor(false)}
         />
       )}

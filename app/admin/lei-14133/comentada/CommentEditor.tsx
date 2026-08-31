@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Save, Eye, Edit3 } from 'lucide-react';
+import { X, Save, Eye, Edit3, ArrowRight } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
 
 interface Props {
   initial: string;
   onSave: (markdown: string) => Promise<void>;
   onCancel: () => void;
+  /** Salva e abre o próximo pendente da fila. Ausente quando não há próximo. */
+  onSaveAndNext?: (markdown: string) => Promise<void>;
+  proximoNumero?: string | null;
 }
 
-export function CommentEditor({ initial, onSave, onCancel }: Props) {
+export function CommentEditor({ initial, onSave, onCancel, onSaveAndNext, proximoNumero }: Props) {
   const [markdown, setMarkdown] = useState(initial);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<'edit' | 'preview' | 'split'>('split');
@@ -19,6 +22,18 @@ export function CommentEditor({ initial, onSave, onCancel }: Props) {
     setSaving(true);
     try {
       await onSave(markdown);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao salvar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAndNext = async () => {
+    if (!onSaveAndNext) return;
+    setSaving(true);
+    try {
+      await onSaveAndNext(markdown);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally {
@@ -94,11 +109,22 @@ export function CommentEditor({ initial, onSave, onCancel }: Props) {
             <button
               onClick={handleSave}
               disabled={saving || markdown.length > 50_000}
-              className="flex items-center gap-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-sm"
+              className="flex items-center gap-1 px-4 py-2 border border-brand-600 text-brand-700 rounded-lg hover:bg-brand-50 disabled:opacity-50 text-sm"
             >
               <Save className="w-4 h-4" />
               {saving ? 'Salvando…' : 'Salvar'}
             </button>
+            {onSaveAndNext && (
+              <button
+                onClick={handleSaveAndNext}
+                disabled={saving || markdown.length > 50_000}
+                title={proximoNumero ? `Próximo: art. ${proximoNumero}` : undefined}
+                className="flex items-center gap-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-800 disabled:opacity-50 text-sm"
+              >
+                {saving ? 'Salvando…' : 'Salvar e próximo'}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </footer>
       </div>

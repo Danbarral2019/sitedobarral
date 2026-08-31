@@ -12,6 +12,8 @@ import {
   type LeiArticleListItem,
 } from '@/components/lei-14133/LeiSidebar';
 import { ArticleEditorMain } from './ArticleEditorMain';
+import { FilaDeRedacao } from './FilaDeRedacao';
+import { proximoDaFila } from '@/lib/lei-14133/fila-redacao';
 
 interface LeiArticle {
   id: string;
@@ -22,6 +24,8 @@ interface LeiArticle {
   capitulo: string;
   secao: string | null;
   documentCount: number;
+  /** Já vem da API; é o que diz se o artigo está comentado. */
+  professorComment: string | null;
 }
 
 interface ApiResponse {
@@ -45,6 +49,7 @@ function AdminContent() {
   const [expandedCapitulos, setExpandedCapitulos] = useState<Set<string>>(new Set());
 
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [painel, setPainel] = useState<'estrutura' | 'fila'>('fila');
   const articleRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
@@ -185,11 +190,39 @@ function AdminContent() {
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="hidden lg:block lg:col-span-4">
-            <div className="bg-white rounded-lg shadow-md sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">Estrutura da Lei</h2>
-                <p className="text-sm text-gray-600">{Object.keys(filteredHierarchy || {}).length} títulos</p>
+            <div className="bg-white rounded-lg shadow-md sticky top-6 max-h-[calc(100vh-8rem)] flex flex-col overflow-hidden">
+              {/* A árvore serve para achar um artigo; a fila serve para o
+                  trabalho contínuo de comentar. Abre na fila, que é o modo de
+                  uso mais comum de quem senta para escrever. */}
+              <div className="flex border-b border-border-subtle flex-shrink-0" role="tablist">
+                {(['fila', 'estrutura'] as const).map((p) => (
+                  <button
+                    key={p}
+                    role="tab"
+                    aria-selected={painel === p}
+                    onClick={() => setPainel(p)}
+                    className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${
+                      painel === p
+                        ? 'border-brand-600 text-brand-700'
+                        : 'border-transparent text-ink-muted hover:text-ink-primary'
+                    }`}
+                  >
+                    {p === 'fila' ? 'Fila de redação' : 'Estrutura da Lei'}
+                  </button>
+                ))}
               </div>
+
+              {painel === 'fila' ? (
+                <FilaDeRedacao
+                  artigos={apiData.articles}
+                  numeroSelecionado={selectedArticle?.numero ?? null}
+                  onSelecionar={(numero) => {
+                    const art = apiData.articles.find((a) => a.numero === numero);
+                    if (art) handleSelectArticle(art);
+                  }}
+                />
+              ) : (
+              <div className="overflow-y-auto">
               <LeiSidebar
                 hierarchy={filteredHierarchy}
                 selectedNumero={selectedArticle?.numero || null}
@@ -200,12 +233,23 @@ function AdminContent() {
                 onSelectArticle={handleSidebarSelect}
                 articleRefs={articleRefs as React.RefObject<Record<string, HTMLElement | null>>}
               />
+              </div>
+              )}
             </div>
           </div>
 
           <div className="lg:col-span-8">
             {selectedArticle ? (
-              <ArticleEditorMain numero={selectedArticle.numero} />
+              <ArticleEditorMain
+                numero={selectedArticle.numero}
+                proximoNumero={
+                  proximoDaFila(apiData.articles, selectedArticle.numero)?.numero ?? null
+                }
+                onIrParaProximo={(numero) => {
+                  const art = apiData.articles.find((a) => a.numero === numero);
+                  if (art) handleSelectArticle(art);
+                }}
+              />
             ) : (
               <div className="bg-white rounded-lg shadow-md p-12 text-center">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
