@@ -75,7 +75,7 @@ export function Tab({ id, children, icon, badge }: TabProps) {
       {icon && <span className="w-5 h-5">{icon}</span>}
       {children}
       {badge !== undefined && badge > 0 && (
-        <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+        <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-[3px]">
           {badge}
         </span>
       )}

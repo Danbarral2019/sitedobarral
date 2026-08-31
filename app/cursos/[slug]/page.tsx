@@ -241,7 +241,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <BookOpen className="w-10 h-10 text-white" />
-                  <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold text-white uppercase tracking-wide">
+                  <span className="bg-white/20 px-4 py-1.5 rounded-[3px] text-sm font-bold text-white uppercase tracking-wide">
                     Curso Especializado
                   </span>
                 </div>
@@ -290,7 +290,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   <h2 className="text-3xl font-bold text-ink-primary">Sobre o Curso</h2>
                 </div>
                 <div className={`${color.bg} p-6 rounded-[6px] mb-6 border-l-4 ${color.border}`}>
-                  <div className="prose prose-lg max-w-none text-ink-secondary leading-relaxed whitespace-pre-line">
+                  <div className="max-w-none text-ink-secondary leading-relaxed whitespace-pre-line">
                     {course.description}
                   </div>
                 </div>

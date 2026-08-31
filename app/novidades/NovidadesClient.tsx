@@ -338,7 +338,7 @@ function Section({
         <div className="flex items-center gap-3">
           <span className="text-ink-muted">{icon}</span>
           <h3 className="font-bold text-ink-primary">{title}</h3>
-          <span className="text-sm text-ink-muted bg-surface-deep px-2 py-0.5 rounded-full">{count}</span>
+          <span className="text-sm text-ink-muted bg-surface-deep px-2 py-0.5 rounded-[3px]">{count}</span>
         </div>
         {expanded ? <ChevronUp className="w-5 h-5 text-ink-muted" /> : <ChevronDown className="w-5 h-5 text-ink-muted" />}
       </button>

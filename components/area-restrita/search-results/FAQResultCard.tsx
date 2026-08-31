@@ -34,7 +34,7 @@ export function FAQResultCard({ faq, query }: FAQResultCardProps) {
           <p className={`text-sm text-ink-muted mt-1 ${isExpanded ? '' : 'line-clamp-2'}`}>
             {highlightText(faq.answer, query)}
           </p>
-          <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700">
+          <span className="inline-block mt-2 px-2 py-0.5 rounded-[3px] text-xs font-medium bg-brand-50 text-brand-700">
             {faq.category}
           </span>
         </div>

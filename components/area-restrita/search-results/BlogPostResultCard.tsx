@@ -26,7 +26,7 @@ export function BlogPostResultCard({ post, query }: BlogPostResultCardProps) {
             {highlightText(post.excerpt, query)}
           </p>
           <div className="flex items-center gap-2 mt-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-accent-soft text-ink-primary">
+            <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-amber-accent-soft text-ink-primary">
               {post.author}
             </span>
             <span className="text-xs text-ink-muted">

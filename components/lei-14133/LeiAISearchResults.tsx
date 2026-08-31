@@ -154,7 +154,7 @@ function AIResultsContent({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-bold text-brand-600">Art. {result.articleNumber}</span>
-                      <span className="text-xs bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-brand-100 text-brand-700 px-2 py-0.5 rounded-[3px]">
                         {result.score}% relevante
                       </span>
                     </div>

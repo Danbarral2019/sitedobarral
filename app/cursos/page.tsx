@@ -42,7 +42,7 @@ export default function CursosPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Cursos Especializados</h1>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-heading">Cursos Especializados</h1>
               <div className="h-1.5 w-40 bg-brand-500 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-ink-secondary max-w-3xl mx-auto leading-relaxed">

@@ -77,7 +77,7 @@ export default function ActCard({ act, expandedAct, setExpandedAct, isBoasPratic
                 {formatDate(act.publishDate)}
               </span>
               {act.leiArticles && act.leiArticles.length > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 font-medium">
+                <span className="px-2 py-0.5 rounded-[3px] bg-brand-50 text-brand-700 font-medium">
                   Art. {act.leiArticles.slice(0, 4).join(', ')}{act.leiArticles.length > 4 ? '...' : ''}
                 </span>
               )}

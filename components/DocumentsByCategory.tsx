@@ -434,7 +434,7 @@ export default function DocumentsByCategory({
                         >
                           <div className="flex items-center gap-2">
                             <h4 className="text-sm font-semibold text-brand-800">{entityLabel}</h4>
-                            <span className="bg-brand-200 text-brand-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                            <span className="bg-brand-200 text-brand-700 px-2 py-0.5 rounded-[3px] text-xs font-bold">
                               {entityDocs.length}
                             </span>
                           </div>

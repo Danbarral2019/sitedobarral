@@ -43,7 +43,7 @@ export function HeroPlanejamento() {
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex-1">
           <div className="mb-3 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide">
+            <span className="inline-flex items-center gap-1 rounded-[3px] bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide">
               <Sparkles className="h-3 w-3" /> Novo
             </span>
             <span className="text-[11px] uppercase tracking-wide text-white/70">

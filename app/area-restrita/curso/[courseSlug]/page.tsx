@@ -214,10 +214,10 @@ export default function CourseLandingPage({
                 </p>
               )}
               <div className="flex items-center gap-4 mt-3">
-                <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-[3px]">
                   {modules.length} {modules.length === 1 ? 'modulo' : 'modulos'}
                 </span>
-                <span className="text-xs font-semibold text-ink-muted bg-surface-deep px-2.5 py-1 rounded-full">
+                <span className="text-xs font-semibold text-ink-muted bg-surface-deep px-2.5 py-1 rounded-[3px]">
                   {totalLessons} {totalLessons === 1 ? 'aula' : 'aulas'}
                 </span>
                 {allLessons.some((l) => l.estimatedMinutes) && (
@@ -254,7 +254,7 @@ export default function CourseLandingPage({
                     {reached.map(m => (
                       <span
                         key={m.threshold}
-                        className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-accent-soft text-ink-primary border border-amber-accent-soft px-2 py-1 rounded-full animate-[scale-in_0.3s_ease-out]"
+                        className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-accent-soft text-ink-primary border border-amber-accent-soft px-2 py-1 rounded-[3px] animate-[scale-in_0.3s_ease-out]"
                       >
                         <span>{m.emoji}</span>
                         {m.label}
@@ -316,7 +316,7 @@ export default function CourseLandingPage({
                     </div>
                     <div className="flex items-center gap-2 ml-4 flex-shrink-0">
                       {isModuleComplete ? (
-                        <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+                        <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-[3px]">
                           <CheckCircle className="w-3.5 h-3.5" />
                           Concluido
                         </span>

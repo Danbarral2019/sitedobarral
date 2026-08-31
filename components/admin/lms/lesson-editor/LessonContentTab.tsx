@@ -28,7 +28,7 @@ export function LessonContentTab({ content, onChange, onSave, isSaving }: Lesson
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Preview</h3>
           <div
-            className="prose prose-sm max-w-none text-gray-800 min-h-[400px] p-3 bg-gray-50 rounded-lg border border-gray-100"
+            className="max-w-none text-gray-800 min-h-[400px] p-3 bg-gray-50 rounded-lg border border-gray-100"
             dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(content) }}
           />
         </div>

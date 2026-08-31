@@ -90,7 +90,7 @@ export default function SectionEditor({
             {def.legalAnchors.map((a, i) => (
               <span
                 key={i}
-                className="rounded-full bg-surface-deep px-2 py-0.5 font-medium text-ink-secondary"
+                className="rounded-[3px] bg-surface-deep px-2 py-0.5 font-medium text-ink-secondary"
               >
                 {a.label}
               </span>
@@ -426,7 +426,7 @@ function CitationsFooter({
           <li key={s.id}>
             <button
               onClick={() => onOpen(s)}
-              className="rounded-full border border-border-subtle bg-white px-2 py-0.5 text-[11px] font-medium text-ink-secondary hover:border-brand-300 hover:text-brand-800"
+              className="rounded-[3px] border border-border-subtle bg-white px-2 py-0.5 text-[11px] font-medium text-ink-secondary hover:border-brand-300 hover:text-brand-800"
               title={s.title}
             >
               {shortLabel(s)}

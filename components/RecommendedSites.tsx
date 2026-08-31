@@ -84,7 +84,7 @@ export default function RecommendedSites({ sites, compact }: RecommendedSitesPro
             )}
           </div>
           {compact && (
-            <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-[3px]">
               {sites.length}
             </span>
           )}

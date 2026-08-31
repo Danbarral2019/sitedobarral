@@ -27,7 +27,7 @@ export function LeiCrossReferences({ selectedNumero, topics, allArticles, onSele
       <div className="space-y-4">
         {topics.map((topic) => (
           <div key={topic.topic}>
-            <span className="inline-block px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium mb-2">
+            <span className="inline-block px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-sm font-medium mb-2">
               {topic.topic}
             </span>
             <div className="flex flex-wrap gap-2">

@@ -115,10 +115,10 @@ export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: Re
     <div className="bg-white border-2 border-border-subtle rounded-[6px] p-6 my-6 space-y-6">
       {alters.length > 0 && (
         <section>
-          <h3 className="font-cinzel font-semibold text-lg text-ink-primary mb-3">
+          <h3 className="font-heading font-semibold text-lg text-ink-primary mb-3">
             ✏️ Este ato afeta os seguintes atos:
           </h3>
-          <p className="text-xs text-ink-muted mb-3 font-poppins">
+          <p className="text-xs text-ink-muted mb-3 font-sans">
             Inclui revogações, alterações, regulamentações, complementações e modificações — o tipo
             específico é indicado pelo selo colorido em cada item.
           </p>
@@ -137,10 +137,10 @@ export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: Re
 
       {alteredBy.length > 0 && (
         <section>
-          <h3 className="font-cinzel font-semibold text-lg text-ink-primary mb-3">
+          <h3 className="font-heading font-semibold text-lg text-ink-primary mb-3">
             📌 Este ato é afetado pelos seguintes atos:
           </h3>
-          <p className="text-xs text-ink-muted mb-3 font-poppins">
+          <p className="text-xs text-ink-muted mb-3 font-sans">
             Inclui atos que revogam, alteram, regulamentam, complementam ou modificam este — o tipo
             específico é indicado pelo selo colorido em cada item.
           </p>
@@ -191,13 +191,13 @@ function RelationItem({
         )}
         <Link
           href={`/legislacao/${otherAct.id}`}
-          className="font-poppins font-semibold text-brand-700 hover:underline"
+          className="font-sans font-semibold text-brand-700 hover:underline"
         >
           {otherAct.fullNumber}
         </Link>
       </div>
-      <p className="text-sm text-ink-secondary mt-1 font-poppins">{otherAct.title}</p>
-      <p className="text-xs text-ink-muted italic mt-1 font-poppins">&ldquo;{rel.excerpt}&rdquo;</p>
+      <p className="text-sm text-ink-secondary mt-1 font-sans">{otherAct.title}</p>
+      <p className="text-xs text-ink-muted italic mt-1 font-sans">&ldquo;{rel.excerpt}&rdquo;</p>
     </li>
   );
 }

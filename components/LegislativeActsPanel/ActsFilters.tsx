@@ -223,37 +223,37 @@ export default function ActsFilters({
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
           <span className="text-xs font-semibold text-ink-muted">Filtros:</span>
           {esferaFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs border border-brand-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-[3px] text-xs border border-brand-200">
               {ESFERA_LABELS[esferaFilter] || esferaFilter}
               <button onClick={() => { setEsferaFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {selectedType && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs border border-brand-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-[3px] text-xs border border-brand-200">
               {TYPE_LABELS[selectedType] || selectedType}
               <button onClick={() => { setSelectedType(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {issuerFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs border border-green-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded-[3px] text-xs border border-green-200">
               {issuerFilter}
               <button onClick={() => { setIssuerFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {yearFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-accent-soft text-ink-primary rounded-full text-xs border border-amber-accent-soft">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-accent-soft text-ink-primary rounded-[3px] text-xs border border-amber-accent-soft">
               {yearFilter}
               <button onClick={() => { setYearFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {themeFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs border border-brand-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-[3px] text-xs border border-brand-200">
               {getThemeLabel(themeFilter)}
               <button onClick={() => { setThemeFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {search && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-deep text-ink-secondary rounded-full text-xs border border-border-subtle">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-deep text-ink-secondary rounded-[3px] text-xs border border-border-subtle">
               &quot;{search}&quot;
               <button onClick={() => { setSearch(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>

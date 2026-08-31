@@ -48,7 +48,7 @@ export function LeiArticleCard({
         </div>
       </div>
 
-      <div className="prose max-w-none">
+      <div className="max-w-none">
         <div className="space-y-2">
           {normalizeTextContent(ementa).map((p, i) => (
             <EmentaParagraph key={i} text={p} />

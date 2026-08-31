@@ -320,7 +320,7 @@ export default function HistoricoIAPage() {
                         {questions.length} pergunta{questions.length !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <div className="px-3 py-1 bg-brand-600 text-white rounded-full text-sm font-bold">
+                    <div className="px-3 py-1 bg-brand-600 text-white rounded-[3px] text-sm font-bold">
                       {questions.length}
                     </div>
                   </button>

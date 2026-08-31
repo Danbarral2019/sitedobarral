@@ -43,7 +43,7 @@ export function VideoResultCard({ video, query }: VideoResultCardProps) {
             <p className="text-xs text-ink-muted mt-1 line-clamp-2">{video.description}</p>
           )}
           {video.courseName && (
-            <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+            <span className="inline-block mt-1 px-2 py-0.5 rounded-[3px] text-xs font-medium bg-red-50 text-red-700">
               {video.courseName}
             </span>
           )}

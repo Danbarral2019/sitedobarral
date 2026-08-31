@@ -57,7 +57,7 @@ export default function MatrixResultCard({ result, compact }: Props) {
         {result.citations.map((c, i) => (
           <span
             key={i}
-            className="rounded-full border border-border-subtle bg-white px-2 py-0.5 text-[11px] font-medium text-ink-secondary"
+            className="rounded-[3px] border border-border-subtle bg-white px-2 py-0.5 text-[11px] font-medium text-ink-secondary"
           >
             {c.label}
           </span>

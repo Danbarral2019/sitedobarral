@@ -48,7 +48,7 @@ export function FAQAccordionItem({ id, question, answer }: FAQAccordionItemProps
 
       {open && (
         <div className="px-6 pb-6 border-t border-border-subtle">
-          <div className="prose prose-sm max-w-none pt-4 text-ink-secondary">
+          <div className="max-w-none pt-4 text-ink-secondary">
             <MarkdownContent content={answer} />
           </div>
 

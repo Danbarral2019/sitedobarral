@@ -135,7 +135,7 @@ export function DashboardCourseCard({
                       {course.shortDescription}
                     </p>
                     {totalMaterials > 0 && (
-                      <span className="inline-block mt-2 text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+                      <span className="inline-block mt-2 text-xs font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-[3px]">
                         {totalMaterials} {totalMaterials === 1 ? 'material' : 'materiais'}
                       </span>
                     )}

@@ -31,14 +31,14 @@ export function LegislativeActResultCard({ act, query }: LegislativeActResultCar
             {highlightText(act.ementa.slice(0, 250), query)}
           </p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-accent-soft text-ink-primary">
+            <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-amber-accent-soft text-ink-primary">
               {typeLabels[act.type] || act.type}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-surface-deep text-ink-muted">
+            <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-surface-deep text-ink-muted">
               {act.issuer}
             </span>
             {act.leiArticles.length > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700">
+              <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-brand-50 text-brand-700">
                 Art. {act.leiArticles.slice(0, 3).join(', ')}{act.leiArticles.length > 3 ? '...' : ''}
               </span>
             )}

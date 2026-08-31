@@ -196,7 +196,7 @@ export default function PlanosClient({ cursosVendaveis }: PlanosClientProps) {
                   <p className="text-sm text-ink-muted line-through">
                     R$ {(49.90 * 12).toFixed(2).replace('.', ',')}/ano no plano mensal
                   </p>
-                  <span className="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
+                  <span className="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-[3px]">
                     Economize R$ {ECONOMIA_BASICO}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export default function PlanosClient({ cursosVendaveis }: PlanosClientProps) {
           <div className="bg-brand-600 rounded-[6px] p-8 border-2 border-brand-500 relative flex flex-col">
             {/* Badge */}
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <span className="inline-block px-5 py-1.5 bg-amber-accent text-ink-primary rounded-full font-bold text-sm border border-border-subtle">
+              <span className="inline-block px-5 py-1.5 bg-amber-accent text-ink-primary rounded-[3px] font-bold text-sm border border-border-subtle">
                 {isYearly ? 'MELHOR VALOR' : 'RECOMENDADO'}
               </span>
             </div>
@@ -288,7 +288,7 @@ export default function PlanosClient({ cursosVendaveis }: PlanosClientProps) {
                   <p className="text-sm text-brand-300 line-through">
                     R$ {(89.90 * 12).toFixed(2).replace('.', ',')}/ano no plano mensal
                   </p>
-                  <span className="inline-block bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-full">
+                  <span className="inline-block bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-[3px]">
                     Economize R$ {ECONOMIA_PREMIUM}
                   </span>
                 </div>

@@ -478,7 +478,7 @@ export default function FavoritosPage() {
                                       </p>
                                     )}
                                     <div className="flex items-center gap-3 flex-wrap">
-                                      <span className="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-full text-xs font-medium">
+                                      <span className="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-[3px] text-xs font-medium">
                                         {getCategoryLabel(fav.document.category)}
                                       </span>
                                       <span className="text-xs text-ink-muted">

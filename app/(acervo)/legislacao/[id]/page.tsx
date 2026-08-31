@@ -268,9 +268,11 @@ export default async function LegislativeActPage({ params }: PageProps) {
             <FileText className="w-5 h-5 text-brand-600" />
             Ementa
           </h3>
-          <div className="prose prose-slate max-w-none prose-p:text-ink-secondary prose-p:leading-relaxed prose-p:text-justify prose-p:mb-3">
+          {/* Ementa de ato normativo é leitura prolongada — mesma
+              tipografia do texto da lei. */}
+          <div className="font-reading text-ink-secondary max-w-[65ch]">
             {normalizeTextContent(act.ementa).map((p, i) => (
-              <p key={i}>{p}</p>
+              <p key={i} className="mb-3 last:mb-0 text-justify hyphens-auto">{p}</p>
             ))}
           </div>
         </div>

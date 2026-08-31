@@ -209,7 +209,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
           </div>
           <h3 className="text-sm font-bold text-ink-primary">Novidades</h3>
           {timelineItems.length > 0 && (
-            <span className="text-[10px] font-bold bg-brand-600 text-white px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold bg-brand-600 text-white px-1.5 py-0.5 rounded-[3px]">
               {timelineItems.length}
             </span>
           )}
@@ -229,7 +229,7 @@ export default function NovidadesSection({ onDocumentClick }: NovidadesSectionPr
             {data.platformUpdates.map((pu) => (
               <span
                 key={pu.id}
-                className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-brand-50 px-2.5 py-1 rounded-[3px]"
                 title={pu.description}
               >
                 <Sparkles className="w-3 h-3" />

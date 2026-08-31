@@ -17,16 +17,16 @@ export default function PrivacidadePage() {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <header className="mb-10">
-            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-ink-primary mb-3">
+            <h1 className="text-4xl md:text-5xl font-heading font-bold text-ink-primary mb-3">
               Política de Privacidade
             </h1>
             <div className="h-1 w-32 bg-brand-500 rounded-full mb-4" />
-            <p className="text-sm text-ink-muted font-poppins">
+            <p className="text-sm text-ink-muted font-sans">
               Última atualização: {LAST_UPDATED}
             </p>
           </header>
 
-          <article className="bg-white rounded-[6px] p-8 md:p-10 border-2 border-border-subtle font-poppins text-ink-secondary leading-relaxed">
+          <article className="bg-white rounded-[6px] p-8 md:p-10 border-2 border-border-subtle font-sans text-ink-secondary leading-relaxed">
             <p className="mb-8 text-ink-secondary">
               Esta Política descreve como tratamos seus dados pessoais quando você utiliza o
               Site do Prof. Daniel Barral, em conformidade com a Lei Geral de Proteção de Dados
@@ -264,7 +264,7 @@ export default function PrivacidadePage() {
 function Section({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8 last:mb-0">
-      <h2 className="font-cinzel font-semibold text-xl md:text-2xl text-ink-primary mb-3">
+      <h2 className="font-heading font-semibold text-xl md:text-2xl text-ink-primary mb-3">
         <span className="text-brand-600 mr-2">{number}.</span>
         {title}
       </h2>

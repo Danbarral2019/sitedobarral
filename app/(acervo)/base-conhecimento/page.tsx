@@ -135,10 +135,10 @@ export default async function BaseConhecimentoPage() {
       <section className="bg-brand-700 text-white py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-4 tracking-wide">
+            <h1 className="text-4xl md:text-5xl font-heading font-semibold mb-4 tracking-wide">
               Base de Conhecimento
             </h1>
-            <p className="text-lg md:text-xl text-brand-100 font-poppins leading-relaxed">
+            <p className="text-lg md:text-xl text-brand-100 font-sans leading-relaxed">
               {totalDocs > 0
                 ? `${totalDocs.toLocaleString('pt-BR')} documentos especializados`
                 : 'Repositório especializado'}{' '}

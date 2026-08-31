@@ -81,7 +81,7 @@ export default async function TermPage({ params }: { params: Promise<{ slug: str
               {term.category && (
                 <div className="flex items-center gap-2">
                   <Tag className="h-4 w-4 text-brand-600" />
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-100 text-brand-800">
+                  <span className="inline-flex items-center px-3 py-1 rounded-[3px] text-sm font-medium bg-brand-100 text-brand-800">
                     {term.category}
                   </span>
                 </div>
@@ -95,7 +95,11 @@ export default async function TermPage({ params }: { params: Promise<{ slug: str
 
           {/* Definition */}
           <div className="mt-6">
-            <div className="prose prose-lg max-w-none prose-headings:text-ink-primary prose-p:text-ink-secondary prose-p:text-justify prose-p:leading-relaxed prose-p:mb-4 prose-strong:text-ink-primary prose-strong:font-semibold prose-ul:my-4 prose-li:text-ink-secondary prose-li:my-2">
+            {/* Leitura prolongada: serif, 1.0625rem, entrelinha 1.7 e coluna
+                de 65ch, como o DESIGN.md pede. Antes eram classes prose
+                inertes — o plugin de tipografia não está instalado, então a
+                definição saía sem tratamento nenhum. */}
+            <div className="font-reading text-ink-secondary max-w-[65ch] space-y-4">
               <ReactMarkdown>{term.definition}</ReactMarkdown>
             </div>
           </div>

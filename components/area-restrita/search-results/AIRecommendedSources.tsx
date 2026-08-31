@@ -27,7 +27,7 @@ export function AIRecommendedSources({
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-4 h-4 text-brand-500" />
         <h3 className="font-bold text-ink-primary text-sm">Fontes recomendadas pela IA</h3>
-        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-700">
+        <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-brand-100 text-brand-700">
           {aiSources.length}
         </span>
       </div>

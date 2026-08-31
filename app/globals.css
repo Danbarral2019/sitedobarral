@@ -167,21 +167,10 @@ body {
   text-transform: uppercase;
 }
 
-/* ============================================================
-   Compat com legado — manter durante migração tipográfica
-   Remover quando todas as ocorrências de font-cinzel/font-poppins
-   tiverem sido migradas no codebase.
-   ============================================================ */
-
-.font-cinzel {
-  font-family: var(--font-serif), 'Source Serif 4', Georgia, serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-
-.font-poppins {
-  font-family: var(--font-sans), Inter, system-ui, sans-serif;
-}
+/* As classes de compat .font-cinzel e .font-poppins foram removidas em
+   31/08/2026: os 69 usos migraram para .font-heading e a fonte padrão. Elas
+   já apontavam para as fontes certas — só o nome sobrevivia, e um nome errado
+   confunde quem lê o código e convida a reintroduzir a fonte antiga. */
 
 /* ============================================================
    Animações (mantidas)

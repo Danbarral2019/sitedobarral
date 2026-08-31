@@ -13,7 +13,7 @@ export default function ContatoPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <div className="inline-block">
-                <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Entre em Contato</h1>
+                <h1 className="text-5xl font-bold mb-3 text-ink-primary font-heading">Entre em Contato</h1>
                 <div className="h-1.5 w-32 bg-brand-500 rounded-full mx-auto mb-6"></div>
               </div>
               <p className="text-xl text-ink-secondary leading-relaxed">
@@ -97,7 +97,7 @@ function ContatoContent() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Entre em Contato</h1>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-heading">Entre em Contato</h1>
               <div className="h-1.5 w-32 bg-brand-500 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-ink-secondary leading-relaxed">

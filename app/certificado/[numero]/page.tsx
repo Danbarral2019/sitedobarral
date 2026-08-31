@@ -132,7 +132,7 @@ export default async function CertificateVerificationPage({
             <p className="text-sm font-light text-ink-muted mb-2">concluiu o curso</p>
             <p className="text-xl md:text-2xl font-semibold text-white mb-6">{certificate.courseTitle}</p>
             {certificate.estimatedHours ? (
-              <p className="inline-block text-xs uppercase tracking-widest text-ink-muted border border-border-strong/40 px-4 py-1.5 rounded-full">
+              <p className="inline-block text-xs uppercase tracking-widest text-ink-muted border border-border-strong/40 px-4 py-1.5 rounded-[3px]">
                 Carga horária: {certificate.estimatedHours} h
               </p>
             ) : null}

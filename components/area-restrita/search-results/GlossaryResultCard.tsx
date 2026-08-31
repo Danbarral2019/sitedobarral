@@ -39,7 +39,7 @@ export function GlossaryResultCard({ term, query }: GlossaryResultCardProps) {
             {highlightText(term.shortDef || term.definition, query)}
           </p>
           {term.category && (
-            <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+            <span className="inline-block mt-2 px-2 py-0.5 rounded-[3px] text-xs font-medium bg-green-50 text-green-700">
               {term.category}
             </span>
           )}

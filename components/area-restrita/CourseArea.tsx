@@ -228,13 +228,13 @@ export default function CourseArea({
               {hasMaterials && (
                 <div className="flex flex-wrap items-center gap-2 mt-3">
                   {totalMaterials > 0 && (
-                    <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-[3px]">
                       {totalMaterials}{' '}
                       {totalMaterials === 1 ? 'material disponível' : 'materiais disponíveis'}
                     </span>
                   )}
                   {sectionDocs.length > 0 && (
-                    <span className="text-xs font-semibold text-ink-muted bg-surface-deep px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-ink-muted bg-surface-deep px-2.5 py-1 rounded-[3px]">
                       {sectionDocs.length}{' '}
                       {sectionDocs.length === 1 ? 'categoria' : 'categorias'}
                     </span>
@@ -299,7 +299,7 @@ export default function CourseArea({
                     </div>
                     <h3 className="text-sm font-bold text-ink-secondary">{section.title}</h3>
                     <span
-                      className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                      className="text-xs font-semibold px-2 py-0.5 rounded-[3px]"
                       style={{
                         backgroundColor: section.accent + '10',
                         color: section.accent,

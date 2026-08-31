@@ -137,7 +137,7 @@ export function ArticleEditorMain({ numero, proximoNumero, onIrParaProximo }: Pr
           {article.titulo && <span className="text-sm text-gray-600">{article.titulo}</span>}
         </div>
         {article.capituloCompleto && <p className="text-sm text-gray-500 mb-3">{article.capituloCompleto}</p>}
-        <div className="prose max-w-none text-gray-800 whitespace-pre-line">{article.ementa}</div>
+        <div className="max-w-none text-gray-800 whitespace-pre-line">{article.ementa}</div>
       </div>
 
       <section className="bg-white rounded-lg shadow-md p-6">
@@ -154,7 +154,7 @@ export function ArticleEditorMain({ numero, proximoNumero, onIrParaProximo }: Pr
           </button>
         </header>
         {article.professorComment ? (
-          <div className="prose prose-sm max-w-none whitespace-pre-line bg-amber-50/30 border-l-4 border-amber-300 p-3 rounded-r">
+          <div className="max-w-none whitespace-pre-line bg-amber-50/30 border-l-4 border-amber-300 p-3 rounded-r">
             {article.professorComment}
           </div>
         ) : (

@@ -78,7 +78,7 @@ export function ArticleBadges({
       })}
 
       {hiddenCount > 0 && (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-deep text-ink-muted">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-[3px] text-xs font-medium bg-surface-deep text-ink-muted">
           +{hiddenCount}
         </span>
       )}

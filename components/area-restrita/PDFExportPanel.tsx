@@ -108,7 +108,7 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
     return (
       <button
         onClick={handleOpenPanel}
-        className="fixed bottom-20 lg:bottom-6 right-6 bg-brand-600 text-white px-6 py-3 rounded-full hover:bg-brand-700 transition-all flex items-center gap-2 z-40 border border-border-subtle"
+        className="fixed bottom-20 lg:bottom-6 right-6 bg-brand-600 text-white px-6 py-3 rounded-[3px] hover:bg-brand-700 transition-all flex items-center gap-2 z-40 border border-border-subtle"
         title="Exportar documentos para PDF"
       >
         <FileDown className="w-5 h-5" />

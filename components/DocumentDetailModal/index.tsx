@@ -267,12 +267,12 @@ export default function DocumentDetailModal({
                 {/* Document identifier and importance */}
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   {documentIdentifier && (
-                    <span className="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold bg-white/20 px-2.5 py-1 rounded-[3px]">
                       {documentIdentifier}
                     </span>
                   )}
                   {importanceBadge && (
-                    <span className="text-xs font-semibold bg-white/25 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold bg-white/25 px-2.5 py-1 rounded-[3px]">
                       {importanceBadge.label}
                     </span>
                   )}

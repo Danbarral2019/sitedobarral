@@ -246,7 +246,7 @@ export default function NewGlossaryTermPage() {
               </div>
 
               {showPreview ? (
-                <div className="w-full min-h-[300px] px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 prose prose-sm max-w-none">
+                <div className="w-full min-h-[300px] px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 max-w-none">
                   {formData.longDef ? renderMarkdownPreview(formData.longDef) : (
                     <p className="text-gray-400 italic">A definição aparecerá aqui...</p>
                   )}

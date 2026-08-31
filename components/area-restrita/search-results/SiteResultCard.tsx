@@ -35,7 +35,7 @@ export function SiteResultCard({ site, query }: SiteResultCardProps) {
             {highlightText(site.description, query)}
           </p>
           {site.category && (
-            <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700">
+            <span className="inline-block mt-2 px-2 py-0.5 rounded-[3px] text-xs font-medium bg-brand-50 text-brand-700">
               {site.category}
             </span>
           )}

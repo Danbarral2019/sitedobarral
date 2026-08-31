@@ -280,8 +280,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 />
               </div>
               <div>
-                <h1 className="text-base font-cinzel font-semibold text-white">Painel Admin</h1>
-                <p className="text-xs text-brand-200 mt-0.5 font-poppins">Prof. Daniel Barral</p>
+                <h1 className="text-base font-heading font-semibold text-white">Painel Admin</h1>
+                <p className="text-xs text-brand-200 mt-0.5 font-sans">Prof. Daniel Barral</p>
               </div>
             </div>
           ) : (
@@ -352,7 +352,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div className="flex items-center gap-2 flex-1">
                       <span>{item.label}</span>
                       {item.badge && item.badge > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-[3px] min-w-[18px] text-center">
                           {item.badge}
                         </span>
                       )}

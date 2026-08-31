@@ -187,7 +187,7 @@ export default function UploadWordPage() {
               {showPreview ? (
                 /* PREVIEW MODE */
                 <div className="bg-white p-8 rounded-xl border-2 border-gray-200">
-                  <article className="prose prose-lg max-w-none">
+                  <article className="max-w-none">
                     <h1>{editedTitle}</h1>
                     <div className="text-sm text-gray-600 mb-6">
                       <p><strong>Autor:</strong> {editedAuthor}</p>

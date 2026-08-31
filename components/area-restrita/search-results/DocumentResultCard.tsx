@@ -92,11 +92,11 @@ export function DocumentResultCard({
             </p>
           )}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-surface-deep text-ink-muted">
+            <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-surface-deep text-ink-muted">
               {doc.category}
             </span>
             {doc.courseName && (
-              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700">
+              <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-brand-50 text-brand-700">
                 {doc.courseName}
               </span>
             )}
@@ -106,7 +106,7 @@ export function DocumentResultCard({
                   e.stopPropagation();
                   onAskAI(doc.title);
                 }}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] text-xs font-medium bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors"
                 title="Perguntar à IA sobre este documento"
               >
                 <Sparkles className="w-3 h-3" />

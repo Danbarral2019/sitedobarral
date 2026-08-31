@@ -119,21 +119,21 @@ export function DOUDocumentModal({
     switch (document.approvalStatus) {
       case 'auto_approved':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-[3px] text-xs font-medium bg-green-100 text-green-800">
             <CheckCircle className="w-3 h-3" />
             Auto-aprovado
           </span>
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-amber-accent-soft text-ink-primary">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-[3px] text-xs font-medium bg-amber-accent-soft text-ink-primary">
             <AlertTriangle className="w-3 h-3" />
             Revisão
           </span>
         );
       case 'auto_rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-[3px] text-xs font-medium bg-red-100 text-red-800">
             <XCircle className="w-3 h-3" />
             Rejeitado
           </span>

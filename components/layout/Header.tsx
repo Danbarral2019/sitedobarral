@@ -68,7 +68,7 @@ export const Header = memo(function Header() {
             <Link
               href="/"
               aria-current={isActive('/') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <Home className="w-4 h-4" />
               <span>Início</span>
@@ -77,7 +77,7 @@ export const Header = memo(function Header() {
             <Link
               href="/sobre"
               aria-current={isActive('/sobre') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/sobre') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/sobre') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <User className="w-4 h-4" />
               <span>Sobre</span>
@@ -88,7 +88,7 @@ export const Header = memo(function Header() {
                 onClick={() => setIsCoursesOpen(!isCoursesOpen)}
                 aria-expanded={isCoursesOpen}
                 aria-haspopup="true"
-                className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/cursos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+                className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/cursos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
               >
                 <BookOpen className="w-4 h-4" />
                 <span>Cursos</span>
@@ -122,7 +122,7 @@ export const Header = memo(function Header() {
             <Link
               href="/base-conhecimento"
               aria-current={isActive('/base-conhecimento') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/base-conhecimento') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/base-conhecimento') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <Library className="w-4 h-4" />
               <span>Base de Conhecimento</span>
@@ -131,7 +131,7 @@ export const Header = memo(function Header() {
             <Link
               href="/legislacao"
               aria-current={isActive('/legislacao') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/legislacao') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/legislacao') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <Scale className="w-4 h-4" />
               <span>Legislação</span>
@@ -140,7 +140,7 @@ export const Header = memo(function Header() {
             <Link
               href="/jurisprudencia"
               aria-current={isActive('/jurisprudencia') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/jurisprudencia') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/jurisprudencia') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <Gavel className="w-4 h-4" />
               <span>Jurisprudência</span>
@@ -149,7 +149,7 @@ export const Header = memo(function Header() {
             <Link
               href="/blog"
               aria-current={isActive('/blog') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <FileText className="w-4 h-4" />
               <span>Blog</span>
@@ -158,7 +158,7 @@ export const Header = memo(function Header() {
             <Link
               href="/glossario"
               aria-current={isActive('/glossario') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/glossario') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/glossario') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <BookMarked className="w-4 h-4" />
               <span>Glossário</span>
@@ -167,7 +167,7 @@ export const Header = memo(function Header() {
             <Link
               href="/faq"
               aria-current={isActive('/faq') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/faq') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/faq') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <HelpCircle className="w-4 h-4" />
               <span>FAQ</span>
@@ -176,7 +176,7 @@ export const Header = memo(function Header() {
             <Link
               href="/planos"
               aria-current={isActive('/planos') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <CreditCard className="w-4 h-4" />
               <span>Planos</span>
@@ -185,7 +185,7 @@ export const Header = memo(function Header() {
             <Link
               href="/contato"
               aria-current={isActive('/contato') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
               <Mail className="w-4 h-4" />
               <span>Contato</span>
@@ -193,7 +193,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/login"
-              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-[6px] text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
+              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-[6px] text-white transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
             >
               <LogIn className="w-4 h-4" />
               <span>Área do Aluno</span>
@@ -229,7 +229,7 @@ export const Header = memo(function Header() {
                 key={href}
                 href={href}
                 aria-current={isActive(href) ? 'page' : undefined}
-                className={`block py-3 px-2 rounded transition-colors font-poppins ${isActive(href) ? 'text-white font-semibold bg-brand-500' : 'text-white/90 hover:text-white hover:bg-brand-500'}`}
+                className={`block py-3 px-2 rounded transition-colors font-sans ${isActive(href) ? 'text-white font-semibold bg-brand-500' : 'text-white/90 hover:text-white hover:bg-brand-500'}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {label}
@@ -238,7 +238,7 @@ export const Header = memo(function Header() {
             <div className="mt-4 pt-4 border-t border-brand-500">
               <Link
                 href="/login"
-                className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-[6px] text-white transition-colors font-poppins"
+                className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-[6px] text-white transition-colors font-sans"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <LogIn className="w-4 h-4" />

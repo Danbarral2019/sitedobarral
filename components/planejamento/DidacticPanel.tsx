@@ -177,7 +177,7 @@ function ConceptoTab({ def }: { def: SectionDefinition }) {
           <ul className="space-y-1 text-xs">
             {def.legalAnchors.map((a, i) => (
               <li key={i} className="inline-flex items-center gap-1">
-                <span className="rounded-full bg-white px-2 py-0.5 text-ink-secondary">
+                <span className="rounded-[3px] bg-white px-2 py-0.5 text-ink-secondary">
                   {a.label}
                 </span>
               </li>

@@ -251,7 +251,7 @@ function SidebarLink({
         )}
       </span>
       {item.badge === 'novo' && (
-        <span className="ml-2 shrink-0 self-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
+        <span className="ml-2 shrink-0 self-center rounded-[3px] bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800">
           Novo
         </span>
       )}

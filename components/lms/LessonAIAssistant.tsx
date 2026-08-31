@@ -166,7 +166,7 @@ export default function LessonAIAssistant({
                 href={src.url || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full hover:bg-brand-100 transition-colors"
+                className="text-[10px] text-brand-600 bg-brand-50 px-2 py-0.5 rounded-[3px] hover:bg-brand-100 transition-colors"
               >
                 {src.title}
               </a>

@@ -34,7 +34,7 @@ export function AnaliseIADemo({ totalResultados }: AnaliseIADemoProps) {
       <div className="flex items-center gap-3 mb-2 flex-wrap">
         <Sparkles className="w-8 h-8 text-brand-600" />
         <h2 className="text-2xl font-bold text-ink-primary">Análise IA</h2>
-        <span className="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-wide">
+        <span className="px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-xs font-bold uppercase tracking-wide">
           Exemplo
         </span>
         <span className="ml-auto text-sm text-ink-muted">disponível na assinatura</span>

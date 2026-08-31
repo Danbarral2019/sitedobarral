@@ -91,7 +91,7 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
         {/* Resposta */}
         {data.aiAnswer && (
           <div className="bg-white rounded-[6px] border border-border-subtle p-6 mb-6">
-            <div className="prose prose-sm max-w-none text-ink-secondary whitespace-pre-wrap">
+            <div className="max-w-none text-ink-secondary whitespace-pre-wrap">
               {data.aiAnswer}
             </div>
           </div>

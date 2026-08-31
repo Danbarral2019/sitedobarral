@@ -20,13 +20,13 @@ export const Footer = memo(function Footer() {
                   className="object-contain opacity-90"
                 />
               </div>
-              <h3 className="text-white font-cinzel font-semibold text-lg tracking-wide">
+              <h3 className="text-white font-heading font-semibold text-lg tracking-wide">
                 Daniel Barral
               </h3>
             </div>
-            <p className="text-sm font-poppins text-brand-200 mb-2">Procurador Federal</p>
-            <p className="text-sm font-poppins text-brand-200 mb-2">Mestre em Direito Público</p>
-            <p className="text-sm font-poppins text-brand-200">
+            <p className="text-sm font-sans text-brand-200 mb-2">Procurador Federal</p>
+            <p className="text-sm font-sans text-brand-200 mb-2">Mestre em Direito Público</p>
+            <p className="text-sm font-sans text-brand-200">
               Especialista em Licitações e Contratos Administrativos
             </p>
 
@@ -64,10 +64,10 @@ export const Footer = memo(function Footer() {
 
           {/* Coluna 2: Links Rapidos */}
           <div>
-            <h4 className="text-white font-cinzel font-semibold mb-4 tracking-wide">
+            <h4 className="text-white font-heading font-semibold mb-4 tracking-wide">
               Links Rápidos
             </h4>
-            <ul className="space-y-2 font-poppins">
+            <ul className="space-y-2 font-sans">
               <li>
                 <Link href="/sobre" className="text-sm text-brand-200 hover:text-white transition-colors">
                   Sobre o Professor
@@ -113,10 +113,10 @@ export const Footer = memo(function Footer() {
 
           {/* Coluna 3: Principais Cursos */}
           <div>
-            <h4 className="text-white font-cinzel font-semibold mb-4 tracking-wide">
+            <h4 className="text-white font-heading font-semibold mb-4 tracking-wide">
               Principais Cursos
             </h4>
-            <ul className="space-y-2 font-poppins">
+            <ul className="space-y-2 font-sans">
               <li>
                 <Link
                   href="/cursos/planejamento-contratacoes"
@@ -163,13 +163,13 @@ export const Footer = memo(function Footer() {
 
         {/* Rodape inferior */}
         <div className="border-t border-brand-600 mt-8 pt-8 text-center">
-          <p className="text-sm font-poppins text-brand-200">
+          <p className="text-sm font-sans text-brand-200">
             © {new Date().getFullYear()} Prof. Daniel Barral. Todos os direitos reservados.
           </p>
-          <p className="text-xs mt-2 text-brand-300 font-poppins">
+          <p className="text-xs mt-2 text-brand-300 font-sans">
             Desenvolvido com dedicação para compartilhar conhecimento em Direito Administrativo
           </p>
-          <div className="mt-4 flex justify-center items-center gap-3 text-xs font-poppins">
+          <div className="mt-4 flex justify-center items-center gap-3 text-xs font-sans">
             <Link
               href="/termos"
               className="text-brand-200 hover:text-white transition-colors"

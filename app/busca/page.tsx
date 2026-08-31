@@ -427,7 +427,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Glossário
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-[3px] text-sm font-bold">
                     {results.results.glossaryTerms.length} {results.results.glossaryTerms.length === 1 ? 'termo' : 'termos'}
                   </span>
                 </div>
@@ -446,7 +446,7 @@ function BuscaIntegradaContent() {
                       </p>
                       {term.category && (
                         <div className="mt-2">
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-[3px]">
                             {term.category}
                           </span>
                         </div>
@@ -465,7 +465,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Lei 14.133/2021
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-sm font-bold">
                     {results.results.articles.length} {results.results.articles.length === 1 ? 'artigo' : 'artigos'}
                   </span>
                 </div>
@@ -521,7 +521,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Atos Normativos
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-sm font-bold">
                     {results.results.acts.length} {results.results.acts.length === 1 ? 'ato' : 'atos'}
                   </span>
                 </div>
@@ -563,7 +563,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Documentos
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-sm font-bold">
                     {results.results.documents.length} {results.results.documents.length === 1 ? 'documento' : 'documentos'}
                   </span>
                 </div>
@@ -664,7 +664,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Jurisprudência
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-emerald-100 text-emerald-700 rounded-[3px] text-sm font-bold">
                     {results.results.decisions.length} {results.results.decisions.length === 1 ? 'decisão' : 'decisões'}
                   </span>
                 </div>
@@ -722,7 +722,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Blog
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-rose-100 text-rose-700 rounded-[3px] text-sm font-bold">
                     {results.results.blogPosts.length} {results.results.blogPosts.length === 1 ? 'artigo' : 'artigos'}
                   </span>
                 </div>
@@ -768,7 +768,7 @@ function BuscaIntegradaContent() {
                   <h2 className="text-2xl font-bold text-ink-primary">
                     Perguntas Frequentes
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-amber-accent-soft text-ink-primary rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-amber-accent-soft text-ink-primary rounded-[3px] text-sm font-bold">
                     {results.results.faqs.length} {results.results.faqs.length === 1 ? 'resultado' : 'resultados'}
                   </span>
                 </div>
@@ -788,7 +788,7 @@ function BuscaIntegradaContent() {
                       </p>
                       {faq.category && (
                         <div className="mt-2 ml-7">
-                          <span className="text-xs px-2 py-1 bg-amber-accent-soft text-ink-primary rounded-full">
+                          <span className="text-xs px-2 py-1 bg-amber-accent-soft text-ink-primary rounded-[3px]">
                             {faq.category}
                           </span>
                         </div>

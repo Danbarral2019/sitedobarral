@@ -466,12 +466,12 @@ export default function JurisprudenciaClient() {
                       return (
                         <div className="flex flex-wrap gap-1 mb-3">
                           {visibleThemes.slice(0, 4).map((theme, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-brand-50 text-brand-700 text-xs rounded-full">
+                            <span key={i} className="px-2 py-0.5 bg-brand-50 text-brand-700 text-xs rounded-[3px]">
                               {theme}
                             </span>
                           ))}
                           {visibleThemes.length > 4 && (
-                            <span className="px-2 py-0.5 bg-surface-raised text-ink-muted text-xs rounded-full">
+                            <span className="px-2 py-0.5 bg-surface-raised text-ink-muted text-xs rounded-[3px]">
                               +{visibleThemes.length - 4}
                             </span>
                           )}

@@ -60,7 +60,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
             className="w-full min-h-[400px] p-6 text-ink-primary font-mono text-sm leading-relaxed resize-none focus:outline-none"
           />
         ) : (
-          <div className="p-6 prose prose-blue max-w-none">
+          <div className="p-6 max-w-none">
             {value ? (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {value}

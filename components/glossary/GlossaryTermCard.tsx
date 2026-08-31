@@ -66,7 +66,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
                 {term.term}
               </h3>
               {term.category && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800 flex-shrink-0">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-[3px] text-xs font-medium bg-brand-100 text-brand-800 flex-shrink-0">
                   {term.category}
                 </span>
               )}
@@ -97,7 +97,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
       {isExpanded && (
         <div className="px-5 pb-5 space-y-6">
           {/* Definição com formatação melhorada */}
-          <div className="prose prose-sm max-w-none">
+          <div className="max-w-none">
             <div className="text-ink-secondary leading-relaxed text-justify">
               <ReactMarkdown
                 components={{
@@ -153,7 +153,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
                         window.location.href = `/glossario/${related.slug}`;
                       }
                     }}
-                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors cursor-pointer"
+                    className="inline-flex items-center px-3 py-1.5 rounded-[3px] text-sm font-medium bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors cursor-pointer"
                   >
                     {related.term}
                   </button>

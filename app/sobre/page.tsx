@@ -40,7 +40,7 @@ export default function SobrePage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Prof. Daniel Barral</h1>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-heading">Prof. Daniel Barral</h1>
               <div className="h-1.5 w-48 bg-brand-500 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-ink-secondary leading-relaxed">
@@ -100,7 +100,7 @@ export default function SobrePage() {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-[6px]">
               <div className="inline-block mb-4">
-                <div className="bg-white/20 px-4 py-2 rounded-full">
+                <div className="bg-white/20 px-4 py-2 rounded-[3px]">
                   <span className="text-white font-semibold text-sm flex items-center gap-2">
                     <Award className="w-4 h-4" />
                     Nossa Missão
@@ -358,7 +358,7 @@ export default function SobrePage() {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-[6px]">
               <div className="inline-block mb-4">
-                <div className="bg-white/20 px-4 py-2 rounded-full">
+                <div className="bg-white/20 px-4 py-2 rounded-[3px]">
                   <span className="text-white font-semibold text-sm">💼 Próximos Passos</span>
                 </div>
               </div>

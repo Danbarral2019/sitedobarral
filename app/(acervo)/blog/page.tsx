@@ -78,7 +78,7 @@ export default async function BlogPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Blog Jurídico</h1>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-heading">Blog Jurídico</h1>
               <div className="h-1.5 w-32 bg-brand-500 rounded-full mx-auto mb-6"></div>
             </div>
             <p className="text-xl text-ink-secondary leading-relaxed">
@@ -156,7 +156,7 @@ export default async function BlogPage() {
 
             <div className="relative z-10">
               <div className="inline-block mb-4">
-                <div className="bg-white/20 px-4 py-2 rounded-full">
+                <div className="bg-white/20 px-4 py-2 rounded-[3px]">
                   <span className="text-white font-semibold text-sm">📰 Blog Jurídico</span>
                 </div>
               </div>

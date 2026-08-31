@@ -116,7 +116,7 @@ export default function GlossarioPage() {
             <div className="flex justify-center mb-4">
               <BookOpen className="h-16 w-16" />
             </div>
-            <h1 className="text-4xl font-bold mb-4 font-cinzel">
+            <h1 className="text-4xl font-bold mb-4 font-heading">
               Glossário de Licitações
             </h1>
             <p className="text-xl text-brand-100 max-w-2xl mx-auto">

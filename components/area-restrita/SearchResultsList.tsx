@@ -207,7 +207,7 @@ export function SearchResultsList({
               <div className="flex items-center gap-2 mb-3">
                 <Icon className={`w-5 h-5 ${config.color}`} />
                 <h3 className="font-bold text-ink-primary">{config.labelPlural}</h3>
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-surface-deep text-ink-muted">
+                <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-surface-deep text-ink-muted">
                   {items.length}
                 </span>
               </div>

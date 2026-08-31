@@ -568,12 +568,12 @@ export default function JurisprudenciaRestritaClient() {
                     {(themes.length > 0 || articles.length > 0) && (
                       <div className="flex flex-wrap gap-1.5 mt-3">
                         {themes.slice(0, 5).map(t => (
-                          <span key={`t-${t}`} className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full">
+                          <span key={`t-${t}`} className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-[3px]">
                             {t}
                           </span>
                         ))}
                         {articles.slice(0, 5).map(a => (
-                          <span key={`a-${a}`} className="text-xs px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full inline-flex items-center gap-1">
+                          <span key={`a-${a}`} className="text-xs px-2 py-0.5 bg-brand-50 text-brand-700 rounded-[3px] inline-flex items-center gap-1">
                             <BookOpen className="w-3 h-3" /> art. {a}
                           </span>
                         ))}

@@ -248,7 +248,7 @@ export default function JurisprudenciaDetailPage() {
             <span className={`px-3 py-1 text-sm font-medium rounded-full ${tribunalColor(decision.tribunalCode)}`}>
               {tribunalLabel(decision.tribunalCode)}
             </span>
-            <span className="px-3 py-1 bg-white/20 text-sm font-medium rounded-full">
+            <span className="px-3 py-1 bg-white/20 text-sm font-medium rounded-[3px]">
               {isCanonical
                 ? formatDecisionBadge(decision.fullIdentifier ?? '', decision.decisionType, decision.decisionNumber)
                 : decision.decisionType}
@@ -428,7 +428,7 @@ export default function JurisprudenciaDetailPage() {
             </h2>
             <div className="flex flex-wrap gap-2">
               {themes.map((theme, i) => (
-                <span key={i} className="px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-sm font-medium">
+                <span key={i} className="px-3 py-1 bg-brand-50 text-brand-700 rounded-[3px] text-sm font-medium">
                   {theme}
                 </span>
               ))}

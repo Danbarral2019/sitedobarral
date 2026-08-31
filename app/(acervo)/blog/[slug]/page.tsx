@@ -163,7 +163,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 {post.tags.map((tag: string) => (
                   <span
                     key={tag}
-                    className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm"
+                    className="bg-primary-100 text-primary-700 px-3 py-1 rounded-[3px] text-sm"
                   >
                     <Tag className="w-3 h-3 inline mr-1" />
                     {tag}

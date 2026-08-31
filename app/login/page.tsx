@@ -83,7 +83,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-[6px] p-8 border border-border-subtle">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-ink-primary mb-2 font-cinzel">
+            <h1 className="text-3xl font-bold text-ink-primary mb-2 font-heading">
               Área do Aluno
             </h1>
             <p className="text-ink-muted">

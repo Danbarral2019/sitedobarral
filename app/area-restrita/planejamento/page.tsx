@@ -74,7 +74,7 @@ export default async function PlanejamentoListPage() {
                   <h3 className="font-serif text-lg text-brand-900">
                     {s.titulo}
                   </h3>
-                  <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-800">
+                  <span className="rounded-[3px] bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-800">
                     {friendlyStatus(s.status)}
                   </span>
                 </div>

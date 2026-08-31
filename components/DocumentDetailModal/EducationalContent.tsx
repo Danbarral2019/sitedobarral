@@ -57,7 +57,7 @@ export default function EducationalContent({
             </div>
             {!document.summaryReviewedByAdmin && (
               <span
-                className="px-2 py-1 bg-amber-accent-soft text-ink-primary border border-amber-accent rounded-full text-xs font-semibold inline-flex items-center gap-1"
+                className="px-2 py-1 bg-amber-accent-soft text-ink-primary border border-amber-accent rounded-[3px] text-xs font-semibold inline-flex items-center gap-1"
                 title="Resumo gerado por IA — ainda não foi revisado por um administrador. Pode conter imprecisões."
               >
                 <span aria-hidden>⚠️</span> Resumo IA não revisado
@@ -146,7 +146,7 @@ export default function EducationalContent({
             {tags.map((tag, index) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium"
+                className="px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-sm font-medium"
               >
                 {tag}
               </span>

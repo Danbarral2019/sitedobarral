@@ -37,7 +37,7 @@ export function LeiArticleResultCard({
             </div>
           )}
           <div className="flex items-center gap-2 mt-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-surface-deep text-ink-muted">
+            <span className="px-2 py-0.5 rounded-[3px] text-xs font-medium bg-surface-deep text-ink-muted">
               {article.capitulo}
             </span>
           </div>

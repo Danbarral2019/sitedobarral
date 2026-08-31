@@ -404,13 +404,13 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
                 <Icon className="w-7 h-7 text-white" />
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-cinzel font-semibold mb-2 tracking-wide">
+                <h1 className="text-3xl md:text-4xl font-heading font-semibold mb-2 tracking-wide">
                   {cfg.label}
                 </h1>
-                <p className="text-base md:text-lg text-brand-100 font-poppins leading-relaxed max-w-3xl">
+                <p className="text-base md:text-lg text-brand-100 font-sans leading-relaxed max-w-3xl">
                   {cfg.description}
                 </p>
-                <p className="text-sm text-brand-200 mt-3 font-poppins">
+                <p className="text-sm text-brand-200 mt-3 font-sans">
                   {searchTerm ? (
                     <>
                       {total.toLocaleString('pt-BR')} {total === 1 ? 'resultado' : 'resultados'} para &quot;{searchTerm}&quot;
@@ -437,7 +437,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
               name="q"
               defaultValue={searchTerm}
               placeholder={`Buscar em ${cfg.label.toLowerCase()}...`}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent text-base font-poppins"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent text-base font-sans"
               aria-label={`Buscar em ${cfg.label}`}
             />
           </div>

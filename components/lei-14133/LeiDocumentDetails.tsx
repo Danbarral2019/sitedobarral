@@ -259,7 +259,7 @@ export function LeiDocumentDetails({ documentId, documentType = 'document' }: Le
           <h4 className="font-bold text-ink-primary text-sm mb-2">Tags</h4>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
-              <span key={index} className="px-2 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-medium">
+              <span key={index} className="px-2 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-xs font-medium">
                 {tag}
               </span>
             ))}
