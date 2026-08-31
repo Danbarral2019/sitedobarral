@@ -20,7 +20,7 @@ import {
   type LeiArticleListItem,
 } from '@/components/lei-14133/LeiSidebar';
 import { LeiPreviewHeader } from '@/components/lei-14133/LeiPreviewHeader';
-import { LeiArticleCard } from '@/components/lei-14133/LeiArticleCard';
+import { ArticleFull } from '@/components/lei-14133/ArticleFull';
 import { LeiCrossReferences } from '@/components/lei-14133/LeiCrossReferences';
 import { LeiArticleDocuments } from '@/components/lei-14133/LeiArticleDocuments';
 import { LeiEnunciadosList } from '@/components/lei-14133/LeiEnunciadosList';
@@ -111,13 +111,35 @@ function LeiComentadaContent() {
           <div className="lg:col-span-8">
             {selectedArticle ? (
               <div className="space-y-6">
-                <LeiArticleCard
-                  numero={selectedArticle.numero}
-                  titulo={selectedArticle.titulo}
-                  capituloCompleto={selectedArticle.capituloCompleto}
-                  ementa={selectedArticle.ementa}
-                  documentCount={selectedArticle.documentCount}
-                />
+                {/* Texto da lei na tipografia de leitura do sistema: serif,
+                    1.0625rem, entrelinha 1.75, recuo pendente em incisos e
+                    alíneas, coluna de 65ch. O LeiArticleCard entregava tudo
+                    isso em Inter, sem teto de largura — contra a regra do
+                    DESIGN.md para a página mais importante do produto. */}
+                <div className="bg-surface-page rounded-[6px] border border-border-subtle p-6 md:p-8">
+                  {(selectedArticle.capituloCompleto || selectedArticle.titulo) && (
+                    <p className="font-label text-ink-muted mb-1">
+                      {[selectedArticle.capituloCompleto, selectedArticle.titulo]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  )}
+                  <div className="max-w-[65ch]">
+                    <ArticleFull
+                      numero={selectedArticle.numero}
+                      ementa={selectedArticle.ementa}
+                      comLink={false}
+                    />
+                  </div>
+                  {selectedArticle.documentCount > 0 && (
+                    <p className="mt-4 text-sm text-ink-muted">
+                      {selectedArticle.documentCount}{' '}
+                      {selectedArticle.documentCount === 1
+                        ? 'documento do acervo cita este artigo'
+                        : 'documentos do acervo citam este artigo'}
+                    </p>
+                  )}
+                </div>
 
                 {selectedArticle.professorComment && (
                   <LeiProfessorComment comment={selectedArticle.professorComment} />

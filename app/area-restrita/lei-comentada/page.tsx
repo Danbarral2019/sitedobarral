@@ -10,7 +10,7 @@ import {
   type LeiArticleListItem,
 } from '@/components/lei-14133/LeiSidebar';
 import { LeiAreaHeader } from '@/components/lei-14133/LeiAreaHeader';
-import { LeiArticleCard } from '@/components/lei-14133/LeiArticleCard';
+import { ArticleFull } from '@/components/lei-14133/ArticleFull';
 import { LeiCrossReferences } from '@/components/lei-14133/LeiCrossReferences';
 import { LeiEnunciadosList } from '@/components/lei-14133/LeiEnunciadosList';
 import { LeiProfessorComment } from '@/components/lei-14133/LeiProfessorComment';
@@ -246,14 +246,27 @@ function ArticleSections({
 }: ArticleSectionsProps) {
   return (
     <div className="space-y-6">
-      <LeiArticleCard
-        numero={article.numero}
-        titulo={article.titulo}
-        capituloCompleto={article.capituloCompleto}
-        ementa={article.ementa}
-        documentCount={article.documentCount}
-        statusVariant="editorial"
-      />
+      {/* Mesma tipografia de leitura da versão pública. A auditoria de
+          2026-08 apontou que a lei comentada do assinante usava o mesmo
+          componente de interface da pública — Inter, sem teto de coluna. */}
+      <div className="bg-surface-page rounded-[6px] border border-border-subtle p-6 md:p-8">
+        {(article.capituloCompleto || article.titulo) && (
+          <p className="font-label text-ink-muted mb-1">
+            {[article.capituloCompleto, article.titulo].filter(Boolean).join(' · ')}
+          </p>
+        )}
+        <div className="max-w-[65ch]">
+          <ArticleFull numero={article.numero} ementa={article.ementa} comLink={false} />
+        </div>
+        {article.documentCount > 0 && (
+          <p className="mt-4 text-sm text-ink-muted">
+            {article.documentCount}{' '}
+            {article.documentCount === 1
+              ? 'documento do acervo cita este artigo'
+              : 'documentos do acervo citam este artigo'}
+          </p>
+        )}
+      </div>
 
       {article.professorComment && <LeiProfessorComment comment={article.professorComment} />}
 
