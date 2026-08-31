@@ -7,10 +7,10 @@ export function LegislacaoHighlightCard() {
   return (
     <section className="container mx-auto px-4 max-w-6xl mt-8">
       <Link href="/lei-14133" className="block group">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-600 p-8 md:p-10 shadow-lg hover:shadow-2xl transition-all border-2 border-brand-500/30">
+        <div className="relative overflow-hidden rounded-[6px] bg-brand-600 p-8 md:p-10 hover: transition-all border-2 border-brand-500/30">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
           <div className="relative flex flex-col md:flex-row items-center gap-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center flex-shrink-0">
+            <div className="w-16 h-16 bg-white/20 rounded-[6px] flex items-center justify-center flex-shrink-0">
               <BookOpen className="w-9 h-9 text-white" />
             </div>
             <div className="flex-1 text-center md:text-left">
@@ -19,7 +19,7 @@ export function LegislacaoHighlightCard() {
               </h2>
               <p className="text-lg text-white/80">195 artigos com jurisprudência e doutrina</p>
             </div>
-            <span className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-xl text-lg font-bold group-hover:bg-gray-50 transition-colors shadow-lg flex-shrink-0">
+            <span className="inline-flex items-center gap-2 bg-white text-brand-700 px-8 py-4 rounded-[6px] text-lg font-bold group-hover:bg-surface-raised transition-colors flex-shrink-0 border border-border-subtle">
               Acessar Lei Comentada
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </span>

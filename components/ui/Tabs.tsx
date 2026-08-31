@@ -40,7 +40,7 @@ interface TabListProps {
 
 export function TabList({ children, className = '' }: TabListProps) {
   return (
-    <div className={`flex border-b border-gray-200 mb-6 ${className}`}>
+    <div className={`flex border-b border-border-subtle mb-6 ${className}`}>
       {children}
     </div>
   );
@@ -67,8 +67,8 @@ export function Tab({ id, children, icon, badge }: TabProps) {
         relative px-6 py-3 font-medium text-sm transition-all
         border-b-2 flex items-center gap-2
         ${isActive
-          ? 'border-blue-600 text-blue-600'
-          : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+          ? 'border-brand-600 text-brand-600'
+          : 'border-transparent text-ink-muted hover:text-ink-primary hover:border-border-subtle'
         }
       `}
     >

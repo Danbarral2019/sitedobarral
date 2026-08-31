@@ -60,16 +60,16 @@ export default async function PublicacoesPage() {
   };
 
   return (
-    <main className="py-12 bg-gradient-to-b from-gray-50 to-white">
+    <main className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Publicações Acadêmicas</h1>
-              <div className="h-1.5 w-40 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Publicações Acadêmicas</h1>
+              <div className="h-1.5 w-40 bg-brand-500 rounded-full mx-auto mb-6"></div>
             </div>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-ink-secondary max-w-3xl mx-auto leading-relaxed">
               Livros, artigos científicos e notícias relevantes sobre Direito Administrativo
             </p>
           </div>
@@ -77,22 +77,22 @@ export default async function PublicacoesPage() {
           {/* Seção de Livros */}
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-brand-700 rounded-[6px] flex items-center justify-center">
                 <BookOpen className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900">Livros</h2>
+              <h2 className="text-3xl font-bold text-ink-primary">Livros</h2>
             </div>
 
             {livros.length === 0 ? (
-              <p className="text-gray-600 text-center py-12 bg-gray-50 rounded-xl">
+              <p className="text-ink-muted text-center py-12 bg-surface-raised rounded-[6px]">
                 Nenhum livro publicado ainda.
               </p>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {livros.map((livro: Publication) => (
-                  <div key={livro.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group border-2 border-gray-100 hover:border-brand-500">
+                  <div key={livro.id} className="bg-white rounded-[6px] overflow-hidden hover: transition-all group border-2 border-border-subtle hover:border-brand-500">
                     {livro.coverImage && (
-                      <div className="aspect-[3/4] bg-gray-200 overflow-hidden relative">
+                      <div className="aspect-[3/4] bg-surface-deep overflow-hidden relative">
                         <Image
                           src={livro.coverImage}
                           alt={livro.title}
@@ -103,24 +103,24 @@ export default async function PublicacoesPage() {
                       </div>
                     )}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-900 line-clamp-2 group-hover:text-brand-700 transition-colors">
+                      <h3 className="text-xl font-bold mb-2 text-ink-primary line-clamp-2 group-hover:text-brand-700 transition-colors">
                         {livro.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">por {livro.author}</p>
+                      <p className="text-sm text-ink-muted mb-2">por {livro.author}</p>
                       {livro.publisher && (
-                        <p className="text-sm text-gray-700 mb-2">
+                        <p className="text-sm text-ink-secondary mb-2">
                           <span className="font-semibold">Editora:</span> {livro.publisher}
                         </p>
                       )}
                       {livro.isbn && (
-                        <p className="text-xs text-gray-600 mb-3">
+                        <p className="text-xs text-ink-muted mb-3">
                           ISBN: {livro.isbn}
                         </p>
                       )}
-                      <p className="text-gray-700 mb-4 line-clamp-3 text-sm">
+                      <p className="text-ink-secondary mb-4 line-clamp-3 text-sm">
                         {livro.description}
                       </p>
-                      <div className="flex items-center text-xs text-gray-600">
+                      <div className="flex items-center text-xs text-ink-muted">
                         <Calendar className="w-3 h-3 mr-1" />
                         {formatDate(livro.publishedAt)}
                       </div>
@@ -134,32 +134,32 @@ export default async function PublicacoesPage() {
           {/* Seção de Artigos */}
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-brand-700 rounded-[6px] flex items-center justify-center">
                 <FileText className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900">Artigos Científicos</h2>
+              <h2 className="text-3xl font-bold text-ink-primary">Artigos Científicos</h2>
             </div>
 
             {artigos.length === 0 ? (
-              <p className="text-gray-600 text-center py-12 bg-gray-50 rounded-xl">
+              <p className="text-ink-muted text-center py-12 bg-surface-raised rounded-[6px]">
                 Nenhum artigo publicado ainda.
               </p>
             ) : (
               <div className="space-y-6">
                 {artigos.map((artigo: Publication) => (
-                  <div key={artigo.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all border-l-4 border-purple-500">
-                    <h3 className="text-2xl font-bold mb-2 text-gray-900">
+                  <div key={artigo.id} className="bg-white rounded-[6px] p-6 hover: transition-all border-l-4 border-brand-500">
+                    <h3 className="text-2xl font-bold mb-2 text-ink-primary">
                       {artigo.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <p className="text-sm text-ink-muted mb-3">
                       por {artigo.author}
                       {artigo.journal && <span className="ml-2">· {artigo.journal}</span>}
                     </p>
-                    <p className="text-gray-700 mb-4 leading-relaxed">
+                    <p className="text-ink-secondary mb-4 leading-relaxed">
                       {artigo.description}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center text-sm text-ink-muted">
                         <Calendar className="w-4 h-4 mr-1" />
                         {formatDate(artigo.publishedAt)}
                       </div>
@@ -168,7 +168,7 @@ export default async function PublicacoesPage() {
                           href={artigo.externalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                          className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors"
                         >
                           Ler artigo
                           <ExternalLink className="w-4 h-4" />
@@ -184,36 +184,36 @@ export default async function PublicacoesPage() {
           {/* Seção de Notícias/Eventos */}
           <section>
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-700 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-brand-700 rounded-[6px] flex items-center justify-center">
                 <Calendar className="w-7 h-7 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900">Notícias & Eventos</h2>
+              <h2 className="text-3xl font-bold text-ink-primary">Notícias & Eventos</h2>
             </div>
 
             {noticias.length === 0 ? (
-              <p className="text-gray-600 text-center py-12 bg-gray-50 rounded-xl">
+              <p className="text-ink-muted text-center py-12 bg-surface-raised rounded-[6px]">
                 Nenhuma notícia ou evento publicado ainda.
               </p>
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
                 {noticias.map((noticia: Publication) => (
-                  <div key={noticia.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transition-all border-2 border-gray-100 hover:border-pink-500">
-                    <h3 className="text-xl font-bold mb-2 text-gray-900">
+                  <div key={noticia.id} className="bg-white rounded-[6px] p-6 hover: transition-all border-2 border-border-subtle hover:border-brand-500">
+                    <h3 className="text-xl font-bold mb-2 text-ink-primary">
                       {noticia.title}
                     </h3>
-                    <p className="text-gray-700 mb-4 leading-relaxed">
+                    <p className="text-ink-secondary mb-4 leading-relaxed">
                       {noticia.description}
                     </p>
-                    <div className="space-y-2 text-sm text-gray-600">
+                    <div className="space-y-2 text-sm text-ink-muted">
                       {noticia.eventDate && (
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-pink-600" />
+                          <Calendar className="w-4 h-4 text-brand-600" />
                           <span className="font-semibold">Data:</span> {formatDate(noticia.eventDate)}
                         </div>
                       )}
                       {noticia.location && (
                         <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-pink-600" />
+                          <MapPin className="w-4 h-4 text-brand-600" />
                           <span className="font-semibold">Local:</span> {noticia.location}
                         </div>
                       )}
@@ -223,7 +223,7 @@ export default async function PublicacoesPage() {
                             href={noticia.externalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-pink-600 font-semibold hover:text-pink-700"
+                            className="inline-flex items-center gap-2 text-brand-600 font-semibold hover:text-brand-700"
                           >
                             Saiba mais
                             <ExternalLink className="w-4 h-4" />

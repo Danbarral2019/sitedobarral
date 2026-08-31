@@ -15,19 +15,19 @@ export function Progress({ value, className = '', showLabel = true }: ProgressPr
     <div className={`w-full ${className}`}>
       <div className="flex justify-between items-center mb-1">
         {showLabel && (
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-ink-secondary">
             {clampedValue < 100 ? 'Enviando...' : 'Concluído!'}
           </span>
         )}
         {showLabel && (
-          <span className="text-sm font-bold text-blue-600">
+          <span className="text-sm font-bold text-brand-600">
             {Math.round(clampedValue)}%
           </span>
         )}
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+      <div className="w-full bg-surface-deep rounded-full h-2.5 overflow-hidden">
         <div
-          className="bg-gradient-to-r from-blue-600 to-purple-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+          className="bg-brand-600 h-2.5 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${clampedValue}%` }}
         />
       </div>

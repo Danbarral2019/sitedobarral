@@ -120,18 +120,18 @@ export function DashboardCourseCard({
           })).filter((s) => s.docs.length > 0);
 
           return (
-            <div key={courseId} className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div key={courseId} className="bg-white border border-border-subtle rounded-[6px] overflow-hidden">
               {/* Course Header */}
               <div className="p-5">
                 <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-brand-100 rounded-xl flex-shrink-0">
+                  <div className="p-2.5 bg-brand-100 rounded-[6px] flex-shrink-0">
                     <GraduationCap className="w-5 h-5 text-brand-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-base font-bold text-gray-900 leading-tight">
+                    <h4 className="text-base font-bold text-ink-primary leading-tight">
                       {course.title.split('(')[0].trim()}
                     </h4>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                    <p className="text-sm text-ink-muted mt-1 line-clamp-2">
                       {course.shortDescription}
                     </p>
                     {totalMaterials > 0 && (
@@ -144,7 +144,7 @@ export function DashboardCourseCard({
               </div>
 
               {/* CTA Bar */}
-              <div className="px-5 py-3 bg-brand-50/50 border-t border-gray-100 flex items-center justify-between gap-3">
+              <div className="px-5 py-3 bg-brand-50/50 border-t border-border-subtle flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-sm text-brand-800 min-w-0">
                   <PlayCircle className="w-4 h-4 text-brand-600 flex-shrink-0" />
                   {modulesData && modulesData[courseId]?.moduleCount > 0 ? (
@@ -160,7 +160,7 @@ export function DashboardCourseCard({
                 </div>
                 <Link
                   href={`/area-restrita/curso/${course.slug}`}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors flex-shrink-0"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white rounded-[6px] font-semibold text-sm hover:bg-brand-700 transition-colors flex-shrink-0"
                 >
                   Entrar
                   <ChevronRight className="w-4 h-4" />
@@ -169,10 +169,10 @@ export function DashboardCourseCard({
 
               {/* Materials Accordion */}
               {hasMaterials && totalMaterials > 0 && (
-                <div className="border-t border-gray-100">
+                <div className="border-t border-border-subtle">
                   <button
                     onClick={() => toggleExpanded(courseId)}
-                    className="w-full flex items-center gap-2 px-5 py-3 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center gap-2 px-5 py-3 text-sm font-medium text-ink-muted hover:text-ink-secondary hover:bg-surface-raised transition-colors"
                   >
                     <ChevronDown
                       className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -190,30 +190,30 @@ export function DashboardCourseCard({
                           <div key={section.category}>
                             <div className="flex items-center gap-2 mb-2">
                               <Icon className="w-4 h-4 text-brand-500" />
-                              <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                              <span className="text-xs font-bold text-ink-secondary uppercase tracking-wider">
                                 {section.title}
                               </span>
-                              <span className="text-xs text-gray-400">({section.docs.length})</span>
+                              <span className="text-xs text-ink-muted">({section.docs.length})</span>
                             </div>
                             <div className="space-y-1.5">
                               {section.docs.map((doc) => (
                                 <button
                                   key={doc.id}
                                   onClick={() => onDocumentClick(doc)}
-                                  className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-xl p-3.5 transition-all group flex items-center gap-3"
+                                  className="w-full text-left bg-surface-raised hover:bg-surface-deep rounded-[6px] p-3.5 transition-all group flex items-center gap-3"
                                 >
-                                  <FileText className="w-4 h-4 text-gray-400 group-hover:text-brand-500 flex-shrink-0" />
+                                  <FileText className="w-4 h-4 text-ink-muted group-hover:text-brand-500 flex-shrink-0" />
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-600 transition-colors">
+                                    <p className="text-sm font-medium text-ink-primary truncate group-hover:text-brand-600 transition-colors">
                                       {doc.title}
                                     </p>
                                     {doc.description && (
-                                      <p className="text-xs text-gray-500 truncate mt-0.5">
+                                      <p className="text-xs text-ink-muted truncate mt-0.5">
                                         {doc.description}
                                       </p>
                                     )}
                                   </div>
-                                  <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white text-gray-500 flex-shrink-0">
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white text-ink-muted flex-shrink-0">
                                     {getDocTypeLabel(doc.type)}
                                   </span>
                                 </button>
@@ -229,9 +229,9 @@ export function DashboardCourseCard({
 
               {/* Empty State */}
               {!hasMaterials && (
-                <div className="px-5 py-6 border-t border-gray-100 text-center">
-                  <Clock className="w-5 h-5 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">Conteúdo em preparação</p>
+                <div className="px-5 py-6 border-t border-border-subtle text-center">
+                  <Clock className="w-5 h-5 text-ink-muted mx-auto mb-2" />
+                  <p className="text-sm text-ink-muted">Conteúdo em preparação</p>
                 </div>
               )}
             </div>

@@ -26,7 +26,7 @@ export default async function PlanejamentoListPage() {
           <h1 className="font-serif text-3xl text-brand-900 mb-2">
             Planejamento da Contratação
           </h1>
-          <p className="text-gray-600 max-w-2xl">
+          <p className="text-ink-muted max-w-2xl">
             Elabore ETP e Termo de Referência com assistência guiada, ancorada
             na base do curso. Cada contratação aqui é uma sessão sua, com
             versionamento próprio.
@@ -34,7 +34,7 @@ export default async function PlanejamentoListPage() {
         </div>
         <Link
           href="/area-restrita/planejamento/nova"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
+          className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
         >
           <Plus className="h-4 w-4" />
           Nova contratação
@@ -44,19 +44,19 @@ export default async function PlanejamentoListPage() {
       <PlanningOnboardingBanner showByDefault={sessions.length === 0} />
 
       {sessions.length === 0 ? (
-        <div className="rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-          <FileText className="mx-auto mb-4 h-10 w-10 text-gray-400" />
-          <h2 className="mb-2 text-lg font-medium text-gray-900">
+        <div className="rounded-[6px] border-2 border-dashed border-border-subtle p-12 text-center">
+          <FileText className="mx-auto mb-4 h-10 w-10 text-ink-muted" />
+          <h2 className="mb-2 text-lg font-medium text-ink-primary">
             Nenhuma contratação iniciada
           </h2>
-          <p className="mb-6 text-gray-600">
+          <p className="mb-6 text-ink-muted">
             Comece descrevendo, em linguagem natural, a contratação do seu
             órgão. O assistente sugere a trilha adequada e conduz a elaboração
             do ETP.
           </p>
           <Link
             href="/area-restrita/planejamento/nova"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
+            className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
           >
             <Plus className="h-4 w-4" />
             Iniciar primeira contratação
@@ -68,7 +68,7 @@ export default async function PlanejamentoListPage() {
             <li key={s.id}>
               <Link
                 href={`/area-restrita/planejamento/${s.id}`}
-                className="block rounded-xl border border-gray-200 p-5 transition hover:border-brand-600 hover:shadow-sm"
+                className="block rounded-[6px] border border-border-subtle p-5 transition hover:border-brand-600 hover:"
               >
                 <div className="mb-2 flex items-start justify-between">
                   <h3 className="font-serif text-lg text-brand-900">
@@ -79,11 +79,11 @@ export default async function PlanejamentoListPage() {
                   </span>
                 </div>
                 {s.natureza && (
-                  <p className="mb-3 text-xs text-gray-500">
+                  <p className="mb-3 text-xs text-ink-muted">
                     {friendlyNatureza(s.natureza)}
                   </p>
                 )}
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs text-ink-muted">
                   <span className="inline-flex items-center gap-1">
                     <FileText className="h-3 w-3" />
                     {s.documents.length} doc

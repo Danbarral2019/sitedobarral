@@ -34,15 +34,15 @@ export default function CourseEnrollmentInfo({ courseId }: CourseEnrollmentInfoP
         <EnrollmentStatusBanner courseId={courseId} />
 
         {/* Card de Acesso Rápido */}
-        <div className="bg-white rounded-xl shadow-md p-4 border-2 border-gray-200 flex items-center justify-between">
+        <div className="bg-white rounded-[6px] p-4 border-2 border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-3">
             <CheckCircle className="w-6 h-6 text-green-600" />
             <div>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-ink-primary">
                 Você está matriculado neste curso
               </p>
               {enrollmentStatus.expiresAt && !enrollmentStatus.isLifetime && (
-                <p className="text-xs text-gray-600 flex items-center gap-1">
+                <p className="text-xs text-ink-muted flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {enrollmentStatus.daysRemaining} dias restantes
                 </p>
@@ -52,7 +52,7 @@ export default function CourseEnrollmentInfo({ courseId }: CourseEnrollmentInfoP
 
           <Link
             href="/area-restrita"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-md text-sm"
+            className="bg-brand-600 text-white px-6 py-2 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-700 transition-all text-sm border border-border-subtle"
           >
             Ir para Área Restrita
           </Link>

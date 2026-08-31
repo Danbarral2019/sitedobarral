@@ -34,22 +34,22 @@ export default function CitationDrawer({ open, source, onClose }: Props) {
       <aside
         role="dialog"
         aria-label="Fonte citada"
-        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-gray-200 bg-white shadow-xl"
+        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-border-subtle bg-white"
       >
-        <header className="flex items-start justify-between border-b border-gray-100 px-5 py-4">
+        <header className="flex items-start justify-between border-b border-border-subtle px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 rounded-lg bg-brand-50 p-2 text-brand-700">
+            <span className="mt-0.5 rounded-[6px] bg-brand-50 p-2 text-brand-700">
               <Icon className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+              <p className="text-[11px] uppercase tracking-wide text-ink-muted">
                 {friendlyType(source.sourceType)}
               </p>
               <h3 className="font-serif text-lg leading-snug text-brand-900">
                 {source.title}
               </h3>
               {typeof source.similarity === "number" && (
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-ink-muted">
                   relevância estimada {Math.round(source.similarity * 100)}%
                 </p>
               )}
@@ -57,18 +57,18 @@ export default function CitationDrawer({ open, source, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+            className="rounded-md p-1 text-ink-muted hover:bg-surface-raised hover:text-ink-muted"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
           </button>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 text-sm leading-relaxed text-gray-800">
+        <div className="flex-1 overflow-y-auto px-5 py-4 text-sm leading-relaxed text-ink-secondary">
           {source.snippet ? (
             <p className="whitespace-pre-wrap">{source.snippet}</p>
           ) : (
-            <p className="italic text-gray-500">
+            <p className="italic text-ink-muted">
               Trecho-fonte não pré-carregado nesta sessão. Abra a fonte original
               para consultar o texto integral.
             </p>
@@ -82,7 +82,7 @@ export default function CitationDrawer({ open, source, onClose }: Props) {
         </div>
 
         {source.url && (
-          <footer className="border-t border-gray-100 px-5 py-3">
+          <footer className="border-t border-border-subtle px-5 py-3">
             <a
               href={source.url}
               target="_blank"

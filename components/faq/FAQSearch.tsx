@@ -35,13 +35,13 @@ export function FAQSearch({ initialSearch = '', initialCategory = '', categories
         }}
         className="flex-1 relative"
       >
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar perguntas..."
-          className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-600"
+          className="w-full pl-10 pr-4 py-3 border-2 border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-brand-600"
         />
       </form>
 
@@ -51,7 +51,7 @@ export function FAQSearch({ initialSearch = '', initialCategory = '', categories
           setCategory(e.target.value);
           submit(search, e.target.value);
         }}
-        className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+        className="px-4 py-3 border-2 border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 bg-white text-ink-primary"
         disabled={isPending}
       >
         <option value="">Todas as categorias</option>

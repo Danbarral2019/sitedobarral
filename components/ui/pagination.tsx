@@ -64,8 +64,8 @@ export function Pagination({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200">
-      <div className="text-sm text-gray-700">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-border-subtle">
+      <div className="text-sm text-ink-secondary">
         Mostrando <span className="font-medium">{String(startItem)}</span> a{' '}
         <span className="font-medium">{String(endItem)}</span> de{' '}
         <span className="font-medium">{String(safeTotalItems)}</span> resultados
@@ -75,7 +75,7 @@ export function Pagination({
         <button
           onClick={() => onPageChange(safeCurrentPage - 1)}
           disabled={safeCurrentPage === 1}
-          className="px-3 py-2 border-2 border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+          className="px-3 py-2 border-2 border-border-subtle rounded-[6px] font-medium text-ink-secondary hover:bg-surface-raised transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
         >
           <ChevronLeft className="w-4 h-4" />
           Anterior
@@ -85,14 +85,14 @@ export function Pagination({
           {getPageNumbers().map((page, index) => (
             <React.Fragment key={index}>
               {page === '...' ? (
-                <span className="px-3 py-2 text-gray-500">...</span>
+                <span className="px-3 py-2 text-ink-muted">...</span>
               ) : (
                 <button
                   onClick={() => onPageChange(page as number)}
-                  className={`px-3 py-2 rounded-lg font-medium transition-all ${
+                  className={`px-3 py-2 rounded-[6px] font-medium transition-all ${
                     safeCurrentPage === page
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                      : 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
+                      ? 'bg-brand-600 text-white'
+                      : 'border-2 border-border-subtle text-ink-secondary hover:bg-surface-raised'
                   }`}
                 >
                   {String(page)}
@@ -105,7 +105,7 @@ export function Pagination({
         <button
           onClick={() => onPageChange(safeCurrentPage + 1)}
           disabled={safeCurrentPage === safeTotalPages}
-          className="px-3 py-2 border-2 border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+          className="px-3 py-2 border-2 border-border-subtle rounded-[6px] font-medium text-ink-secondary hover:bg-surface-raised transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
         >
           Próxima
           <ChevronRight className="w-4 h-4" />

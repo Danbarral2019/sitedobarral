@@ -16,16 +16,16 @@ export default function TermosPage() {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <header className="mb-10">
-            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-gray-900 mb-3">
+            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-ink-primary mb-3">
               Termos de Uso
             </h1>
-            <div className="h-1 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mb-4" />
-            <p className="text-sm text-gray-500 font-poppins">
+            <div className="h-1 w-32 bg-brand-500 rounded-full mb-4" />
+            <p className="text-sm text-ink-muted font-poppins">
               Última atualização: {LAST_UPDATED}
             </p>
           </header>
 
-          <article className="bg-white rounded-2xl shadow-lg p-8 md:p-10 border-2 border-gray-200 font-poppins text-gray-800 leading-relaxed">
+          <article className="bg-white rounded-[6px] p-8 md:p-10 border-2 border-border-subtle font-poppins text-ink-secondary leading-relaxed">
             <Section number="1" title="Identificação">
               <p>
                 Este site e os serviços associados são oferecidos por{' '}
@@ -216,7 +216,7 @@ export default function TermosPage() {
               </p>
             </Section>
 
-            <p className="mt-10 text-sm text-gray-500 italic">
+            <p className="mt-10 text-sm text-ink-muted italic">
               Em caso de dúvida sobre qualquer cláusula, entre em contato conosco pelo e-mail{' '}
               <a href="mailto:contato@profdanielbarral.com" className="text-brand-600 hover:underline">
                 contato@profdanielbarral.com
@@ -233,7 +233,7 @@ export default function TermosPage() {
 function Section({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8 last:mb-0">
-      <h2 className="font-cinzel font-semibold text-xl md:text-2xl text-gray-900 mb-3">
+      <h2 className="font-cinzel font-semibold text-xl md:text-2xl text-ink-primary mb-3">
         <span className="text-brand-600 mr-2">{number}.</span>
         {title}
       </h2>

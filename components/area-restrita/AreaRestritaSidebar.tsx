@@ -56,7 +56,7 @@ export function AreaRestritaSidebar() {
     <nav className="flex flex-1 flex-col overflow-y-auto px-3 py-4">
       {NAV_SECTIONS.map((section) => (
         <section key={section.title} className="mb-4">
-          <h3 className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+          <h3 className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
             {section.title}
           </h3>
           <ul className="space-y-0.5">
@@ -67,7 +67,7 @@ export function AreaRestritaSidebar() {
             ))}
             {section.title === 'Meus estudos' && enrolledCourses.length > 0 && (
               <li className="pt-1">
-                <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
                   Meus cursos
                 </p>
                 <ul className="space-y-0.5">
@@ -98,18 +98,18 @@ export function AreaRestritaSidebar() {
       ? createPortal(
           <div className="lg:hidden">
             <div
-              className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-[2px]"
+              className="fixed inset-0 z-[60] bg-black/40-[2px]"
               onClick={() => setMobileOpen(false)}
               aria-hidden
             />
             <aside
               role="dialog"
               aria-label="Menu de navegação"
-              className="fixed left-0 top-0 z-[70] flex h-screen w-[85%] max-w-sm flex-col border-r border-gray-200 bg-white shadow-2xl"
+              className="fixed left-0 top-0 z-[70] flex h-screen w-[85%] max-w-sm flex-col border-r border-border-subtle bg-white"
             >
-              <header className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <header className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                  <p className="text-[11px] uppercase tracking-wide text-ink-muted">
                     Navegação
                   </p>
                   <h2 className="font-serif text-lg text-brand-900">
@@ -118,7 +118,7 @@ export function AreaRestritaSidebar() {
                 </div>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-md p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-700"
+                  className="rounded-md p-1.5 text-ink-muted hover:bg-surface-raised hover:text-ink-secondary"
                   aria-label="Fechar menu"
                 >
                   <X className="h-4 w-4" />
@@ -140,13 +140,13 @@ export function AreaRestritaSidebar() {
       <aside
         aria-label="Menu de navegação"
         className={cn(
-          'fixed left-0 top-0 z-40 hidden h-screen w-72 flex-col border-r border-gray-200 bg-white shadow-sm transition-transform duration-200',
+          'fixed left-0 top-0 z-40 hidden h-screen w-72 flex-col border-r border-border-subtle bg-white transition-transform duration-200',
           hydrated && desktopOpen ? 'lg:flex lg:translate-x-0' : 'lg:flex lg:-translate-x-full',
         )}
       >
-        <header className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+        <header className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
           <div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-500">
+            <p className="text-[11px] uppercase tracking-wide text-ink-muted">
               Navegação
             </p>
             <h2 className="font-serif text-lg text-brand-900">
@@ -155,7 +155,7 @@ export function AreaRestritaSidebar() {
           </div>
           <button
             onClick={toggleDesktop}
-            className="rounded-md p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-700"
+            className="rounded-md p-1.5 text-ink-muted hover:bg-surface-raised hover:text-ink-secondary"
             aria-label="Ocultar menu"
             title="Ocultar menu"
           >
@@ -169,7 +169,7 @@ export function AreaRestritaSidebar() {
       {hydrated && !desktopOpen && (
         <button
           onClick={toggleDesktop}
-          className="fixed left-4 top-20 z-40 hidden items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-md hover:border-brand-300 hover:text-brand-700 lg:inline-flex"
+          className="fixed left-4 top-20 z-40 hidden items-center gap-1 rounded-[6px] border border-border-subtle bg-white px-3 py-2 text-xs font-medium text-ink-secondary hover:border-brand-300 hover:text-brand-700 lg:inline-flex"
           aria-label="Abrir menu"
           title="Abrir menu"
         >
@@ -196,7 +196,7 @@ export function SidebarMobileTrigger({
     return (
       <button
         onClick={toggleMobile}
-        className="flex flex-1 flex-col items-center justify-center h-full text-gray-600 hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        className="flex flex-1 flex-col items-center justify-center h-full text-ink-muted hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
         aria-label="Abrir menu"
       >
         <Menu className="w-5 h-5 mb-1" />
@@ -207,7 +207,7 @@ export function SidebarMobileTrigger({
   return (
     <button
       onClick={toggleMobile}
-      className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors font-medium text-sm lg:hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+      className="flex items-center gap-1.5 px-3 py-2 text-ink-secondary hover:text-brand-700 hover:bg-brand-50 rounded-[6px] transition-colors font-medium text-sm lg:hidden focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
       aria-label="Abrir menu"
     >
       <Menu className="w-4 h-4" />
@@ -229,10 +229,10 @@ function SidebarLink({
       pathname.startsWith(item.href));
   const Icon = item.icon;
   const className = cn(
-    'flex items-start gap-3 rounded-lg px-3 py-2 text-sm transition',
+    'flex items-start gap-3 rounded-[6px] px-3 py-2 text-sm transition',
     active
       ? 'bg-brand-50 text-brand-900'
-      : 'text-gray-800 hover:bg-brand-50 hover:text-brand-800',
+      : 'text-ink-secondary hover:bg-brand-50 hover:text-brand-800',
   );
   const content = (
     <>
@@ -247,7 +247,7 @@ function SidebarLink({
       <span className="flex-1">
         <span className="block font-medium">{item.label}</span>
         {item.description && (
-          <span className="block text-[11px] text-gray-500">{item.description}</span>
+          <span className="block text-[11px] text-ink-muted">{item.description}</span>
         )}
       </span>
       {item.badge === 'novo' && (

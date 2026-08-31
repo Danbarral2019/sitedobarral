@@ -137,10 +137,10 @@ export default function CourseLandingPage({
   // Loading
   if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <main className="min-h-screen flex items-center justify-center bg-surface-raised">
         <div className="text-center">
           <Loader2 className="w-10 h-10 animate-spin text-brand-600 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Carregando curso...</p>
+          <p className="text-ink-muted text-sm">Carregando curso...</p>
         </div>
       </main>
     );
@@ -149,9 +149,9 @@ export default function CourseLandingPage({
   // Error
   if (error) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <main className="min-h-screen flex items-center justify-center bg-surface-raised">
         <div className="text-center max-w-md px-4">
-          <p className="text-gray-700 font-medium mb-4">{error}</p>
+          <p className="text-ink-secondary font-medium mb-4">{error}</p>
           <Link
             href="/area-restrita"
             className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-700 font-semibold text-sm"
@@ -168,20 +168,20 @@ export default function CourseLandingPage({
   const courseDescription = course?.shortDescription || '';
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b border-border-subtle">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link
             href="/area-restrita"
-            className="p-2 rounded-lg text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+            className="p-2 rounded-[6px] text-ink-muted hover:text-brand-600 hover:bg-brand-50 transition-colors"
             title="Voltar"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="min-w-0">
-            <p className="text-xs text-gray-400">Curso</p>
-            <h1 className="text-base lg:text-lg font-bold text-gray-900 truncate">
+            <p className="text-xs text-ink-muted">Curso</p>
+            <h1 className="text-base lg:text-lg font-bold text-ink-primary truncate">
               {courseTitle}
             </h1>
           </div>
@@ -199,17 +199,17 @@ export default function CourseLandingPage({
         )}
 
         {/* Course Info Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 lg:p-8 mb-6">
+        <div className="bg-white rounded-[6px] border border-border-subtle p-6 lg:p-8 mb-6">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl shadow-md flex-shrink-0">
+            <div className="p-3 bg-brand-700 rounded-[6px] flex-shrink-0 border border-border-subtle">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-xl lg:text-2xl font-bold text-ink-primary leading-tight">
                 {courseTitle}
               </h2>
               {courseDescription && (
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                <p className="text-sm text-ink-muted mt-2 leading-relaxed">
                   {courseDescription}
                 </p>
               )}
@@ -217,11 +217,11 @@ export default function CourseLandingPage({
                 <span className="text-xs font-semibold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">
                   {modules.length} {modules.length === 1 ? 'modulo' : 'modulos'}
                 </span>
-                <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-semibold text-ink-muted bg-surface-deep px-2.5 py-1 rounded-full">
                   {totalLessons} {totalLessons === 1 ? 'aula' : 'aulas'}
                 </span>
                 {allLessons.some((l) => l.estimatedMinutes) && (
-                  <span className="hidden sm:flex items-center gap-1 text-xs text-gray-400">
+                  <span className="hidden sm:flex items-center gap-1 text-xs text-ink-muted">
                     <Clock className="w-3.5 h-3.5" />
                     {allLessons.reduce((sum, l) => sum + (l.estimatedMinutes || 0), 0)} min total
                   </span>
@@ -232,7 +232,7 @@ export default function CourseLandingPage({
 
           {/* Progress Bar */}
           {totalLessons > 0 && (
-            <div className="mt-5 border-t border-gray-100 pt-4">
+            <div className="mt-5 border-t border-border-subtle pt-4">
               <LessonProgressBar
                 totalLessons={totalLessons}
                 completedLessons={completedLessons}
@@ -254,7 +254,7 @@ export default function CourseLandingPage({
                     {reached.map(m => (
                       <span
                         key={m.threshold}
-                        className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-full animate-[scale-in_0.3s_ease-out]"
+                        className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-accent-soft text-ink-primary border border-amber-accent-soft px-2 py-1 rounded-full animate-[scale-in_0.3s_ease-out]"
                       >
                         <span>{m.emoji}</span>
                         {m.label}
@@ -271,14 +271,14 @@ export default function CourseLandingPage({
             <div className="mt-5">
               <Link
                 href={`/area-restrita/curso/${courseSlug}/aula/${continueLesson.slug}`}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-colors shadow-sm"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-brand-600 text-white rounded-[6px] font-semibold text-sm hover:bg-brand-700 transition-colors border border-border-subtle"
               >
                 <Play className="w-4 h-4" />
                 {hasStarted ? 'Continuar de onde parou' : 'Comecar curso'}
                 <ChevronRight className="w-4 h-4" />
               </Link>
               {hasStarted && continueLesson && (
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-ink-muted mt-2">
                   Proxima: {continueLesson.title}
                 </p>
               )}
@@ -299,17 +299,17 @@ export default function CourseLandingPage({
             return (
               <div
                 key={mod.id}
-                className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+                className="bg-white rounded-[6px] border border-border-subtle overflow-hidden"
               >
                 {/* Module Header */}
-                <div className="px-5 py-4 lg:px-6 lg:py-5 border-b border-gray-100">
+                <div className="px-5 py-4 lg:px-6 lg:py-5 border-b border-border-subtle">
                   <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-sm lg:text-base font-bold text-gray-900 leading-tight">
+                      <h3 className="text-sm lg:text-base font-bold text-ink-primary leading-tight">
                         {mod.title}
                       </h3>
                       {mod.description && (
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        <p className="text-xs text-ink-muted mt-1 line-clamp-2">
                           {mod.description}
                         </p>
                       )}
@@ -321,7 +321,7 @@ export default function CourseLandingPage({
                           Concluido
                         </span>
                       ) : (
-                        <span className="text-xs font-semibold text-gray-400">
+                        <span className="text-xs font-semibold text-ink-muted">
                           {moduleCompleted}/{moduleTotal}
                         </span>
                       )}
@@ -330,7 +330,7 @@ export default function CourseLandingPage({
                 </div>
 
                 {/* Lessons List */}
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-border-subtle">
                   {moduleLessons.map((lesson) => {
                     const isCompleted = lesson.progress?.status === 'completed';
                     const isInProgress = lesson.progress?.status === 'in_progress';
@@ -357,19 +357,19 @@ export default function CourseLandingPage({
                           className="flex items-center gap-3 px-5 py-3.5 lg:px-6 lg:py-4 opacity-50 cursor-not-allowed"
                           title="Complete a aula pre-requisito para desbloquear"
                         >
-                          <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          <Lock className="w-5 h-5 text-ink-muted flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium leading-tight text-gray-400">
+                            <p className="text-sm font-medium leading-tight text-ink-muted">
                               {lesson.title}
                             </p>
                             {lesson.estimatedMinutes && (
-                              <span className="flex items-center gap-1 text-xs text-gray-300 mt-0.5">
+                              <span className="flex items-center gap-1 text-xs text-ink-muted mt-0.5">
                                 <Clock className="w-3 h-3" />
                                 {lesson.estimatedMinutes} min
                               </span>
                             )}
                           </div>
-                          <Lock className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                          <Lock className="w-4 h-4 text-ink-muted flex-shrink-0" />
                         </div>
                       );
                     }
@@ -378,7 +378,7 @@ export default function CourseLandingPage({
                       <Link
                         key={lesson.id}
                         href={`/area-restrita/curso/${courseSlug}/aula/${lesson.slug}`}
-                        className={`flex items-center gap-3 px-5 py-3.5 lg:px-6 lg:py-4 hover:bg-gray-50 transition-colors group ${
+                        className={`flex items-center gap-3 px-5 py-3.5 lg:px-6 lg:py-4 hover:bg-surface-raised transition-colors group ${
                           isContinueTarget ? 'bg-brand-50/30' : ''
                         }`}
                       >
@@ -389,7 +389,7 @@ export default function CourseLandingPage({
                           ) : isInProgress || isContinueTarget ? (
                             <Play className="w-5 h-5 text-brand-600" />
                           ) : (
-                            <div className="w-5 h-5 rounded-full border-2 border-gray-300" />
+                            <div className="w-5 h-5 rounded-full border-2 border-border-subtle" />
                           )}
                         </div>
 
@@ -398,16 +398,16 @@ export default function CourseLandingPage({
                           <p
                             className={`text-sm font-medium leading-tight ${
                               isCompleted
-                                ? 'text-gray-500'
+                                ? 'text-ink-muted'
                                 : isInProgress || isContinueTarget
                                 ? 'text-brand-700 font-semibold'
-                                : 'text-gray-800'
+                                : 'text-ink-secondary'
                             } group-hover:text-brand-600 transition-colors`}
                           >
                             {lesson.title}
                           </p>
                           {lesson.estimatedMinutes && (
-                            <span className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
+                            <span className="flex items-center gap-1 text-xs text-ink-muted mt-0.5">
                               <Clock className="w-3 h-3" />
                               {lesson.estimatedMinutes} min
                             </span>
@@ -415,7 +415,7 @@ export default function CourseLandingPage({
                         </div>
 
                         {/* Arrow */}
-                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-brand-500 flex-shrink-0 transition-colors" />
+                        <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-brand-500 flex-shrink-0 transition-colors" />
                       </Link>
                     );
                   })}
@@ -427,9 +427,9 @@ export default function CourseLandingPage({
 
         {/* Empty state */}
         {modules.length === 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-            <BookOpen className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">
+          <div className="bg-white rounded-[6px] border border-border-subtle p-8 text-center">
+            <BookOpen className="w-10 h-10 text-ink-muted mx-auto mb-3" />
+            <p className="text-ink-muted text-sm">
               Este curso ainda nao possui modulos disponiveis.
             </p>
             <Link

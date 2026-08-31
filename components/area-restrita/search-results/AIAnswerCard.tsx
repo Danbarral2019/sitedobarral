@@ -61,15 +61,15 @@ export function AIAnswerCard({
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 animate-pulse" aria-live="polite" aria-busy="true" role="status">
+      <div className="bg-brand-50 rounded-[6px] border border-brand-200 p-5 animate-pulse" aria-live="polite" aria-busy="true" role="status">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-5 h-5 rounded bg-purple-200" />
-          <div className="h-4 bg-purple-200 rounded w-24" />
+          <div className="w-5 h-5 rounded bg-brand-200" />
+          <div className="h-4 bg-brand-200 rounded w-24" />
         </div>
         <div className="space-y-2">
-          <div className="h-3 bg-purple-100 rounded w-full" />
-          <div className="h-3 bg-purple-100 rounded w-5/6" />
-          <div className="h-3 bg-purple-100 rounded w-4/6" />
+          <div className="h-3 bg-brand-100 rounded w-full" />
+          <div className="h-3 bg-brand-100 rounded w-5/6" />
+          <div className="h-3 bg-brand-100 rounded w-4/6" />
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ export function AIAnswerCard({
   // Error state
   if (error) {
     return (
-      <div className="bg-red-50 rounded-2xl border border-red-200 p-5">
+      <div className="bg-red-50 rounded-[6px] border border-red-200 p-5">
         <div className="flex items-center gap-2 text-red-700">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <span className="text-sm font-medium">{error}</span>
@@ -91,16 +91,16 @@ export function AIAnswerCard({
   if (!answer) return null;
 
   return (
-    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 p-5 shadow-sm">
+    <div className="bg-brand-50 rounded-[6px] border border-brand-200 p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-600" />
-          <h3 className="font-bold text-purple-900 text-sm">Análise IA</h3>
+          <Sparkles className="w-5 h-5 text-brand-600" />
+          <h3 className="font-bold text-brand-900 text-sm">Análise IA</h3>
         </div>
         <button
           onClick={handleDownloadPDF}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-purple-700 bg-purple-100 hover:bg-purple-200 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium text-brand-700 bg-brand-100 hover:bg-brand-200 transition-colors"
           title="Baixar resposta como PDF"
         >
           <Download className="w-3.5 h-3.5" />
@@ -109,7 +109,7 @@ export function AIAnswerCard({
       </div>
 
       {/* Answer text */}
-      <div className="text-sm text-gray-800 leading-relaxed">
+      <div className="text-sm text-ink-secondary leading-relaxed">
         <div className={isExpanded ? '' : 'line-clamp-6'}>
           {answer.split('\n\n').map((paragraph, i) => (
             <p key={i} className="mb-3 last:mb-0">
@@ -125,7 +125,7 @@ export function AIAnswerCard({
         {answer.length > 400 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-2 text-purple-600 hover:text-purple-800 text-xs font-medium transition-colors"
+            className="mt-2 text-brand-600 hover:text-brand-800 text-xs font-medium transition-colors"
           >
             {isExpanded ? 'Ver menos' : 'Ver mais'}
           </button>
@@ -134,8 +134,8 @@ export function AIAnswerCard({
 
       {/* Legal Sources */}
       {legalSources && legalSources.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-purple-200/50">
-          <p className="text-xs font-medium text-purple-700 mb-2">Fundamentação legal:</p>
+        <div className="mt-4 pt-3 border-t border-brand-200/50">
+          <p className="text-xs font-medium text-brand-700 mb-2">Fundamentação legal:</p>
           <div className="flex flex-wrap gap-2">
             {legalSources.map((source) => {
               const isExternal = source.url.startsWith('http');
@@ -148,12 +148,12 @@ export function AIAnswerCard({
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-indigo-200 rounded-lg text-xs text-indigo-800 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-brand-200 rounded-[6px] text-xs text-brand-800 hover:bg-brand-50 hover:border-brand-300 transition-colors cursor-pointer"
                     title={source.title}
                   >
                     <IconComp className="w-3 h-3 flex-shrink-0" />
                     <span className="truncate max-w-[200px]">{source.title}</span>
-                    <ExternalLink className="w-3 h-3 flex-shrink-0 text-indigo-400" />
+                    <ExternalLink className="w-3 h-3 flex-shrink-0 text-brand-400" />
                   </a>
                 );
               }
@@ -162,7 +162,7 @@ export function AIAnswerCard({
                 <Link
                   key={source.title}
                   href={source.url}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-indigo-200 rounded-lg text-xs text-indigo-800 hover:bg-indigo-50 hover:border-indigo-300 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-brand-200 rounded-[6px] text-xs text-brand-800 hover:bg-brand-50 hover:border-brand-300 transition-colors cursor-pointer"
                   title={source.title}
                 >
                   <IconComp className="w-3 h-3 flex-shrink-0" />
@@ -176,15 +176,15 @@ export function AIAnswerCard({
 
       {/* Document Sources */}
       {sources && sources.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-purple-200/50">
-          <p className="text-xs font-medium text-purple-700 mb-2">Fontes consultadas:</p>
+        <div className="mt-3 pt-3 border-t border-brand-200/50">
+          <p className="text-xs font-medium text-brand-700 mb-2">Fontes consultadas:</p>
           <div className="flex flex-wrap gap-2">
             {sources.map((source) => {
               const content = (
                 <>
                   <SourceIcon category={source.category} />
                   <span className="truncate max-w-[180px]">{source.title}</span>
-                  <span className="text-purple-500 font-medium">
+                  <span className="text-brand-500 font-medium">
                     {Math.round(source.relevance * 100)}%
                   </span>
                 </>
@@ -205,7 +205,7 @@ export function AIAnswerCard({
                       href={effectiveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800 hover:bg-purple-50 hover:border-purple-300 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-brand-200 rounded-[6px] text-xs text-brand-800 hover:bg-brand-50 hover:border-brand-300 transition-colors cursor-pointer"
                       title={source.excerpt}
                     >
                       {content}
@@ -216,7 +216,7 @@ export function AIAnswerCard({
                   <Link
                     key={source.documentId}
                     href={effectiveUrl}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800 hover:bg-purple-50 hover:border-purple-300 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-brand-200 rounded-[6px] text-xs text-brand-800 hover:bg-brand-50 hover:border-brand-300 transition-colors cursor-pointer"
                     title={source.excerpt}
                   >
                     {content}
@@ -227,7 +227,7 @@ export function AIAnswerCard({
               return (
                 <span
                   key={source.documentId}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-purple-200 rounded-lg text-xs text-purple-800"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/70 border border-brand-200 rounded-[6px] text-xs text-brand-800"
                   title={source.excerpt}
                 >
                   {content}
@@ -239,8 +239,8 @@ export function AIAnswerCard({
       )}
 
       {/* Disclaimer */}
-      <div className="mt-3 pt-3 border-t border-purple-200/50">
-        <p className="text-[10px] text-purple-500/70 leading-relaxed">
+      <div className="mt-3 pt-3 border-t border-brand-200/50">
+        <p className="text-[10px] text-brand-500/70 leading-relaxed">
           <AlertCircle className="w-3 h-3 inline-block mr-1 -mt-0.5" />
           Esta resposta foi gerada por Inteligencia Artificial e pode conter imprecisoes. E responsabilidade do aluno consultar as fontes originais para verificacao da correcao das informacoes apresentadas.
         </p>
@@ -248,19 +248,19 @@ export function AIAnswerCard({
 
       {/* Follow-up input */}
       {onFollowUp && (
-        <form onSubmit={handleFollowUpSubmit} className="mt-3 pt-3 border-t border-purple-200/50">
+        <form onSubmit={handleFollowUpSubmit} className="mt-3 pt-3 border-t border-brand-200/50">
           <div className="flex gap-2">
             <input
               type="text"
               value={followUpInput}
               onChange={(e) => setFollowUpInput(e.target.value)}
               placeholder="Refinar pergunta..."
-              className="flex-1 px-3 py-1.5 text-xs border border-purple-200 rounded-lg bg-white/70 focus:outline-none focus:ring-1 focus:ring-purple-400 placeholder:text-purple-400"
+              className="flex-1 px-3 py-1.5 text-xs border border-brand-200 rounded-[6px] bg-white/70 focus:outline-none focus:ring-1 focus:ring-brand-400 placeholder:text-brand-400"
             />
             <button
               type="submit"
               disabled={!followUpInput.trim()}
-              className="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-[6px] hover:bg-brand-700 disabled:bg-brand-300 disabled:cursor-not-allowed transition-colors"
             >
               Enviar
             </button>

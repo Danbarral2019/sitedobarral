@@ -21,12 +21,13 @@ describe('getTypeLabel', () => {
 
 describe('getTypeColor', () => {
   it('retorna classes especificas pra tipos conhecidos', () => {
-    expect(getTypeColor('decreto')).toContain('blue');
+    expect(getTypeColor('decreto')).toContain('brand');
     expect(getTypeColor('lei')).toContain('red');
   });
 
   it('retorna cinza pra tipo desconhecido', () => {
-    expect(getTypeColor('xyz')).toContain('gray');
+    // Tipo desconhecido cai na superfície neutra do sistema.
+    expect(getTypeColor('xyz')).toContain('surface-deep');
   });
 });
 

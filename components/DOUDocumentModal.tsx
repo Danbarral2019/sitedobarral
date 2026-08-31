@@ -126,7 +126,7 @@ export function DOUDocumentModal({
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-amber-accent-soft text-ink-primary">
             <AlertTriangle className="w-3 h-3" />
             Revisão
           </span>
@@ -151,10 +151,10 @@ export function DOUDocumentModal({
             {document.title}
           </DialogTitle>
           <DialogDescription className="flex items-center gap-2 flex-wrap mt-2">
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded uppercase">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-100 text-brand-800 text-xs font-bold rounded uppercase">
               {document.section}
             </span>
-            <span className="inline-flex items-center gap-1 text-xs text-gray-600">
+            <span className="inline-flex items-center gap-1 text-xs text-ink-muted">
               <Calendar className="w-3 h-3" />
               {document.publishDate}
             </span>
@@ -163,16 +163,16 @@ export function DOUDocumentModal({
         </DialogHeader>
 
         {/* Metadados */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
+        <div className="grid grid-cols-2 gap-4 p-4 bg-surface-raised rounded-[6px] border">
           <div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+            <div className="flex items-center gap-2 text-sm text-ink-muted mb-1">
               <Tag className="w-4 h-4" />
               <span className="font-medium">Categoria</span>
             </div>
             <p className="text-sm font-medium">{document.category}</p>
           </div>
           <div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+            <div className="flex items-center gap-2 text-sm text-ink-muted mb-1">
               <TrendingUp className="w-4 h-4" />
               <span className="font-medium">Confiança</span>
             </div>
@@ -180,7 +180,7 @@ export function DOUDocumentModal({
           </div>
           {document.hierarchyStr && (
             <div className="col-span-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+              <div className="flex items-center gap-2 text-sm text-ink-muted mb-1">
                 <Building className="w-4 h-4" />
                 <span className="font-medium">Órgão</span>
               </div>
@@ -197,7 +197,7 @@ export function DOUDocumentModal({
               <FileText className="w-4 h-4" />
               Resumo
             </h3>
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="p-4 bg-brand-50 rounded-[6px] border border-brand-200">
               <p className="text-sm leading-relaxed whitespace-pre-line">
                 {document.abstract}
               </p>
@@ -214,13 +214,13 @@ export function DOUDocumentModal({
                 </h3>
                 <button
                   onClick={() => setShowFullContent(!showFullContent)}
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs text-brand-600 hover:underline"
                 >
                   {showFullContent ? 'Ocultar' : 'Expandir'}
                 </button>
               </div>
               {showFullContent && (
-                <div className="p-4 bg-white rounded-lg border max-h-96 overflow-y-auto">
+                <div className="p-4 bg-white rounded-[6px] border max-h-96 overflow-y-auto">
                   <p className="text-sm leading-relaxed whitespace-pre-line">
                     {document.fullContent}
                   </p>
@@ -235,13 +235,13 @@ export function DOUDocumentModal({
               href={document.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-deep text-ink-secondary rounded-[6px] hover:bg-surface-deep transition-colors text-sm font-medium"
             >
               <ExternalLink className="w-4 h-4" />
               Ver na Fonte Oficial (DOU)
             </a>
           ) : (
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-sm">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-surface-raised text-ink-muted rounded-[6px] text-sm">
               <ExternalLink className="w-4 h-4" />
               Link da fonte indisponivel
             </span>
@@ -256,7 +256,7 @@ export function DOUDocumentModal({
               Importar como:
             </label>
             <div className="flex gap-4">
-              <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <label className="flex items-center gap-2 p-3 border rounded-[6px] cursor-pointer hover:bg-brand-50 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
                 <input
                   type="radio"
                   name="importAs"
@@ -266,10 +266,10 @@ export function DOUDocumentModal({
                 />
                 <div>
                   <span className="text-sm font-medium">Ato Normativo</span>
-                  <p className="text-xs text-gray-500">Base geral de legislacao</p>
+                  <p className="text-xs text-ink-muted">Base geral de legislacao</p>
                 </div>
               </label>
-              <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-green-50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+              <label className="flex items-center gap-2 p-3 border rounded-[6px] cursor-pointer hover:bg-green-50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
                 <input
                   type="radio"
                   name="importAs"
@@ -279,17 +279,17 @@ export function DOUDocumentModal({
                 />
                 <div>
                   <span className="text-sm font-medium">Boa Pratica</span>
-                  <p className="text-xs text-gray-500">Referencia/inspiracao de outros orgaos</p>
+                  <p className="text-xs text-ink-muted">Referencia/inspiracao de outros orgaos</p>
                 </div>
               </label>
             </div>
           </div>
 
-          <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
+          <div className="space-y-4 p-4 bg-green-50 rounded-[6px] border border-green-200">
               <h4 className="text-sm font-bold text-green-800">Metadados do Documento</h4>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-ink-secondary mb-1">
                   Orgao de Origem
                 </label>
                 <input
@@ -297,12 +297,12 @@ export function DOUDocumentModal({
                   value={issuerOrg}
                   onChange={(e) => setIssuerOrg(e.target.value)}
                   placeholder="Ex: TCE-SP, CGE-MG, TCU..."
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border rounded-[6px] focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-ink-secondary mb-1">
                   Esfera
                 </label>
                 <div className="flex gap-3">
@@ -318,7 +318,7 @@ export function DOUDocumentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-ink-secondary mb-1">
                   Temas
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -332,7 +332,7 @@ export function DOUDocumentModal({
                       className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                         selectedThemes.includes(tema.value)
                           ? 'bg-green-600 text-white border-green-600'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'
+                          : 'bg-white text-ink-secondary border-border-subtle hover:border-green-400'
                       }`}
                     >
                       {tema.label}
@@ -346,7 +346,7 @@ export function DOUDocumentModal({
             <label className="block text-sm font-bold mb-2">
               Vincular aos cursos: *
             </label>
-            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-gray-50 rounded-lg border">
+            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-surface-raised rounded-[6px] border">
               {courses.map((course) => (
                 <label
                   key={course.id}
@@ -362,7 +362,7 @@ export function DOUDocumentModal({
                 </label>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               {selectedCourses.length} curso(s) selecionado(s)
             </p>
           </div>
@@ -375,7 +375,7 @@ export function DOUDocumentModal({
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
               placeholder="Adicione observações sobre este documento..."
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={3}
             />
           </div>
@@ -386,7 +386,7 @@ export function DOUDocumentModal({
           <button
             onClick={handleReject}
             disabled={isRejecting || isApproving}
-            className="px-6 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2 border border-red-300 text-red-700 rounded-[6px] hover:bg-red-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <XCircle className="w-4 h-4" />
             {isRejecting ? 'Rejeitando...' : 'Rejeitar'}
@@ -394,7 +394,7 @@ export function DOUDocumentModal({
           <button
             onClick={handleApprove}
             disabled={isApproving || isRejecting || selectedCourses.length === 0}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2 bg-green-600 text-white rounded-[6px] hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <CheckCircle className="w-4 h-4" />
             {isApproving ? 'Aprovando...' : 'Aprovar e Incorporar'}

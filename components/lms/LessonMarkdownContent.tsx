@@ -269,7 +269,7 @@ export default function LessonMarkdownContent({ content }: LessonMarkdownContent
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={isArticle || isDocument ? 'text-blue-700 font-medium hover:text-blue-900 hover:underline' : undefined}
+                className={isArticle || isDocument ? 'text-brand-700 font-medium hover:text-brand-900 hover:underline' : undefined}
                 {...props}
               >
                 {children}

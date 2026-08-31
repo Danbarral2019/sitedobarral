@@ -16,10 +16,10 @@ export function CategoryFilter({
   if (categories.length === 0) return null;
 
   return (
-    <div className="bg-white border rounded-lg p-4">
+    <div className="bg-white border rounded-[6px] p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Filter className="h-4 w-4 text-gray-500" />
-        <h3 className="text-sm font-semibold text-gray-700">Filtrar por Categoria</h3>
+        <Filter className="h-4 w-4 text-ink-muted" />
+        <h3 className="text-sm font-semibold text-ink-secondary">Filtrar por Categoria</h3>
       </div>
       <div className="flex flex-wrap gap-2">
         <button
@@ -27,8 +27,8 @@ export function CategoryFilter({
           className={`
             px-3 py-1.5 rounded-md text-sm font-medium transition-colors
             ${!activeCategory
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              ? 'bg-brand-600 text-white'
+              : 'bg-surface-deep hover:bg-border-subtle text-ink-secondary'
             }
           `}
         >
@@ -41,8 +41,8 @@ export function CategoryFilter({
             className={`
               px-3 py-1.5 rounded-md text-sm font-medium transition-colors
               ${activeCategory === category
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                ? 'bg-brand-600 text-white'
+                : 'bg-surface-deep hover:bg-border-subtle text-ink-secondary'
               }
             `}
           >

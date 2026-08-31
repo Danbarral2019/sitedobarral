@@ -235,17 +235,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-surface-raised">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-lg shadow-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-[6px] border-2 border-border-subtle hover:bg-surface-raised transition-colors"
         aria-label="Toggle menu"
       >
         {isMobileMenuOpen ? (
-          <X className="w-6 h-6 text-gray-900" />
+          <X className="w-6 h-6 text-ink-primary" />
         ) : (
-          <Menu className="w-6 h-6 text-gray-900" />
+          <Menu className="w-6 h-6 text-ink-primary" />
         )}
       </button>
 
@@ -297,7 +297,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-brand-500 transition-colors ml-auto hidden lg:block"
+            className="p-2 rounded-[6px] hover:bg-brand-500 transition-colors ml-auto hidden lg:block"
             title={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {isCollapsed ? (
@@ -340,7 +340,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   key={item.path}
                   href={item.path!}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-[6px] text-sm font-medium transition-colors ${
                     active
                       ? 'bg-white/20 text-white font-semibold'
                       : 'text-brand-100 hover:bg-brand-500 hover:text-white'
@@ -372,7 +372,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-brand-500 font-medium transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-[6px] text-white hover:bg-brand-500 font-medium transition-colors"
               title={isCollapsed ? 'Area do Aluno (abre em nova aba)' : ''}
             >
               <GraduationCap className="w-5 h-5 flex-shrink-0" />
@@ -388,7 +388,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-brand-200 hover:bg-brand-500 hover:text-white font-medium transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-[6px] text-brand-200 hover:bg-brand-500 hover:text-white font-medium transition-colors"
               title={isCollapsed ? 'Voltar ao Site' : ''}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

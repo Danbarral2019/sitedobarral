@@ -63,14 +63,14 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  'decreto': 'bg-blue-100 text-blue-800',
+  'decreto': 'bg-brand-100 text-brand-800',
   'portaria': 'bg-green-100 text-green-800',
-  'in': 'bg-purple-100 text-purple-800',
-  'ordem-servico': 'bg-yellow-100 text-yellow-800',
+  'in': 'bg-brand-100 text-brand-800',
+  'ordem-servico': 'bg-amber-accent-soft text-amber-accent-deep',
   'lei': 'bg-red-100 text-red-800',
-  'medida-provisoria': 'bg-orange-100 text-orange-800',
-  'orientacao-normativa': 'bg-indigo-100 text-indigo-800',
-  'parecer-vinculante': 'bg-teal-100 text-teal-800',
+  'medida-provisoria': 'bg-amber-accent-soft text-amber-accent-deep',
+  'orientacao-normativa': 'bg-brand-100 text-brand-800',
+  'parecer-vinculante': 'bg-brand-100 text-brand-800',
 };
 
 export default function FavoritosPage() {
@@ -342,35 +342,35 @@ export default function FavoritosPage() {
 
   if (isLoading || isLoadingFavorites) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando favoritos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto mb-4"></div>
+          <p className="text-ink-muted">Carregando favoritos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
+    <main className="min-h-screen bg-white py-12 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.push('/area-restrita')}
-            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 mb-6 font-medium transition-colors"
+            className="flex items-center gap-2 text-ink-secondary hover:text-brand-600 mb-6 font-medium transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar para área restrita
           </button>
 
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-red-500 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center border border-border-subtle">
               <Heart className="w-8 h-8 text-white fill-current" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Meus Favoritos</h1>
-              <p className="text-gray-600">
+              <h1 className="text-3xl font-bold text-ink-primary">Meus Favoritos</h1>
+              <p className="text-ink-muted">
                 {totalFavorites} {totalFavorites === 1 ? 'item favoritado' : 'itens favoritados'}
               </p>
             </div>
@@ -382,10 +382,10 @@ export default function FavoritosPage() {
           <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => setActiveTab('documents')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-[6px] font-medium transition-colors flex items-center gap-2 ${
                 activeTab === 'documents'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-white text-ink-secondary hover:bg-surface-deep border border-border-subtle'
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -393,10 +393,10 @@ export default function FavoritosPage() {
             </button>
             <button
               onClick={() => setActiveTab('ons')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-[6px] font-medium transition-colors flex items-center gap-2 ${
                 activeTab === 'ons'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-white text-ink-secondary hover:bg-surface-deep border border-border-subtle'
               }`}
             >
               <BookOpen className="w-4 h-4" />
@@ -404,10 +404,10 @@ export default function FavoritosPage() {
             </button>
             <button
               onClick={() => setActiveTab('acts')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-[6px] font-medium transition-colors flex items-center gap-2 ${
                 activeTab === 'acts'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-white text-ink-secondary hover:bg-surface-deep border border-border-subtle'
               }`}
             >
               <Scale className="w-4 h-4" />
@@ -418,15 +418,15 @@ export default function FavoritosPage() {
 
         {/* Conteúdo */}
         {totalFavorites === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center border-2 border-gray-200">
-            <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Nenhum favorito ainda</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white rounded-[6px] p-12 text-center border-2 border-border-subtle">
+            <Heart className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-ink-primary mb-2">Nenhum favorito ainda</h2>
+            <p className="text-ink-muted mb-6">
               Clique no coração ao lado dos documentos ou atos normativos para adicioná-los aos favoritos.
             </p>
             <button
               onClick={() => router.push('/area-restrita')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+              className="bg-brand-600 text-white px-6 py-3 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-700 transition-all border border-border-subtle"
             >
               Explorar Documentos
             </button>
@@ -437,17 +437,17 @@ export default function FavoritosPage() {
             {activeTab === 'documents' && (
               <div className="space-y-8">
                 {favorites.length === 0 ? (
-                  <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-gray-200">
-                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-600">Nenhum documento favoritado ainda.</p>
+                  <div className="bg-white rounded-[6px] p-8 text-center border-2 border-border-subtle">
+                    <FileText className="w-12 h-12 text-ink-muted mx-auto mb-3" />
+                    <p className="text-ink-muted">Nenhum documento favoritado ainda.</p>
                   </div>
                 ) : (
                   groupedFavorites.map((group) => (
-                    <div key={group.courseId} className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
+                    <div key={group.courseId} className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden">
                       {/* Header do Curso */}
-                      <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6">
+                      <div className="bg-brand-500 text-white p-6">
                         <h2 className="text-2xl font-bold">{group.courseTitle}</h2>
-                        <p className="text-blue-100 mt-1">
+                        <p className="text-brand-100 mt-1">
                           {group.favorites.length} {group.favorites.length === 1 ? 'documento' : 'documentos'}
                         </p>
                       </div>
@@ -460,10 +460,10 @@ export default function FavoritosPage() {
                           return (
                             <div
                               key={fav.id}
-                              className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
+                              className="flex items-start gap-4 p-4 bg-white border-2 border-border-subtle rounded-[6px] hover:border-brand-300 hover: transition-all"
                             >
                               {/* Ícone */}
-                              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 text-blue-600">
+                              <div className="w-12 h-12 bg-brand-100 rounded-[6px] flex items-center justify-center flex-shrink-0 text-brand-600">
                                 {getCategoryIcon(fav.document.category)}
                               </div>
 
@@ -471,17 +471,17 @@ export default function FavoritosPage() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-4">
                                   <div className="flex-1">
-                                    <h3 className="font-bold text-gray-900 mb-1">{fav.document.title}</h3>
+                                    <h3 className="font-bold text-ink-primary mb-1">{fav.document.title}</h3>
                                     {fav.document.description && (
-                                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                      <p className="text-sm text-ink-muted mb-2 line-clamp-2">
                                         {fav.document.description}
                                       </p>
                                     )}
                                     <div className="flex items-center gap-3 flex-wrap">
-                                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                      <span className="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-full text-xs font-medium">
                                         {getCategoryLabel(fav.document.category)}
                                       </span>
-                                      <span className="text-xs text-gray-500">
+                                      <span className="text-xs text-ink-muted">
                                         Adicionado em {new Date(fav.createdAt).toLocaleDateString('pt-BR')}
                                       </span>
                                     </div>
@@ -491,10 +491,10 @@ export default function FavoritosPage() {
                                   <div className="flex items-center gap-2 flex-shrink-0">
                                     <button
                                       onClick={() => toggleAnnotation(fav.id, fav.annotation)}
-                                      className={`p-2 rounded-lg transition-colors ${
+                                      className={`p-2 rounded-[6px] transition-colors ${
                                         fav.annotation
-                                          ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
-                                          : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
+                                          ? 'text-amber-accent-deep bg-amber-accent-soft hover:bg-amber-accent'
+                                          : 'text-ink-muted hover:text-amber-accent-deep hover:bg-amber-accent-soft'
                                       }`}
                                       title={fav.annotation ? 'Editar anotacao' : 'Adicionar anotacao'}
                                     >
@@ -503,7 +503,7 @@ export default function FavoritosPage() {
                                     {fav.document.type === 'pdf' && (
                                       <button
                                         onClick={() => handleDownload(fav.document!)}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        className="p-2 text-brand-600 hover:bg-brand-50 rounded-[6px] transition-colors"
                                         title="Baixar documento"
                                       >
                                         <Download className="w-5 h-5" />
@@ -512,7 +512,7 @@ export default function FavoritosPage() {
                                     <button
                                       onClick={() => handleRemoveDocumentFavorite(fav.documentId)}
                                       disabled={removingId === fav.documentId}
-                                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                      className="p-2 text-red-600 hover:bg-red-50 rounded-[6px] transition-colors disabled:opacity-50"
                                       title="Remover dos favoritos"
                                     >
                                       {removingId === fav.documentId ? (
@@ -526,11 +526,11 @@ export default function FavoritosPage() {
 
                                 {/* Anotação expandível */}
                                 {editingAnnotation === fav.id && (
-                                  <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <div className="mt-3 pt-3 border-t border-border-subtle">
                                     <div className="flex items-center justify-between mb-1">
-                                      <label className="text-xs font-semibold text-gray-600">Anotacao de estudo</label>
+                                      <label className="text-xs font-semibold text-ink-muted">Anotacao de estudo</label>
                                       {savingAnnotation === fav.id ? (
-                                        <span className="flex items-center gap-1 text-xs text-gray-400">
+                                        <span className="flex items-center gap-1 text-xs text-ink-muted">
                                           <Loader2 className="w-3 h-3 animate-spin" />
                                           Salvando...
                                         </span>
@@ -545,10 +545,10 @@ export default function FavoritosPage() {
                                       value={annotationText}
                                       onChange={(e) => handleAnnotationChange(fav.id, e.target.value)}
                                       placeholder="Adicione suas anotacoes sobre este documento..."
-                                      className="w-full p-3 text-sm border border-gray-300 rounded-lg resize-y min-h-[80px] max-h-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                                      className="w-full p-3 text-sm border border-border-subtle rounded-[6px] resize-y min-h-[80px] max-h-[200px] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white"
                                       maxLength={5000}
                                     />
-                                    <p className="text-xs text-gray-400 mt-1 text-right">{annotationText.length}/5000</p>
+                                    <p className="text-xs text-ink-muted mt-1 text-right">{annotationText.length}/5000</p>
                                   </div>
                                 )}
 
@@ -556,9 +556,9 @@ export default function FavoritosPage() {
                                 {editingAnnotation !== fav.id && fav.annotation && (
                                   <button
                                     onClick={() => toggleAnnotation(fav.id, fav.annotation)}
-                                    className="mt-2 w-full text-left p-2 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 hover:bg-amber-100 transition-colors"
+                                    className="mt-2 w-full text-left p-2 bg-amber-accent-soft border border-amber-accent-soft rounded-[6px] text-sm text-ink-primary hover:bg-amber-accent-soft transition-colors"
                                   >
-                                    <span className="font-medium text-xs text-amber-600 block mb-0.5">Anotacao:</span>
+                                    <span className="font-medium text-xs text-amber-accent-deep block mb-0.5">Anotacao:</span>
                                     <span className="line-clamp-2">{fav.annotation}</span>
                                   </button>
                                 )}
@@ -577,24 +577,24 @@ export default function FavoritosPage() {
             {activeTab === 'ons' && (
               <div className="space-y-4">
                 {onFavorites.length === 0 ? (
-                  <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-gray-200">
-                    <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-600">Nenhuma Orientação Normativa favoritada ainda.</p>
+                  <div className="bg-white rounded-[6px] p-8 text-center border-2 border-border-subtle">
+                    <BookOpen className="w-12 h-12 text-ink-muted mx-auto mb-3" />
+                    <p className="text-ink-muted">Nenhuma Orientação Normativa favoritada ainda.</p>
                     <Link
                       href="/area-restrita/lei-comentada"
-                      className="inline-block mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
+                      className="inline-block mt-4 text-brand-600 hover:text-brand-700 font-medium"
                     >
                       Explorar Lei 14.133 Comentada
                     </Link>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-                    <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-6">
+                  <div className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden">
+                    <div className="bg-brand-600 text-white p-6">
                       <h2 className="text-2xl font-bold flex items-center gap-3">
                         <BookOpen className="w-7 h-7" />
                         Orientações Normativas - AGU
                       </h2>
-                      <p className="text-indigo-100 mt-1">
+                      <p className="text-brand-100 mt-1">
                         {onFavorites.length} {onFavorites.length === 1 ? 'ON favoritada' : 'ONs favoritadas'}
                       </p>
                     </div>
@@ -603,10 +603,10 @@ export default function FavoritosPage() {
                       {onFavorites.map((fav) => (
                         <div
                           key={fav.id}
-                          className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-2 border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all"
+                          className="flex items-start gap-4 p-4 bg-white border-2 border-border-subtle rounded-[6px] hover:border-brand-300 hover: transition-all"
                         >
                           {/* Ícone */}
-                          <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 text-indigo-600">
+                          <div className="w-12 h-12 bg-brand-100 rounded-[6px] flex items-center justify-center flex-shrink-0 text-brand-600">
                             <BookOpen className="w-6 h-6" />
                           </div>
 
@@ -614,16 +614,16 @@ export default function FavoritosPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
-                                <span className="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-medium mb-1">
+                                <span className="inline-block px-2 py-0.5 bg-brand-100 text-brand-800 rounded text-xs font-medium mb-1">
                                   Orientação Normativa
                                 </span>
-                                <h3 className="font-bold text-gray-900 mb-1">{fav.document.title}</h3>
+                                <h3 className="font-bold text-ink-primary mb-1">{fav.document.title}</h3>
                                 {fav.document.description && (
-                                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                  <p className="text-sm text-ink-muted mb-2 line-clamp-2">
                                     {fav.document.description}
                                   </p>
                                 )}
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-ink-muted">
                                   Adicionado em {new Date(fav.createdAt).toLocaleDateString('pt-BR')}
                                 </span>
                               </div>
@@ -635,7 +635,7 @@ export default function FavoritosPage() {
                                     href={fav.document.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                    className="p-2 text-brand-600 hover:bg-brand-50 rounded-[6px] transition-colors"
                                     title="Acessar documento oficial"
                                   >
                                     <ExternalLink className="w-5 h-5" />
@@ -644,7 +644,7 @@ export default function FavoritosPage() {
                                 <button
                                   onClick={() => handleRemoveONFavorite(fav.documentId)}
                                   disabled={removingId === fav.documentId}
-                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-[6px] transition-colors disabled:opacity-50"
                                   title="Remover dos favoritos"
                                 >
                                   {removingId === fav.documentId ? (
@@ -668,24 +668,24 @@ export default function FavoritosPage() {
             {activeTab === 'acts' && (
               <div className="space-y-4">
                 {legislativeActs.length === 0 ? (
-                  <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-gray-200">
-                    <Scale className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-600">Nenhum ato normativo favoritado ainda.</p>
+                  <div className="bg-white rounded-[6px] p-8 text-center border-2 border-border-subtle">
+                    <Scale className="w-12 h-12 text-ink-muted mx-auto mb-3" />
+                    <p className="text-ink-muted">Nenhum ato normativo favoritado ainda.</p>
                     <Link
                       href="/area-restrita/lei-comentada"
-                      className="inline-block mt-4 text-blue-600 hover:text-blue-700 font-medium"
+                      className="inline-block mt-4 text-brand-600 hover:text-brand-700 font-medium"
                     >
                       Explorar Lei 14.133 Comentada
                     </Link>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
-                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+                  <div className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden">
+                    <div className="bg-brand-600 text-white p-6">
                       <h2 className="text-2xl font-bold flex items-center gap-3">
                         <Scale className="w-7 h-7" />
                         Atos Normativos Favoritados
                       </h2>
-                      <p className="text-indigo-100 mt-1">
+                      <p className="text-brand-100 mt-1">
                         {legislativeActs.length} {legislativeActs.length === 1 ? 'ato normativo' : 'atos normativos'}
                       </p>
                     </div>
@@ -693,15 +693,15 @@ export default function FavoritosPage() {
                     <div className="p-6 space-y-4">
                       {legislativeActs.map((act) => {
                         const typeLabel = TYPE_LABELS[act.type] || act.type;
-                        const typeColor = TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800';
+                        const typeColor = TYPE_COLORS[act.type] || 'bg-surface-deep text-ink-secondary';
 
                         return (
                           <div
                             key={act.id}
-                            className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-2 border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all"
+                            className="flex items-start gap-4 p-4 bg-white border-2 border-border-subtle rounded-[6px] hover:border-brand-300 hover: transition-all"
                           >
                             {/* Ícone */}
-                            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 text-indigo-600">
+                            <div className="w-12 h-12 bg-brand-100 rounded-[6px] flex items-center justify-center flex-shrink-0 text-brand-600">
                               <Scale className="w-6 h-6" />
                             </div>
 
@@ -714,10 +714,10 @@ export default function FavoritosPage() {
                                       {typeLabel}
                                     </span>
                                   </div>
-                                  <h3 className="font-bold text-gray-900 mb-1">{act.fullNumber}</h3>
-                                  <p className="text-sm text-gray-700 mb-2">{act.title}</p>
-                                  <p className="text-xs text-gray-600 line-clamp-2 mb-2">{act.ementa}</p>
-                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  <h3 className="font-bold text-ink-primary mb-1">{act.fullNumber}</h3>
+                                  <p className="text-sm text-ink-secondary mb-2">{act.title}</p>
+                                  <p className="text-xs text-ink-muted line-clamp-2 mb-2">{act.ementa}</p>
+                                  <div className="flex items-center gap-4 text-xs text-ink-muted">
                                     <span className="flex items-center gap-1">
                                       <Building className="w-3 h-3" />
                                       {act.issuer}
@@ -741,7 +741,7 @@ export default function FavoritosPage() {
                                       href={act.officialUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                      className="p-2 text-brand-600 hover:bg-brand-50 rounded-[6px] transition-colors"
                                       title="Acessar documento oficial"
                                     >
                                       <ExternalLink className="w-5 h-5" />
@@ -750,7 +750,7 @@ export default function FavoritosPage() {
                                   <button
                                     onClick={() => handleRemoveActFavorite(act.id)}
                                     disabled={removingId === act.id}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-[6px] transition-colors disabled:opacity-50"
                                     title="Remover dos favoritos"
                                   >
                                     {removingId === act.id ? (

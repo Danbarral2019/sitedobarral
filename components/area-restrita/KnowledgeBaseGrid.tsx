@@ -22,11 +22,11 @@ const KNOWLEDGE_BASE_CATEGORIES: Array<{
 ];
 
 const CATEGORY_COLORS: Record<string, { bg: string; border: string; iconBg: string; text: string; hover: string }> = {
-  blue: { bg: 'bg-blue-50', border: 'border-blue-200', iconBg: 'bg-blue-100', text: 'text-blue-700', hover: 'hover:border-blue-400 hover:shadow-md' },
-  purple: { bg: 'bg-purple-50', border: 'border-purple-200', iconBg: 'bg-purple-100', text: 'text-purple-700', hover: 'hover:border-purple-400 hover:shadow-md' },
-  green: { bg: 'bg-green-50', border: 'border-green-200', iconBg: 'bg-green-100', text: 'text-green-700', hover: 'hover:border-green-400 hover:shadow-md' },
-  amber: { bg: 'bg-amber-50', border: 'border-amber-200', iconBg: 'bg-amber-100', text: 'text-amber-700', hover: 'hover:border-amber-400 hover:shadow-md' },
-  teal: { bg: 'bg-teal-50', border: 'border-teal-200', iconBg: 'bg-teal-100', text: 'text-teal-700', hover: 'hover:border-teal-400 hover:shadow-md' },
+  blue: { bg: 'bg-brand-50', border: 'border-brand-200', iconBg: 'bg-brand-100', text: 'text-brand-700', hover: 'hover:border-brand-400 hover:' },
+  purple: { bg: 'bg-brand-50', border: 'border-brand-200', iconBg: 'bg-brand-100', text: 'text-brand-700', hover: 'hover:border-brand-400 hover:' },
+  green: { bg: 'bg-green-50', border: 'border-green-200', iconBg: 'bg-green-100', text: 'text-green-700', hover: 'hover:border-green-400 hover:' },
+  amber: { bg: 'bg-amber-accent-soft', border: 'border-amber-accent-soft', iconBg: 'bg-amber-accent-soft', text: 'text-amber-accent-deep', hover: 'hover:border-amber-accent hover:' },
+  teal: { bg: 'bg-brand-50', border: 'border-brand-200', iconBg: 'bg-brand-100', text: 'text-brand-700', hover: 'hover:border-brand-400 hover:' },
 };
 
 interface DocumentType {
@@ -50,8 +50,8 @@ export function KnowledgeBaseGrid({ documents, onSelectCategory }: KnowledgeBase
 
   if (categoriesWithCounts.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 text-center">
-        <p className="text-gray-500">Nenhum documento encontrado na base de conhecimento.</p>
+      <div className="bg-white rounded-[6px] border-2 border-border-subtle p-8 text-center">
+        <p className="text-ink-muted">Nenhum documento encontrado na base de conhecimento.</p>
       </div>
     );
   }
@@ -65,13 +65,13 @@ export function KnowledgeBaseGrid({ documents, onSelectCategory }: KnowledgeBase
           <button
             key={cat.category}
             onClick={() => onSelectCategory(cat.category)}
-            className={`${colors.bg} border-2 ${colors.border} ${colors.hover} rounded-xl p-5 text-left transition-all cursor-pointer group`}
+            className={`${colors.bg} border-2 ${colors.border} ${colors.hover} rounded-[6px] p-5 text-left transition-all cursor-pointer group`}
           >
-            <div className={`inline-flex p-2.5 ${colors.iconBg} rounded-lg mb-3`}>
+            <div className={`inline-flex p-2.5 ${colors.iconBg} rounded-[6px] mb-3`}>
               <Icon className={`w-5 h-5 ${colors.text}`} />
             </div>
             <h3 className={`font-bold ${colors.text} text-sm mb-1`}>{cat.label}</h3>
-            <p className="text-xs text-gray-500">{cat.count} {cat.count === 1 ? 'documento' : 'documentos'}</p>
+            <p className="text-xs text-ink-muted">{cat.count} {cat.count === 1 ? 'documento' : 'documentos'}</p>
           </button>
         );
       })}

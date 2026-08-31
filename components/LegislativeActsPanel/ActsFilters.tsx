@@ -58,7 +58,7 @@ export default function ActsFilters({
       {/* Busca */}
       <div className="flex gap-2 mb-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
           <input
             type="text"
             placeholder={isBoasPraticas
@@ -66,12 +66,12 @@ export default function ActsFilters({
               : 'Buscar por título, número ou ementa...'}
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-10 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-amber-400 transition-colors"
+            className="w-full pl-10 pr-10 py-2.5 border-2 border-border-subtle rounded-[6px] text-sm focus:outline-none focus:border-amber-accent transition-colors"
           />
           {search && (
             <button
               onClick={() => { setSearch(''); setPage(1); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-secondary"
             >
               <X className="w-4 h-4" />
             </button>
@@ -79,35 +79,35 @@ export default function ActsFilters({
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-1.5 px-3 py-2.5 border-2 rounded-xl text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-2.5 border-2 rounded-[6px] text-sm font-medium transition-colors ${
             showFilters || hasActiveFilters
               ? isBoasPraticas
                 ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                : 'border-amber-400 bg-amber-50 text-amber-700'
-              : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                : 'border-amber-accent bg-amber-accent-soft text-amber-accent-deep'
+              : 'border-border-subtle text-ink-muted hover:border-border-subtle'
           }`}
         >
           <Filter className="w-4 h-4" />
           Filtros
           {hasActiveFilters && (
-            <span className={`w-2 h-2 rounded-full ${isBoasPraticas ? 'bg-emerald-600' : 'bg-amber-600'}`} />
+            <span className={`w-2 h-2 rounded-full ${isBoasPraticas ? 'bg-emerald-600' : 'bg-amber-accent'}`} />
           )}
         </button>
       </div>
 
       {/* Painel de Filtros Expandido */}
       {showFilters && (
-        <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 mb-3 space-y-3">
+        <div className="bg-surface-raised border-2 border-border-subtle rounded-[6px] p-4 mb-3 space-y-3">
           {/* Dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Tipo (apenas atos) */}
             {!isBoasPraticas && (
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">Tipo</label>
+                <label className="block text-xs font-bold text-ink-muted mb-1">Tipo</label>
                 <select
                   value={selectedType}
                   onChange={(e) => { setSelectedType(e.target.value); setPage(1); }}
-                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-amber-400"
+                  className="w-full px-3 py-2 text-sm border-2 border-border-subtle rounded-[6px] focus:outline-none focus:border-amber-accent"
                 >
                   <option value="">Todos</option>
                   {availableTypes.map(({ type, count }) => (
@@ -121,7 +121,7 @@ export default function ActsFilters({
 
             {/* Orgao */}
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">
+              <label className="block text-xs font-bold text-ink-muted mb-1">
                 {isBoasPraticas ? 'Órgão de Origem' : 'Órgão Emissor'}
               </label>
               {isBoasPraticas ? (
@@ -130,14 +130,14 @@ export default function ActsFilters({
                   value={issuerFilter}
                   onChange={(e) => { setIssuerFilter(e.target.value); setPage(1); }}
                   placeholder="Ex: TCE-SP..."
-                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-400"
+                  className="w-full px-3 py-2 text-sm border-2 border-border-subtle rounded-[6px] focus:outline-none focus:border-emerald-400"
                   list="panel-issuers-list"
                 />
               ) : (
                 <select
                   value={issuerFilter}
                   onChange={(e) => { setIssuerFilter(e.target.value); setPage(1); }}
-                  className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-amber-400"
+                  className="w-full px-3 py-2 text-sm border-2 border-border-subtle rounded-[6px] focus:outline-none focus:border-amber-accent"
                 >
                   <option value="">Todos</option>
                   {availableIssuers.map(({ issuer, count }) => (
@@ -158,11 +158,11 @@ export default function ActsFilters({
 
             {/* Esfera */}
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Esfera</label>
+              <label className="block text-xs font-bold text-ink-muted mb-1">Esfera</label>
               <select
                 value={esferaFilter}
                 onChange={(e) => { setEsferaFilter(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 text-sm border-2 border-border-subtle rounded-[6px] focus:outline-none focus:border-amber-accent"
               >
                 <option value="">Todas</option>
                 {availableEsferas.map(({ esfera, count }) => (
@@ -175,11 +175,11 @@ export default function ActsFilters({
 
             {/* Ano */}
             <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Ano</label>
+              <label className="block text-xs font-bold text-ink-muted mb-1">Ano</label>
               <select
                 value={yearFilter}
                 onChange={(e) => { setYearFilter(e.target.value); setPage(1); }}
-                className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg focus:outline-none focus:border-amber-400"
+                className="w-full px-3 py-2 text-sm border-2 border-border-subtle rounded-[6px] focus:outline-none focus:border-amber-accent"
               >
                 <option value="">Todos</option>
                 {availableYears.map(({ year, count }) => (
@@ -193,7 +193,7 @@ export default function ActsFilters({
 
           {/* Temas como chips */}
           <div>
-            <label className="block text-xs font-bold text-gray-600 mb-1.5">Temas</label>
+            <label className="block text-xs font-bold text-ink-muted mb-1.5">Temas</label>
             <div className="flex flex-wrap gap-1.5">
               {TEMAS_LICITACOES.map((tema) => (
                 <button
@@ -206,8 +206,8 @@ export default function ActsFilters({
                     themeFilter === tema.value
                       ? isBoasPraticas
                         ? 'bg-emerald-600 text-white border-emerald-600'
-                        : 'bg-amber-600 text-white border-amber-600'
-                      : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
+                        : 'bg-amber-accent text-white border-amber-accent'
+                      : 'bg-white text-ink-muted border-border-subtle hover:border-border-strong'
                   }`}
                 >
                   {tema.label}
@@ -221,15 +221,15 @@ export default function ActsFilters({
       {/* Chips de filtros ativos */}
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          <span className="text-xs font-semibold text-gray-500">Filtros:</span>
+          <span className="text-xs font-semibold text-ink-muted">Filtros:</span>
           {esferaFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs border border-blue-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs border border-brand-200">
               {ESFERA_LABELS[esferaFilter] || esferaFilter}
               <button onClick={() => { setEsferaFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {selectedType && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full text-xs border border-purple-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs border border-brand-200">
               {TYPE_LABELS[selectedType] || selectedType}
               <button onClick={() => { setSelectedType(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
@@ -241,26 +241,26 @@ export default function ActsFilters({
             </span>
           )}
           {yearFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full text-xs border border-orange-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-accent-soft text-ink-primary rounded-full text-xs border border-amber-accent-soft">
               {yearFilter}
               <button onClick={() => { setYearFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {themeFilter && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-xs border border-indigo-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs border border-brand-200">
               {getThemeLabel(themeFilter)}
               <button onClick={() => { setThemeFilter(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           {search && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs border border-gray-200">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-deep text-ink-secondary rounded-full text-xs border border-border-subtle">
               &quot;{search}&quot;
               <button onClick={() => { setSearch(''); setPage(1); }}><X className="w-3 h-3" /></button>
             </span>
           )}
           <button
             onClick={clearFilters}
-            className="text-xs text-gray-500 hover:text-red-600 underline ml-1"
+            className="text-xs text-ink-muted hover:text-red-600 underline ml-1"
           >
             Limpar
           </button>

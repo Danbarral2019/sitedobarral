@@ -43,9 +43,9 @@ export default function ConfirmacaoRegistroPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">
+        <div className="bg-white rounded-[6px] p-8 md:p-12 border border-border-subtle">
           {/* Ícone de sucesso */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -63,20 +63,20 @@ export default function ConfirmacaoRegistroPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-ink-primary mb-2">
               Conta Criada com Sucesso!
             </h1>
-            <p className="text-gray-600">
+            <p className="text-ink-muted">
               Falta só mais um passo para acessar os materiais do curso
             </p>
           </div>
 
           {/* Instruções */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-            <h2 className="text-lg font-semibold text-blue-900 mb-3">
+          <div className="bg-brand-50 border border-brand-200 rounded-[6px] p-6 mb-8">
+            <h2 className="text-lg font-semibold text-brand-900 mb-3">
               📧 Verifique seu email
             </h2>
-            <div className="space-y-3 text-sm text-blue-800">
+            <div className="space-y-3 text-sm text-brand-800">
               <p>
                 Enviamos um email de verificação para:{' '}
                 <strong className="font-semibold">{email || 'seu email'}</strong>
@@ -84,25 +84,25 @@ export default function ConfirmacaoRegistroPage() {
               <p>
                 Para ativar sua conta e acessar os materiais do curso, clique no link de verificação que está no email.
               </p>
-              <p className="text-blue-700">
+              <p className="text-brand-700">
                 <strong>Dica:</strong> Se não encontrar o email, verifique sua pasta de spam ou lixo eletrônico.
               </p>
             </div>
           </div>
 
           {/* Tempo de validade */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
-            <h3 className="text-sm font-semibold text-yellow-900 mb-2">
+          <div className="bg-amber-accent-soft border border-amber-accent-soft rounded-[6px] p-6 mb-8">
+            <h3 className="text-sm font-semibold text-amber-accent-deep mb-2">
               ⏰ Link válido por 24 horas
             </h3>
-            <p className="text-sm text-yellow-800">
+            <p className="text-sm text-amber-accent-deep">
               O link de verificação expira em 24 horas. Após esse período, será necessário solicitar um novo link.
             </p>
           </div>
 
           {/* Verificação manual com token */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-6 mb-8">
+            <h3 className="text-sm font-semibold text-ink-primary mb-3">
               Recebeu o link por email? Cole o token aqui:
             </h3>
             <form onSubmit={async (e) => {
@@ -134,13 +134,13 @@ export default function ConfirmacaoRegistroPage() {
                 value={verifyToken}
                 onChange={(e) => setVerifyToken(e.target.value)}
                 placeholder="Cole o token de verificação"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full px-4 py-3 border border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
                 disabled={verifyLoading}
               />
               <button
                 type="submit"
                 disabled={verifyLoading || !verifyToken.trim()}
-                className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                className="w-full bg-brand-600 text-white py-2.5 px-4 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed text-sm"
               >
                 {verifyLoading ? 'Verificando...' : 'Verificar Email'}
               </button>
@@ -154,43 +154,43 @@ export default function ConfirmacaoRegistroPage() {
 
           {/* Botão de reenviar */}
           <div className="text-center mb-8">
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-ink-muted mb-3">
               Não recebeu o email?
             </p>
             <button
               onClick={handleResendEmail}
               disabled={resendLoading}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm underline disabled:text-gray-400 disabled:no-underline"
+              className="text-brand-600 hover:text-brand-700 font-medium text-sm underline disabled:text-ink-muted disabled:no-underline"
             >
               {resendLoading ? 'Reenviando...' : 'Clique aqui para reenviar'}
             </button>
             {resendMessage && (
-              <p className={`mt-3 text-sm ${resendMessage.includes('sucesso') ? 'text-green-600' : 'text-yellow-600'}`}>
+              <p className={`mt-3 text-sm ${resendMessage.includes('sucesso') ? 'text-green-600' : 'text-amber-accent-deep'}`}>
                 {resendMessage}
               </p>
             )}
           </div>
 
           {/* Próximos passos */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <div className="border-t border-border-subtle pt-6">
+            <h3 className="text-lg font-semibold text-ink-primary mb-3">
               Próximos passos:
             </h3>
-            <ol className="space-y-3 text-sm text-gray-700">
+            <ol className="space-y-3 text-sm text-ink-secondary">
               <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full font-semibold text-xs mr-3 mt-0.5">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-brand-100 text-brand-600 rounded-full font-semibold text-xs mr-3 mt-0.5">
                   1
                 </span>
                 <span>Abra o email que enviamos para <strong>{email || 'você'}</strong></span>
               </li>
               <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full font-semibold text-xs mr-3 mt-0.5">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-brand-100 text-brand-600 rounded-full font-semibold text-xs mr-3 mt-0.5">
                   2
                 </span>
                 <span>Clique no link de verificação dentro do email</span>
               </li>
               <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full font-semibold text-xs mr-3 mt-0.5">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-brand-100 text-brand-600 rounded-full font-semibold text-xs mr-3 mt-0.5">
                   3
                 </span>
                 <span>Você será redirecionado automaticamente e poderá acessar todos os materiais do curso</span>
@@ -199,10 +199,10 @@ export default function ConfirmacaoRegistroPage() {
           </div>
 
           {/* Link para voltar */}
-          <div className="mt-8 text-center border-t border-gray-200 pt-6">
+          <div className="mt-8 text-center border-t border-border-subtle pt-6">
             <Link
               href="/"
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-sm text-brand-600 hover:text-brand-700 font-medium"
             >
               ← Voltar para o site
             </Link>
@@ -211,9 +211,9 @@ export default function ConfirmacaoRegistroPage() {
 
         {/* Suporte */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-ink-muted">
             Problemas com o cadastro?{' '}
-            <Link href="/contato" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link href="/contato" className="text-brand-600 hover:text-brand-700 font-medium">
               Entre em contato conosco
             </Link>
           </p>

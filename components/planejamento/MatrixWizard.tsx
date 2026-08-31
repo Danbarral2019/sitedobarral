@@ -96,7 +96,7 @@ export default function MatrixWizard({ sessionId }: Props) {
 
   if (loading) {
     return (
-      <p className="inline-flex items-center gap-2 text-sm text-gray-500">
+      <p className="inline-flex items-center gap-2 text-sm text-ink-muted">
         <Loader2 className="h-4 w-4 animate-spin" /> Carregando matriz…
       </p>
     );
@@ -131,8 +131,8 @@ export default function MatrixWizard({ sessionId }: Props) {
       }}
       className="space-y-5"
     >
-      <header className="flex items-start gap-3 rounded-lg border border-brand-100 bg-brand-50 p-4">
-        <span className="rounded-lg bg-white p-2 text-brand-700">
+      <header className="flex items-start gap-3 rounded-[6px] border border-brand-100 bg-brand-50 p-4">
+        <span className="rounded-[6px] bg-white p-2 text-brand-700">
           <ScaleIcon className="h-5 w-5" />
         </span>
         <div>
@@ -140,7 +140,7 @@ export default function MatrixWizard({ sessionId }: Props) {
             {matrix.slug} · v{matrix.version}
           </p>
           <h2 className="font-serif text-lg text-brand-900">{matrix.title}</h2>
-          <p className="mt-1 text-xs text-gray-600">
+          <p className="mt-1 text-xs text-ink-muted">
             A matriz é determinística e auditável; mudanças no conjunto de
             regras geram uma nova versão registrada em{" "}
             <code className="rounded bg-white px-1">PlanningDecisionRun</code>.
@@ -167,7 +167,7 @@ export default function MatrixWizard({ sessionId }: Props) {
 
       <div className="flex items-center justify-between">
         {missingRequired.length > 0 ? (
-          <p className="text-xs text-amber-700">
+          <p className="text-xs text-amber-accent-deep">
             Preencha: {missingRequired.join(", ")}
           </p>
         ) : (
@@ -176,7 +176,7 @@ export default function MatrixWizard({ sessionId }: Props) {
         <button
           type="submit"
           disabled={submitting || missingRequired.length > 0}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -203,7 +203,7 @@ function InputField({
   if (input.type === "enum") {
     return (
       <div>
-        <label htmlFor={id} className="mb-1 block text-sm font-medium text-gray-800">
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-ink-secondary">
           {input.label}
           {input.required && <span className="text-red-600"> *</span>}
         </label>
@@ -211,7 +211,7 @@ function InputField({
           id={id}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value || undefined)}
-          className="w-full rounded-lg border-2 border-gray-200 bg-white px-3 py-2 text-sm focus:border-brand-600 focus:outline-none"
+          className="w-full rounded-[6px] border-2 border-border-subtle bg-white px-3 py-2 text-sm focus:border-brand-600 focus:outline-none"
         >
           <option value="">Selecione…</option>
           {input.options?.map((opt) => (
@@ -227,7 +227,7 @@ function InputField({
   if (input.type === "bool") {
     return (
       <div>
-        <p className="mb-1 text-sm font-medium text-gray-800">{input.label}</p>
+        <p className="mb-1 text-sm font-medium text-ink-secondary">{input.label}</p>
         <div className="flex gap-2">
           {(
             [
@@ -239,10 +239,10 @@ function InputField({
               type="button"
               key={String(opt.v)}
               onClick={() => onChange(opt.v)}
-              className={`rounded-lg border px-4 py-1.5 text-sm transition ${
+              className={`rounded-[6px] border px-4 py-1.5 text-sm transition ${
                 value === opt.v
                   ? "border-brand-700 bg-brand-700 text-white"
-                  : "border-gray-200 bg-white text-gray-700 hover:border-brand-300"
+                  : "border-border-subtle bg-white text-ink-secondary hover:border-brand-300"
               }`}
             >
               {opt.label}
@@ -256,7 +256,7 @@ function InputField({
   if (input.type === "number") {
     return (
       <div>
-        <label htmlFor={id} className="mb-1 block text-sm font-medium text-gray-800">
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-ink-secondary">
           {input.label}
           {input.required && <span className="text-red-600"> *</span>}
         </label>
@@ -272,7 +272,7 @@ function InputField({
             const n = Number(raw);
             onChange(Number.isFinite(n) ? n : undefined);
           }}
-          className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none"
+          className="w-full rounded-[6px] border-2 border-border-subtle px-3 py-2 text-sm focus:border-brand-600 focus:outline-none"
         />
         {input.help && <Helper text={input.help} />}
       </div>
@@ -281,7 +281,7 @@ function InputField({
   // text
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium text-gray-800">
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-ink-secondary">
         {input.label}
         {input.required && <span className="text-red-600"> *</span>}
       </label>
@@ -290,7 +290,7 @@ function InputField({
         type="text"
         value={(value as string | undefined) ?? ""}
         onChange={(e) => onChange(e.target.value || undefined)}
-        className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none"
+        className="w-full rounded-[6px] border-2 border-border-subtle px-3 py-2 text-sm focus:border-brand-600 focus:outline-none"
       />
       {input.help && <Helper text={input.help} />}
     </div>
@@ -298,5 +298,5 @@ function InputField({
 }
 
 function Helper({ text }: { text: string }) {
-  return <p className="mt-1 text-[11px] text-gray-500">{text}</p>;
+  return <p className="mt-1 text-[11px] text-ink-muted">{text}</p>;
 }

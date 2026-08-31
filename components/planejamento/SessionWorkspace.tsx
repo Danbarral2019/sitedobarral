@@ -203,14 +203,14 @@ export default function SessionWorkspace({
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-end gap-2 px-4 pt-4">
         <button
           onClick={openLibraryForBrowse}
-          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:border-brand-300 hover:text-brand-800"
+          className="inline-flex items-center gap-1 rounded-[6px] border border-border-subtle bg-white px-3 py-1.5 text-xs font-medium text-ink-secondary hover:border-brand-300 hover:text-brand-800"
         >
           <BookMarked className="h-3.5 w-3.5" /> Biblioteca
         </button>
         <VersionHistoryButton documentId={documentId} />
         <button
           onClick={() => setExportOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800"
+          className="inline-flex items-center gap-1 rounded-[6px] bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800"
         >
           <Download className="h-3.5 w-3.5" /> Exportar
         </button>
@@ -244,7 +244,7 @@ export default function SessionWorkspace({
               onSaveAsSnippet={openLibraryForSaveCurrent}
             />
           ) : (
-            <p className="text-sm text-gray-500">Selecione uma seção à esquerda.</p>
+            <p className="text-sm text-ink-muted">Selecione uma seção à esquerda.</p>
           )}
         </section>
       </div>

@@ -27,14 +27,14 @@ export default async function RevisaoPage({ params }: PageProps) {
     <main className="mx-auto max-w-4xl px-4 py-8">
       <Link
         href={`/area-restrita/planejamento/${sessionId}`}
-        className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-brand-700"
+        className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-brand-700"
       >
         <ArrowLeft className="h-4 w-4" /> Voltar à trilha
       </Link>
       <h1 className="mt-3 font-serif text-2xl text-brand-900">
         Revisão final
       </h1>
-      <p className="mt-1 mb-6 max-w-2xl text-sm text-gray-600">
+      <p className="mt-1 mb-6 max-w-2xl text-sm text-ink-muted">
         Checklist de conformidade com a Lei 14.133/2021 e INs SEGES aplicáveis,
         mais um teste de coerência entre o ETP e o TR. Os achados são
         informativos — a decisão de exportar permanece com você.

@@ -26,14 +26,14 @@ export function getArticleStatus(count: number, variant: ArticleStatusVariant = 
   if (count === 0) {
     return variant === 'editorial'
       ? { label: 'Órfão', color: 'bg-red-100 text-red-700', icon: AlertCircle }
-      : { label: 'Sem documentos', color: 'bg-gray-100 text-gray-600', icon: AlertCircle };
+      : { label: 'Sem documentos', color: 'bg-surface-deep text-ink-muted', icon: AlertCircle };
   }
   if (count < 3) {
     return variant === 'editorial'
-      ? { label: 'Escasso', color: 'bg-orange-100 text-orange-700', icon: TrendingUp }
-      : { label: 'Inicial', color: 'bg-orange-100 text-orange-700', icon: TrendingUp };
+      ? { label: 'Escasso', color: 'bg-amber-accent-soft text-amber-accent-deep', icon: TrendingUp }
+      : { label: 'Inicial', color: 'bg-amber-accent-soft text-amber-accent-deep', icon: TrendingUp };
   }
-  if (count < 6) return { label: 'Médio', color: 'bg-blue-100 text-blue-700', icon: Target };
+  if (count < 6) return { label: 'Médio', color: 'bg-brand-100 text-brand-700', icon: Target };
   if (count < 15) return { label: 'Bom', color: 'bg-green-100 text-green-700', icon: CheckCircle };
   return { label: 'Excelente', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle };
 }

@@ -156,8 +156,8 @@ export default function HistoricoPage() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-700 font-medium">Verificando acesso...</p>
+          <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-ink-secondary font-medium">Verificando acesso...</p>
         </div>
       </main>
     );
@@ -207,8 +207,8 @@ export default function HistoricoPage() {
   const getActionColor = (action: string) => {
     switch (action) {
       case 'download': return 'bg-green-100 text-green-800 border-green-200';
-      case 'view': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'view': return 'bg-brand-100 text-brand-800 border-brand-200';
+      default: return 'bg-surface-deep text-ink-secondary border-border-subtle';
     }
   };
 
@@ -235,22 +235,22 @@ export default function HistoricoPage() {
     return (
       <div
         key={log.id}
-        className="flex items-start justify-between p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors"
+        className="flex items-start justify-between p-4 bg-brand-50 rounded-[6px] border border-border-subtle hover:border-brand-300 transition-colors"
       >
         <div className="flex items-start gap-3 flex-1">
-          <div className={`px-3 py-1 rounded-lg text-xs font-bold border flex items-center gap-1 ${getActionColor(log.action)}`}>
+          <div className={`px-3 py-1 rounded-[6px] text-xs font-bold border flex items-center gap-1 ${getActionColor(log.action)}`}>
             {getActionIcon(log.action)}
             {getActionLabel(log.action)}
           </div>
           <div className="flex-1">
             {title ? (
-              <h4 className="font-bold text-gray-900 text-sm">{title}</h4>
+              <h4 className="font-bold text-ink-primary text-sm">{title}</h4>
             ) : (
-              <p className="text-gray-500 text-sm">Documento</p>
+              <p className="text-ink-muted text-sm">Documento</p>
             )}
           </div>
         </div>
-        <div className="text-sm text-gray-500 font-medium ml-4">{time}</div>
+        <div className="text-sm text-ink-muted font-medium ml-4">{time}</div>
       </div>
     );
   };
@@ -266,7 +266,7 @@ export default function HistoricoPage() {
     return (
       <div
         key={entry.id}
-        className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200 hover:border-purple-300 transition-colors"
+        className="p-4 bg-brand-50 rounded-[6px] border border-brand-200 hover:border-brand-300 transition-colors"
       >
         <div className="flex items-start justify-between gap-3">
           <div
@@ -274,24 +274,24 @@ export default function HistoricoPage() {
             onClick={() => setExpandedSearchId(isExpanded ? null : entry.id)}
           >
             <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-4 h-4 text-purple-600 flex-shrink-0" />
-              <h4 className="font-bold text-gray-900 text-sm truncate">{entry.query}</h4>
+              <Sparkles className="w-4 h-4 text-brand-600 flex-shrink-0" />
+              <h4 className="font-bold text-ink-primary text-sm truncate">{entry.query}</h4>
             </div>
             {!isExpanded && previewAnswer && (
-              <p className="text-xs text-gray-600 line-clamp-2 ml-6">{previewAnswer}</p>
+              <p className="text-xs text-ink-muted line-clamp-2 ml-6">{previewAnswer}</p>
             )}
             {isExpanded && entry.aiAnswer && (
-              <div className="mt-3 ml-6 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <div className="mt-3 ml-6 text-sm text-ink-secondary leading-relaxed whitespace-pre-wrap">
                 {entry.aiAnswer.replace(/\*\*/g, '')}
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-gray-500">{formatRelativeDate(entry.createdAt)}</span>
+            <span className="text-xs text-ink-muted">{formatRelativeDate(entry.createdAt)}</span>
             <button
               onClick={() => setExpandedSearchId(isExpanded ? null : entry.id)}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-ink-muted hover:text-ink-secondary transition-colors"
               title={isExpanded ? 'Recolher' : 'Expandir'}
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -303,7 +303,7 @@ export default function HistoricoPage() {
         <div className="flex items-center gap-2 mt-3 ml-6">
           <button
             onClick={() => router.push(`/area-restrita?q=${encodeURIComponent(entry.query)}`)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-purple-700 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-brand-700 bg-white border border-brand-200 rounded-[6px] hover:bg-brand-50 transition-colors"
           >
             <Search className="w-3 h-3" />
             Pesquisar novamente
@@ -311,7 +311,7 @@ export default function HistoricoPage() {
           <button
             onClick={() => deleteSearchEntry(entry.id)}
             disabled={isDeleting}
-            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-[6px] hover:bg-red-50 transition-colors disabled:opacity-50"
           >
             {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
             Excluir
@@ -322,27 +322,27 @@ export default function HistoricoPage() {
   };
 
   return (
-    <main className="py-12 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    <main className="py-12 bg-white min-h-screen">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <button
               onClick={() => router.push('/area-restrita')}
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors mb-4 font-medium"
+              className="flex items-center gap-2 text-ink-secondary hover:text-brand-600 transition-colors mb-4 font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar para Área Restrita
             </button>
 
-            <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-200">
+            <div className="bg-white rounded-[6px] p-8 border-2 border-border-subtle">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-14 h-14 bg-brand-600 rounded-full flex items-center justify-center">
                   <Clock className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Histórico</h1>
-                  <p className="text-gray-600 mt-1">
+                  <h1 className="text-3xl font-bold text-ink-primary">Histórico</h1>
+                  <p className="text-ink-muted mt-1">
                     {totalCount} registro(s)
                     {filter === 'all' && searchHistory.length > 0 && logs.length > 0 &&
                       ` (${logs.length} acessos, ${searchHistory.length} pesquisas IA)`
@@ -355,16 +355,16 @@ export default function HistoricoPage() {
               <div className="flex gap-3 mt-6 flex-wrap">
                 <button
                   onClick={() => setFilter('all')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                    filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-4 py-2 rounded-[6px] font-semibold transition-colors ${
+                    filter === 'all' ? 'bg-brand-600 text-white' : 'bg-surface-deep text-ink-secondary hover:bg-surface-deep'
                   }`}
                 >
                   Todos
                 </button>
                 <button
                   onClick={() => setFilter('download')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
-                    filter === 'download' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-4 py-2 rounded-[6px] font-semibold transition-colors flex items-center gap-2 ${
+                    filter === 'download' ? 'bg-green-600 text-white' : 'bg-surface-deep text-ink-secondary hover:bg-surface-deep'
                   }`}
                 >
                   <Download className="w-4 h-4" />
@@ -372,8 +372,8 @@ export default function HistoricoPage() {
                 </button>
                 <button
                   onClick={() => setFilter('view')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
-                    filter === 'view' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-4 py-2 rounded-[6px] font-semibold transition-colors flex items-center gap-2 ${
+                    filter === 'view' ? 'bg-brand-600 text-white' : 'bg-surface-deep text-ink-secondary hover:bg-surface-deep'
                   }`}
                 >
                   <Eye className="w-4 h-4" />
@@ -381,8 +381,8 @@ export default function HistoricoPage() {
                 </button>
                 <button
                   onClick={() => setFilter('ai-search')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
-                    filter === 'ai-search' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  className={`px-4 py-2 rounded-[6px] font-semibold transition-colors flex items-center gap-2 ${
+                    filter === 'ai-search' ? 'bg-brand-600 text-white' : 'bg-surface-deep text-ink-secondary hover:bg-surface-deep'
                   }`}
                 >
                   <Sparkles className="w-4 h-4" />
@@ -394,23 +394,23 @@ export default function HistoricoPage() {
 
           {/* Content */}
           {isLoadingContent ? (
-            <div className="bg-white rounded-2xl shadow-lg p-12 border-2 border-gray-200 text-center">
-              <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
-              <p className="text-gray-600">Carregando histórico...</p>
+            <div className="bg-white rounded-[6px] p-12 border-2 border-border-subtle text-center">
+              <Loader2 className="w-10 h-10 animate-spin text-brand-600 mx-auto mb-4" />
+              <p className="text-ink-muted">Carregando histórico...</p>
             </div>
           ) : isAiOnly ? (
             /* === Pesquisas IA only === */
             searchHistory.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-lg p-12 border-2 border-gray-200 text-center">
-                <Sparkles className="w-16 h-16 text-purple-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhuma pesquisa IA encontrada</h3>
-                <p className="text-gray-600">Suas pesquisas com IA aparecerão aqui</p>
+              <div className="bg-white rounded-[6px] p-12 border-2 border-border-subtle text-center">
+                <Sparkles className="w-16 h-16 text-brand-300 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-ink-primary mb-2">Nenhuma pesquisa IA encontrada</h3>
+                <p className="text-ink-muted">Suas pesquisas com IA aparecerão aqui</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {Object.entries(searchByDate).map(([date, entries]) => (
-                  <div key={date} className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div key={date} className="bg-white rounded-[6px] p-6 border-2 border-border-subtle">
+                    <h3 className="text-lg font-bold text-ink-primary mb-4 flex items-center gap-2">
                       <Clock className="w-5 h-5" />
                       {date}
                     </h3>
@@ -424,16 +424,16 @@ export default function HistoricoPage() {
           ) : (
             /* === Unified Timeline (Todos / Downloads / Views) === */
             timelineItems.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-lg p-12 border-2 border-gray-200 text-center">
-                <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhum registro encontrado</h3>
-                <p className="text-gray-600">Seus acessos, downloads e pesquisas aparecerão aqui</p>
+              <div className="bg-white rounded-[6px] p-12 border-2 border-border-subtle text-center">
+                <Clock className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-ink-primary mb-2">Nenhum registro encontrado</h3>
+                <p className="text-ink-muted">Seus acessos, downloads e pesquisas aparecerão aqui</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {Object.entries(timelineByDate).map(([date, items]) => (
-                  <div key={date} className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div key={date} className="bg-white rounded-[6px] p-6 border-2 border-border-subtle">
+                    <h3 className="text-lg font-bold text-ink-primary mb-4 flex items-center gap-2">
                       <Clock className="w-5 h-5" />
                       {date}
                     </h3>

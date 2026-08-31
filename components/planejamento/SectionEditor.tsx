@@ -79,18 +79,18 @@ export default function SectionEditor({
     state.generationProvenance === "NOT_ANCHORED" && state.status !== "CONFIRMED";
 
   return (
-    <article className="rounded-xl border border-gray-200 bg-white">
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 px-6 py-4">
+    <article className="rounded-[6px] border border-border-subtle bg-white">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border-subtle px-6 py-4">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">
+          <p className="text-[11px] uppercase tracking-wide text-ink-muted">
             Seção {def.ordem} · {def.required ? "obrigatória" : "opcional"}
           </p>
           <h2 className="mt-0.5 font-serif text-xl text-brand-900">{def.title}</h2>
-          <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-gray-600">
+          <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-ink-muted">
             {def.legalAnchors.map((a, i) => (
               <span
                 key={i}
-                className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700"
+                className="rounded-full bg-surface-deep px-2 py-0.5 font-medium text-ink-secondary"
               >
                 {a.label}
               </span>
@@ -103,18 +103,18 @@ export default function SectionEditor({
         />
       </header>
 
-      <div className="border-b border-gray-100">
+      <div className="border-b border-border-subtle">
         <button
           onClick={() => setDidacticOpen((v) => !v)}
-          className="flex w-full items-center justify-between px-6 py-3 text-sm text-gray-700 hover:bg-gray-50"
+          className="flex w-full items-center justify-between px-6 py-3 text-sm text-ink-secondary hover:bg-surface-raised"
         >
           <span className="inline-flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-brand-700" /> Painel didático
           </span>
           {didacticOpen ? (
-            <ChevronUp className="h-4 w-4 text-gray-400" />
+            <ChevronUp className="h-4 w-4 text-ink-muted" />
           ) : (
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <ChevronDown className="h-4 w-4 text-ink-muted" />
           )}
         </button>
         <DidacticPanel
@@ -136,14 +136,14 @@ export default function SectionEditor({
       <div className="px-6 py-5">
         {skipMode && def.discretionary ? (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-800">
+            <label className="mb-1 block text-sm font-medium text-ink-secondary">
               Justificativa para dispensar esta seção
             </label>
             <textarea
               value={justification}
               onChange={(e) => setJustification(e.target.value)}
               rows={5}
-              className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm leading-relaxed focus:border-brand-600 focus:outline-none"
+              className="w-full rounded-[6px] border-2 border-border-subtle px-4 py-3 text-sm leading-relaxed focus:border-brand-600 focus:outline-none"
               placeholder="Informe o fundamento fático e jurídico pelo qual esta seção é dispensada."
             />
             <div className="mt-3 flex gap-2">
@@ -156,7 +156,7 @@ export default function SectionEditor({
                   })
                 }
                 disabled={isSaving || justification.trim().length < 20}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
               >
                 {isSaving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -167,7 +167,7 @@ export default function SectionEditor({
               </button>
               <button
                 onClick={() => setSkipMode(false)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="rounded-[6px] border border-border-subtle px-4 py-2 text-sm text-ink-secondary hover:bg-surface-raised"
               >
                 Cancelar
               </button>
@@ -175,7 +175,7 @@ export default function SectionEditor({
           </div>
         ) : (
           <>
-            <div className="mb-3 rounded-lg border border-brand-100 bg-brand-50/60 p-3">
+            <div className="mb-3 rounded-[6px] border border-brand-100 bg-brand-50/60 p-3">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="inline-flex items-center gap-1 text-xs font-medium text-brand-800">
                   <Sparkles className="h-3.5 w-3.5" />
@@ -193,7 +193,7 @@ export default function SectionEditor({
                 onChange={(e) => setHints(e.target.value)}
                 rows={2}
                 placeholder="Observações opcionais (ex: incluir referência à sustentabilidade, indicar que o órgão é municipal)."
-                className="w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-xs focus:border-brand-600 focus:outline-none"
+                className="w-full resize-none rounded-md border border-border-subtle px-3 py-2 text-xs focus:border-brand-600 focus:outline-none"
                 maxLength={1500}
               />
               <div className="mt-2 flex flex-wrap gap-2">
@@ -226,7 +226,7 @@ export default function SectionEditor({
               onChange={(e) => setContent(e.target.value)}
               rows={16}
               placeholder="Escreva o conteúdo desta seção em prosa técnico-jurídica, ou use Gerar do zero para obter um texto-base ancorado."
-              className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 font-mono text-sm leading-relaxed focus:border-brand-600 focus:outline-none"
+              className="w-full rounded-[6px] border-2 border-border-subtle px-4 py-3 font-mono text-sm leading-relaxed focus:border-brand-600 focus:outline-none"
             />
 
             {state.sources.length > 0 && (
@@ -244,7 +244,7 @@ export default function SectionEditor({
             )}
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-ink-muted">
                 <span
                   className={cn(
                     "rounded-full px-2 py-0.5 font-medium",
@@ -254,7 +254,7 @@ export default function SectionEditor({
                   {friendlyStatus(state.status)}
                 </span>
                 {dirty && (
-                  <span className="ml-2 text-amber-700">
+                  <span className="ml-2 text-amber-accent-deep">
                     alterações não salvas
                   </span>
                 )}
@@ -263,7 +263,7 @@ export default function SectionEditor({
                 {onSaveAsSnippet && state.contentMd.trim().length > 20 && (
                   <button
                     onClick={onSaveAsSnippet}
-                    className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                    className="inline-flex items-center gap-1 rounded-[6px] border border-border-subtle px-3 py-1.5 text-sm text-ink-secondary hover:bg-surface-raised"
                   >
                     <BookMarked className="h-3.5 w-3.5" />
                     Salvar como snippet
@@ -272,7 +272,7 @@ export default function SectionEditor({
                 {def.discretionary && state.status !== "CONFIRMED" && (
                   <button
                     onClick={() => setSkipMode(true)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                    className="inline-flex items-center gap-1 rounded-[6px] border border-border-subtle px-3 py-1.5 text-sm text-ink-secondary hover:bg-surface-raised"
                   >
                     <Ban className="h-3.5 w-3.5" />
                     Dispensar com justificativa
@@ -281,7 +281,7 @@ export default function SectionEditor({
                 <button
                   onClick={() => onSave({ contentMd: content })}
                   disabled={isSaving || !dirty}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-[6px] bg-brand-900 px-4 py-2 text-sm font-medium text-white hover:bg-brand-900 disabled:opacity-60"
                 >
                   {isSaving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -295,7 +295,7 @@ export default function SectionEditor({
                     onSave({ contentMd: content, status: "CONFIRMED" })
                   }
                   disabled={isSaving || content.trim().length < 20}
-                  className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
                 >
                   <Check className="h-4 w-4" />
                   Confirmar seção
@@ -364,11 +364,11 @@ function CheckpointBlock({
   }
 
   return (
-    <div className="mt-6 rounded-lg border border-dashed border-brand-200 bg-brand-50/40 p-4">
+    <div className="mt-6 rounded-[6px] border border-dashed border-brand-200 bg-brand-50/40 p-4">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-800">
         Checkpoint pedagógico
       </p>
-      <p className="mt-1 text-sm text-gray-800">{question}</p>
+      <p className="mt-1 text-sm text-ink-secondary">{question}</p>
       <textarea
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
@@ -378,7 +378,7 @@ function CheckpointBlock({
         maxLength={4000}
       />
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] text-gray-500">
+        <p className="text-[11px] text-ink-muted">
           {passed === true && "Marcado como compreendido"}
           {passed === false && "Marcado como incerto — revise o fundamento"}
           {savedAt && ` · ${savedAt.toLocaleTimeString("pt-BR")}`}
@@ -387,7 +387,7 @@ function CheckpointBlock({
           <button
             onClick={() => submit("uncertain")}
             disabled={saving || answer.trim().length < 5}
-            className="rounded-md border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+            className="rounded-md border border-border-subtle px-3 py-1 text-xs text-ink-secondary hover:bg-surface-raised disabled:opacity-60"
           >
             Ainda tenho dúvida
           </button>
@@ -417,8 +417,8 @@ function CitationsFooter({
   onOpen: (s: PlanningSectionSource) => void;
 }) {
   return (
-    <div className="mt-3 rounded-md bg-gray-50 p-3">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+    <div className="mt-3 rounded-md bg-surface-raised p-3">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
         Fontes ancoradas
       </p>
       <ul className="flex flex-wrap gap-1.5">
@@ -426,7 +426,7 @@ function CitationsFooter({
           <li key={s.id}>
             <button
               onClick={() => onOpen(s)}
-              className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-700 hover:border-brand-300 hover:text-brand-800"
+              className="rounded-full border border-border-subtle bg-white px-2 py-0.5 text-[11px] font-medium text-ink-secondary hover:border-brand-300 hover:text-brand-800"
               title={s.title}
             >
               {shortLabel(s)}
@@ -468,10 +468,10 @@ function statusColor(s: string) {
     case "DRAFTED":
       return "bg-brand-50 text-brand-800";
     case "IN_PROGRESS":
-      return "bg-amber-100 text-amber-800";
+      return "bg-amber-accent-soft text-amber-accent-deep";
     case "SKIPPED_WITH_JUSTIFICATION":
-      return "bg-gray-100 text-gray-700";
+      return "bg-surface-deep text-ink-secondary";
     default:
-      return "bg-gray-100 text-gray-500";
+      return "bg-surface-deep text-ink-muted";
   }
 }

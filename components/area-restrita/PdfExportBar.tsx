@@ -29,7 +29,7 @@ export function PdfExportBar({
             {/* Info */}
             <div className="flex items-center gap-2 text-sm min-w-0">
               <CheckSquare className="w-4 h-4 text-brand-600 flex-shrink-0" />
-              <span className="text-gray-700 truncate">
+              <span className="text-ink-secondary truncate">
                 <strong className="text-brand-700">{selectedCount}</strong>
                 {' de '}
                 <strong>{totalDocumentCount}</strong>
@@ -44,7 +44,7 @@ export function PdfExportBar({
               {selectedCount < totalDocumentCount && (
                 <button
                   onClick={onSelectAll}
-                  className="px-3 py-1.5 text-xs font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-[6px] transition-colors"
                 >
                   <span className="hidden sm:inline">Selecionar Todos</span>
                   <span className="sm:hidden">Todos</span>
@@ -54,7 +54,7 @@ export function PdfExportBar({
                 <>
                   <button
                     onClick={onClearSelection}
-                    className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+                    className="px-3 py-1.5 text-xs font-medium text-ink-muted bg-surface-deep hover:bg-border-subtle rounded-[6px] transition-colors flex items-center gap-1"
                   >
                     <X className="w-3 h-3" />
                     <span className="hidden sm:inline">Limpar</span>
@@ -62,7 +62,7 @@ export function PdfExportBar({
                   <button
                     onClick={onExport}
                     disabled={isExporting}
-                    className="px-4 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center gap-1.5"
+                    className="px-4 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed rounded-[6px] transition-colors flex items-center gap-1.5"
                   >
                     {isExporting ? (
                       <>

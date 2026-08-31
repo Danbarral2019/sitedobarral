@@ -77,10 +77,10 @@ function LeiComentadaContent() {
 
   if (reader.loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-raised flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Carregando Lei 14.133/2021...</p>
+          <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-ink-muted">Carregando Lei 14.133/2021...</p>
         </div>
       </div>
     );
@@ -88,8 +88,8 @@ function LeiComentadaContent() {
 
   if (reader.error || !reader.apiData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+      <div className="min-h-screen bg-surface-raised flex items-center justify-center p-4">
+        <div className="bg-red-50 border border-red-200 rounded-[6px] p-6 max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-900 text-center mb-2">Erro ao Carregar Lei</h2>
           <p className="text-red-700 text-center mb-4">{reader.error || 'Erro desconhecido'}</p>
@@ -119,7 +119,7 @@ function LeiComentadaContent() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-raised">
       <LeiAreaHeader
         searchQuery={reader.searchQuery}
         onSearchChange={reader.setSearchQuery}
@@ -143,10 +143,10 @@ function LeiComentadaContent() {
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="hidden lg:block lg:col-span-4">
-            <div className="bg-white rounded-lg shadow-md sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">Estrutura da Lei</h2>
-                <p className="text-sm text-gray-600">
+            <div className="bg-white rounded-[6px] sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto border border-border-subtle">
+              <div className="p-4 border-b border-border-subtle">
+                <h2 className="text-lg font-bold text-ink-primary">Estrutura da Lei</h2>
+                <p className="text-sm text-ink-muted">
                   {Object.keys(reader.filteredHierarchy || {}).length} títulos
                 </p>
               </div>
@@ -169,10 +169,10 @@ function LeiComentadaContent() {
                 onToggleDocument={toggleDocumentExpanded}
               />
             ) : (
-              <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 text-lg mb-2">Selecione um artigo</p>
-                <p className="text-gray-500 text-sm">
+              <div className="bg-white rounded-[6px] p-12 text-center border border-border-subtle">
+                <BookOpen className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+                <p className="text-ink-muted text-lg mb-2">Selecione um artigo</p>
+                <p className="text-ink-muted text-sm">
                   Navegue pela estrutura da lei ao lado e selecione um artigo para ver seus documentos
                 </p>
               </div>
@@ -184,7 +184,7 @@ function LeiComentadaContent() {
       {/* Mobile FAB */}
       <button
         onClick={reader.openMobileDrawer}
-        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors"
+        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-brand-600 text-white rounded-full flex items-center justify-center hover:bg-brand-700 transition-colors border border-border-subtle"
         aria-label="Abrir navegação"
       >
         <BookOpen className="w-6 h-6" />
@@ -195,12 +195,12 @@ function LeiComentadaContent() {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/50" onClick={reader.closeMobileDrawer} />
           <div
-            className="absolute top-0 left-0 h-full w-[80vw] max-w-sm bg-white shadow-2xl overflow-y-auto"
+            className="absolute top-0 left-0 h-full w-[80vw] max-w-sm bg-white overflow-y-auto border border-border-subtle"
             style={{ animation: 'slide-in-left 0.2s ease-out' }}
           >
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
-              <h2 className="text-lg font-bold text-gray-900">Estrutura da Lei</h2>
-              <button onClick={reader.closeMobileDrawer} className="p-2 hover:bg-gray-100 rounded-lg">
+            <div className="p-4 border-b border-border-subtle flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="text-lg font-bold text-ink-primary">Estrutura da Lei</h2>
+              <button onClick={reader.closeMobileDrawer} className="p-2 hover:bg-surface-deep rounded-[6px]">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -284,10 +284,10 @@ function ArticleSections({
           onToggleDocument={onToggleDocument}
         />
       ) : (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
-          <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-3" />
-          <p className="text-amber-900 font-medium mb-2">Nenhum documento catalogado para este artigo</p>
-          <p className="text-sm text-amber-700">
+        <div className="bg-amber-accent-soft border border-amber-accent-soft rounded-[6px] p-6 text-center">
+          <AlertCircle className="w-12 h-12 text-amber-accent-deep mx-auto mb-3" />
+          <p className="text-amber-accent-deep font-medium mb-2">Nenhum documento catalogado para este artigo</p>
+          <p className="text-sm text-amber-accent-deep">
             Este artigo ainda não possui documentos vinculados. Estamos trabalhando para ampliar a cobertura da lei.
           </p>
         </div>
@@ -302,10 +302,10 @@ export default function LeiComentadaPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-surface-raised flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600">Carregando Lei 14.133/2021...</p>
+            <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
+            <p className="text-ink-muted">Carregando Lei 14.133/2021...</p>
           </div>
         </div>
       }

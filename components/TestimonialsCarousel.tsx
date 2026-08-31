@@ -92,7 +92,7 @@ export default function TestimonialsCarousel() {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Carregando depoimentos...</p>
+        <p className="text-ink-muted">Carregando depoimentos...</p>
       </div>
     );
   }
@@ -117,23 +117,23 @@ export default function TestimonialsCarousel() {
         {visibleTestimonials.map((testimonial, idx) => (
           <div
             key={`${testimonial.id}-${idx}`}
-            className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-accent-400 shadow-lg hover:shadow-2xl transition-all animate-fade-in"
+            className="bg-white p-8 rounded-[6px] border-2 border-border-subtle hover:border-accent-400 hover: transition-all animate-fade-in"
           >
             <div className="flex mb-4 gap-1">
               {[...Array(testimonial.rating)].map((_, i) => (
-                <Star key={i} className="w-6 h-6 fill-amber-400 text-amber-400" />
+                <Star key={i} className="w-6 h-6 fill-amber-accent text-amber-accent-deep" />
               ))}
             </div>
-            <p className="text-gray-800 mb-6 italic text-lg leading-relaxed">
+            <p className="text-ink-secondary mb-6 italic text-lg leading-relaxed">
               &quot;{testimonial.text}&quot;
             </p>
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 bg-gradient-to-br ${testimonial.color} rounded-full flex items-center justify-center text-white font-bold text-xl`}>
+              <div className={`w-12 h-12 ${testimonial.color} rounded-full flex items-center justify-center text-white font-bold text-xl`}>
                 {testimonial.avatar}
               </div>
               <div>
-                <p className="font-bold text-gray-900">{testimonial.name}</p>
-                <p className="text-sm text-gray-600">{testimonial.role}</p>
+                <p className="font-bold text-ink-primary">{testimonial.name}</p>
+                <p className="text-sm text-ink-muted">{testimonial.role}</p>
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function TestimonialsCarousel() {
         <button
           onClick={handlePrevClick}
           aria-label="Depoimento anterior"
-          className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full flex items-center justify-center hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl hover:scale-110 active:scale-95"
+          className="w-12 h-12 bg-brand-700 text-white rounded-full flex items-center justify-center hover:from-brand-700 hover:to-brand-800 transition-all hover: hover:scale-110 active:scale-95 border border-border-subtle"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -160,8 +160,8 @@ export default function TestimonialsCarousel() {
               aria-label={`Ir para depoimento ${index + 1}`}
               className={`transition-all ${
                 index === currentIndex
-                  ? 'w-8 h-3 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full'
-                  : 'w-3 h-3 bg-gray-300 hover:bg-gray-400 rounded-full'
+                  ? 'w-8 h-3 bg-accent-400 rounded-full'
+                  : 'w-3 h-3 bg-border-strong hover:bg-border-strong rounded-full'
               }`}
             />
           ))}
@@ -171,7 +171,7 @@ export default function TestimonialsCarousel() {
         <button
           onClick={handleNextClick}
           aria-label="Próximo depoimento"
-          className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full flex items-center justify-center hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl hover:scale-110 active:scale-95"
+          className="w-12 h-12 bg-brand-700 text-white rounded-full flex items-center justify-center hover:from-brand-700 hover:to-brand-800 transition-all hover: hover:scale-110 active:scale-95 border border-border-subtle"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -179,7 +179,7 @@ export default function TestimonialsCarousel() {
 
       {/* Contador de Depoimentos */}
       <div className="text-center mt-4">
-        <p className="text-sm text-gray-600 font-medium">
+        <p className="text-sm text-ink-muted font-medium">
           {currentIndex + 1} de {testimonials.length} depoimentos
         </p>
       </div>

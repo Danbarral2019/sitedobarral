@@ -14,7 +14,7 @@ export function LeiHighlightCard({ onExploreTemas }: LeiHighlightCardProps) {
   const [articleInput, setArticleInput] = useState('');
 
   return (
-    <div className="mb-6 bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-4 text-white shadow-lg overflow-hidden relative">
+    <div className="mb-6 bg-brand-700 rounded-[6px] p-4 text-white overflow-hidden relative border border-border-subtle">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
         <Scale className="w-full h-full" />
@@ -24,7 +24,7 @@ export function LeiHighlightCard({ onExploreTemas }: LeiHighlightCardProps) {
         {/* Single-row layout: icon + title + input + button */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="p-2 bg-white/20 rounded-xl">
+            <div className="p-2 bg-white/20 rounded-[6px]">
               <Scale className="w-5 h-5" />
             </div>
             <div className="sm:mr-2">
@@ -52,13 +52,13 @@ export function LeiHighlightCard({ onExploreTemas }: LeiHighlightCardProps) {
                 placeholder="Ir para Art. ..."
                 value={articleInput}
                 onChange={(e) => setArticleInput(e.target.value.replace(/\D/g, ''))}
-                className="w-full pl-9 pr-3 py-2 bg-white/15 border border-white/20 rounded-xl text-white placeholder-brand-200 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
+                className="w-full pl-9 pr-3 py-2 bg-white/15 border border-white/20 rounded-[6px] text-white placeholder-brand-200 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
               />
             </div>
             <button
               type="submit"
               disabled={!articleInput.trim()}
-              className="px-3 py-2 bg-white text-brand-700 font-bold text-sm rounded-xl hover:bg-brand-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              className="px-3 py-2 bg-white text-brand-700 font-bold text-sm rounded-[6px] hover:bg-brand-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -66,7 +66,7 @@ export function LeiHighlightCard({ onExploreTemas }: LeiHighlightCardProps) {
 
           <button
             onClick={onExploreTemas}
-            className="flex-shrink-0 px-4 py-2 bg-white/15 border border-white/25 text-white font-semibold text-sm rounded-xl hover:bg-white/25 transition-colors flex items-center gap-2 justify-center"
+            className="flex-shrink-0 px-4 py-2 bg-white/15 border border-white/25 text-white font-semibold text-sm rounded-[6px] hover:bg-white/25 transition-colors flex items-center gap-2 justify-center"
           >
             Explorar por Temas
             <ChevronRight className="w-4 h-4" />

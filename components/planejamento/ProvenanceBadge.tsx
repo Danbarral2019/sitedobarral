@@ -45,8 +45,8 @@ function metaFor(p: string) {
     case "PARTIALLY_ANCHORED":
       return {
         label: "parcialmente ancorada",
-        bg: "bg-amber-100",
-        text: "text-amber-900",
+        bg: "bg-amber-accent-soft",
+        text: "text-amber-accent-deep",
         Icon: Shield,
         title:
           "Parte do texto foi ancorada no contexto. Verifique as afirmações sem citação.",
@@ -64,8 +64,8 @@ function metaFor(p: string) {
     default:
       return {
         label: "redação manual",
-        bg: "bg-gray-100",
-        text: "text-gray-700",
+        bg: "bg-surface-deep",
+        text: "text-ink-secondary",
         Icon: Pencil,
         title: "Escrito pelo aluno sem apoio de geração.",
       };

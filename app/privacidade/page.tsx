@@ -17,17 +17,17 @@ export default function PrivacidadePage() {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <header className="mb-10">
-            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-gray-900 mb-3">
+            <h1 className="text-4xl md:text-5xl font-cinzel font-bold text-ink-primary mb-3">
               Política de Privacidade
             </h1>
-            <div className="h-1 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mb-4" />
-            <p className="text-sm text-gray-500 font-poppins">
+            <div className="h-1 w-32 bg-brand-500 rounded-full mb-4" />
+            <p className="text-sm text-ink-muted font-poppins">
               Última atualização: {LAST_UPDATED}
             </p>
           </header>
 
-          <article className="bg-white rounded-2xl shadow-lg p-8 md:p-10 border-2 border-gray-200 font-poppins text-gray-800 leading-relaxed">
-            <p className="mb-8 text-gray-700">
+          <article className="bg-white rounded-[6px] p-8 md:p-10 border-2 border-border-subtle font-poppins text-ink-secondary leading-relaxed">
+            <p className="mb-8 text-ink-secondary">
               Esta Política descreve como tratamos seus dados pessoais quando você utiliza o
               Site do Prof. Daniel Barral, em conformidade com a Lei Geral de Proteção de Dados
               Pessoais — <strong>LGPD (Lei nº 13.709/2018)</strong>.
@@ -49,14 +49,14 @@ export default function PrivacidadePage() {
             </Section>
 
             <Section number="2" title="Quais dados coletamos">
-              <h3 className="font-semibold text-gray-900 mt-4 mb-2">a) Dados de cadastro</h3>
+              <h3 className="font-semibold text-ink-primary mt-4 mb-2">a) Dados de cadastro</h3>
               <ul className="list-disc pl-6 space-y-1.5">
                 <li>Nome completo</li>
                 <li>E-mail</li>
                 <li>Senha (armazenada com hash criptográfico irreversível)</li>
               </ul>
 
-              <h3 className="font-semibold text-gray-900 mt-4 mb-2">b) Dados de pagamento</h3>
+              <h3 className="font-semibold text-ink-primary mt-4 mb-2">b) Dados de pagamento</h3>
               <ul className="list-disc pl-6 space-y-1.5">
                 <li>
                   Os dados do seu cartão são processados <strong>diretamente pela Stripe</strong>;
@@ -65,7 +65,7 @@ export default function PrivacidadePage() {
                 <li>Mantemos apenas referências (ID do cliente Stripe e ID da assinatura).</li>
               </ul>
 
-              <h3 className="font-semibold text-gray-900 mt-4 mb-2">c) Dados de uso da plataforma</h3>
+              <h3 className="font-semibold text-ink-primary mt-4 mb-2">c) Dados de uso da plataforma</h3>
               <ul className="list-disc pl-6 space-y-1.5">
                 <li>Histórico de buscas (para melhorar a relevância da busca por IA)</li>
                 <li>Progresso em cursos e marcações</li>
@@ -74,7 +74,7 @@ export default function PrivacidadePage() {
                 <li>Erros técnicos (Sentry — IP, navegador, contexto da falha)</li>
               </ul>
 
-              <h3 className="font-semibold text-gray-900 mt-4 mb-2">d) Dados de matrícula presencial (QR Code)</h3>
+              <h3 className="font-semibold text-ink-primary mt-4 mb-2">d) Dados de matrícula presencial (QR Code)</h3>
               <p>
                 Quando aplicável, os dados coletados em eventos presenciais com matrícula via
                 QR Code seguem as regras do contrato firmado naquela ocasião.
@@ -85,7 +85,7 @@ export default function PrivacidadePage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-gray-300 text-left">
+                    <tr className="border-b-2 border-border-subtle text-left">
                       <th className="py-2 pr-3 font-semibold">Dados</th>
                       <th className="py-2 pr-3 font-semibold">Finalidade</th>
                       <th className="py-2 font-semibold">Base legal (LGPD art. 7º)</th>
@@ -247,7 +247,7 @@ export default function PrivacidadePage() {
               </p>
             </Section>
 
-            <p className="mt-10 text-sm text-gray-500 italic">
+            <p className="mt-10 text-sm text-ink-muted italic">
               Esta Política deve ser lida em conjunto com nossos{' '}
               <Link href="/termos" className="text-brand-600 hover:underline">
                 Termos de Uso
@@ -264,7 +264,7 @@ export default function PrivacidadePage() {
 function Section({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8 last:mb-0">
-      <h2 className="font-cinzel font-semibold text-xl md:text-2xl text-gray-900 mb-3">
+      <h2 className="font-cinzel font-semibold text-xl md:text-2xl text-ink-primary mb-3">
         <span className="text-brand-600 mr-2">{number}.</span>
         {title}
       </h2>
@@ -275,7 +275,7 @@ function Section({ number, title, children }: { number: string; title: string; c
 
 function Row({ d, f, b }: { d: string; f: string; b: string }) {
   return (
-    <tr className="border-b border-gray-200">
+    <tr className="border-b border-border-subtle">
       <td className="py-2 pr-3 align-top">{d}</td>
       <td className="py-2 pr-3 align-top">{f}</td>
       <td className="py-2 align-top">{b}</td>

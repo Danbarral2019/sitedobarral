@@ -14,7 +14,7 @@ export default function OfflinePage() {
       <h1 className="text-2xl font-semibold text-[#20364e] mb-3 font-heading text-center">
         Você está offline
       </h1>
-      <p className="text-gray-600 mb-8 text-center max-w-md">
+      <p className="text-ink-muted mb-8 text-center max-w-md">
         Verifique sua conexão com a internet e tente novamente.
       </p>
       <ReloadButton />

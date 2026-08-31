@@ -52,9 +52,9 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-4">
+      <div className="bg-white rounded-[6px] border border-border-subtle p-4">
         <div className="flex items-center justify-center py-4">
-          <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
+          <Loader2 className="w-5 h-5 animate-spin text-ink-muted" />
         </div>
       </div>
     );
@@ -68,9 +68,9 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-[6px] border border-border-subtle overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3">
+        <div className="bg-brand-600 px-4 py-3">
           <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
             <Trophy className="w-4 h-4" />
             Sua Jornada
@@ -81,25 +81,25 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
           {/* XP Bar */}
           <div>
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="font-bold text-purple-700">{data.xp} XP</span>
-              <span className="text-gray-400">Meta: {nextMilestone} XP</span>
+              <span className="font-bold text-brand-700">{data.xp} XP</span>
+              <span className="text-ink-muted">Meta: {nextMilestone} XP</span>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-surface-deep rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
+                className="h-full bg-brand-500 rounded-full transition-all duration-500"
                 style={{ width: `${xpProgress}%` }}
               />
             </div>
           </div>
 
           {/* Streak */}
-          <div className="flex items-center gap-3 bg-orange-50 rounded-xl px-3 py-2.5">
-            <Flame className={`w-6 h-6 ${data.streak.current > 0 ? 'text-orange-500' : 'text-gray-300'}`} />
+          <div className="flex items-center gap-3 bg-amber-accent-soft rounded-[6px] px-3 py-2.5">
+            <Flame className={`w-6 h-6 ${data.streak.current > 0 ? 'text-amber-accent-deep' : 'text-ink-muted'}`} />
             <div>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-sm font-bold text-ink-primary">
                 {data.streak.current} {data.streak.current === 1 ? 'dia' : 'dias'} seguidos
               </p>
-              <p className="text-[10px] text-gray-500">
+              <p className="text-[10px] text-ink-muted">
                 Recorde: {data.streak.longest} dias
               </p>
             </div>
@@ -107,7 +107,7 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
 
           {/* Badges */}
           <div>
-            <p className="text-xs font-semibold text-gray-500 mb-2">
+            <p className="text-xs font-semibold text-ink-muted mb-2">
               Badges ({data.badges.length}/{allBadgeTypes.length})
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -116,10 +116,10 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
                 return (
                   <div
                     key={bt.type}
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg text-lg ${
+                    className={`flex items-center justify-center w-9 h-9 rounded-[6px] text-lg ${
                       earned
-                        ? 'bg-amber-50 border border-amber-200'
-                        : 'bg-gray-50 border border-gray-100 opacity-30 grayscale'
+                        ? 'bg-amber-accent-soft border border-amber-accent-soft'
+                        : 'bg-surface-raised border border-border-subtle opacity-30 grayscale'
                     }`}
                     title={earned ? `${bt.label} - ${bt.description}` : `${bt.label} (bloqueado)`}
                   >
@@ -133,19 +133,19 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
           {/* Leaderboard position */}
           <button
             onClick={() => setShowLeaderboard(true)}
-            className="w-full flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-xl px-3 py-2.5 transition-colors group"
+            className="w-full flex items-center justify-between bg-surface-raised hover:bg-surface-deep rounded-[6px] px-3 py-2.5 transition-colors group"
           >
             <div className="flex items-center gap-2">
-              <Award className="w-4 h-4 text-indigo-500" />
-              <span className="text-sm font-medium text-gray-700">Ranking</span>
+              <Award className="w-4 h-4 text-brand-500" />
+              <span className="text-sm font-medium text-ink-secondary">Ranking</span>
             </div>
             <div className="flex items-center gap-1">
               {data.leaderboardPosition && (
-                <span className="text-sm font-bold text-indigo-600">
+                <span className="text-sm font-bold text-brand-600">
                   #{data.leaderboardPosition}
                 </span>
               )}
-              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+              <ChevronRight className="w-4 h-4 text-ink-muted group-hover:text-brand-500 transition-colors" />
             </div>
           </button>
         </div>

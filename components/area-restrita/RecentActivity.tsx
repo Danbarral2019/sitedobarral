@@ -67,7 +67,7 @@ export default function RecentActivity({ onDocumentClick }: RecentActivityProps)
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <Clock className="w-4 h-4 text-brand-600" />
-        <h3 className="text-sm font-semibold text-gray-700">Continue de onde parou</h3>
+        <h3 className="text-sm font-semibold text-ink-secondary">Continue de onde parou</h3>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
         {documents.map((doc) => (
@@ -79,25 +79,25 @@ export default function RecentActivity({ onDocumentClick }: RecentActivityProps)
               category: doc.category,
               url: doc.url || undefined,
             })}
-            className="flex-shrink-0 w-56 bg-white border border-gray-200 rounded-xl p-3 text-left hover:border-brand-300 hover:shadow-sm transition-all group"
+            className="flex-shrink-0 w-56 bg-white border border-border-subtle rounded-[6px] p-3 text-left hover:border-brand-300 hover: transition-all group"
           >
             <div className="flex items-start gap-2">
               <FileText className="w-4 h-4 text-brand-500 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-700">
+                <p className="text-sm font-medium text-ink-primary truncate group-hover:text-brand-700">
                   {doc.title}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                  <span className="text-xs text-ink-muted bg-surface-deep px-1.5 py-0.5 rounded">
                     {CATEGORY_LABELS[doc.category] || doc.category}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-ink-muted">
                     {formatTimeAgo(doc.lastAccessedAt)}
                   </span>
                 </div>
               </div>
               {doc.url && (
-                <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                <ExternalLink className="w-3 h-3 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
               )}
             </div>
           </button>

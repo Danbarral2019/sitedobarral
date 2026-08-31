@@ -19,15 +19,15 @@ export function LeiCrossReferences({ selectedNumero, topics, allArticles, onSele
   if (topics.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <Scale className="w-5 h-5 text-indigo-600" />
+    <div className="bg-white rounded-[6px] p-6 border border-border-subtle">
+      <h3 className="text-lg font-bold text-ink-primary mb-4 flex items-center gap-2">
+        <Scale className="w-5 h-5 text-brand-600" />
         Artigos Relacionados
       </h3>
       <div className="space-y-4">
         {topics.map((topic) => (
           <div key={topic.topic}>
-            <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-2">
+            <span className="inline-block px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium mb-2">
               {topic.topic}
             </span>
             <div className="flex flex-wrap gap-2">
@@ -40,7 +40,7 @@ export function LeiCrossReferences({ selectedNumero, topics, allArticles, onSele
                     <button
                       key={artNum}
                       onClick={() => onSelectArticle(art)}
-                      className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium hover:bg-blue-100 transition-colors"
+                      className="px-2.5 py-1 bg-brand-50 text-brand-700 rounded text-xs font-medium hover:bg-brand-100 transition-colors"
                     >
                       Art. {artNum}
                     </button>

@@ -28,7 +28,7 @@ export function QuickAccessBar({ onShowInlineView }: QuickAccessBarProps) {
           <Link
             key={pill.href}
             href={pill.href}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-brand-300 hover:bg-brand-50 transition-all whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] bg-white border border-border-subtle text-sm font-medium text-ink-secondary hover:border-brand-300 hover:bg-brand-50 transition-all whitespace-nowrap"
           >
             <Icon className="w-4 h-4 text-brand-600" />
             {pill.label}
@@ -41,7 +41,7 @@ export function QuickAccessBar({ onShowInlineView }: QuickAccessBarProps) {
           <button
             key={pill.view}
             onClick={() => onShowInlineView(pill.view)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-brand-300 hover:bg-brand-50 transition-all whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] bg-white border border-border-subtle text-sm font-medium text-ink-secondary hover:border-brand-300 hover:bg-brand-50 transition-all whitespace-nowrap"
           >
             <Icon className="w-4 h-4 text-brand-600" />
             {pill.label}

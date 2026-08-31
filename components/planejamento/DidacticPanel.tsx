@@ -78,7 +78,7 @@ export default function DidacticPanel({ def, documentId, open, onOpenCitation }:
   if (!open) return null;
 
   return (
-    <div className="border-b border-gray-100 bg-brand-50/30">
+    <div className="border-b border-border-subtle bg-brand-50/30">
       <div className="flex items-center gap-1 border-b border-brand-100/60 px-4">
         <TabButton active={activeTab === "conceito"} onClick={() => setActiveTab("conceito")}>
           <BookOpen className="h-3.5 w-3.5" /> Conceito
@@ -94,11 +94,11 @@ export default function DidacticPanel({ def, documentId, open, onOpenCitation }:
         </TabButton>
       </div>
 
-      <div className="px-6 py-4 text-sm leading-relaxed text-gray-800">
+      <div className="px-6 py-4 text-sm leading-relaxed text-ink-secondary">
         {activeTab === "conceito" && <ConceptoTab def={def} />}
 
         {activeTab !== "conceito" && loading && (
-          <p className="inline-flex items-center gap-2 text-xs text-gray-500">
+          <p className="inline-flex items-center gap-2 text-xs text-ink-muted">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando contexto…
           </p>
         )}
@@ -110,7 +110,7 @@ export default function DidacticPanel({ def, documentId, open, onOpenCitation }:
         )}
 
         {activeTab !== "conceito" && ctx && ctx.note === "onboarding-pendente" && (
-          <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+          <p className="rounded-md border border-amber-accent-soft bg-amber-accent-soft p-3 text-xs text-ink-primary">
             A descrição da contratação está muito curta para recuperar contexto
             relevante. Refine o onboarding antes de solicitar excertos.
           </p>
@@ -146,7 +146,7 @@ function TabButton({
         "inline-flex items-center gap-1 border-b-2 px-3 py-2 text-xs font-medium transition",
         active
           ? "border-brand-700 text-brand-800"
-          : "border-transparent text-gray-500 hover:text-gray-800",
+          : "border-transparent text-ink-muted hover:text-ink-secondary",
       )}
     >
       {children}
@@ -177,7 +177,7 @@ function ConceptoTab({ def }: { def: SectionDefinition }) {
           <ul className="space-y-1 text-xs">
             {def.legalAnchors.map((a, i) => (
               <li key={i} className="inline-flex items-center gap-1">
-                <span className="rounded-full bg-white px-2 py-0.5 text-gray-700">
+                <span className="rounded-full bg-white px-2 py-0.5 text-ink-secondary">
                   {a.label}
                 </span>
               </li>
@@ -185,7 +185,7 @@ function ConceptoTab({ def }: { def: SectionDefinition }) {
           </ul>
         </div>
       )}
-      <p className="inline-flex items-center gap-1 text-[11px] italic text-gray-500">
+      <p className="inline-flex items-center gap-1 text-[11px] italic text-ink-muted">
         <Sparkles className="h-3 w-3" />
         As abas Excertos/Artigos/Atos carregam contexto ancorado na base do curso sob demanda.
       </p>
@@ -202,7 +202,7 @@ function ExcerptsTab({
 }) {
   if (ctx.excerpts.length === 0) {
     return (
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-ink-muted">
         Nenhum excerto relevante encontrado para esta seção.
       </p>
     );
@@ -210,7 +210,7 @@ function ExcerptsTab({
   return (
     <ul className="space-y-3">
       {ctx.excerpts.map((e) => (
-        <li key={e.id} className="rounded-md bg-white p-3 shadow-sm">
+        <li key={e.id} className="rounded-md bg-white p-3 border border-border-subtle">
           <div className="mb-1 flex items-center justify-between gap-2">
             <button
               onClick={() =>
@@ -227,11 +227,11 @@ function ExcerptsTab({
             >
               {iconFor(e.sourceType)} {e.title}
             </button>
-            <span className="text-[10px] text-gray-500">
+            <span className="text-[10px] text-ink-muted">
               {Math.round(e.similarity * 100)}%
             </span>
           </div>
-          <p className="text-xs leading-relaxed text-gray-700">{e.snippet}</p>
+          <p className="text-xs leading-relaxed text-ink-secondary">{e.snippet}</p>
         </li>
       ))}
     </ul>
@@ -246,12 +246,12 @@ function ArticlesTab({
   onOpenCitation: (s: PlanningSectionSource) => void;
 }) {
   if (ctx.articles.length === 0) {
-    return <p className="text-xs text-gray-500">Sem artigos selecionados.</p>;
+    return <p className="text-xs text-ink-muted">Sem artigos selecionados.</p>;
   }
   return (
     <ul className="space-y-2">
       {ctx.articles.map((a) => (
-        <li key={a.numero} className="rounded-md bg-white p-3 shadow-sm">
+        <li key={a.numero} className="rounded-md bg-white p-3 border border-border-subtle">
           <button
             onClick={() =>
               onOpenCitation({
@@ -267,7 +267,7 @@ function ArticlesTab({
           >
             Art. {a.numero} · Lei 14.133/2021
           </button>
-          <p className="mt-1 text-xs leading-relaxed text-gray-700">
+          <p className="mt-1 text-xs leading-relaxed text-ink-secondary">
             {truncate(a.ementa, 320)}
           </p>
         </li>
@@ -285,7 +285,7 @@ function ActsTab({
 }) {
   if (ctx.relatedActs.length === 0) {
     return (
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-ink-muted">
         Sem atos normativos correlatos identificados.
       </p>
     );
@@ -293,7 +293,7 @@ function ActsTab({
   return (
     <ul className="space-y-2">
       {ctx.relatedActs.map((a, i) => (
-        <li key={`${a.title}-${i}`} className="rounded-md bg-white p-3 shadow-sm">
+        <li key={`${a.title}-${i}`} className="rounded-md bg-white p-3 border border-border-subtle">
           <button
             onClick={() =>
               onOpenCitation({
@@ -308,11 +308,11 @@ function ActsTab({
           >
             {a.title}
           </button>
-          <p className="mt-1 text-xs leading-relaxed text-gray-700">
+          <p className="mt-1 text-xs leading-relaxed text-ink-secondary">
             {truncate(a.ementa, 260)}
           </p>
           {a.leiArticles.length > 0 && (
-            <p className="mt-1 text-[10px] uppercase tracking-wide text-gray-400">
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-ink-muted">
               vincula: {a.leiArticles.slice(0, 6).join(", ")}
               {a.leiArticles.length > 6 ? "…" : ""}
             </p>

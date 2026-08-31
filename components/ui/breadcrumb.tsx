@@ -17,7 +17,7 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
       {/* Home sempre primeiro */}
       <Link
         href="/"
-        className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
+        className="flex items-center gap-1 text-ink-muted hover:text-brand-600 transition-colors"
       >
         <Home className="w-4 h-4" />
         <span className="hidden sm:inline">Início</span>
@@ -28,16 +28,16 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
 
         return (
           <div key={index} className="flex items-center gap-2">
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <ChevronRight className="w-4 h-4 text-ink-muted" />
             {item.href && !isLast ? (
               <Link
                 href={item.href}
-                className="text-gray-600 hover:text-blue-600 transition-colors truncate max-w-[200px]"
+                className="text-ink-muted hover:text-brand-600 transition-colors truncate max-w-[200px]"
               >
                 {item.label}
               </Link>
             ) : (
-              <span className="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-[300px]">
+              <span className="text-ink-primary font-medium truncate max-w-[200px] sm:max-w-[300px]">
                 {item.label}
               </span>
             )}

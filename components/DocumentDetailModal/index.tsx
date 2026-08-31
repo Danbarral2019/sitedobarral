@@ -182,12 +182,12 @@ export default function DocumentDetailModal({
   if (loading) {
     return (
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
         onClick={handleBackdropClick}
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-12 text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Carregando documento...</p>
+        <div className="bg-white rounded-[6px] p-12 text-center border border-border-subtle">
+          <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-ink-muted">Carregando documento...</p>
         </div>
       </div>
     );
@@ -197,17 +197,17 @@ export default function DocumentDetailModal({
   if (error || !document) {
     return (
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
         onClick={handleBackdropClick}
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md">
+        <div className="bg-white rounded-[6px] p-8 max-w-md border border-border-subtle">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-red-900 mb-2">Erro ao Carregar</h2>
             <p className="text-red-700 mb-4">{error || 'Documento nao encontrado'}</p>
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-6 py-2 bg-red-600 text-white rounded-[6px] hover:bg-red-700 transition-colors"
             >
               Fechar
             </button>
@@ -246,15 +246,15 @@ export default function DocumentDetailModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-[6px] max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-border-subtle">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-2xl z-10">
+        <div className="sticky top-0 bg-brand-700 text-white p-6 rounded-t-[6px] z-10">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4 flex-1">
-              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-white/20 rounded-[6px] flex items-center justify-center flex-shrink-0">
                 {document.type === 'video' ? (
                   <Video className="w-6 h-6" />
                 ) : (
@@ -280,7 +280,7 @@ export default function DocumentDetailModal({
 
                 {/* Breadcrumbs - Lei 14.133 */}
                 {leiArticles.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-blue-100 mt-2">
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-brand-100 mt-2">
                     <Scale className="w-4 h-4" />
                     <span>Lei 14.133/2021</span>
                     {leiArticles.slice(0, 3).map((artNum) => (
@@ -296,7 +296,7 @@ export default function DocumentDetailModal({
                       </div>
                     ))}
                     {leiArticles.length > 3 && (
-                      <span className="text-blue-200">+{leiArticles.length - 3} mais</span>
+                      <span className="text-brand-200">+{leiArticles.length - 3} mais</span>
                     )}
                   </div>
                 )}
@@ -308,7 +308,7 @@ export default function DocumentDetailModal({
               {onToggleFavorite && (
                 <button
                   onClick={onToggleFavorite}
-                  className={`p-2 rounded-lg transition-colors ${
+                  className={`p-2 rounded-[6px] transition-colors ${
                     isFavorite
                       ? 'bg-red-500 hover:bg-red-600'
                       : 'bg-white/20 hover:bg-white/30'
@@ -320,7 +320,7 @@ export default function DocumentDetailModal({
               )}
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/20 rounded-[6px] transition-colors"
                 aria-label="Fechar"
               >
                 <X className="w-6 h-6" />

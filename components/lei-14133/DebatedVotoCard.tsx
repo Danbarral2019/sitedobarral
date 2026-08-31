@@ -15,30 +15,30 @@ export function DebatedVotoCard({ doc }: { doc: EnrichedDoc }) {
       href={getDocHref(doc)}
       target={doc.url ? '_blank' : undefined}
       rel={doc.url ? 'noopener noreferrer' : undefined}
-      className="block border-2 border-indigo-300 bg-indigo-50/40 rounded-xl p-4 hover:shadow-md transition-all group"
+      className="block border-2 border-brand-300 bg-brand-50/40 rounded-[6px] p-4 hover: transition-all group"
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-          <Scale className="w-5 h-5 text-indigo-600" />
+        <div className="flex-shrink-0 w-10 h-10 bg-white rounded-[6px] flex items-center justify-center border border-border-subtle">
+          <Scale className="w-5 h-5 text-brand-600" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[11px] font-bold uppercase rounded tracking-wide">
+            <span className="px-2 py-0.5 bg-brand-100 text-brand-700 text-[11px] font-bold uppercase rounded tracking-wide">
               Debatido no voto
             </span>
             {doc.isPublic && (
               <span className="px-2 py-0.5 bg-green-50 text-green-700 text-[10px] font-medium rounded">Público</span>
             )}
           </div>
-          <h4 className="font-semibold text-gray-900 text-base leading-snug mb-1 group-hover:text-indigo-700 transition-colors">
+          <h4 className="font-semibold text-ink-primary text-base leading-snug mb-1 group-hover:text-brand-700 transition-colors">
             {doc.title}
           </h4>
           {doc.summary && (
-            <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-2">{doc.summary}</p>
+            <p className="text-sm text-ink-muted leading-relaxed line-clamp-2 mb-2">{doc.summary}</p>
           )}
-          <p className="text-xs text-indigo-700/80 italic">Razão de decidir — o artigo foi aplicado no voto.</p>
+          <p className="text-xs text-brand-700/80 italic">Razão de decidir — o artigo foi aplicado no voto.</p>
         </div>
-        <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1 group-hover:text-indigo-600 transition-colors" />
+        <ExternalLink className="w-4 h-4 text-ink-muted flex-shrink-0 mt-1 group-hover:text-brand-600 transition-colors" />
       </div>
     </a>
   );

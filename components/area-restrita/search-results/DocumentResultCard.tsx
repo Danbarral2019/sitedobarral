@@ -34,10 +34,10 @@ export function DocumentResultCard({
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer group ${
+      className={`bg-white rounded-[6px] border p-4 hover: transition-all cursor-pointer group ${
         isSelected
           ? 'border-brand-400 bg-brand-50/30 ring-1 ring-brand-300'
-          : 'border-gray-200 hover:border-brand-300'
+          : 'border-border-subtle hover:border-brand-300'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -51,7 +51,7 @@ export function DocumentResultCard({
             className={`p-1 rounded transition-colors flex-shrink-0 mt-0.5 ${
               isSelected
                 ? 'text-brand-600'
-                : 'text-gray-300 hover:text-brand-500'
+                : 'text-ink-muted hover:text-brand-500'
             }`}
             title={isSelected ? 'Desmarcar' : 'Selecionar para PDF'}
           >
@@ -62,12 +62,12 @@ export function DocumentResultCard({
             )}
           </button>
         )}
-        <div className="p-2 rounded-lg bg-brand-50 text-brand-600 flex-shrink-0">
+        <div className="p-2 rounded-[6px] bg-brand-50 text-brand-600 flex-shrink-0">
           <FileText className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-brand-600 transition-colors">
+            <h4 className="font-semibold text-ink-primary text-sm line-clamp-2 group-hover:text-brand-600 transition-colors">
               {highlightText(doc.title, query)}
             </h4>
             {onToggleFavorite && (
@@ -76,10 +76,10 @@ export function DocumentResultCard({
                   e.stopPropagation();
                   onToggleFavorite();
                 }}
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1.5 rounded-[6px] transition-colors ${
                   isFavorite
-                    ? 'text-pink-500 bg-pink-50'
-                    : 'text-gray-400 hover:text-pink-500 hover:bg-pink-50'
+                    ? 'text-brand-500 bg-brand-50'
+                    : 'text-ink-muted hover:text-brand-500 hover:bg-brand-50'
                 }`}
               >
                 <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -87,12 +87,12 @@ export function DocumentResultCard({
             )}
           </div>
           {doc.description && (
-            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            <p className="text-sm text-ink-muted mt-1 line-clamp-2">
               {highlightText(doc.description, query)}
             </p>
           )}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-surface-deep text-ink-muted">
               {doc.category}
             </span>
             {doc.courseName && (
@@ -106,7 +106,7 @@ export function DocumentResultCard({
                   e.stopPropagation();
                   onAskAI(doc.title);
                 }}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors"
                 title="Perguntar à IA sobre este documento"
               >
                 <Sparkles className="w-3 h-3" />

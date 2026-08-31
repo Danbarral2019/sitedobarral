@@ -71,33 +71,33 @@ export default async function AssistentePage() {
   const courseTitle = COURSE_TITLES[primaryEnrollment.courseId] || 'Curso não encontrado';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="max-w-5xl mx-auto mb-8">
           <Link
             href="/area-restrita"
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-800 mb-4 transition-colors text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar para Área Restrita
           </Link>
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-blue-100">
+          <div className="bg-white rounded-[6px] p-8 border border-brand-100">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+              <div className="p-3 bg-brand-600 rounded-[6px]">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-bold text-ink-primary mb-2">
                   Assistente Inteligente
                 </h1>
-                <p className="text-gray-600 text-lg">
+                <p className="text-ink-muted text-lg">
                   Faça perguntas sobre qualquer documento do curso{' '}
-                  <span className="font-semibold text-blue-600">
+                  <span className="font-semibold text-brand-600">
                     {courseTitle}
                   </span>
                 </p>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-ink-muted text-sm mt-2">
                   Conversa multi-turno com histórico e citações das fontes. Para busca rápida por palavras-chave, use a <strong>busca global</strong> na Área Restrita.
                 </p>
               </div>
@@ -105,37 +105,37 @@ export default async function AssistentePage() {
 
             {/* Features Grid */}
             <div className="grid md:grid-cols-3 gap-4 mt-6">
-              <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
-                <BookOpen className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-brand-50 rounded-[6px]">
+                <BookOpen className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">
+                  <h3 className="font-semibold text-ink-primary text-sm">
                     Busca Semântica
                   </h3>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-ink-muted mt-1">
                     Entende o contexto da sua pergunta
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-lg">
-                <MessageSquare className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-brand-50 rounded-[6px]">
+                <MessageSquare className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">
+                  <h3 className="font-semibold text-ink-primary text-sm">
                     Citações de Fontes
                   </h3>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-ink-muted mt-1">
                     Veja exatamente de onde vem cada resposta
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+              <div className="flex items-start gap-3 p-4 bg-green-50 rounded-[6px]">
                 <Zap className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">
+                  <h3 className="font-semibold text-ink-primary text-sm">
                     Respostas Instantâneas
                   </h3>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-ink-muted mt-1">
                     Cache inteligente para consultas rápidas
                   </p>
                 </div>
@@ -147,7 +147,7 @@ export default async function AssistentePage() {
         {/* Chat Interface */}
         <div className="max-w-5xl mx-auto">
           <FeedbackTipBanner />
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-[6px] border border-border-subtle overflow-hidden">
             <ChatInterface
               courseId={primaryEnrollment.courseId}
               maxResults={5}
@@ -166,32 +166,32 @@ export default async function AssistentePage() {
 
         {/* Help Section */}
         <div className="max-w-5xl mx-auto mt-8">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">
+          <div className="bg-brand-50 rounded-[6px] p-6 border border-brand-100">
+            <h2 className="text-lg font-semibold text-ink-primary mb-3">
               💡 Dicas para melhores resultados
             </h2>
-            <ul className="space-y-2 text-sm text-gray-700">
+            <ul className="space-y-2 text-sm text-ink-secondary">
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-brand-600 font-bold">•</span>
                 <span>
                   Seja específico: quanto mais clara a pergunta, melhor a resposta
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-brand-600 font-bold">•</span>
                 <span>
                   Use termos técnicos: o assistente conhece todos os documentos do
                   curso
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-brand-600 font-bold">•</span>
                 <span>
                   Verifique as fontes: cada resposta mostra os documentos consultados
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-brand-600 font-bold">•</span>
                 <span>
                   Reformule se necessário: tente diferentes formas de perguntar
                 </span>

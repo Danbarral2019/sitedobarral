@@ -33,20 +33,20 @@ export default function HomeHeroSearch({ className = '' }: HomeHeroSearchProps) 
       <label htmlFor="home-hero-search" className="sr-only">
         Pesquisar no acervo
       </label>
-      <div className="flex-1 flex items-center gap-2 bg-white rounded-xl px-4 shadow-lg">
-        <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+      <div className="flex-1 flex items-center gap-2 bg-white rounded-[6px] px-4 border border-border-subtle">
+        <Search className="w-5 h-5 text-ink-muted flex-shrink-0" />
         <input
           id="home-hero-search"
           type="search"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder="Pesquisar acórdãos, pareceres, Lei 14.133…"
-          className="w-full py-3.5 bg-transparent text-gray-900 placeholder:text-gray-400 focus:outline-none font-poppins"
+          className="w-full py-3.5 bg-transparent text-ink-primary placeholder:text-ink-muted focus:outline-none font-poppins"
         />
       </div>
       <button
         type="submit"
-        className="bg-amber-400 text-brand-700 font-poppins font-semibold px-6 py-3.5 rounded-xl hover:bg-amber-500 transition-colors shadow-lg whitespace-nowrap"
+        className="bg-amber-accent text-brand-700 font-poppins font-semibold px-6 py-3.5 rounded-[6px] hover:bg-amber-accent transition-colors whitespace-nowrap border border-border-subtle"
       >
         <span className="sm:hidden">Buscar no acervo</span>
         <span className="hidden sm:inline">Buscar</span>

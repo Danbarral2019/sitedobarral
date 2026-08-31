@@ -192,7 +192,7 @@ export default function TCUReviewTable({
   if (!currentDoc) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Nenhum documento para revisar</p>
+        <p className="text-ink-muted">Nenhum documento para revisar</p>
       </div>
     );
   }
@@ -217,7 +217,7 @@ export default function TCUReviewTable({
           <h3 className="text-lg font-semibold">
             Revisão de Documento {currentIndex + 1} de {documents.length}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-ink-muted">
             {Math.round(((currentIndex + 1) / documents.length) * 100)}% concluído
           </p>
         </div>
@@ -226,7 +226,7 @@ export default function TCUReviewTable({
           <button
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            className="px-3 py-1.5 text-sm border border-border-subtle rounded-md hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           >
             <ChevronLeft className="h-4 w-4" />
             Anterior
@@ -234,7 +234,7 @@ export default function TCUReviewTable({
           <button
             onClick={handleNext}
             disabled={currentIndex === documents.length - 1}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            className="px-3 py-1.5 text-sm border border-border-subtle rounded-md hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           >
             Próximo
             <ChevronRight className="h-4 w-4" />
@@ -246,56 +246,56 @@ export default function TCUReviewTable({
         {/* Coluna Esquerda: Dados Originais */}
         <div className="space-y-6">
           {/* Dados da Planilha TCU */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-3">📊 Dados da Planilha TCU</h4>
+          <div className="bg-brand-50 border border-brand-200 rounded-[6px] p-4">
+            <h4 className="font-semibold text-brand-900 mb-3">📊 Dados da Planilha TCU</h4>
             <div className="space-y-2 text-sm">
               <div>
                 <span className="font-medium">Número do Acórdão:</span>
-                <p className="text-gray-700">{currentDoc.tcuData.acordao}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.acordao}</p>
               </div>
               <div>
                 <span className="font-medium">Enunciado (Resumo):</span>
-                <p className="text-gray-700">{currentDoc.tcuData.enunciado}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.enunciado}</p>
               </div>
               <div>
                 <span className="font-medium">Autor da Tese:</span>
-                <p className="text-gray-700">{currentDoc.tcuData.autorTese}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.autorTese}</p>
               </div>
               <div>
                 <span className="font-medium">Contexto Temático:</span>
-                <p className="text-gray-700">
+                <p className="text-ink-secondary">
                   {currentDoc.tcuData.area} → {currentDoc.tcuData.tema} → {currentDoc.tcuData.subtema}
                 </p>
               </div>
               <div>
                 <span className="font-medium">Legislação:</span>
-                <p className="text-gray-700">{currentDoc.tcuData.legislacao || 'Não informada'}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.legislacao || 'Não informada'}</p>
               </div>
               <div>
                 <span className="font-medium">Indexadores:</span>
-                <p className="text-gray-700">{currentDoc.tcuData.outrosIndexadores || 'Não informados'}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.outrosIndexadores || 'Não informados'}</p>
               </div>
               <div>
                 <span className="font-medium">Tipo do Processo:</span>
-                <p className="text-gray-700">{currentDoc.tcuData.tipoProcesso}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.tipoProcesso}</p>
               </div>
               <div>
                 <span className="font-medium">Data do Julgamento:</span>
-                <p className="text-gray-700">{currentDoc.tcuData.data}</p>
+                <p className="text-ink-secondary">{currentDoc.tcuData.data}</p>
               </div>
             </div>
           </div>
 
           {/* Dados de Enriquecimento */}
-          <div className={`border rounded-lg p-4 ${
+          <div className={`border rounded-[6px] p-4 ${
             enrichmentStatus === 'success' ? 'bg-green-50 border-green-200' :
             enrichmentStatus === 'failed' ? 'bg-red-50 border-red-200' :
-            'bg-gray-50 border-gray-200'
+            'bg-surface-raised border-border-subtle'
           }`}>
             <h4 className={`font-semibold mb-3 ${
               enrichmentStatus === 'success' ? 'text-green-900' :
               enrichmentStatus === 'failed' ? 'text-red-900' :
-              'text-gray-900'
+              'text-ink-primary'
             }`}>
               🔍 Enriquecimento TCU
               {enrichmentStatus === 'success' && ' (✅ Sucesso)'}
@@ -308,19 +308,19 @@ export default function TCUReviewTable({
                 {currentDoc.enrichment.ementaCompleta && (
                   <div>
                     <span className="font-medium">Ementa Completa:</span>
-                    <p className="text-gray-700 line-clamp-4">{currentDoc.enrichment.ementaCompleta}</p>
+                    <p className="text-ink-secondary line-clamp-4">{currentDoc.enrichment.ementaCompleta}</p>
                   </div>
                 )}
                 {currentDoc.enrichment.metadados?.relator && (
                   <div>
                     <span className="font-medium">Relator:</span>
-                    <p className="text-gray-700">{currentDoc.enrichment.metadados.relator}</p>
+                    <p className="text-ink-secondary">{currentDoc.enrichment.metadados.relator}</p>
                   </div>
                 )}
                 {currentDoc.enrichment.metadados?.orgaoJulgador && (
                   <div>
                     <span className="font-medium">Órgão Julgador:</span>
-                    <p className="text-gray-700">{currentDoc.enrichment.metadados.orgaoJulgador}</p>
+                    <p className="text-ink-secondary">{currentDoc.enrichment.metadados.orgaoJulgador}</p>
                   </div>
                 )}
                 {currentDoc.enrichment.linkPDF && (
@@ -330,7 +330,7 @@ export default function TCUReviewTable({
                       href={currentDoc.enrichment.linkPDF}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-brand-600 hover:underline"
                     >
                       Abrir PDF oficial
                     </a>
@@ -344,20 +344,20 @@ export default function TCUReviewTable({
             )}
 
             {enrichmentStatus === 'pending' && (
-              <p className="text-gray-700 text-sm">Enriquecimento não foi executado</p>
+              <p className="text-ink-secondary text-sm">Enriquecimento não foi executado</p>
             )}
           </div>
 
           {/* Classificação IA */}
-          <div className={`border rounded-lg p-4 ${
-            classificationStatus === 'success' ? 'bg-purple-50 border-purple-200' :
+          <div className={`border rounded-[6px] p-4 ${
+            classificationStatus === 'success' ? 'bg-brand-50 border-brand-200' :
             classificationStatus === 'failed' ? 'bg-red-50 border-red-200' :
-            'bg-gray-50 border-gray-200'
+            'bg-surface-raised border-border-subtle'
           }`}>
             <h4 className={`font-semibold mb-3 ${
-              classificationStatus === 'success' ? 'text-purple-900' :
+              classificationStatus === 'success' ? 'text-brand-900' :
               classificationStatus === 'failed' ? 'text-red-900' :
-              'text-gray-900'
+              'text-ink-primary'
             }`}>
               🤖 Classificação IA
               {classificationStatus === 'success' && ` (✅ Confiança: ${currentDoc.classification?.confianca}%)`}
@@ -369,12 +369,12 @@ export default function TCUReviewTable({
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="font-medium">Raciocínio:</span>
-                  <p className="text-gray-700 italic">{currentDoc.classification.raciocinio}</p>
+                  <p className="text-ink-secondary italic">{currentDoc.classification.raciocinio}</p>
                 </div>
                 {currentDoc.classification.artigos && currentDoc.classification.artigos.length > 0 && (
                   <div>
                     <span className="font-medium">Artigos da Lei 14.133/2021 sugeridos:</span>
-                    <p className="text-gray-700">
+                    <p className="text-ink-secondary">
                       {currentDoc.classification.artigos.map(a => `art. ${a}`).join(', ')}
                     </p>
                   </div>
@@ -387,15 +387,15 @@ export default function TCUReviewTable({
             )}
 
             {classificationStatus === 'pending' && (
-              <p className="text-gray-700 text-sm">Classificação não foi executada</p>
+              <p className="text-ink-secondary text-sm">Classificação não foi executada</p>
             )}
           </div>
         </div>
 
         {/* Coluna Direita: Edição */}
         <div className="space-y-6">
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-900 mb-4">✏️ Editar Classificação</h4>
+          <div className="bg-white border border-border-subtle rounded-[6px] p-4">
+            <h4 className="font-semibold text-ink-primary mb-4">✏️ Editar Classificação</h4>
 
             <div className="space-y-4">
               {/* Título */}
@@ -405,7 +405,7 @@ export default function TCUReviewTable({
                   type="text"
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border-subtle rounded-md focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                   placeholder="Título descritivo do documento"
                 />
               </div>
@@ -417,7 +417,7 @@ export default function TCUReviewTable({
                   value={editedDescription}
                   onChange={(e) => setEditedDescription(e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border-subtle rounded-md focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                   placeholder="Descrição expandida do documento"
                 />
               </div>
@@ -426,16 +426,16 @@ export default function TCUReviewTable({
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Link/PDF do Inteiro Teor
-                  <span className="text-xs text-gray-500 ml-2">(opcional)</span>
+                  <span className="text-xs text-ink-muted ml-2">(opcional)</span>
                 </label>
                 <input
                   type="url"
                   value={editedUrl}
                   onChange={(e) => setEditedUrl(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border-subtle rounded-md focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                   placeholder="https://exemplo.com/acordao.pdf"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-ink-muted mt-1">
                   💡 Link para acessar o documento completo (PDF ou página web)
                 </p>
               </div>
@@ -446,7 +446,7 @@ export default function TCUReviewTable({
                 <select
                   value={editedCategory}
                   onChange={(e) => setEditedCategory(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border-subtle rounded-md focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                 >
                   <option value="acordao">Acórdão</option>
                   <option value="apostila">Apostila</option>
@@ -461,14 +461,14 @@ export default function TCUReviewTable({
               {/* Cursos */}
               <div>
                 <label className="block text-sm font-medium mb-2">Cursos (selecione 1 ou mais)</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-3">
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-border-subtle rounded-md p-3">
                   {availableCourses.map((course) => (
-                    <label key={course.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                    <label key={course.id} className="flex items-center gap-2 cursor-pointer hover:bg-surface-raised p-1 rounded">
                       <input
                         type="checkbox"
                         checked={editedCourses.includes(course.id)}
                         onChange={() => toggleCourse(course.id)}
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        className="w-4 h-4 text-brand-600 rounded focus:ring-2 focus:ring-brand-500"
                       />
                       <span className="text-sm">{course.nome}</span>
                     </label>
@@ -485,13 +485,13 @@ export default function TCUReviewTable({
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 border border-border-subtle rounded-md focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     placeholder="Digite uma tag e pressione Enter"
                   />
                   <button
                     onClick={addTag}
                     type="button"
-                    className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-3 py-1.5 text-sm bg-brand-600 text-white rounded-md hover:bg-brand-700"
                   >
                     Adicionar
                   </button>
@@ -500,12 +500,12 @@ export default function TCUReviewTable({
                   {editedTags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-sm"
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-brand-100 text-brand-800 rounded-md text-sm"
                     >
                       {tag}
                       <button
                         onClick={() => removeTag(tag)}
-                        className="hover:text-blue-600"
+                        className="hover:text-brand-600"
                         type="button"
                       >
                         ×
@@ -519,7 +519,7 @@ export default function TCUReviewTable({
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Artigos da Lei 14.133/2021
-                  <span className="text-xs text-gray-500 ml-2">(para Lei Comentada)</span>
+                  <span className="text-xs text-ink-muted ml-2">(para Lei Comentada)</span>
                 </label>
                 <div className="flex gap-2 mb-2">
                   <input
@@ -527,7 +527,7 @@ export default function TCUReviewTable({
                     value={newArtigo}
                     onChange={(e) => setNewArtigo(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addArtigo())}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="flex-1 px-3 py-2 border border-border-subtle rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="Digite o número do artigo (ex: 6, 11, 72)"
                   />
                   <button
@@ -555,7 +555,7 @@ export default function TCUReviewTable({
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-ink-muted mt-1">
                   💡 Estes artigos serão usados na futura Lei 14.133/2021 Comentada
                 </p>
               </div>
@@ -566,7 +566,7 @@ export default function TCUReviewTable({
           <div className="flex gap-3">
             <button
               onClick={handleSkip}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 border border-border-subtle rounded-md hover:bg-surface-raised flex items-center justify-center gap-2"
             >
               <X className="h-4 w-4" />
               Pular
@@ -574,7 +574,7 @@ export default function TCUReviewTable({
             <button
               onClick={handleReprocess}
               disabled={isReprocessing}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 border border-border-subtle rounded-md hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isReprocessing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

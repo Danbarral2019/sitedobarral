@@ -271,7 +271,7 @@ function AreaRestritaContent() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
-          <p className="text-gray-700 font-medium">Verificando acesso...</p>
+          <p className="text-ink-secondary font-medium">Verificando acesso...</p>
         </div>
       </main>
     );
@@ -283,7 +283,7 @@ function AreaRestritaContent() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50/50">
+    <main className="min-h-screen bg-surface-raised/50">
       <AreaRestritaHeader
         userName={user.name}
         enrolledCount={enrolledCourseIds.length}
@@ -386,9 +386,9 @@ function AreaRestritaContent() {
           )}
 
           {/* Important Notice */}
-          <div className="bg-orange-50 border-l-4 border-orange-500 p-4 lg:p-6 rounded-r-xl">
-            <h3 className="text-base font-bold text-orange-900 mb-1">Importante</h3>
-            <p className="text-sm text-orange-800">
+          <div className="bg-amber-accent-soft border-l-4 border-amber-accent p-4 lg:p-6 rounded-r-[6px]">
+            <h3 className="text-base font-bold text-amber-accent-deep mb-1">Importante</h3>
+            <p className="text-sm text-amber-accent-deep">
               Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não
               autorizado pode resultar na suspensão do acesso.
             </p>
@@ -399,7 +399,7 @@ function AreaRestritaContent() {
         <div hidden={search.isSearchActive || inlineView === 'home'}>
           <button
             onClick={() => setInlineView('home')}
-            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-brand-600 mb-4 transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-ink-muted hover:text-brand-600 mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar ao Início
@@ -472,8 +472,8 @@ export default function AreaRestritaPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
         </div>
       }
     >

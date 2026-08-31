@@ -152,12 +152,12 @@ export default function ArticleChatHistory({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-[6px] max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col border border-border-subtle">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+        <div className="bg-brand-600 text-white p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+              <div className="p-2 bg-white/20 rounded-[6px]">
                 <History className="w-6 h-6" />
               </div>
               <div>
@@ -171,7 +171,7 @@ export default function ArticleChatHistory({
               {messages.length > 0 && (
                 <button
                   onClick={handleExportPDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-[6px] transition-colors text-sm font-medium"
                   aria-label="Exportar PDF"
                 >
                   <FileDown className="w-4 h-4" />
@@ -180,7 +180,7 @@ export default function ArticleChatHistory({
               )}
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/20 rounded-[6px] transition-colors"
                 aria-label="Fechar histórico"
               >
                 <X className="w-6 h-6" />
@@ -193,24 +193,24 @@ export default function ArticleChatHistory({
         <div className="flex-1 overflow-y-auto p-6">
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-12 h-12 animate-spin text-purple-600 mb-4" />
-              <p className="text-gray-600">Carregando histórico...</p>
+              <Loader2 className="w-12 h-12 animate-spin text-brand-600 mb-4" />
+              <p className="text-ink-muted">Carregando histórico...</p>
             </div>
           )}
 
           {error && (
-            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-center">
+            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-[6px] text-center">
               <p className="text-red-800">{error}</p>
             </div>
           )}
 
           {!isLoading && !error && messages.length === 0 && (
             <div className="text-center py-12">
-              <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg font-medium">
+              <MessageSquare className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+              <p className="text-ink-muted text-lg font-medium">
                 Nenhuma conversa encontrada
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-ink-muted text-sm mt-2">
                 Suas perguntas anteriores aparecerão aqui
               </p>
             </div>
@@ -222,9 +222,9 @@ export default function ArticleChatHistory({
                 <div key={dateLabel}>
                   {/* Date Header */}
                   <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-4 h-4 text-purple-600" />
-                    <h4 className="font-bold text-purple-900">{dateLabel}</h4>
-                    <div className="flex-1 h-px bg-purple-200"></div>
+                    <Calendar className="w-4 h-4 text-brand-600" />
+                    <h4 className="font-bold text-brand-900">{dateLabel}</h4>
+                    <div className="flex-1 h-px bg-brand-200"></div>
                   </div>
 
                   {/* Messages */}
@@ -232,14 +232,14 @@ export default function ArticleChatHistory({
                     {msgs.map((msg) => (
                       <div
                         key={msg.id}
-                        className="p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-purple-300 transition-colors"
+                        className="p-4 bg-surface-raised rounded-[6px] border-2 border-border-subtle hover:border-brand-300 transition-colors"
                       >
                         <div className="flex items-start gap-3">
-                          <MessageSquare className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                          <MessageSquare className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             {/* Time and Feedback */}
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs text-gray-500 font-medium">
+                              <span className="text-xs text-ink-muted font-medium">
                                 {formatTime(msg.createdAt)}
                               </span>
                               {msg.wasHelpful !== null && (
@@ -266,7 +266,7 @@ export default function ArticleChatHistory({
                             </div>
 
                             {/* Question */}
-                            <p className="text-gray-900 font-medium mb-2">
+                            <p className="text-ink-primary font-medium mb-2">
                               {msg.question}
                             </p>
 
@@ -274,13 +274,13 @@ export default function ArticleChatHistory({
                             {msg.answer && (
                               <div className="mt-3">
                                 {expandedMessageId === msg.id ? (
-                                  <div className="p-3 bg-white rounded border border-purple-200">
-                                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                  <div className="p-3 bg-white rounded border border-brand-200">
+                                    <p className="text-sm text-ink-secondary whitespace-pre-wrap">
                                       {msg.answer}
                                     </p>
                                   </div>
                                 ) : (
-                                  <p className="text-sm text-gray-600 line-clamp-2">
+                                  <p className="text-sm text-ink-muted line-clamp-2">
                                     {msg.answer.substring(0, 150)}...
                                   </p>
                                 )}
@@ -291,16 +291,16 @@ export default function ArticleChatHistory({
                             <div className="flex items-center gap-2 mt-3">
                               <button
                                 onClick={() => toggleExpand(msg.id)}
-                                className="text-xs text-purple-700 hover:text-purple-800 font-medium underline"
+                                className="text-xs text-brand-700 hover:text-brand-800 font-medium underline"
                               >
                                 {expandedMessageId === msg.id
                                   ? 'Ocultar resposta'
                                   : 'Ver resposta completa'}
                               </button>
-                              <span className="text-gray-300">|</span>
+                              <span className="text-ink-muted">|</span>
                               <button
                                 onClick={() => handleRestore(msg)}
-                                className="text-xs text-blue-700 hover:text-blue-800 font-medium underline"
+                                className="text-xs text-brand-700 hover:text-brand-800 font-medium underline"
                               >
                                 Restaurar esta conversa
                               </button>
@@ -317,9 +317,9 @@ export default function ArticleChatHistory({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className="p-4 border-t border-border-subtle bg-surface-raised">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-ink-muted">
               {messages.length > 0 ? (
                 <>
                   {messages.length} {messages.length === 1 ? 'pergunta' : 'perguntas'}{' '}
@@ -331,7 +331,7 @@ export default function ArticleChatHistory({
             </p>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm"
+              className="px-4 py-2 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 transition-colors font-medium text-sm"
             >
               Fechar
             </button>

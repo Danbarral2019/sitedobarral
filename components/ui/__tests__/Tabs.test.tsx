@@ -98,7 +98,7 @@ describe('Tabs Component', () => {
       const tab2 = screen.getByText('Tab 2');
 
       // Tab 1 deve estar ativa
-      expect(tab1).toHaveClass('border-blue-600');
+      expect(tab1).toHaveClass('border-brand-600');
       expect(tab2).toHaveClass('border-transparent');
 
       // Clicar na Tab 2
@@ -106,7 +106,7 @@ describe('Tabs Component', () => {
 
       // Tab 2 deve estar ativa agora
       expect(tab1).toHaveClass('border-transparent');
-      expect(tab2).toHaveClass('border-blue-600');
+      expect(tab2).toHaveClass('border-brand-600');
     });
   });
 

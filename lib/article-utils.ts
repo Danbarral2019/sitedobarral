@@ -53,24 +53,24 @@ export function getArticleBadgeClasses(numero: string, isPrimary: boolean = fals
 
   if (isPrimary) {
     const colorClasses = {
-      blue: 'bg-blue-600 text-white',
+      blue: 'bg-brand-600 text-white',
       green: 'bg-green-600 text-white',
-      yellow: 'bg-yellow-600 text-white',
-      orange: 'bg-orange-600 text-white',
+      yellow: 'bg-amber-accent text-white',
+      orange: 'bg-amber-accent text-white',
       red: 'bg-red-600 text-white',
-      purple: 'bg-purple-600 text-white',
-      gray: 'bg-gray-600 text-white',
+      purple: 'bg-brand-600 text-white',
+      gray: 'bg-brand-800 text-white',
     };
     return `${base} ${colorClasses[color as keyof typeof colorClasses]}`;
   } else {
     const colorClasses = {
-      blue: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+      blue: 'bg-brand-100 text-brand-800 hover:bg-brand-200',
       green: 'bg-green-100 text-green-800 hover:bg-green-200',
-      yellow: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-      orange: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      yellow: 'bg-amber-accent-soft text-amber-accent-deep hover:bg-amber-accent-soft',
+      orange: 'bg-amber-accent-soft text-amber-accent-deep hover:bg-amber-accent-soft',
       red: 'bg-red-100 text-red-800 hover:bg-red-200',
-      purple: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
-      gray: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+      purple: 'bg-brand-100 text-brand-800 hover:bg-brand-200',
+      gray: 'bg-surface-deep text-ink-secondary hover:bg-surface-deep',
     };
     return `${base} ${colorClasses[color as keyof typeof colorClasses]} cursor-pointer transition-colors`;
   }

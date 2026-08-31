@@ -86,12 +86,12 @@ export function FileDropzone({
   const getFileIcon = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (['mp4', 'avi', 'mov'].includes(ext || '')) {
-      return <Film className="w-8 h-8 text-purple-600" />;
+      return <Film className="w-8 h-8 text-brand-600" />;
     }
     if (['pdf'].includes(ext || '')) {
       return <FileText className="w-8 h-8 text-red-600" />;
     }
-    return <File className="w-8 h-8 text-blue-600" />;
+    return <File className="w-8 h-8 text-brand-600" />;
   };
 
   return (
@@ -103,10 +103,10 @@ export function FileDropzone({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`
-            relative border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer
+            relative border-2 border-dashed rounded-[6px] p-8 text-center transition-all cursor-pointer
             ${isDragging
-              ? 'border-blue-500 bg-blue-50 scale-105'
-              : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+              ? 'border-brand-500 bg-brand-50 scale-105'
+              : 'border-border-subtle hover:border-brand-400 hover:bg-surface-raised'
             }
           `}
         >
@@ -120,39 +120,39 @@ export function FileDropzone({
           <div className="flex flex-col items-center gap-3">
             <div className={`
               w-16 h-16 rounded-full flex items-center justify-center transition-all
-              ${isDragging ? 'bg-blue-100' : 'bg-gray-100'}
+              ${isDragging ? 'bg-brand-100' : 'bg-surface-deep'}
             `}>
-              <Upload className={`w-8 h-8 ${isDragging ? 'text-blue-600' : 'text-gray-600'}`} />
+              <Upload className={`w-8 h-8 ${isDragging ? 'text-brand-600' : 'text-ink-muted'}`} />
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-ink-primary">
                 {isDragging ? 'Solte o arquivo aqui' : 'Arraste um arquivo ou clique para selecionar'}
               </p>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-ink-muted mt-1">
                 PDF, DOC, DOCX, MP4, AVI, MOV (máx. {maxSize}MB)
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
+        <div className="border-2 border-brand-200 bg-brand-50 rounded-[6px] p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
               {getFileIcon(selectedFile)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">
+              <p className="text-sm font-semibold text-ink-primary truncate">
                 {selectedFile.name}
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-ink-muted">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
             <button
               type="button"
               onClick={onFileRemove}
-              className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
+              className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-[6px] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -161,7 +161,7 @@ export function FileDropzone({
       )}
 
       {error && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-sm text-red-800">
+        <div className="bg-red-50 border-2 border-red-200 rounded-[6px] p-3 text-sm text-red-800">
           {error}
         </div>
       )}

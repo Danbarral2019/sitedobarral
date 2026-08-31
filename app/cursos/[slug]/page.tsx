@@ -213,9 +213,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
       />
 
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <main className="min-h-screen bg-white">
       {/* Hero Section com Cor do Curso */}
-      <div className={`relative overflow-hidden bg-gradient-to-br ${color.gradient}`}>
+      <div className={`relative overflow-hidden ${color.gradient}`}>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMTRjMy4zMTQgMCA2IDIuNjg2IDYgNnMtMi42ODYgNi02IDYtNi0yLjY4Ni02LTYgMi42ODYtNiA2LTZ6TTI0IDM4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
 
         <div className="container mx-auto px-4 py-8 relative">
@@ -231,7 +231,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <div className="flex items-start gap-6 pb-12">
               {/* Número do Curso */}
               <div className="hidden md:block">
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 text-center">
+                <div className="bg-white/20 rounded-[6px] p-6 text-center">
                   <div className="text-6xl font-bold text-white mb-2">{courseNumber}</div>
                   <div className="text-sm uppercase tracking-wider font-semibold text-white/90">Curso</div>
                 </div>
@@ -241,7 +241,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <BookOpen className="w-10 h-10 text-white" />
-                  <span className="bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-bold text-white uppercase tracking-wide">
+                  <span className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold text-white uppercase tracking-wide">
                     Curso Especializado
                   </span>
                 </div>
@@ -255,14 +255,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 {/* Stats */}
                 <div className="flex flex-wrap gap-4 mt-8">
                   {modules.length > 0 && (
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
+                    <div className="bg-white/20 rounded-[6px] px-6 py-3 flex items-center gap-3">
                       <Layers className="w-5 h-5 text-white" />
                       <span className="text-white font-semibold">
                         {modules.length} {modules.length === 1 ? 'Módulo' : 'Módulos'} · {modules.reduce((s, m) => s + m._count.lessons, 0)} Aulas
                       </span>
                     </div>
                   )}
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
+                  <div className="bg-white/20 rounded-[6px] px-6 py-3 flex items-center gap-3">
                     <Award className="w-5 h-5 text-white" />
                     <span className="text-white font-semibold">Certificado</span>
                   </div>
@@ -282,45 +282,45 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-8">
               {/* Sobre o Curso */}
-              <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
+              <div className={`bg-white rounded-[6px] p-8 border-2 ${color.border} hover: transition-shadow`}>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${color.gradient} rounded-[6px] flex items-center justify-center`}>
                     <Target className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900">Sobre o Curso</h2>
+                  <h2 className="text-3xl font-bold text-ink-primary">Sobre o Curso</h2>
                 </div>
-                <div className={`${color.bg} p-6 rounded-xl mb-6 border-l-4 ${color.border}`}>
-                  <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
+                <div className={`${color.bg} p-6 rounded-[6px] mb-6 border-l-4 ${color.border}`}>
+                  <div className="prose prose-lg max-w-none text-ink-secondary leading-relaxed whitespace-pre-line">
                     {course.description}
                   </div>
                 </div>
 
                 {/* Diferenciais */}
                 <div className="grid md:grid-cols-3 gap-4">
-                  <div className={`${color.bg} p-4 rounded-xl`}>
+                  <div className={`${color.bg} p-4 rounded-[6px]`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Conteúdo Atualizado</h3>
-                        <p className="text-sm text-gray-700">Material revisado conforme nova legislação</p>
+                        <h3 className="font-bold text-ink-primary mb-1">Conteúdo Atualizado</h3>
+                        <p className="text-sm text-ink-secondary">Material revisado conforme nova legislação</p>
                       </div>
                     </div>
                   </div>
-                  <div className={`${color.bg} p-4 rounded-xl`}>
+                  <div className={`${color.bg} p-4 rounded-[6px]`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Abordagem Prática</h3>
-                        <p className="text-sm text-gray-700">Casos reais e jurisprudência aplicada</p>
+                        <h3 className="font-bold text-ink-primary mb-1">Abordagem Prática</h3>
+                        <p className="text-sm text-ink-secondary">Casos reais e jurisprudência aplicada</p>
                       </div>
                     </div>
                   </div>
-                  <div className={`${color.bg} p-4 rounded-xl`}>
+                  <div className={`${color.bg} p-4 rounded-[6px]`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Material Exclusivo</h3>
-                        <p className="text-sm text-gray-700">Acórdãos, pareceres e apostilas especializadas</p>
+                        <h3 className="font-bold text-ink-primary mb-1">Material Exclusivo</h3>
+                        <p className="text-sm text-ink-secondary">Acórdãos, pareceres e apostilas especializadas</p>
                       </div>
                     </div>
                   </div>
@@ -329,14 +329,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
               {/* Conteúdo Programático (Preview de Módulos) */}
               {modules.length > 0 && (
-                <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
+                <div className={`bg-white rounded-[6px] p-8 border-2 ${color.border} hover: transition-shadow`}>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
+                    <div className={`w-12 h-12 ${color.gradient} rounded-[6px] flex items-center justify-center`}>
                       <Layers className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900">Conteudo Programatico</h2>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <h2 className="text-3xl font-bold text-ink-primary">Conteudo Programatico</h2>
+                      <p className="text-sm text-ink-muted mt-1">
                         {modules.length} {modules.length === 1 ? 'modulo' : 'modulos'} com{' '}
                         {modules.reduce((sum, m) => sum + m._count.lessons, 0)} aulas estruturadas
                       </p>
@@ -347,27 +347,27 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                     {modules.map((mod, index) => (
                       <div
                         key={mod.id}
-                        className={`${color.bg} rounded-xl p-4 flex items-center gap-4 border border-white`}
+                        className={`${color.bg} rounded-[6px] p-4 flex items-center gap-4 border border-white`}
                       >
-                        <div className={`w-10 h-10 bg-gradient-to-br ${color.gradient} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                        <div className={`w-10 h-10 ${color.gradient} rounded-[6px] flex items-center justify-center flex-shrink-0`}>
                           <span className="text-white font-bold text-sm">{index + 1}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate">{mod.title}</h3>
+                          <h3 className="font-semibold text-ink-primary truncate">{mod.title}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <PlayCircle className={`w-3.5 h-3.5 ${color.text}`} />
-                            <span className="text-xs text-gray-600">
+                            <span className="text-xs text-ink-muted">
                               {mod._count.lessons} {mod._count.lessons === 1 ? 'aula' : 'aulas'}
                             </span>
                           </div>
                         </div>
-                        <Lock className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                        <Lock className="w-4 h-4 text-ink-muted flex-shrink-0" />
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="mt-6 pt-4 border-t border-border-subtle">
+                    <div className="flex items-center gap-2 text-sm text-ink-muted">
                       <Lock className="w-4 h-4" />
                       <span>Conteudo completo disponivel para alunos matriculados</span>
                     </div>
@@ -379,7 +379,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className={`bg-gradient-to-br ${color.gradient} rounded-2xl shadow-xl p-8 text-white sticky top-8`}>
+              <div className={`${color.gradient} rounded-[6px] p-8 text-white sticky top-8`}>
                 <div className="text-center">
                   <h3 className="text-2xl font-bold mb-3">Já é Aluno?</h3>
                   <p className="text-white/90 leading-relaxed mb-6 text-sm">
@@ -388,14 +388,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
                   <Link
                     href={`/login?curso=${course.id}`}
-                    className={`block bg-white ${color.text} px-8 py-4 rounded-xl font-bold hover:bg-white/90 transition-all shadow-lg`}
+                    className={`block bg-white ${color.text} px-8 py-4 rounded-[6px] font-bold hover:bg-white/90 transition-all`}
                   >
                     Fazer Login
                   </Link>
 
                   <p className="text-xs text-white/80 mt-4">
                     Primeiro acesso?{' '}
-                    <Link href="/validar-acesso" className="underline hover:text-white">
+                    <Link href="/validar-acesso"className="underline hover:text-white">
                       Use o QR Code do curso
                     </Link>
                   </p>
@@ -408,7 +408,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           <div className="mt-16 text-center">
             <Link
               href="/cursos"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-brand-700 transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 text-ink-muted hover:text-brand-700 transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Ver todos os cursos

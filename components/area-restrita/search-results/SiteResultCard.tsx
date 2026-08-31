@@ -14,10 +14,10 @@ export function SiteResultCard({ site, query }: SiteResultCardProps) {
       href={site.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-teal-300 hover:shadow-md transition-all group"
+      className="block bg-white rounded-[6px] border border-border-subtle p-4 hover:border-brand-300 hover: transition-all group"
     >
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-teal-50 text-teal-600 flex-shrink-0">
+        <div className="p-2 rounded-[6px] bg-brand-50 text-brand-600 flex-shrink-0">
           {site.faviconUrl ? (
             <Image src={site.faviconUrl} alt="" width={20} height={20} className="rounded" unoptimized />
           ) : (
@@ -26,16 +26,16 @@ export function SiteResultCard({ site, query }: SiteResultCardProps) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h4 className="font-semibold text-gray-900 text-sm group-hover:text-teal-600 transition-colors">
+            <h4 className="font-semibold text-ink-primary text-sm group-hover:text-brand-600 transition-colors">
               {highlightText(site.title, query)}
             </h4>
-            <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
+            <ExternalLink className="w-3.5 h-3.5 text-ink-muted" />
           </div>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+          <p className="text-sm text-ink-muted mt-1 line-clamp-2">
             {highlightText(site.description, query)}
           </p>
           {site.category && (
-            <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-teal-50 text-teal-700">
+            <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700">
               {site.category}
             </span>
           )}

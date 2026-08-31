@@ -42,10 +42,10 @@ export const Header = memo(function Header() {
   }, [isCoursesOpen]);
 
   return (
-    <header className="bg-brand-600 shadow-lg">
+    <header className="bg-brand-600 border border-border-subtle">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[10000] focus:bg-white focus:text-brand-700 focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[10000] focus:bg-white focus:text-brand-700 focus:px-4 focus:py-2 focus:rounded-[6px] focus:font-bold focus: border border-border-subtle"
       >
         Pular para o conteúdo principal
       </a>
@@ -96,7 +96,7 @@ export const Header = memo(function Header() {
               </button>
 
               {isMounted && isCoursesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 max-h-96 overflow-y-auto z-[9999] border border-gray-200">
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-[6px] py-2 max-h-96 overflow-y-auto z-[9999] border border-border-subtle">
                   <Link
                     href="/cursos"
                     className="block px-4 py-2 text-sm font-semibold text-brand-600 hover:bg-brand-50 hover:text-brand-700"
@@ -109,7 +109,7 @@ export const Header = memo(function Header() {
                     <Link
                       key={course.id}
                       href={`/cursos/${course.slug}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-600"
+                      className="block px-4 py-2 text-sm text-ink-secondary hover:bg-brand-50 hover:text-brand-600"
                       onClick={() => setIsCoursesOpen(false)}
                     >
                       {course.title}
@@ -193,7 +193,7 @@ export const Header = memo(function Header() {
 
             <Link
               href="/login"
-              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
+              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-[6px] text-white transition-colors font-poppins text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
             >
               <LogIn className="w-4 h-4" />
               <span>Área do Aluno</span>
@@ -238,7 +238,7 @@ export const Header = memo(function Header() {
             <div className="mt-4 pt-4 border-t border-brand-500">
               <Link
                 href="/login"
-                className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors font-poppins"
+                className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-[6px] text-white transition-colors font-poppins"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <LogIn className="w-4 h-4" />

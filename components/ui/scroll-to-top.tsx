@@ -43,12 +43,12 @@ export function ScrollToTop() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-110 active:scale-95 group"
+      className="fixed bottom-6 right-6 z-50 bg-brand-600 text-white p-3 rounded-full hover:from-brand-700 hover:to-brand-700 transition-all transform hover:scale-110 active:scale-95 group border border-border-subtle"
       aria-label="Voltar ao topo"
       title="Voltar ao topo"
     >
       <ArrowUp className="w-6 h-6" />
-      <span className="absolute -top-10 right-0 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+      <span className="absolute -top-10 right-0 bg-brand-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
         Voltar ao topo
       </span>
     </button>

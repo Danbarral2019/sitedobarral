@@ -76,7 +76,7 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
               return (
                 <Link
                   href={href}
-                  className="text-blue-700 font-medium hover:text-blue-900 hover:underline"
+                  className="text-brand-700 font-medium hover:text-brand-900 hover:underline"
                 >
                   {children}
                 </Link>
@@ -87,7 +87,7 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-brand-600 hover:underline"
                 {...props}
               >
                 {children}
@@ -120,7 +120,7 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
           ),
           // Code blocks
           pre: ({ children, ...props }: ComponentPropsWithoutRef<'pre'>) => (
-            <pre className="bg-gray-800 text-gray-100 rounded-md p-3 my-2 overflow-x-auto text-xs" {...props}>
+            <pre className="bg-brand-900 text-ink-muted rounded-md p-3 my-2 overflow-x-auto text-xs" {...props}>
               {children}
             </pre>
           ),
@@ -131,7 +131,7 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
               return <code className={className} {...props}>{children}</code>;
             }
             return (
-              <code className="bg-gray-200 text-gray-800 px-1.5 py-0.5 rounded text-xs" {...props}>
+              <code className="bg-surface-deep text-ink-secondary px-1.5 py-0.5 rounded text-xs" {...props}>
                 {children}
               </code>
             );
@@ -139,7 +139,7 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
           // Blockquotes
           blockquote: ({ children, ...props }: ComponentPropsWithoutRef<'blockquote'>) => (
             <blockquote
-              className="border-l-3 border-blue-400 pl-3 my-2 text-gray-700 italic"
+              className="border-l-3 border-brand-400 pl-3 my-2 text-ink-secondary italic"
               {...props}
             >
               {children}
@@ -152,15 +152,15 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
             </div>
           ),
           thead: ({ children, ...props }: ComponentPropsWithoutRef<'thead'>) => (
-            <thead className="bg-gray-200" {...props}>{children}</thead>
+            <thead className="bg-surface-deep" {...props}>{children}</thead>
           ),
           th: ({ children, ...props }: ComponentPropsWithoutRef<'th'>) => (
-            <th className="px-2 py-1 text-left font-semibold border-b border-gray-300 text-xs" {...props}>
+            <th className="px-2 py-1 text-left font-semibold border-b border-border-subtle text-xs" {...props}>
               {children}
             </th>
           ),
           td: ({ children, ...props }: ComponentPropsWithoutRef<'td'>) => (
-            <td className="px-2 py-1 border-b border-gray-200 text-xs" {...props}>{children}</td>
+            <td className="px-2 py-1 border-b border-border-subtle text-xs" {...props}>{children}</td>
           ),
           // Strong / emphasis
           strong: ({ children, ...props }: ComponentPropsWithoutRef<'strong'>) => (
@@ -168,7 +168,7 @@ export default function ArticleAwareMarkdown({ content }: ArticleAwareMarkdownPr
           ),
           // Horizontal rule
           hr: (props: ComponentPropsWithoutRef<'hr'>) => (
-            <hr className="my-3 border-gray-300" {...props} />
+            <hr className="my-3 border-border-subtle" {...props} />
           ),
         }}
       >

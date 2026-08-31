@@ -25,9 +25,9 @@ export function AIRecommendedSources({
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="w-4 h-4 text-purple-500" />
-        <h3 className="font-bold text-gray-900 text-sm">Fontes recomendadas pela IA</h3>
-        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+        <Sparkles className="w-4 h-4 text-brand-500" />
+        <h3 className="font-bold text-ink-primary text-sm">Fontes recomendadas pela IA</h3>
+        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-700">
           {aiSources.length}
         </span>
       </div>
@@ -57,40 +57,40 @@ export function AIRecommendedSources({
           const borderClass = isProfessorMaterial
             ? 'border-brand-300 bg-brand-50/30 ring-1 ring-brand-200'
             : isHighPriority
-            ? 'border-indigo-200 bg-indigo-50/20'
-            : 'border-gray-200';
+            ? 'border-brand-200 bg-brand-50/20'
+            : 'border-border-subtle';
           const hoverClass = isProfessorMaterial
-            ? 'hover:border-brand-400 hover:shadow-md'
-            : 'hover:border-purple-300 hover:shadow-sm';
+            ? 'hover:border-brand-400 hover:'
+            : 'hover:border-brand-300 hover:';
           const iconBg = isProfessorMaterial
             ? 'bg-brand-100 text-brand-700'
             : isHighPriority
-            ? 'bg-indigo-50 text-indigo-600'
-            : 'bg-purple-50 text-purple-600';
+            ? 'bg-brand-50 text-brand-600'
+            : 'bg-brand-50 text-brand-600';
           const labelClass = isProfessorMaterial
             ? 'bg-brand-100 text-brand-800 font-semibold'
             : isHighPriority
-            ? 'bg-indigo-100 text-indigo-700'
-            : 'bg-gray-100 text-gray-600';
+            ? 'bg-brand-100 text-brand-700'
+            : 'bg-surface-deep text-ink-muted';
 
           const cardContent = (
             <div className="flex items-start gap-3">
-              <div className={`p-1.5 rounded-lg flex-shrink-0 ${iconBg}`}>
+              <div className={`p-1.5 rounded-[6px] flex-shrink-0 ${iconBg}`}>
                 <SourceIcon category={source.category} />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className={`text-sm font-medium line-clamp-1 transition-colors ${isProfessorMaterial ? 'text-brand-900 group-hover:text-brand-700' : 'text-gray-900 group-hover:text-purple-700'}`}>
+                <h4 className={`text-sm font-medium line-clamp-1 transition-colors ${isProfessorMaterial ? 'text-brand-900 group-hover:text-brand-700' : 'text-ink-primary group-hover:text-brand-700'}`}>
                   {source.title}
                 </h4>
                 {source.excerpt && (
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{source.excerpt}</p>
+                  <p className="text-xs text-ink-muted mt-0.5 line-clamp-1">{source.excerpt}</p>
                 )}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${labelClass}`}>
                   {label}
                 </span>
-                <span className="text-xs font-medium text-purple-600">
+                <span className="text-xs font-medium text-brand-600">
                   {Math.round(source.relevance * 100)}%
                 </span>
                 {onAskAIAboutDoc && (
@@ -100,7 +100,7 @@ export function AIRecommendedSources({
                       e.stopPropagation();
                       onAskAIAboutDoc(source.title);
                     }}
-                    className="p-1 rounded-full bg-purple-50 text-purple-500 hover:bg-purple-100 hover:text-purple-700 transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1 rounded-full bg-brand-50 text-brand-500 hover:bg-brand-100 hover:text-brand-700 transition-colors opacity-0 group-hover:opacity-100"
                     title="Perguntar à IA sobre este documento"
                   >
                     <Sparkles className="w-3 h-3" />
@@ -110,7 +110,7 @@ export function AIRecommendedSources({
             </div>
           );
 
-          const cardClassName = `block rounded-xl border px-4 py-3 transition-all group cursor-pointer ${borderClass} ${hoverClass}`;
+          const cardClassName = `block rounded-[6px] border px-4 py-3 transition-all group cursor-pointer ${borderClass} ${hoverClass}`;
 
           // Use internal link for pareceres vinculantes and enunciados
           const useInternalLink = ['parecer-vinculante', 'enunciados'].includes(source.category);
@@ -147,7 +147,7 @@ export function AIRecommendedSources({
           return (
             <div
               key={source.documentId}
-              className={`rounded-xl border px-4 py-3 group ${borderClass}`}
+              className={`rounded-[6px] border px-4 py-3 group ${borderClass}`}
             >
               {cardContent}
             </div>

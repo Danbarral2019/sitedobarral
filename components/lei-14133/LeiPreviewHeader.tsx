@@ -24,7 +24,7 @@ export function LeiPreviewHeader({
   const aiDisabled = searchQuery.trim().length < 3;
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
+    <div className="bg-brand-700 text-white border border-border-subtle">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-4">
           <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors">
@@ -33,7 +33,7 @@ export function LeiPreviewHeader({
           </Link>
           <Link
             href="/area-restrita"
-            className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors text-sm"
+            className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-[6px] hover:bg-white/30 transition-colors text-sm"
           >
             Área Restrita
           </Link>
@@ -43,27 +43,27 @@ export function LeiPreviewHeader({
           <Scale className="w-8 h-8" />
           <div>
             <h1 className="text-3xl font-bold">Lei 14.133/2021 Comentada</h1>
-            <p className="text-blue-100">Nova Lei de Licitações e Contratos Administrativos</p>
+            <p className="text-brand-100">Nova Lei de Licitações e Contratos Administrativos</p>
           </div>
         </div>
 
         <div className="flex gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
             <input
               type="text"
               placeholder="Pergunte algo como: 'Quando usar dispensa de licitação?' ou busque por artigo…"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-300"
+              className="w-full pl-10 pr-4 py-3 rounded-[6px] bg-white text-ink-primary placeholder-ink-muted focus:ring-2 focus:ring-brand-300"
             />
           </div>
           <button
             disabled={aiDisabled}
-            className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
+            className={`px-4 py-3 rounded-[6px] flex items-center gap-2 transition-colors ${
               aiDisabled
-                ? 'bg-purple-300 text-white cursor-not-allowed'
-                : 'bg-purple-600 text-white hover:bg-purple-700'
+                ? 'bg-brand-300 text-white cursor-not-allowed'
+                : 'bg-brand-600 text-white hover:bg-brand-700'
             }`}
             title="Busca semântica com IA"
           >
@@ -72,8 +72,8 @@ export function LeiPreviewHeader({
           </button>
           <button
             onClick={onToggleOnlyWithDocs}
-            className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
-              onlyWithDocuments ? 'bg-white text-blue-700' : 'bg-blue-500 text-white hover:bg-blue-400'
+            className={`px-4 py-3 rounded-[6px] flex items-center gap-2 transition-colors ${
+              onlyWithDocuments ? 'bg-white text-brand-700' : 'bg-brand-500 text-white hover:bg-brand-400'
             }`}
           >
             <Filter className="w-5 h-5" />

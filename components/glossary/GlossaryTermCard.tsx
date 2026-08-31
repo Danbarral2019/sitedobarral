@@ -53,41 +53,41 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
   };
 
   return (
-    <div className="border-b border-gray-200 last:border-b-0">
+    <div className="border-b border-border-subtle last:border-b-0">
       {/* Header - Sempre visível */}
       <button
         onClick={onToggle}
-        className="w-full p-5 hover:bg-blue-50 transition-colors duration-150 text-left"
+        className="w-full p-5 hover:bg-brand-50 transition-colors duration-150 text-left"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-3 mb-1">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 className="text-lg font-bold text-ink-primary">
                 {term.term}
               </h3>
               {term.category && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800 flex-shrink-0">
                   {term.category}
                 </span>
               )}
             </div>
 
             {term.shortDef && !isExpanded && (
-              <p className="text-gray-600 text-sm line-clamp-1">
+              <p className="text-ink-muted text-sm line-clamp-1">
                 {term.shortDef}
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-gray-500 flex-shrink-0">
+          <div className="flex items-center gap-4 text-xs text-ink-muted flex-shrink-0">
             <div className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
               <span>{term.viewCount}</span>
             </div>
             {isExpanded ? (
-              <ChevronUp className="h-5 w-5 text-blue-600" />
+              <ChevronUp className="h-5 w-5 text-brand-600" />
             ) : (
-              <ChevronDown className="h-5 w-5 text-gray-400" />
+              <ChevronDown className="h-5 w-5 text-ink-muted" />
             )}
           </div>
         </div>
@@ -98,14 +98,14 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
         <div className="px-5 pb-5 space-y-6">
           {/* Definição com formatação melhorada */}
           <div className="prose prose-sm max-w-none">
-            <div className="text-gray-700 leading-relaxed text-justify">
+            <div className="text-ink-secondary leading-relaxed text-justify">
               <ReactMarkdown
                 components={{
                   p: ({ children }) => <p className="mb-4 text-justify">{children}</p>,
                   ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
                   ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
                   li: ({ children }) => <li className="ml-4">{children}</li>,
-                  strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                  strong: ({ children }) => <strong className="font-semibold text-ink-primary">{children}</strong>,
                 }}
               >
                 {formatDefinition(term.definition)}
@@ -115,10 +115,10 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
 
           {/* Artigos da Lei Indexados */}
           {term.leiArticles && (
-            <div className="pt-4 border-t border-gray-200">
+            <div className="pt-4 border-t border-border-subtle">
               <div className="flex items-center gap-2 mb-3">
-                <Scale className="w-4 h-4 text-blue-600" />
-                <h4 className="text-sm font-bold text-gray-900">
+                <Scale className="w-4 h-4 text-brand-600" />
+                <h4 className="text-sm font-bold text-ink-primary">
                   Artigos da Lei 14.133/2021 Relacionados
                 </h4>
               </div>
@@ -134,10 +134,10 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
 
           {/* Termos Correlatos */}
           {relatedTerms.length > 0 && (
-            <div className="pt-4 border-t border-gray-200">
+            <div className="pt-4 border-t border-border-subtle">
               <div className="flex items-center gap-2 mb-3">
-                <BookOpen className="w-4 h-4 text-purple-600" />
-                <h4 className="text-sm font-bold text-gray-900">
+                <BookOpen className="w-4 h-4 text-brand-600" />
+                <h4 className="text-sm font-bold text-ink-primary">
                   Termos Correlatos
                 </h4>
               </div>
@@ -153,7 +153,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
                         window.location.href = `/glossario/${related.slug}`;
                       }
                     }}
-                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors cursor-pointer"
+                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-brand-100 text-brand-800 hover:bg-brand-200 transition-colors cursor-pointer"
                   >
                     {related.term}
                   </button>

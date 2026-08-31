@@ -15,16 +15,16 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
   return (
-    <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white">
+    <div className="border-2 border-border-subtle rounded-[6px] overflow-hidden bg-white">
       {/* Tabs */}
-      <div className="flex items-center justify-between border-b-2 border-gray-200 bg-gray-50 px-4">
+      <div className="flex items-center justify-between border-b-2 border-border-subtle bg-surface-raised px-4">
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('edit')}
             className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 ${
               activeTab === 'edit'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-brand-600 text-brand-600'
+                : 'border-transparent text-ink-muted hover:text-ink-primary'
             }`}
           >
             <Code className="w-4 h-4" />
@@ -34,8 +34,8 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
             onClick={() => setActiveTab('preview')}
             className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors border-b-2 ${
               activeTab === 'preview'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-brand-600 text-brand-600'
+                : 'border-transparent text-ink-muted hover:text-ink-primary'
             }`}
           >
             <Eye className="w-4 h-4" />
@@ -44,7 +44,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
         </div>
 
         {/* Dica de Markdown */}
-        <div className="text-xs text-gray-500 flex items-center gap-1">
+        <div className="text-xs text-ink-muted flex items-center gap-1">
           <Info className="w-3 h-3" />
           Suporta Markdown
         </div>
@@ -57,7 +57,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder || 'Escreva o conteúdo do post em Markdown...'}
-            className="w-full min-h-[400px] p-6 text-gray-900 font-mono text-sm leading-relaxed resize-none focus:outline-none"
+            className="w-full min-h-[400px] p-6 text-ink-primary font-mono text-sm leading-relaxed resize-none focus:outline-none"
           />
         ) : (
           <div className="p-6 prose prose-blue max-w-none">
@@ -66,7 +66,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
                 {value}
               </ReactMarkdown>
             ) : (
-              <p className="text-gray-400 italic">
+              <p className="text-ink-muted italic">
                 Nenhum conteúdo para visualizar. Escreva algo na aba &quot;Editar&quot;.
               </p>
             )}
@@ -76,14 +76,14 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
 
       {/* Guia Rápido de Markdown (quando está em modo edição) */}
       {activeTab === 'edit' && (
-        <div className="border-t-2 border-gray-200 bg-gray-50 p-4">
+        <div className="border-t-2 border-border-subtle bg-surface-raised p-4">
           <details className="text-sm">
-            <summary className="cursor-pointer font-semibold text-gray-700 hover:text-gray-900 mb-2">
+            <summary className="cursor-pointer font-semibold text-ink-secondary hover:text-ink-primary mb-2">
               Guia Rápido de Markdown
             </summary>
-            <div className="grid md:grid-cols-3 gap-4 mt-3 text-xs text-gray-600">
+            <div className="grid md:grid-cols-3 gap-4 mt-3 text-xs text-ink-muted">
               <div>
-                <p className="font-bold text-gray-900 mb-1">Formatação Básica:</p>
+                <p className="font-bold text-ink-primary mb-1">Formatação Básica:</p>
                 <code className="block bg-white p-2 rounded border">
                   **negrito**<br />
                   *itálico*<br />
@@ -91,7 +91,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
                 </code>
               </div>
               <div>
-                <p className="font-bold text-gray-900 mb-1">Títulos:</p>
+                <p className="font-bold text-ink-primary mb-1">Títulos:</p>
                 <code className="block bg-white p-2 rounded border">
                   # Título 1<br />
                   ## Título 2<br />
@@ -99,7 +99,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
                 </code>
               </div>
               <div>
-                <p className="font-bold text-gray-900 mb-1">Listas e Links:</p>
+                <p className="font-bold text-ink-primary mb-1">Listas e Links:</p>
                 <code className="block bg-white p-2 rounded border">
                   - Item lista<br />
                   1. Item numerado<br />

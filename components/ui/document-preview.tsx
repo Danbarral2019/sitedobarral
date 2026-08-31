@@ -24,9 +24,9 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
       case 'pdf':
         return <FileText className="w-8 h-8 text-red-600" />;
       case 'video':
-        return <Film className="w-8 h-8 text-purple-600" />;
+        return <Film className="w-8 h-8 text-brand-600" />;
       default:
-        return <File className="w-8 h-8 text-blue-600" />;
+        return <File className="w-8 h-8 text-brand-600" />;
     }
   };
 
@@ -41,7 +41,7 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
             <DialogTitle className="text-xl">{document.title}</DialogTitle>
           </div>
           {document.description && (
-            <p className="text-sm text-gray-600 mt-2">{document.description}</p>
+            <p className="text-sm text-ink-muted mt-2">{document.description}</p>
           )}
         </DialogHeader>
 
@@ -51,28 +51,28 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
               {document.type === 'pdf' ? (
                 <iframe
                   src={document.url}
-                  className="w-full h-[600px] border-2 border-gray-200 rounded-lg"
+                  className="w-full h-[600px] border-2 border-border-subtle rounded-[6px]"
                   title={document.title}
                 />
               ) : (
                 <video
                   src={document.url}
                   controls
-                  className="w-full h-auto max-h-[600px] rounded-lg"
+                  className="w-full h-auto max-h-[600px] rounded-[6px]"
                 >
                   Seu navegador não suporta vídeos.
                 </video>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border-2 border-gray-200">
+            <div className="flex flex-col items-center justify-center py-12 bg-brand-50 rounded-[6px] border-2 border-border-subtle">
               {getIcon()}
-              <p className="text-gray-700 font-medium mt-4 mb-2">Preview não disponível para este tipo de arquivo</p>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-ink-secondary font-medium mt-4 mb-2">Preview não disponível para este tipo de arquivo</p>
+              <p className="text-sm text-ink-muted mb-6">
                 {document.type === 'doc' ? 'Arquivo Word (.doc/.docx)' : 'Link externo'}
               </p>
               {document.size && (
-                <p className="text-sm text-gray-600 mb-6">
+                <p className="text-sm text-ink-muted mb-6">
                   Tamanho: {(document.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               )}
@@ -80,7 +80,7 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
                 href={document.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
+                className="bg-brand-600 text-white px-6 py-3 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-700 transition-all flex items-center gap-2 border border-border-subtle"
               >
                 {document.type === 'link' ? (
                   <>
@@ -98,10 +98,10 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
           )}
         </div>
 
-        <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border-subtle">
           <button
             onClick={() => onOpenChange(false)}
-            className="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 border-2 border-border-subtle rounded-[6px] font-medium text-ink-secondary hover:bg-surface-raised transition-colors"
           >
             Fechar
           </button>
@@ -110,7 +110,7 @@ export function DocumentPreview({ open, onOpenChange, document }: DocumentPrevie
             download
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
+            className="bg-brand-600 text-white px-6 py-2 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-700 transition-all flex items-center gap-2 border border-border-subtle"
           >
             <Download className="w-4 h-4" />
             Baixar

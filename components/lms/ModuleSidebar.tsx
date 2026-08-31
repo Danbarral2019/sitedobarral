@@ -66,12 +66,12 @@ export default function ModuleSidebar({
   );
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col h-full">
+    <div className="bg-white border border-border-subtle rounded-[6px] overflow-hidden flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+      <div className="px-4 py-3 border-b border-border-subtle bg-surface-raised/50">
         <div className="flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-brand-600 flex-shrink-0" />
-          <h2 className="text-sm font-bold text-gray-900 line-clamp-1">{courseTitle}</h2>
+          <h2 className="text-sm font-bold text-ink-primary line-clamp-1">{courseTitle}</h2>
         </div>
       </div>
 
@@ -84,20 +84,20 @@ export default function ModuleSidebar({
           ).length;
 
           return (
-            <div key={mod.id} className="border-b border-gray-50 last:border-0">
+            <div key={mod.id} className="border-b border-border-subtle last:border-0">
               {/* Module header */}
               <button
                 onClick={() => toggleModule(mod.id)}
-                className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-surface-raised transition-colors"
               >
                 {isExpanded ? (
-                  <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <ChevronDown className="w-3.5 h-3.5 text-ink-muted flex-shrink-0" />
                 ) : (
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-ink-muted flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-gray-800 line-clamp-1">{mod.title}</p>
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-xs font-bold text-ink-secondary line-clamp-1">{mod.title}</p>
+                  <p className="text-[10px] text-ink-muted">
                     {completedInModule}/{mod.lessons.length} {mod.lessons.length === 1 ? 'aula' : 'aulas'}
                   </p>
                 </div>
@@ -137,11 +137,11 @@ export default function ModuleSidebar({
                       return (
                         <div
                           key={lesson.id}
-                          className="flex items-center gap-2.5 px-4 py-2 mx-2 rounded-lg opacity-50 cursor-not-allowed"
+                          className="flex items-center gap-2.5 px-4 py-2 mx-2 rounded-[6px] opacity-50 cursor-not-allowed"
                           title="Complete o questionario da aula anterior para desbloquear"
                         >
-                          <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          <span className="text-xs leading-snug line-clamp-2 text-gray-400">
+                          <Lock className="w-4 h-4 text-ink-muted flex-shrink-0" />
+                          <span className="text-xs leading-snug line-clamp-2 text-ink-muted">
                             {lesson.title}
                           </span>
                         </div>
@@ -152,10 +152,10 @@ export default function ModuleSidebar({
                       <Link
                         key={lesson.id}
                         href={`/area-restrita/curso/${courseSlug}/aula/${lesson.slug}`}
-                        className={`flex items-center gap-2.5 px-4 py-2 mx-2 rounded-lg text-left transition-colors ${
+                        className={`flex items-center gap-2.5 px-4 py-2 mx-2 rounded-[6px] text-left transition-colors ${
                           isCurrent
                             ? 'bg-brand-50 border border-brand-200'
-                            : 'hover:bg-gray-50'
+                            : 'hover:bg-surface-raised'
                         }`}
                       >
                         {/* Status icon */}
@@ -165,7 +165,7 @@ export default function ModuleSidebar({
                           ) : isCurrent ? (
                             <Play className="w-4 h-4 text-brand-600" />
                           ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                            <div className="w-4 h-4 rounded-full border-2 border-border-subtle" />
                           )}
                         </div>
 
@@ -175,8 +175,8 @@ export default function ModuleSidebar({
                             isCurrent
                               ? 'font-bold text-brand-700'
                               : isCompleted
-                                ? 'text-gray-500'
-                                : 'text-gray-700'
+                                ? 'text-ink-muted'
+                                : 'text-ink-secondary'
                           }`}
                         >
                           {lesson.title}
@@ -187,7 +187,7 @@ export default function ModuleSidebar({
                           <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                             lesson.quizPassed
                               ? 'bg-green-100 text-green-600'
-                              : 'bg-purple-100 text-purple-600'
+                              : 'bg-brand-100 text-brand-600'
                           }`}>
                             Q
                           </span>
@@ -203,7 +203,7 @@ export default function ModuleSidebar({
       </div>
 
       {/* Progress bar */}
-      <div className="border-t border-gray-100">
+      <div className="border-t border-border-subtle">
         <LessonProgressBar totalLessons={totalLessons} completedLessons={completedLessons} />
       </div>
     </div>

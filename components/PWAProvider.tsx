@@ -188,7 +188,7 @@ export function PWAProvider() {
     <>
       {/* SW Update Banner */}
       {showUpdateBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 border border-border-subtle">
           <div className="flex items-center gap-3 min-w-0">
             <RefreshCw className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
@@ -198,7 +198,7 @@ export function PWAProvider() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleUpdate}
-              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-surface-deep transition-colors"
             >
               Atualizar
             </button>
@@ -215,7 +215,7 @@ export function PWAProvider() {
 
       {/* Install PWA Banner */}
       {showBanner && !showUpdateBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 border border-border-subtle">
           <div className="flex items-center gap-3 min-w-0">
             <Download className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
@@ -225,7 +225,7 @@ export function PWAProvider() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleInstall}
-              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-surface-deep transition-colors"
             >
               Instalar
             </button>
@@ -242,7 +242,7 @@ export function PWAProvider() {
 
       {/* Push Notification Permission Prompt */}
       {showNotificationPrompt && !showBanner && !showUpdateBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 border border-border-subtle">
           <div className="flex items-center gap-3 min-w-0">
             <Bell className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
@@ -252,7 +252,7 @@ export function PWAProvider() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleEnableNotifications}
-              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-surface-deep transition-colors"
             >
               Ativar
             </button>

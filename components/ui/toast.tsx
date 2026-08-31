@@ -28,7 +28,7 @@ const Toast = React.forwardRef<
     <ToastPrimitives.Root
       ref={ref}
       className={`
-        group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-6 pr-8 shadow-lg transition-all
+        group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-[6px] border p-6 pr-8 transition-all
         data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]
         data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none
         data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out
@@ -40,8 +40,8 @@ const Toast = React.forwardRef<
             : variant === 'error'
             ? 'border-red-200 bg-red-50 text-red-900'
             : variant === 'warning'
-            ? 'border-yellow-200 bg-yellow-50 text-yellow-900'
-            : 'border-blue-200 bg-blue-50 text-blue-900'
+            ? 'border-amber-accent-soft bg-amber-accent-soft text-amber-accent-deep'
+            : 'border-brand-200 bg-brand-50 text-brand-900'
         }
         ${className || ''}
       `}

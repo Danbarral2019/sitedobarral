@@ -118,10 +118,10 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`
-            relative border-2 border-dashed rounded-xl p-12 text-center transition-all
+            relative border-2 border-dashed rounded-[6px] p-12 text-center transition-all
             ${isDragging
-              ? 'border-blue-500 bg-blue-50 scale-[1.02]'
-              : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+              ? 'border-brand-500 bg-brand-50 scale-[1.02]'
+              : 'border-border-subtle hover:border-brand-400 hover:bg-surface-raised'
             }
           `}
         >
@@ -137,32 +137,32 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
             <div className="flex justify-center">
               <div className={`
                 p-4 rounded-full transition-all
-                ${isDragging ? 'bg-blue-100' : 'bg-gray-100'}
+                ${isDragging ? 'bg-brand-100' : 'bg-surface-deep'}
               `}>
                 <Upload className={`
                   w-12 h-12 transition-all
-                  ${isDragging ? 'text-blue-600' : 'text-gray-400'}
+                  ${isDragging ? 'text-brand-600' : 'text-ink-muted'}
                 `} />
               </div>
             </div>
 
             <div>
-              <p className="text-lg font-semibold text-gray-900 mb-2">
+              <p className="text-lg font-semibold text-ink-primary mb-2">
                 {isDragging ? 'Solte o arquivo aqui' : 'Arraste seu arquivo Word aqui'}
               </p>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-ink-muted mb-4">
                 ou
               </p>
               <label
                 htmlFor="word-file-input"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-[6px] font-bold hover:bg-brand-700 transition-colors cursor-pointer"
               >
                 <FileText className="w-5 h-5" />
                 Selecionar Arquivo
               </label>
             </div>
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-ink-muted">
               Formatos aceitos: .doc, .docx (máximo 10MB)
             </p>
           </div>
@@ -170,36 +170,36 @@ export default function WordUploader({ onUploadComplete, onError }: WordUploader
       )}
 
       {isProcessing && (
-        <div className="border-2 border-blue-200 bg-blue-50 rounded-xl p-12 text-center">
+        <div className="border-2 border-brand-200 bg-brand-50 rounded-[6px] p-12 text-center">
           <div className="flex justify-center mb-4">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+            <Loader2 className="w-12 h-12 text-brand-600 animate-spin" />
           </div>
-          <p className="text-lg font-semibold text-gray-900 mb-2">
+          <p className="text-lg font-semibold text-ink-primary mb-2">
             Processando arquivo...
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-ink-muted">
             Extraindo conteúdo, notas de rodapé e referências
           </p>
         </div>
       )}
 
       {file && !isProcessing && (
-        <div className="border-2 border-green-200 bg-green-50 rounded-xl p-6">
+        <div className="border-2 border-green-200 bg-green-50 rounded-[6px] p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-100 rounded-[6px]">
                 <FileText className="w-6 h-6 text-green-700" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">{file.name}</p>
-                <p className="text-sm text-gray-600">
+                <p className="font-semibold text-ink-primary">{file.name}</p>
+                <p className="text-sm text-ink-muted">
                   {(file.size / 1024).toFixed(2)} KB
                 </p>
               </div>
             </div>
             <button
               onClick={handleRemoveFile}
-              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+              className="p-2 text-red-600 hover:bg-red-100 rounded-[6px] transition-colors"
               title="Remover arquivo"
             >
               <X className="w-5 h-5" />

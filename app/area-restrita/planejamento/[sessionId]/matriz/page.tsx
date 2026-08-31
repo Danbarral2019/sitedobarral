@@ -52,14 +52,14 @@ export default async function MatrizPage({ params }: PageProps) {
     <main className="mx-auto max-w-4xl px-4 py-8">
       <Link
         href={`/area-restrita/planejamento/${sessionId}`}
-        className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-brand-700"
+        className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-brand-700"
       >
         <ArrowLeft className="h-4 w-4" /> Voltar à trilha
       </Link>
       <h1 className="mt-3 font-serif text-2xl text-brand-900">
         Matriz de modalidade e critério
       </h1>
-      <p className="mt-1 mb-6 max-w-2xl text-sm text-gray-600">
+      <p className="mt-1 mb-6 max-w-2xl text-sm text-ink-muted">
         A recomendação é gerada por regras determinísticas fundadas nos arts.
         28 a 36 da Lei 14.133/2021. Os inputs informados são registrados para
         auditoria e podem ser revistos a qualquer momento.
@@ -67,7 +67,7 @@ export default async function MatrizPage({ params }: PageProps) {
 
       {lastResult && (
         <div className="mb-8">
-          <p className="mb-2 text-xs text-gray-500">
+          <p className="mb-2 text-xs text-ink-muted">
             Última execução em{" "}
             {new Date(lastRun.executedAt).toLocaleString("pt-BR")}
           </p>
@@ -75,7 +75,7 @@ export default async function MatrizPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
+      <div className="rounded-[6px] border border-border-subtle bg-white p-6">
         <MatrixWizard sessionId={sessionId} />
       </div>
     </main>

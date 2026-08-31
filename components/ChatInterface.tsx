@@ -495,7 +495,7 @@ export default function ChatInterface({
   };
 
   // Fase 3: durante a pausa do thinking do Claude, a mensagem do assistente
-  // ainda está vazia — mostramos "Analisando as fontes…" em vez do spinner cru.
+  // ainda está vazia — mostramos "Analisando as fontes…"em vez do spinner cru.
   const streamingMsg = messages[messages.length - 1];
   const isAnalyzing =
     isLoading && streamingMsg?.role === 'assistant' && !streamingMsg?.content;
@@ -503,17 +503,17 @@ export default function ChatInterface({
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-border-subtle">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Assistente Inteligente</h3>
+          <Sparkles className="w-5 h-5 text-brand-600" />
+          <h3 className="font-semibold text-ink-primary">Assistente Inteligente</h3>
         </div>
         {messages.length > 0 && (
           <div className="flex items-center gap-3">
             <button
               onClick={handleExportConversationPDF}
               disabled={exportingPdf === 'conversation'}
-              className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-800 disabled:text-ink-muted transition-colors"
               title="Exportar conversa como PDF"
             >
               {exportingPdf === 'conversation' ? (
@@ -525,7 +525,7 @@ export default function ChatInterface({
             </button>
             <button
               onClick={clearHistory}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-sm text-ink-muted hover:text-ink-secondary transition-colors"
             >
               Limpar histórico
             </button>
@@ -537,22 +537,22 @@ export default function ChatInterface({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center py-12">
-            <Sparkles className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">
+            <Sparkles className="w-12 h-12 text-brand-500 mx-auto mb-4" />
+            <h4 className="text-lg font-semibold text-ink-primary mb-2">
               Como posso ajudar?
             </h4>
-            <p className="text-gray-600 mb-6">
+            <p className="text-ink-muted mb-6">
               Faça perguntas sobre os documentos e materiais do curso
             </p>
 
             {/* Suggestions */}
             <div className="max-w-2xl mx-auto space-y-2">
-              <p className="text-sm text-gray-400 mb-3">Sugestões:</p>
+              <p className="text-sm text-ink-muted mb-3">Sugestões:</p>
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-sm text-gray-600"
+                  className="w-full text-left px-4 py-3 bg-surface-raised hover:bg-surface-deep rounded-[6px] transition-colors text-sm text-ink-muted"
                 >
                   {suggestion}
                 </button>
@@ -568,10 +568,10 @@ export default function ChatInterface({
               }`}
             >
               <div
-                className={`group/msg max-w-3xl rounded-lg p-4 ${
+                className={`group/msg max-w-3xl rounded-[6px] p-4 ${
                   message.role === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    ? 'bg-brand-600 text-white'
+                    : 'bg-surface-deep text-ink-primary'
                 }`}
               >
                 {message.role === 'assistant' ? (
@@ -594,7 +594,7 @@ export default function ChatInterface({
                             <span className="text-emerald-400 mt-0.5">▸</span>
                             <span className="truncate font-medium">{c.documentTitle ?? 'Fonte'}</span>
                           </summary>
-                          <blockquote className="ml-4 mt-1 pl-2 border-l-2 border-emerald-300 text-gray-600 italic">
+                          <blockquote className="ml-4 mt-1 pl-2 border-l-2 border-emerald-300 text-ink-muted italic">
                             &ldquo;{c.citedText}&rdquo;
                           </blockquote>
                         </details>
@@ -605,8 +605,8 @@ export default function ChatInterface({
 
                 {/* Legal Sources */}
                 {message.legalSources && message.legalSources.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-gray-300 space-y-1">
-                    <p className="text-xs font-semibold text-gray-600 mb-1.5">
+                  <div className="mt-4 pt-3 border-t border-border-subtle space-y-1">
+                    <p className="text-xs font-semibold text-ink-muted mb-1.5">
                       Fundamentação legal:
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -621,11 +621,11 @@ export default function ChatInterface({
                               href={ls.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-800 hover:bg-indigo-100 transition-colors"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 border border-brand-200 rounded text-xs text-brand-800 hover:bg-brand-100 transition-colors"
                             >
                               <IconComp className="w-3 h-3" />
                               <span className="truncate max-w-[180px]">{ls.title}</span>
-                              <ExternalLink className="w-3 h-3 text-indigo-400" />
+                              <ExternalLink className="w-3 h-3 text-brand-400" />
                             </a>
                           );
                         }
@@ -634,7 +634,7 @@ export default function ChatInterface({
                           <Link
                             key={ls.title}
                             href={ls.url}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-xs text-indigo-800 hover:bg-indigo-100 transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-50 border border-brand-200 rounded text-xs text-brand-800 hover:bg-brand-100 transition-colors"
                           >
                             <IconComp className="w-3 h-3" />
                             <span className="truncate max-w-[180px]">{ls.title}</span>
@@ -647,24 +647,24 @@ export default function ChatInterface({
 
                 {/* Document Sources */}
                 {message.sources && message.sources.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-300 space-y-2">
-                    <p className="text-xs font-semibold text-gray-600">
+                  <div className="mt-3 pt-3 border-t border-border-subtle space-y-2">
+                    <p className="text-xs font-semibold text-ink-muted">
                       Fontes consultadas:
                     </p>
                     {message.sources.map((source) => {
                       const sourceContent = (
                         <div className="flex items-start gap-2">
-                          <FileText className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                          <FileText className="w-4 h-4 text-ink-muted flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-gray-900">
+                              <span className="font-medium text-ink-primary">
                                 {source.title}
                               </span>
-                              <span className="text-gray-400">
+                              <span className="text-ink-muted">
                                 {Math.round(source.relevance * 100)}%
                               </span>
                             </div>
-                            <p className="text-gray-600 text-xs mt-1">
+                            <p className="text-ink-muted text-xs mt-1">
                               {source.category}
                             </p>
                           </div>
@@ -680,7 +680,7 @@ export default function ChatInterface({
                               href={source.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                              className="block text-xs bg-white rounded p-2 hover:bg-surface-raised transition-colors cursor-pointer"
                             >
                               {sourceContent}
                             </a>
@@ -690,7 +690,7 @@ export default function ChatInterface({
                           <Link
                             key={source.documentId}
                             href={source.url}
-                            className="block text-xs bg-white rounded p-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                            className="block text-xs bg-white rounded p-2 hover:bg-surface-raised transition-colors cursor-pointer"
                           >
                             {sourceContent}
                           </Link>
@@ -725,7 +725,7 @@ export default function ChatInterface({
                             className={`inline-flex items-center px-2 py-0.5 rounded text-xs transition-all ${
                               message.feedback === 1
                                 ? 'text-green-600 bg-green-50'
-                                : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                                : 'text-ink-muted hover:text-green-600 hover:bg-green-50'
                             }`}
                             aria-label="Resposta útil"
                             aria-pressed={message.feedback === 1}
@@ -738,7 +738,7 @@ export default function ChatInterface({
                             className={`inline-flex items-center px-2 py-0.5 rounded text-xs transition-all ${
                               message.feedback === -1
                                 ? 'text-red-600 bg-red-50'
-                                : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                : 'text-ink-muted hover:text-red-600 hover:bg-red-50'
                             }`}
                             aria-label="Resposta não ajudou"
                             aria-pressed={message.feedback === -1}
@@ -749,7 +749,7 @@ export default function ChatInterface({
                           <button
                             onClick={() => handleShare(message)}
                             disabled={sharingId === message.id}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-purple-600 hover:bg-purple-50 disabled:text-gray-400 transition-all"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-ink-muted hover:text-brand-600 hover:bg-brand-50 disabled:text-ink-muted transition-all"
                             title={sharedUrl && sharingId === message.id ? 'Link copiado!' : 'Compartilhar resposta'}
                           >
                             {sharedUrl && sharingId === message.id ? (
@@ -771,7 +771,7 @@ export default function ChatInterface({
                       <button
                         onClick={() => handleExportMessagePDF(message)}
                         disabled={exportingPdf === message.id}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 disabled:text-gray-400 transition-all"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-ink-muted hover:text-brand-600 hover:bg-brand-50 disabled:text-ink-muted transition-all"
                         title="Baixar resposta como PDF"
                       >
                         {exportingPdf === message.id ? (
@@ -790,12 +790,12 @@ export default function ChatInterface({
         )}
 
         {/* Loading indicator */}
-        <div aria-live="polite" aria-atomic="true">
+        <div aria-live="polite"aria-atomic="true">
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg px-4 py-3 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-indigo-500" aria-hidden="true" />
-                <span className="text-sm text-gray-600">
+              <div className="bg-surface-deep rounded-[6px] px-4 py-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-brand-500"aria-hidden="true" />
+                <span className="text-sm text-ink-muted">
                   {isAnalyzing ? 'Analisando as fontes…' : 'Sintetizando a resposta…'}
                 </span>
               </div>
@@ -806,7 +806,7 @@ export default function ChatInterface({
         {/* Error display */}
         {error && (
           <div className="flex justify-center">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-2 max-w-2xl">
+            <div className="bg-red-50 border border-red-200 rounded-[6px] p-4 flex items-start gap-2 max-w-2xl">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-red-800">{error}</div>
             </div>
@@ -817,14 +817,14 @@ export default function ChatInterface({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 p-4 space-y-3">
+      <div className="border-t border-border-subtle p-4 space-y-3">
         {/* Scope chips: aluno controla o foco da pesquisa */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1 text-xs text-gray-500" title="Escopo da pesquisa">
-            <Filter className="w-3 h-3" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1 text-xs text-ink-muted"title="Escopo da pesquisa">
+            <Filter className="w-3 h-3"aria-hidden="true" />
             <span>Escopo:</span>
           </span>
-          <div className="inline-flex rounded-md border border-gray-200 bg-white p-0.5" role="group" aria-label="Escopo da pesquisa">
+          <div className="inline-flex rounded-md border border-border-subtle bg-white p-0.5"role="group"aria-label="Escopo da pesquisa">
             {SCOPE_OPTIONS.map((opt) => {
               const active = scope === opt.value;
               return (
@@ -838,8 +838,8 @@ export default function ChatInterface({
                   className={
                     'px-3 py-1 text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ' +
                     (active
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-100')
+                      ? 'bg-brand-600 text-white'
+                      : 'text-ink-muted hover:bg-surface-deep')
                   }
                 >
                   {opt.label}
@@ -848,7 +848,7 @@ export default function ChatInterface({
             })}
           </div>
           {scope !== 'all' && (
-            <span className="text-xs text-gray-500 italic">{SCOPE_OPTIONS.find((o) => o.value === scope)?.help}</span>
+            <span className="text-xs text-ink-muted italic">{SCOPE_OPTIONS.find((o) => o.value === scope)?.help}</span>
           )}
         </div>
         <form
@@ -864,12 +864,12 @@ export default function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             placeholder={placeholder}
             disabled={isLoading}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 bg-white text-gray-900"
+            className="flex-1 px-4 py-3 border border-border-subtle rounded-[6px] focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-surface-deep bg-white text-ink-primary"
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 disabled:bg-border-strong disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

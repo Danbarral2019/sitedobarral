@@ -33,7 +33,7 @@ export function highlightText(text: string, query: string): React.ReactNode {
 
   return parts.map((part, i) =>
     regex.test(part) ? (
-      <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5">
+      <mark key={i} className="bg-amber-accent-soft text-ink-primary rounded px-0.5">
         {part}
       </mark>
     ) : (
@@ -85,7 +85,7 @@ export function formatLine(text: string): React.ReactNode {
   const headingMatch = text.match(/^(#{1,4})\s+(.*)/);
   if (headingMatch) {
     return (
-      <span className="block font-bold text-gray-900 mt-3 mb-1">
+      <span className="block font-bold text-ink-primary mt-3 mb-1">
         {formatBold(headingMatch[2])}
       </span>
     );
@@ -99,7 +99,7 @@ export function formatLine(text: string): React.ReactNode {
   const formatted = formatBold(content);
 
   if (isBullet) {
-    return <span className="flex gap-1.5 ml-2"><span className="text-purple-400">&#8226;</span><span>{formatted}</span></span>;
+    return <span className="flex gap-1.5 ml-2"><span className="text-brand-400">&#8226;</span><span>{formatted}</span></span>;
   }
   return formatted;
 }

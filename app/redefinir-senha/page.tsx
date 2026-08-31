@@ -83,9 +83,9 @@ export default function RedefinirSenhaPage() {
   // Token inválido ou ausente
   if (tokenValid === false) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-[6px] p-8 border border-border-subtle">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                 <svg
@@ -102,23 +102,23 @@ export default function RedefinirSenhaPage() {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-ink-primary mb-2">
                 Link Inválido
               </h1>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="bg-red-50 border border-red-200 rounded-[6px] p-4 mb-6">
                 <p className="text-sm text-red-800">{error}</p>
               </div>
 
               <div className="space-y-3">
                 <Link
                   href="/esqueci-senha"
-                  className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="block w-full bg-brand-600 text-white py-3 px-4 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors"
                 >
                   Solicitar Novo Link
                 </Link>
                 <Link
                   href="/login"
-                  className="block w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="block w-full border border-border-subtle text-ink-secondary py-3 px-4 rounded-[6px] font-semibold hover:bg-surface-raised transition-colors"
                 >
                   Voltar para o Login
                 </Link>
@@ -129,7 +129,7 @@ export default function RedefinirSenhaPage() {
           <div className="mt-6 text-center">
             <Link
               href="/"
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-sm text-brand-600 hover:text-brand-700 font-medium"
             >
               ← Voltar para o site
             </Link>
@@ -140,14 +140,14 @@ export default function RedefinirSenhaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-[6px] p-8 border border-border-subtle">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-100 rounded-full mb-4">
               <svg
-                className="w-8 h-8 text-blue-600"
+                className="w-8 h-8 text-brand-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -160,17 +160,17 @@ export default function RedefinirSenhaPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-ink-primary mb-2">
               Redefinir Senha
             </h1>
-            <p className="text-gray-600">
+            <p className="text-ink-muted">
               Digite sua nova senha abaixo
             </p>
           </div>
 
           {/* Erro */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-[6px]">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -179,7 +179,7 @@ export default function RedefinirSenhaPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nova Senha */}
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="newPassword" className="block text-sm font-medium text-ink-secondary mb-2">
                 Nova Senha
               </label>
               <input
@@ -187,7 +187,7 @@ export default function RedefinirSenhaPage() {
                 id="newPassword"
                 value={formData.newPassword}
                 onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Mínimo 6 caracteres"
                 disabled={loading}
                 autoComplete="new-password"
@@ -197,7 +197,7 @@ export default function RedefinirSenhaPage() {
 
             {/* Confirmar Senha */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink-secondary mb-2">
                 Confirmar Nova Senha
               </label>
               <input
@@ -205,7 +205,7 @@ export default function RedefinirSenhaPage() {
                 id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Digite a senha novamente"
                 disabled={loading}
                 autoComplete="new-password"
@@ -214,19 +214,19 @@ export default function RedefinirSenhaPage() {
             </div>
 
             {/* Requisitos de senha */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">
+            <div className="bg-brand-50 border border-brand-200 rounded-[6px] p-4">
+              <h3 className="text-sm font-semibold text-brand-900 mb-2">
                 Requisitos da senha:
               </h3>
-              <ul className="text-sm text-blue-800 space-y-1">
+              <ul className="text-sm text-brand-800 space-y-1">
                 <li className="flex items-center">
-                  <span className={`mr-2 ${formData.newPassword.length >= 6 ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className={`mr-2 ${formData.newPassword.length >= 6 ? 'text-green-600' : 'text-ink-muted'}`}>
                     {formData.newPassword.length >= 6 ? '✓' : '○'}
                   </span>
                   Mínimo de 6 caracteres
                 </li>
                 <li className="flex items-center">
-                  <span className={`mr-2 ${formData.newPassword && formData.newPassword === formData.confirmPassword ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className={`mr-2 ${formData.newPassword && formData.newPassword === formData.confirmPassword ? 'text-green-600' : 'text-ink-muted'}`}>
                     {formData.newPassword && formData.newPassword === formData.confirmPassword ? '✓' : '○'}
                   </span>
                   As senhas devem coincidir
@@ -238,14 +238,14 @@ export default function RedefinirSenhaPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-brand-600 text-white py-3 px-4 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
             >
               {loading ? 'Redefinindo...' : 'Redefinir Senha'}
             </button>
           </form>
 
           {/* Aviso de auto-login */}
-          <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="mt-6 bg-green-50 border border-green-200 rounded-[6px] p-4">
             <p className="text-sm text-green-800">
               ✓ Após redefinir sua senha, você será automaticamente logado e redirecionado para a área restrita.
             </p>
@@ -253,8 +253,8 @@ export default function RedefinirSenhaPage() {
         </div>
 
         {/* Aviso de validade */}
-        <div className="mt-6 bg-yellow-50 rounded-lg p-4">
-          <p className="text-sm text-yellow-800">
+        <div className="mt-6 bg-amber-accent-soft rounded-[6px] p-4">
+          <p className="text-sm text-amber-accent-deep">
             ⏰ Este link é válido por <strong>1 hora</strong>. Se expirar, solicite um novo link.
           </p>
         </div>
@@ -263,7 +263,7 @@ export default function RedefinirSenhaPage() {
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-brand-600 hover:text-brand-700 font-medium"
           >
             ← Voltar para o site
           </Link>

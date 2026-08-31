@@ -23,8 +23,8 @@ type BillingCycle = 'monthly' | 'yearly';
 
 function CheckIcon({ className }: { className?: string }) {
   return (
-    <svg className={className || 'w-5 h-5 text-green-500 mt-0.5 flex-shrink-0'} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    <svg className={className || 'w-5 h-5 text-green-500 mt-0.5 flex-shrink-0'} fill="none"stroke="currentColor"viewBox="0 0 24 24">
+      <path strokeLinecap="round"strokeLinejoin="round"strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   );
 }
@@ -82,25 +82,25 @@ export default function PlanosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-brand-50 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-ink-primary mb-4">
             Planos de Assinatura
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-ink-muted max-w-2xl mx-auto">
             Acesse os materiais de Direito Administrativo, Licitações e Contratos do Prof. Daniel Barral
           </p>
         </div>
 
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-[6px] text-center">
             <p className="text-sm text-red-600">{error}</p>
             {hasActiveSubscription && (
               <a
                 href="/api/conta/portal"
-                className="inline-block mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                className="inline-block mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-[6px] transition-colors"
               >
                 Gerenciar assinatura
               </a>
@@ -110,30 +110,30 @@ export default function PlanosPage() {
 
         {/* Toggle Mensal / Anual */}
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+          <div className="inline-flex bg-white rounded-[6px] border border-border-subtle p-1">
             <button
               onClick={() => { setBillingCycle('monthly');}}
-              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-6 py-2.5 rounded-[6px] text-sm font-medium transition-colors ${
                 !isYearly
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-brand-600 text-white'
+                  : 'text-ink-muted hover:text-ink-primary'
               }`}
             >
               Mensal
             </button>
             <button
               onClick={() => { setBillingCycle('yearly');}}
-              className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+              className={`px-6 py-2.5 rounded-[6px] text-sm font-medium transition-colors flex items-center gap-2 ${
                 isYearly
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-brand-600 text-white'
+                  : 'text-ink-muted hover:text-ink-primary'
               }`}
             >
               Anual
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                 isYearly
-                  ? 'bg-yellow-400 text-yellow-900'
-                  : 'bg-yellow-100 text-yellow-800'
+                  ? 'bg-amber-accent text-amber-accent-deep'
+                  : 'bg-amber-accent-soft text-amber-accent-deep'
               }`}>
                 2 meses grátis
               </span>
@@ -145,23 +145,23 @@ export default function PlanosPage() {
             PIX (Pix Automático) está desabilitado até a Stripe liberar — ver lib/payments/config.ts. */}
         {PIX_ENABLED && (
           <div className="mb-8 flex justify-center">
-            <div className="inline-flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+            <div className="inline-flex bg-white rounded-[6px] border border-border-subtle p-1">
               <button
                 onClick={() => { setPaymentMethod('cartao');}}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-6 py-2.5 rounded-[6px] text-sm font-medium transition-colors ${
                   paymentMethod === 'cartao'
-                    ? 'bg-gray-800 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-brand-900 text-white'
+                    : 'text-ink-muted hover:text-ink-primary'
                 }`}
               >
                 Cartão / Boleto
               </button>
               <button
                 onClick={() => { setPaymentMethod('pix');}}
-                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-6 py-2.5 rounded-[6px] text-sm font-medium transition-colors ${
                   paymentMethod === 'pix'
-                    ? 'bg-green-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-green-600 text-white'
+                    : 'text-ink-muted hover:text-ink-primary'
                 }`}
               >
                 PIX
@@ -173,21 +173,21 @@ export default function PlanosPage() {
         {/* Cards de planos */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           {/* Plano Básico */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 flex flex-col">
+          <div className="bg-white rounded-[6px] p-8 border border-border-subtle flex flex-col">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Básico</h2>
-              <p className="text-gray-500">Acesso a 1 curso específico</p>
+              <h2 className="text-2xl font-bold text-ink-primary mb-2">Básico</h2>
+              <p className="text-ink-muted">Acesso a 1 curso específico</p>
               <div className="mt-6">
-                <span className="text-5xl font-bold text-gray-900">
+                <span className="text-5xl font-bold text-ink-primary">
                   R$ {isYearly ? PRICE_BASICO_ANUAL : PRICE_BASICO}
                 </span>
-                <span className="text-gray-500 text-lg">
+                <span className="text-ink-muted text-lg">
                   {isYearly ? '/ano' : '/mês'}
                 </span>
               </div>
               {isYearly && (
                 <div className="mt-3 space-y-1">
-                  <p className="text-sm text-gray-400 line-through">
+                  <p className="text-sm text-ink-muted line-through">
                     R$ {(49.90 * 12).toFixed(2).replace('.', ',')}/ano no plano mensal
                   </p>
                   <span className="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
@@ -200,32 +200,32 @@ export default function PlanosPage() {
             <ul className="space-y-4 mb-8 flex-grow">
               <li className="flex items-start gap-3">
                 <CheckIcon />
-                <span className="text-gray-700">Acesso completo a 1 curso</span>
+                <span className="text-ink-secondary">Acesso completo a 1 curso</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckIcon />
-                <span className="text-gray-700">Documentos, vídeos e materiais</span>
+                <span className="text-ink-secondary">Documentos, vídeos e materiais</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckIcon />
-                <span className="text-gray-700">Atualizações contínuas</span>
+                <span className="text-ink-secondary">Atualizações contínuas</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckIcon />
-                <span className="text-gray-700">Assistente IA com busca semântica</span>
+                <span className="text-ink-secondary">Assistente IA com busca semântica</span>
               </li>
             </ul>
 
             {/* Seletor de curso */}
             <div className="mb-6">
-              <label htmlFor="course-select" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="course-select"className="block text-sm font-medium text-ink-secondary mb-2">
                 Escolha o curso:
               </label>
               <select
                 id="course-select"
                 value={selectedCourse}
                 onChange={(e) => setSelectedCourse(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                className="w-full rounded-[6px] border border-border-subtle px-4 py-3 text-ink-primary focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none"
               >
                 {COURSES.map((course) => (
                   <option key={course.id} value={course.id}>
@@ -238,37 +238,37 @@ export default function PlanosPage() {
             <button
               onClick={() => handleSubscribe('basico')}
               disabled={loading !== null || isLoading}
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-xl transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="w-full bg-brand-900 hover:bg-brand-950 text-white font-semibold py-4 px-6 rounded-[6px] transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
             >
               {loading === 'basico'
                 ? (paymentMethod === 'pix' ? 'Gerando PIX...' : 'Redirecionando...')
-                : `Assinar Básico ${isYearly ? 'Anual' : ''}${paymentMethod === 'pix' ? ' com PIX' : ''}`}
+                : `Assinar Básico ${isYearly ? 'Anual' : ''}${paymentMethod === 'pix' ? 'com PIX' : ''}`}
             </button>
           </div>
 
           {/* Plano Premium */}
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-xl p-8 border-2 border-blue-500 relative flex flex-col">
+          <div className="bg-brand-600 rounded-[6px] p-8 border-2 border-brand-500 relative flex flex-col">
             {/* Badge */}
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <span className="inline-block px-5 py-1.5 bg-yellow-400 text-yellow-900 rounded-full font-bold text-sm shadow-md">
+              <span className="inline-block px-5 py-1.5 bg-amber-accent text-ink-primary rounded-full font-bold text-sm border border-border-subtle">
                 {isYearly ? 'MELHOR VALOR' : 'RECOMENDADO'}
               </span>
             </div>
 
             <div className="text-center mb-8 mt-4">
               <h2 className="text-2xl font-bold text-white mb-2">Premium</h2>
-              <p className="text-blue-100">Acesso completo a todos os cursos</p>
+              <p className="text-brand-100">Acesso completo a todos os cursos</p>
               <div className="mt-6">
                 <span className="text-5xl font-bold text-white">
                   R$ {isYearly ? PRICE_PREMIUM_ANUAL : PRICE_PREMIUM}
                 </span>
-                <span className="text-blue-200 text-lg">
+                <span className="text-brand-200 text-lg">
                   {isYearly ? '/ano' : '/mês'}
                 </span>
               </div>
               {isYearly && (
                 <div className="mt-3 space-y-1">
-                  <p className="text-sm text-blue-300 line-through">
+                  <p className="text-sm text-brand-300 line-through">
                     R$ {(89.90 * 12).toFixed(2).replace('.', ',')}/ano no plano mensal
                   </p>
                   <span className="inline-block bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-full">
@@ -304,11 +304,11 @@ export default function PlanosPage() {
             <button
               onClick={() => handleSubscribe('premium')}
               disabled={loading !== null || isLoading}
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-4 px-6 rounded-xl transition-colors disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed shadow-lg"
+              className="w-full bg-amber-accent hover:bg-amber-accent-deep text-ink-primary font-bold py-4 px-6 rounded-[6px] transition-colors disabled:bg-border-strong disabled:text-ink-muted disabled:cursor-not-allowed"
             >
               {loading === 'premium'
                 ? (paymentMethod === 'pix' ? 'Gerando PIX...' : 'Redirecionando...')
-                : `Assinar Premium ${isYearly ? 'Anual' : ''}${paymentMethod === 'pix' ? ' com PIX' : ''}`}
+                : `Assinar Premium ${isYearly ? 'Anual' : ''}${paymentMethod === 'pix' ? 'com PIX' : ''}`}
             </button>
           </div>
         </div>
@@ -316,43 +316,43 @@ export default function PlanosPage() {
         {/* Equivalência mensal para plano anual */}
         {isYearly && (
           <div className="text-center mb-12 -mt-8">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-ink-muted">
               Plano anual equivale a{' '}
-              <span className="font-semibold text-gray-700">R$ {(499 / 12).toFixed(2).replace('.', ',')}/mês</span> (Básico) ou{' '}
-              <span className="font-semibold text-gray-700">R$ {(899 / 12).toFixed(2).replace('.', ',')}/mês</span> (Premium)
+              <span className="font-semibold text-ink-secondary">R$ {(499 / 12).toFixed(2).replace('.', ',')}/mês</span> (Básico) ou{' '}
+              <span className="font-semibold text-ink-secondary">R$ {(899 / 12).toFixed(2).replace('.', ',')}/mês</span> (Premium)
             </p>
           </div>
         )}
 
         {/* FAQ */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+        <div className="bg-white rounded-[6px] border border-border-subtle p-8 mb-8">
+          <h3 className="text-lg font-semibold text-ink-primary mb-4 text-center">
             Perguntas Frequentes
           </h3>
           <div className="grid md:grid-cols-2 gap-6 text-sm">
             <div>
-              <p className="font-medium text-gray-900 mb-1">Posso cancelar a qualquer momento?</p>
-              <p className="text-gray-600">Sim, sem multa. O acesso permanece até o fim do período pago.</p>
+              <p className="font-medium text-ink-primary mb-1">Posso cancelar a qualquer momento?</p>
+              <p className="text-ink-muted">Sim, sem multa. O acesso permanece até o fim do período pago.</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900 mb-1">Já participei de um curso presencial. O que muda?</p>
-              <p className="text-gray-600">Seu QR Code dá 1 mês de acesso gratuito. Após, assine para continuar.</p>
+              <p className="font-medium text-ink-primary mb-1">Já participei de um curso presencial. O que muda?</p>
+              <p className="text-ink-muted">Seu QR Code dá 1 mês de acesso gratuito. Após, assine para continuar.</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900 mb-1">Quais formas de pagamento?</p>
-              <p className="text-gray-600">{PIX_ENABLED ? 'Cartão de crédito e Pix Automático (débito recorrente autorizado no app do seu banco).' : 'Cartão de crédito e boleto bancário.'}</p>
+              <p className="font-medium text-ink-primary mb-1">Quais formas de pagamento?</p>
+              <p className="text-ink-muted">{PIX_ENABLED ? 'Cartão de crédito e Pix Automático (débito recorrente autorizado no app do seu banco).' : 'Cartão de crédito e boleto bancário.'}</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900 mb-1">O pagamento é seguro?</p>
-              <p className="text-gray-600">Processado pelo Stripe, plataforma líder em pagamentos no mundo, com criptografia de ponta a ponta.</p>
+              <p className="font-medium text-ink-primary mb-1">O pagamento é seguro?</p>
+              <p className="text-ink-muted">Processado pelo Stripe, plataforma líder em pagamentos no mundo, com criptografia de ponta a ponta.</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900 mb-1">Qual a vantagem do plano anual?</p>
-              <p className="text-gray-600">Você paga o equivalente a 10 meses e ganha 2 meses grátis de acesso.</p>
+              <p className="font-medium text-ink-primary mb-1">Qual a vantagem do plano anual?</p>
+              <p className="text-ink-muted">Você paga o equivalente a 10 meses e ganha 2 meses grátis de acesso.</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900 mb-1">Posso trocar de plano?</p>
-              <p className="text-gray-600">Sim. Cancele o plano atual e assine o novo. O acesso anterior permanece até o fim do período.</p>
+              <p className="font-medium text-ink-primary mb-1">Posso trocar de plano?</p>
+              <p className="text-ink-muted">Sim. Cancele o plano atual e assine o novo. O acesso anterior permanece até o fim do período.</p>
             </div>
           </div>
         </div>
@@ -360,11 +360,11 @@ export default function PlanosPage() {
         {/* Login / Voltar */}
         <div className="text-center space-y-3">
           {!user && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-ink-muted">
               Já tem conta?{' '}
               <Link
                 href="/login?returnTo=/planos"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-brand-600 hover:text-brand-700 font-medium"
               >
                 Fazer login
               </Link>
@@ -372,7 +372,7 @@ export default function PlanosPage() {
           )}
           <Link
             href="/"
-            className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="text-brand-600 hover:text-brand-700 font-medium transition-colors"
           >
             Voltar ao site
           </Link>

@@ -55,16 +55,16 @@ export function LeiSidebar({
           <div key={tk} className="mb-2">
             <button
               onClick={() => onToggleTitulo(tk)}
-              className="w-full flex items-center gap-2 p-3 hover:bg-blue-50 rounded-lg transition-colors text-left"
+              className="w-full flex items-center gap-2 p-3 hover:bg-brand-50 rounded-[6px] transition-colors text-left"
             >
               {open ? (
-                <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <ChevronDown className="w-5 h-5 text-brand-600 flex-shrink-0" />
               ) : (
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-ink-muted flex-shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 truncate">{td.titulo}</p>
-                <p className="text-xs text-gray-500">
+                <p className="font-semibold text-ink-primary truncate">{td.titulo}</p>
+                <p className="text-xs text-ink-muted">
                   {Object.values(td.capitulos).reduce((sum, c) => sum + c.artigos.length, 0)} artigos
                 </p>
               </div>
@@ -79,16 +79,16 @@ export function LeiSidebar({
                     <div key={ck}>
                       <button
                         onClick={() => onToggleCapitulo(tk, ck)}
-                        className="w-full flex items-center gap-2 p-2 hover:bg-indigo-50 rounded-lg transition-colors text-left"
+                        className="w-full flex items-center gap-2 p-2 hover:bg-brand-50 rounded-[6px] transition-colors text-left"
                       >
                         {cOpen ? (
-                          <ChevronDown className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                          <ChevronDown className="w-4 h-4 text-brand-600 flex-shrink-0" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-ink-muted flex-shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{cd.capituloCompleto}</p>
-                          <p className="text-xs text-gray-500">{cd.artigos.length} artigos</p>
+                          <p className="text-sm font-medium text-ink-secondary truncate">{cd.capituloCompleto}</p>
+                          <p className="text-xs text-ink-muted">{cd.artigos.length} artigos</p>
                         </div>
                       </button>
 
@@ -103,19 +103,19 @@ export function LeiSidebar({
                                   if (articleRefs?.current) articleRefs.current[art.numero] = el;
                                 }}
                                 onClick={() => onSelectArticle(art)}
-                                className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors text-left ${
-                                  sel ? 'bg-blue-100 border-2 border-blue-500' : 'hover:bg-gray-100'
+                                className={`w-full flex items-center gap-2 p-2 rounded-[6px] transition-colors text-left ${
+                                  sel ? 'bg-brand-100 border-2 border-brand-500' : 'hover:bg-surface-deep'
                                 }`}
                               >
                                 <span
                                   className={`px-2 py-1 rounded text-xs font-bold ${
-                                    sel ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                                    sel ? 'bg-brand-600 text-white' : 'bg-surface-deep text-ink-secondary'
                                   }`}
                                 >
                                   Art. {art.numero}
                                 </span>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-xs text-gray-700 truncate">
+                                  <p className="text-xs text-ink-secondary truncate">
                                     {art.ementa.substring(0, 40)}…
                                   </p>
                                 </div>

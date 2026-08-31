@@ -60,26 +60,26 @@ export function KnowledgeBaseSection({ documents, onSelectCategory, tribunalDeci
             <button
               key={cat.category}
               onClick={() => onSelectCategory(cat.category)}
-              className="bg-white border border-gray-200 rounded-xl p-4 text-left hover:border-brand-300 hover:shadow-sm transition-all"
+              className="bg-white border border-border-subtle rounded-[6px] p-4 text-left hover:border-brand-300 hover: transition-all"
             >
               <div className="w-9 h-9 bg-brand-100 rounded-full flex items-center justify-center mb-2">
                 <Icon className="w-4 h-4 text-brand-600" />
               </div>
-              <p className="text-sm font-semibold text-gray-800">{cat.label}</p>
-              <p className="text-xs text-gray-500">{cat.count} {cat.count === 1 ? 'documento' : 'documentos'}</p>
+              <p className="text-sm font-semibold text-ink-secondary">{cat.label}</p>
+              <p className="text-xs text-ink-muted">{cat.count} {cat.count === 1 ? 'documento' : 'documentos'}</p>
             </button>
           );
         })}
         {tribunalDecisionCount != null && tribunalDecisionCount > 0 && (
           <Link
             href="/jurisprudencia"
-            className="bg-white border border-gray-200 rounded-xl p-4 text-left hover:border-brand-300 hover:shadow-sm transition-all"
+            className="bg-white border border-border-subtle rounded-[6px] p-4 text-left hover:border-brand-300 hover: transition-all"
           >
             <div className="w-9 h-9 bg-brand-100 rounded-full flex items-center justify-center mb-2">
               <Landmark className="w-4 h-4 text-brand-600" />
             </div>
-            <p className="text-sm font-semibold text-gray-800">TCEs Estaduais</p>
-            <p className="text-xs text-gray-500">{tribunalDecisionCount} {tribunalDecisionCount === 1 ? 'decisão' : 'decisões'}</p>
+            <p className="text-sm font-semibold text-ink-secondary">TCEs Estaduais</p>
+            <p className="text-xs text-ink-muted">{tribunalDecisionCount} {tribunalDecisionCount === 1 ? 'decisão' : 'decisões'}</p>
           </Link>
         )}
       </div>

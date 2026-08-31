@@ -130,12 +130,12 @@ export function GlossaryPanel({ articleBasePath = '/area-restrita/artigo' }: Glo
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <span className="ml-2 text-gray-600">Carregando glossário...</span>
+          <span className="ml-2 text-ink-muted">Carregando glossário...</span>
         </div>
       ) : filteredTerms.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl border-2 border-gray-200">
-          <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600">
+        <div className="text-center py-12 bg-white rounded-[6px] border-2 border-border-subtle">
+          <BookOpen className="h-12 w-12 text-ink-muted mx-auto mb-3" />
+          <p className="text-ink-muted">
             {searchQuery
               ? `Nenhum termo encontrado para "${searchQuery}"`
               : 'Nenhum termo para os filtros selecionados'}
@@ -143,14 +143,14 @@ export function GlossaryPanel({ articleBasePath = '/area-restrita/artigo' }: Glo
         </div>
       ) : (
         <>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-ink-muted">
             {filteredTerms.length} {filteredTerms.length === 1 ? 'termo' : 'termos'}
             {searchQuery && ` para "${searchQuery}"`}
             {activeLetter && ` — letra "${activeLetter}"`}
             {activeCategory && ` — ${activeCategory}`}
           </div>
 
-          <div className="bg-white rounded-2xl border-2 border-gray-200 divide-y divide-gray-200 overflow-hidden">
+          <div className="bg-white rounded-[6px] border-2 border-border-subtle divide-y divide-border-subtle overflow-hidden">
             {filteredTerms.map((term) => (
               <div key={term.id} id={`glossary-term-${term.id}`}>
                 <GlossaryTermCard

@@ -24,9 +24,9 @@ export default function GlobalError({
 
   return (
     <html lang="pt-BR">
-      <body className="bg-gray-50">
+      <body className="bg-surface-raised">
         <div className="min-h-screen flex items-center justify-center px-4 py-8">
-          <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="max-w-md w-full bg-white rounded-[6px] p-8 text-center border border-border-subtle">
             {/* Error Icon */}
             <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
               <svg
@@ -45,18 +45,18 @@ export default function GlobalError({
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-ink-primary mb-2">
               Algo deu errado
             </h1>
 
             {/* Description */}
-            <p className="text-gray-600 mb-6">
+            <p className="text-ink-muted mb-6">
               Ocorreu um erro inesperado. Nossa equipe foi notificada e está trabalhando para resolver o problema.
             </p>
 
             {/* Error ID (for support) */}
             {error.digest && (
-              <p className="text-xs text-gray-400 mb-6">
+              <p className="text-xs text-ink-muted mb-6">
                 ID do erro: {error.digest}
               </p>
             )}
@@ -65,25 +65,25 @@ export default function GlobalError({
             <div className="flex flex-col gap-3">
               <button
                 onClick={reset}
-                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="w-full bg-brand-600 text-white px-6 py-3 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors"
               >
                 Tentar novamente
               </button>
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error cannot use <Link> as the app root may be broken */}
               <a
                 href="/"
-                className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors inline-block"
+                className="w-full bg-surface-deep text-ink-secondary px-6 py-3 rounded-[6px] font-semibold hover:bg-surface-deep transition-colors inline-block"
               >
                 Voltar para o início
               </a>
             </div>
 
             {/* Help */}
-            <p className="mt-6 text-sm text-gray-500">
+            <p className="mt-6 text-sm text-ink-muted">
               Precisa de ajuda?{' '}
               <a
                 href="mailto:suporte@profdanielbarral.com"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-brand-600 hover:text-brand-700 font-medium"
               >
                 Entre em contato
               </a>

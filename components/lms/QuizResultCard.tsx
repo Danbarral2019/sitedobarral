@@ -35,10 +35,10 @@ export default function QuizResultCard({ attempt, passingScore, index }: QuizRes
   });
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-[6px] border ${
       attempt.passed
         ? 'bg-green-50/50 border-green-100'
-        : 'bg-gray-50 border-gray-100'
+        : 'bg-surface-raised border-border-subtle'
     }`}>
       {attempt.passed ? (
         <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -47,7 +47,7 @@ export default function QuizResultCard({ attempt, passingScore, index }: QuizRes
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-800">
+          <span className="text-sm font-medium text-ink-secondary">
             Tentativa {index}
           </span>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -57,9 +57,9 @@ export default function QuizResultCard({ attempt, passingScore, index }: QuizRes
           }`}>
             {Math.round(attempt.score)}%
           </span>
-          <span className="text-xs text-gray-400">(min: {passingScore}%)</span>
+          <span className="text-xs text-ink-muted">(min: {passingScore}%)</span>
         </div>
-        <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+        <div className="flex items-center gap-3 mt-0.5 text-xs text-ink-muted">
           <span>{dateStr}</span>
           <span>{attempt.totalPoints}/{attempt.maxPoints} pts</span>
           {attempt.timeSpentSeconds != null && (

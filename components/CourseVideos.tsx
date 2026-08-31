@@ -54,13 +54,13 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
 
   return (
     <>
-      <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl shadow-lg p-8 border-2 border-red-200 mt-6">
+      <div className="bg-red-50 rounded-[6px] p-8 border-2 border-red-200 mt-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-ink-primary mb-2 flex items-center gap-2">
             <Youtube className="w-7 h-7 text-red-600" />
             Vídeos do Curso
           </h2>
-          <p className="text-gray-700">
+          <p className="text-ink-secondary">
             Conteúdo audiovisual complementar para aprofundar seus conhecimentos
           </p>
         </div>
@@ -72,10 +72,10 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
               <button
                 key={video.id}
                 onClick={() => handleVideoClick(video)}
-                className="group relative overflow-hidden rounded-xl border-2 border-gray-300 hover:border-red-400 hover:shadow-lg transition-all bg-white"
+                className="group relative overflow-hidden rounded-[6px] border-2 border-border-subtle hover:border-red-400 hover: transition-all bg-white"
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
+                <div className="relative aspect-video bg-brand-800 overflow-hidden">
                   <Image
                     src={getThumbnailUrl(video)}
                     alt={video.title}
@@ -86,7 +86,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                   />
                   {/* Overlay com ícone de play */}
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform border border-border-subtle">
                       <Play className="w-8 h-8 text-white fill-white ml-1" />
                     </div>
                   </div>
@@ -99,11 +99,11 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
 
                 {/* Informações */}
                 <div className="p-4 text-left">
-                  <h3 className="font-bold text-gray-900 group-hover:text-red-600 transition-colors line-clamp-2 mb-2">
+                  <h3 className="font-bold text-ink-primary group-hover:text-red-600 transition-colors line-clamp-2 mb-2">
                     {video.title}
                   </h3>
                   {video.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2">
+                    <p className="text-sm text-ink-muted line-clamp-2">
                       {video.description}
                     </p>
                   )}
@@ -119,7 +119,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
             {videos.map((video) => (
               <div
                 key={video.id}
-                className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden hover: transition-shadow"
               >
                 {/* Player */}
                 <div className="relative aspect-video bg-black">
@@ -137,9 +137,9 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                 </div>
 
                 {/* Informações abaixo do player */}
-                <div className="p-4 border-t-2 border-gray-200">
+                <div className="p-4 border-t-2 border-border-subtle">
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-bold text-gray-900 flex-1">
+                    <h3 className="font-bold text-ink-primary flex-1">
                       {video.title}
                     </h3>
                     {video.storageType !== 'r2' && video.youtubeUrl && (
@@ -155,7 +155,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                     )}
                   </div>
                   {video.description && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-ink-muted">
                       {video.description}
                     </p>
                   )}
@@ -166,7 +166,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
         )}
 
         {/* Info */}
-        <div className="mt-6 p-4 bg-red-100 border border-red-300 rounded-lg">
+        <div className="mt-6 p-4 bg-red-100 border border-red-300 rounded-[6px]">
           <p className="text-sm text-red-900 font-medium">
             🎥 <strong>Nota:</strong> {displayMode === 'thumbnails' ? 'Clique em qualquer vídeo para assistir em tela cheia.' : 'Os vídeos são carregados diretamente do YouTube.'}
           </p>
@@ -176,22 +176,22 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
       {/* Modal para Vídeo (usado no modo thumbnails) */}
       {isModalOpen && selectedVideo && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
           onClick={handleCloseModal}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-[6px] max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-border-subtle"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header do Modal */}
-            <div className="sticky top-0 bg-gradient-to-r from-red-600 to-pink-600 text-white p-4 rounded-t-2xl flex items-center justify-between">
+            <div className="sticky top-0 bg-red-600 text-white p-4 rounded-t-[6px] flex items-center justify-between">
               <div className="flex items-center gap-3 flex-1">
                 <Youtube className="w-6 h-6" />
                 <h2 className="text-xl font-bold">{selectedVideo.title}</h2>
               </div>
               <button
                 onClick={handleCloseModal}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/20 rounded-[6px] transition-colors"
                 aria-label="Fechar"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,8 +219,8 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
             <div className="p-6">
               {selectedVideo.description && (
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Descrição</h3>
-                  <p className="text-gray-700 leading-relaxed">{selectedVideo.description}</p>
+                  <h3 className="text-lg font-bold text-ink-primary mb-2">Descrição</h3>
+                  <p className="text-ink-secondary leading-relaxed">{selectedVideo.description}</p>
                 </div>
               )}
 
@@ -230,7 +230,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                     href={selectedVideo.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-red-600 text-white px-6 py-3 rounded-[6px] font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                   >
                     <ExternalLink className="w-5 h-5" />
                     Abrir no YouTube
@@ -238,7 +238,7 @@ export default function CourseVideos({ videos, displayMode = 'thumbnails' }: Cou
                 )}
                 <button
                   onClick={handleCloseModal}
-                  className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 transition-colors"
+                  className="px-6 py-3 bg-surface-deep text-ink-secondary rounded-[6px] font-bold hover:bg-border-strong transition-colors"
                 >
                   Fechar
                 </button>

@@ -87,18 +87,18 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       const isDevelopment = process.env.NODE_ENV === 'development';
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+        <div className="min-h-screen flex items-center justify-center bg-surface-raised px-4 py-8">
           <div className="max-w-2xl w-full">
-            <div className="bg-white rounded-2xl shadow-xl border-2 border-red-200 p-8">
+            <div className="bg-white rounded-[6px] border-2 border-red-200 p-8">
               {/* Icon & Title */}
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-4">
                   <AlertTriangle className="w-10 h-10 text-red-600" />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-bold text-ink-primary mb-2">
                   Ops! Algo deu errado
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-ink-muted">
                   Ocorreu um erro inesperado. Nossa equipe foi notificada.
                 </p>
               </div>
@@ -106,8 +106,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               {/* Error details (apenas em desenvolvimento) */}
               {isDevelopment && this.state.error && (
                 <div className="mb-6">
-                  <details className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <summary className="cursor-pointer font-semibold text-gray-700 hover:text-gray-900">
+                  <details className="bg-surface-raised rounded-[6px] p-4 border border-border-subtle">
+                    <summary className="cursor-pointer font-semibold text-ink-secondary hover:text-ink-primary">
                       Detalhes do Erro (Dev)
                     </summary>
                     <div className="mt-4 space-y-2">
@@ -115,24 +115,24 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                         <p className="text-sm font-semibold text-red-600">
                           {this.state.error.name}
                         </p>
-                        <p className="text-sm text-gray-700 mt-1">
+                        <p className="text-sm text-ink-secondary mt-1">
                           {this.state.error.message}
                         </p>
                       </div>
                       {this.state.error.stack && (
                         <div>
-                          <p className="text-xs font-semibold text-gray-600 mb-1">Stack Trace:</p>
-                          <pre className="text-xs bg-gray-900 text-gray-100 p-3 rounded overflow-x-auto">
+                          <p className="text-xs font-semibold text-ink-muted mb-1">Stack Trace:</p>
+                          <pre className="text-xs bg-brand-900 text-ink-muted p-3 rounded overflow-x-auto">
                             {this.state.error.stack}
                           </pre>
                         </div>
                       )}
                       {this.state.errorInfo?.componentStack && (
                         <div>
-                          <p className="text-xs font-semibold text-gray-600 mb-1">
+                          <p className="text-xs font-semibold text-ink-muted mb-1">
                             Component Stack:
                           </p>
-                          <pre className="text-xs bg-gray-900 text-gray-100 p-3 rounded overflow-x-auto">
+                          <pre className="text-xs bg-brand-900 text-ink-muted p-3 rounded overflow-x-auto">
                             {this.state.errorInfo.componentStack}
                           </pre>
                         </div>
@@ -146,21 +146,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleReset}
-                  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors"
                 >
                   <RefreshCw className="w-5 h-5" />
                   Tentar Novamente
                 </button>
                 <button
                   onClick={this.handleReload}
-                  className="flex items-center justify-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-center gap-2 bg-brand-800 text-white px-6 py-3 rounded-[6px] font-semibold hover:bg-brand-800 transition-colors"
                 >
                   <RefreshCw className="w-5 h-5" />
                   Recarregar Página
                 </button>
                 <button
                   onClick={this.handleGoHome}
-                  className="flex items-center justify-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border-2 border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center gap-2 bg-white text-ink-secondary px-6 py-3 rounded-[6px] font-semibold border-2 border-border-subtle hover:bg-surface-raised transition-colors"
                 >
                   <Home className="w-5 h-5" />
                   Ir para Início
@@ -169,11 +169,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
               {/* Help text */}
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-ink-muted">
                   Se o problema persistir, entre em contato com o suporte em{' '}
                   <a
                     href="mailto:suporte@profdanielbarral.com"
-                    className="text-blue-600 hover:text-blue-700 font-semibold"
+                    className="text-brand-600 hover:text-brand-700 font-semibold"
                   >
                     suporte@profdanielbarral.com
                   </a>
@@ -202,7 +202,7 @@ export function SectionErrorBoundary({
   return (
     <ErrorBoundary
       fallback={
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 text-center">
+        <div className="bg-red-50 border-2 border-red-200 rounded-[6px] p-6 text-center">
           <AlertTriangle className="w-8 h-8 text-red-600 mx-auto mb-2" />
           <p className="text-red-800 font-semibold">{title}</p>
           <button

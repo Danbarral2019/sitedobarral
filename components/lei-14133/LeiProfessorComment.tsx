@@ -8,9 +8,9 @@ interface LeiProfessorCommentProps {
 
 export function LeiProfessorComment({ comment }: LeiProfessorCommentProps) {
   return (
-    <div className="bg-amber-50/40 border-2 border-amber-200 rounded-lg shadow-sm p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-        <span className="text-amber-500">✦</span> Comentário do Prof. Daniel Barral
+    <div className="bg-amber-accent-soft/40 border-2 border-amber-accent-soft rounded-[6px] p-6">
+      <h3 className="text-lg font-bold text-ink-primary mb-3 flex items-center gap-2">
+        <span className="text-amber-accent-deep">✦</span> Comentário do Prof. Daniel Barral
       </h3>
       <div className="prose prose-sm max-w-none">
         <MarkdownContent content={comment} />

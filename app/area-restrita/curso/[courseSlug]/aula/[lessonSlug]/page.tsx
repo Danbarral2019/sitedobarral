@@ -23,15 +23,15 @@ import MarkCompleteButton from '@/components/lms/MarkCompleteButton';
 import CourseSuspensionBanner from '@/components/lms/CourseSuspensionBanner';
 
 const LessonAIAssistant = dynamic(() => import('@/components/lms/LessonAIAssistant'), {
-  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-brand-500" /></div>,
 });
 
 const QuizPlayer = dynamic(() => import('@/components/lms/QuizPlayer'), {
-  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-brand-500" /></div>,
 });
 
 const GamificationSidebar = dynamic(() => import('@/components/lms/GamificationSidebar'), {
-  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>,
+  loading: () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-brand-500" /></div>,
 });
 
 interface LessonData {
@@ -241,10 +241,10 @@ export default function LessonPage({
   // Loading
   if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <main className="min-h-screen flex items-center justify-center bg-surface-raised">
         <div className="text-center">
           <Loader2 className="w-10 h-10 animate-spin text-brand-600 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Carregando aula...</p>
+          <p className="text-ink-muted text-sm">Carregando aula...</p>
         </div>
       </main>
     );
@@ -253,9 +253,9 @@ export default function LessonPage({
   // Error
   if (error) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <main className="min-h-screen flex items-center justify-center bg-surface-raised">
         <div className="text-center max-w-md px-4">
-          <p className="text-gray-700 font-medium mb-4">{error}</p>
+          <p className="text-ink-secondary font-medium mb-4">{error}</p>
           <Link
             href="/area-restrita"
             className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-700 font-semibold text-sm"
@@ -290,29 +290,29 @@ export default function LessonPage({
   const courseTitle = course?.title || 'Curso';
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <header className="bg-white border-b border-border-subtle sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/area-restrita"
-              className="p-2 rounded-lg text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+              className="p-2 rounded-[6px] text-ink-muted hover:text-brand-600 hover:bg-brand-50 transition-colors"
               title="Voltar"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="hidden sm:block min-w-0">
-              <p className="text-xs text-gray-400 truncate">{course?.title.split('(')[0].trim()}</p>
-              <p className="text-sm font-bold text-gray-900 truncate">{lesson.title}</p>
+              <p className="text-xs text-ink-muted truncate">{course?.title.split('(')[0].trim()}</p>
+              <p className="text-sm font-bold text-ink-primary truncate">{lesson.title}</p>
             </div>
-            <p className="sm:hidden text-sm font-bold text-gray-900 truncate max-w-[200px]">
+            <p className="sm:hidden text-sm font-bold text-ink-primary truncate max-w-[200px]">
               {lesson.title}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {lesson.estimatedMinutes && (
-              <span className="hidden sm:flex items-center gap-1 text-xs text-gray-400">
+              <span className="hidden sm:flex items-center gap-1 text-xs text-ink-muted">
                 <Clock className="w-3.5 h-3.5" />
                 {lesson.estimatedMinutes} min
               </span>
@@ -325,7 +325,7 @@ export default function LessonPage({
             {/* Mobile sidebar toggle */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 rounded-[6px] text-ink-muted hover:bg-surface-deep transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -351,12 +351,12 @@ export default function LessonPage({
         {sidebarOpen && (
           <div className="lg:hidden fixed inset-0 z-40">
             <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
-            <div className="absolute left-0 top-0 bottom-0 w-[300px] bg-white shadow-xl overflow-y-auto">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                <h3 className="font-bold text-sm text-gray-900">Navegacao</h3>
+            <div className="absolute left-0 top-0 bottom-0 w-[300px] bg-white overflow-y-auto border border-border-subtle">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
+                <h3 className="font-bold text-sm text-ink-primary">Navegacao</h3>
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-gray-100"
+                  className="p-1.5 rounded-[6px] hover:bg-surface-deep"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -380,16 +380,16 @@ export default function LessonPage({
             <p className="text-xs text-brand-600 font-semibold mb-1">
               {lesson.module.title}
             </p>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-2xl lg:text-3xl font-bold text-ink-primary leading-tight">
               {lesson.title}
             </h1>
             {lesson.description && (
-              <p className="text-sm text-gray-500 mt-2 leading-relaxed">{lesson.description}</p>
+              <p className="text-sm text-ink-muted mt-2 leading-relaxed">{lesson.description}</p>
             )}
             {lesson.estimatedMinutes && (
               <div className="flex items-center gap-1.5 mt-3">
-                <Clock className="w-4 h-4 text-gray-400" />
-                <span className="text-xs text-gray-400">
+                <Clock className="w-4 h-4 text-ink-muted" />
+                <span className="text-xs text-ink-muted">
                   Tempo estimado: {lesson.estimatedMinutes} minutos
                 </span>
               </div>
@@ -407,7 +407,7 @@ export default function LessonPage({
 
           {/* Content */}
           {lesson.content && !courseStatus?.isSuspended && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 lg:p-8 mb-6">
+            <div className="bg-white rounded-[6px] border border-border-subtle p-6 lg:p-8 mb-6">
               <LessonContent
                 content={lesson.content}
                 aiSummary={lesson.aiSummary}
@@ -418,14 +418,14 @@ export default function LessonPage({
 
           {/* Videos */}
           {lesson.videos.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-[6px] border border-border-subtle p-6 mb-6">
               <LessonVideos videos={lesson.videos} />
             </div>
           )}
 
           {/* Documents */}
           {lesson.documents.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-[6px] border border-border-subtle p-6 mb-6">
               <LessonDocuments documents={lesson.documents} />
             </div>
           )}
@@ -454,12 +454,12 @@ export default function LessonPage({
               {navigation.prev ? (
                 <Link
                   href={`/area-restrita/curso/${courseSlug}/aula/${navigation.prev.slug}`}
-                  className="flex-1 flex items-center gap-3 bg-white border border-gray-200 rounded-2xl p-4 hover:border-brand-300 hover:shadow-sm transition-all group"
+                  className="flex-1 flex items-center gap-3 bg-white border border-border-subtle rounded-[6px] p-4 hover:border-brand-300 hover: transition-all group"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-300 group-hover:text-brand-500 flex-shrink-0" />
+                  <ChevronLeft className="w-5 h-5 text-ink-muted group-hover:text-brand-500 flex-shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold">Anterior</p>
-                    <p className="text-sm font-semibold text-gray-700 line-clamp-1 group-hover:text-brand-600">
+                    <p className="text-[10px] text-ink-muted uppercase font-bold">Anterior</p>
+                    <p className="text-sm font-semibold text-ink-secondary line-clamp-1 group-hover:text-brand-600">
                       {navigation.prev.title}
                     </p>
                   </div>
@@ -470,15 +470,15 @@ export default function LessonPage({
               {navigation.next ? (
                 <button
                   onClick={() => handleNavigateNext(navigation.next!.slug)}
-                  className="flex-1 flex items-center justify-end gap-3 bg-white border border-gray-200 rounded-2xl p-4 hover:border-brand-300 hover:shadow-sm transition-all group text-right cursor-pointer"
+                  className="flex-1 flex items-center justify-end gap-3 bg-white border border-border-subtle rounded-[6px] p-4 hover:border-brand-300 hover: transition-all group text-right cursor-pointer"
                 >
                   <div className="min-w-0">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold">Proxima</p>
-                    <p className="text-sm font-semibold text-gray-700 line-clamp-1 group-hover:text-brand-600">
+                    <p className="text-[10px] text-ink-muted uppercase font-bold">Proxima</p>
+                    <p className="text-sm font-semibold text-ink-secondary line-clamp-1 group-hover:text-brand-600">
                       {navigation.next.title}
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-brand-500 flex-shrink-0" />
+                  <ChevronRight className="w-5 h-5 text-ink-muted group-hover:text-brand-500 flex-shrink-0" />
                 </button>
               ) : (
                 <div className="flex-1" />

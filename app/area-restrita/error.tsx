@@ -15,7 +15,7 @@ export default function AreaRestritaError({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface-raised px-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -34,16 +34,16 @@ export default function AreaRestritaError({
             </svg>
           </div>
 
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-2xl font-semibold text-ink-primary mb-2">
             Erro na Área Restrita
           </h2>
-          <p className="text-gray-600">
+          <p className="text-ink-muted">
             Não foi possível carregar o conteúdo. Verifique sua conexão e tente novamente.
           </p>
         </div>
 
         {process.env.NODE_ENV === 'development' && error.message && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-[6px] text-left">
             <p className="text-xs font-mono text-red-800 break-words">
               {error.message}
             </p>
@@ -53,21 +53,21 @@ export default function AreaRestritaError({
         <div className="space-y-3">
           <button
             onClick={reset}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="w-full bg-brand-600 text-white px-6 py-3 rounded-[6px] font-medium hover:bg-brand-700 transition-colors"
           >
             Tentar novamente
           </button>
 
           <Link
             href="/area-restrita"
-            className="block w-full bg-gray-200 text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+            className="block w-full bg-surface-deep text-ink-primary px-6 py-3 rounded-[6px] font-medium hover:bg-border-strong transition-colors"
           >
             Voltar para área restrita
           </Link>
 
           <Link
             href="/"
-            className="block text-sm text-gray-600 hover:text-gray-900 mt-4"
+            className="block text-sm text-ink-muted hover:text-ink-primary mt-4"
           >
             Ir para página inicial
           </Link>

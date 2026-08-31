@@ -232,7 +232,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 py-8 justify-center text-gray-400">
+      <div className="flex items-center gap-2 py-8 justify-center text-ink-muted">
         <Loader2 className="w-5 h-5 animate-spin" />
         <span className="text-sm">Carregando questionario...</span>
       </div>
@@ -249,15 +249,15 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
   // ── PRE-START / RESULT SUMMARY ──
   if (!isStarted || results) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+      <div className="bg-white rounded-[6px] border border-border-subtle p-6">
         <div className="flex items-center gap-2 mb-4">
-          <ClipboardCheck className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-bold text-gray-900">{quiz.title}</h3>
+          <ClipboardCheck className="w-5 h-5 text-brand-600" />
+          <h3 className="text-lg font-bold text-ink-primary">{quiz.title}</h3>
         </div>
 
         {/* Result summary if just submitted */}
         {submittedScore && results && (
-          <div className={`rounded-xl p-5 mb-6 ${
+          <div className={`rounded-[6px] p-5 mb-6 ${
             submittedScore.passed
               ? 'bg-green-50 border border-green-200'
               : 'bg-red-50 border border-red-200'
@@ -272,12 +272,12 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
                 <p className={`font-bold text-lg ${submittedScore.passed ? 'text-green-700' : 'text-red-700'}`}>
                   {submittedScore.passed ? 'Aprovado!' : 'Nao aprovado'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-ink-muted">
                   Nota: {Math.round(submittedScore.score)}% (minimo: {quiz.passingScore}%)
                 </p>
               </div>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-ink-muted">
               {submittedScore.totalPoints}/{submittedScore.maxPoints} pontos  ·  Tempo: {formatTime(elapsedSeconds)}
             </p>
 
@@ -286,14 +286,14 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
               {questions.map((q, idx) => {
                 const result = results.find(r => r.questionId === q.id);
                 return (
-                  <div key={q.id} className="bg-white rounded-lg p-4 border border-gray-100">
+                  <div key={q.id} className="bg-white rounded-[6px] p-4 border border-border-subtle">
                     <div className="flex items-start gap-2 mb-2">
                       {result?.correct ? (
                         <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                       ) : (
                         <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                       )}
-                      <p className="text-sm font-medium text-gray-800">
+                      <p className="text-sm font-medium text-ink-secondary">
                         {idx + 1}. {q.text}
                       </p>
                     </div>
@@ -308,7 +308,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
                               ? 'bg-green-50 text-green-700 font-medium'
                               : isSelected
                                 ? 'bg-red-50 text-red-700'
-                                : 'text-gray-500'
+                                : 'text-ink-muted'
                           }`}
                         >
                           {opt.text}
@@ -318,7 +318,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
                       );
                     })}
                     {result?.explanation && (
-                      <p className="ml-6 mt-2 text-xs text-gray-500 italic">
+                      <p className="ml-6 mt-2 text-xs text-ink-muted italic">
                         {result.explanation}
                       </p>
                     )}
@@ -333,9 +333,9 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
         {!submittedScore && (
           <div className="space-y-3 mb-6">
             {quiz.description && (
-              <p className="text-sm text-gray-600">{quiz.description}</p>
+              <p className="text-sm text-ink-muted">{quiz.description}</p>
             )}
-            <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+            <div className="flex flex-wrap gap-3 text-sm text-ink-muted">
               <span className="flex items-center gap-1">
                 <ClipboardCheck className="w-4 h-4" />
                 {quiz.questionCount} {quiz.questionCount === 1 ? 'pergunta' : 'perguntas'}
@@ -352,7 +352,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
               )}
             </div>
             {hasPassed && (
-              <div className="flex items-center gap-2 text-green-600 bg-green-50 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 rounded-[6px] px-3 py-2">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">Voce ja foi aprovado neste questionario</span>
               </div>
@@ -365,7 +365,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
           {canRetry && (
             <button
               onClick={handleStart}
-              className="inline-flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-brand-600 text-white px-5 py-2.5 rounded-[6px] font-medium text-sm hover:bg-brand-700 transition-colors"
             >
               {submittedScore || pastAttempts.length > 0 ? (
                 <>
@@ -378,7 +378,7 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
             </button>
           )}
           {!canRetry && !hasPassed && (
-            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 rounded-lg px-3 py-2 text-sm">
+            <div className="flex items-center gap-2 text-ink-primary bg-amber-accent-soft rounded-[6px] px-3 py-2 text-sm">
               <AlertTriangle className="w-4 h-4" />
               Tentativas esgotadas
             </div>
@@ -387,8 +387,8 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
 
         {/* Past attempts */}
         {pastAttempts.length > 0 && !submittedScore && (
-          <div className="mt-6 border-t border-gray-100 pt-4">
-            <h4 className="text-sm font-bold text-gray-700 mb-3">Tentativas anteriores</h4>
+          <div className="mt-6 border-t border-border-subtle pt-4">
+            <h4 className="text-sm font-bold text-ink-secondary mb-3">Tentativas anteriores</h4>
             <div className="space-y-2">
               {pastAttempts.map((attempt, idx) => (
                 <QuizResultCard
@@ -407,20 +407,20 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
 
   // ── QUIZ IN PROGRESS ──
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6">
+    <div className="bg-white rounded-[6px] border border-border-subtle p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <ClipboardCheck className="w-5 h-5 text-purple-600" />
-          <h3 className="text-lg font-bold text-gray-900">{quiz.title}</h3>
+          <ClipboardCheck className="w-5 h-5 text-brand-600" />
+          <h3 className="text-lg font-bold text-ink-primary">{quiz.title}</h3>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-gray-500">
+          <span className="text-ink-muted">
             {answeredCount}/{questions.length}
           </span>
           {timeRemaining !== null && (
             <span className={`flex items-center gap-1 font-mono font-bold ${
-              timeRemaining < 60 ? 'text-red-600' : 'text-gray-600'
+              timeRemaining < 60 ? 'text-red-600' : 'text-ink-muted'
             }`}>
               <Clock className="w-4 h-4" />
               {formatTime(timeRemaining)}
@@ -430,9 +430,9 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-1.5 bg-gray-100 rounded-full mb-6">
+      <div className="w-full h-1.5 bg-surface-deep rounded-full mb-6">
         <div
-          className="h-full bg-purple-500 rounded-full transition-all duration-300"
+          className="h-full bg-brand-500 rounded-full transition-all duration-300"
           style={{ width: `${(answeredCount / questions.length) * 100}%` }}
         />
       </div>
@@ -440,12 +440,12 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
       {/* Questions */}
       <div className="space-y-6">
         {questions.map((question, idx) => (
-          <div key={question.id} className="border border-gray-100 rounded-xl p-5">
-            <p className="text-sm font-medium text-gray-800 mb-3">
-              <span className="text-purple-600 font-bold">{idx + 1}.</span>{' '}
+          <div key={question.id} className="border border-border-subtle rounded-[6px] p-5">
+            <p className="text-sm font-medium text-ink-secondary mb-3">
+              <span className="text-brand-600 font-bold">{idx + 1}.</span>{' '}
               {question.text}
               {question.points > 1 && (
-                <span className="text-xs text-gray-400 ml-2">({question.points} pts)</span>
+                <span className="text-xs text-ink-muted ml-2">({question.points} pts)</span>
               )}
             </p>
             <div className="space-y-2">
@@ -455,10 +455,10 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
                   <button
                     key={option.id}
                     onClick={() => handleSelectOption(question.id, option.id)}
-                    className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-all ${
+                    className={`w-full text-left px-4 py-3 rounded-[6px] border text-sm transition-all ${
                       isSelected
-                        ? 'border-purple-500 bg-purple-50 text-purple-700 font-medium'
-                        : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/30 text-gray-700'
+                        ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium'
+                        : 'border-border-subtle hover:border-brand-300 hover:bg-brand-50/30 text-ink-secondary'
                     }`}
                   >
                     {option.text}
@@ -472,13 +472,13 @@ export default function QuizPlayer({ lessonId, onQuizPass }: QuizPlayerProps) {
 
       {/* Submit */}
       <div className="mt-6 flex items-center justify-between">
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-ink-muted">
           {allAnswered ? 'Todas respondidas' : `Faltam ${questions.length - answeredCount}`}
         </p>
         <button
           onClick={handleSubmit}
           disabled={!allAnswered || isSubmitting}
-          className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium text-sm hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 bg-brand-600 text-white px-6 py-2.5 rounded-[6px] font-medium text-sm hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>

@@ -24,17 +24,17 @@ interface EmentaParagraphProps {
 
 const VETO_MARKER_REGEX = /^\s*(?:§\s*\d+(?:º|o)?(?:-[A-Z])?\.?|[IVXLCDM]+\s*[-–—]|[a-z]\)|Parágrafo único\.?)\s*\(VETADO\)\.?\s*;?\s*$/;
 
-export function EmentaParagraph({ text, className = 'text-gray-800' }: EmentaParagraphProps) {
+export function EmentaParagraph({ text, className = 'text-ink-secondary' }: EmentaParagraphProps) {
   const trimmed = text.trim();
 
   // Caso 1: parágrafo é inteiramente um veto (marker + (VETADO) + pontuação)
   if (VETO_MARKER_REGEX.test(trimmed)) {
     return (
       <p
-        className={`${className} italic text-gray-500 flex items-center gap-1.5`}
+        className={`${className} italic text-ink-muted flex items-center gap-1.5`}
         title="Dispositivo vetado pelo Poder Executivo na sanção da Lei"
       >
-        <Ban className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" aria-hidden="true" />
+        <Ban className="w-3.5 h-3.5 text-ink-muted flex-shrink-0" aria-hidden="true" />
         {text}
       </p>
     );
@@ -47,7 +47,7 @@ export function EmentaParagraph({ text, className = 'text-gray-800' }: EmentaPar
       <p className={className}>
         {parts.map((part, i) =>
           part === '(VETADO)' ? (
-            <span key={i} className="italic text-gray-500" title="Trecho vetado">
+            <span key={i} className="italic text-ink-muted" title="Trecho vetado">
               (VETADO)
             </span>
           ) : (

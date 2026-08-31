@@ -150,30 +150,30 @@ export default function BatchClassifyPanel({
 
   const getConfidenceBadge = (confidence: number): string => {
     if (confidence >= 80) return 'bg-green-100 text-green-800';
-    if (confidence >= 60) return 'bg-yellow-100 text-yellow-800';
+    if (confidence >= 60) return 'bg-amber-accent-soft text-amber-accent-deep';
     return 'bg-red-100 text-red-800';
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-[6px] w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border border-border-subtle">
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+        <div className="p-6 bg-brand-600 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-white/20 rounded-lg">
+              <div className="p-3 bg-white/20 rounded-[6px]">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold">Classificação Automática em Lote</h2>
-                <p className="text-purple-100 mt-1">
+                <p className="text-brand-100 mt-1">
                   {selectedDocuments.size} documento(s) selecionado(s)
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/20 rounded-[6px] transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -182,12 +182,12 @@ export default function BatchClassifyPanel({
 
         {/* Configurações */}
         {classifications.length === 0 && (
-          <div className="p-6 border-b bg-gray-50">
+          <div className="p-6 border-b bg-surface-raised">
             <h3 className="font-bold text-lg mb-4">Configurações de Classificação</h3>
 
             <div className="space-y-4">
               {/* Usar IA */}
-              <label className="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:border-purple-500 transition-colors">
+              <label className="flex items-center gap-3 p-4 border-2 rounded-[6px] cursor-pointer hover:border-brand-500 transition-colors">
                 <input
                   type="checkbox"
                   checked={useAI}
@@ -196,17 +196,17 @@ export default function BatchClassifyPanel({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-purple-600" />
+                    <Brain className="w-5 h-5 text-brand-600" />
                     <span className="font-semibold">Usar Claude AI (Análise Avançada)</span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-ink-muted mt-1">
                     Usa IA para documentos com baixa confiança. Mais preciso, porém mais lento.
                   </p>
                 </div>
               </label>
 
               {/* Auto-aplicar */}
-              <label className="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer hover:border-purple-500 transition-colors">
+              <label className="flex items-center gap-3 p-4 border-2 rounded-[6px] cursor-pointer hover:border-brand-500 transition-colors">
                 <input
                   type="checkbox"
                   checked={autoApply}
@@ -215,10 +215,10 @@ export default function BatchClassifyPanel({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-600" />
+                    <Zap className="w-5 h-5 text-amber-accent-deep" />
                     <span className="font-semibold">Aplicar Automaticamente (Alta Confiança)</span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-ink-muted mt-1">
                     Aplica classificações automaticamente para confiança ≥ 70%. Requer revisão posterior.
                   </p>
                 </div>
@@ -229,7 +229,7 @@ export default function BatchClassifyPanel({
               <button
                 onClick={handleClassify}
                 disabled={isClassifying}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 font-medium"
+                className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-[6px] hover:from-brand-700 hover:to-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 font-medium"
               >
                 {isClassifying ? (
                   <>
@@ -259,27 +259,27 @@ export default function BatchClassifyPanel({
 
         {/* Estatísticas */}
         {stats && (
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+          <div className="p-6 bg-brand-50 border-b">
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">{stats.classified}</div>
-                <div className="text-sm text-gray-600 mt-1">Classificados</div>
+                <div className="text-3xl font-bold text-brand-600">{stats.classified}</div>
+                <div className="text-sm text-ink-muted mt-1">Classificados</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-600">{stats.autoApplied}</div>
-                <div className="text-sm text-gray-600 mt-1">Aplicados</div>
+                <div className="text-sm text-ink-muted mt-1">Aplicados</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600">{stats.averageConfidence}%</div>
-                <div className="text-sm text-gray-600 mt-1">Confiança Média</div>
+                <div className="text-3xl font-bold text-amber-accent-deep">{stats.averageConfidence}%</div>
+                <div className="text-sm text-ink-muted mt-1">Confiança Média</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-600">{stats.bySource.claude}</div>
-                <div className="text-sm text-gray-600 mt-1">Via IA</div>
+                <div className="text-3xl font-bold text-brand-600">{stats.bySource.claude}</div>
+                <div className="text-sm text-ink-muted mt-1">Via IA</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">{stats.bySource.basic}</div>
-                <div className="text-sm text-gray-600 mt-1">Via Regras</div>
+                <div className="text-3xl font-bold text-brand-600">{stats.bySource.basic}</div>
+                <div className="text-sm text-ink-muted mt-1">Via Regras</div>
               </div>
             </div>
           </div>
@@ -293,7 +293,7 @@ export default function BatchClassifyPanel({
               <div className="flex gap-2">
                 <button
                   onClick={selectAllHighConfidence}
-                  className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium flex items-center gap-2"
+                  className="px-4 py-2 bg-green-100 text-green-700 rounded-[6px] hover:bg-green-200 transition-colors text-sm font-medium flex items-center gap-2"
                 >
                   <TrendingUp className="w-4 h-4" />
                   Selecionar Alta Confiança (≥70%)
@@ -301,7 +301,7 @@ export default function BatchClassifyPanel({
                 <button
                   onClick={applySelectedClassifications}
                   disabled={selectedForApply.size === 0 || isClassifying}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
+                  className="px-4 py-2 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
                 >
                   <CheckCircle className="w-4 h-4" />
                   Aplicar Selecionados ({selectedForApply.size})
@@ -313,10 +313,10 @@ export default function BatchClassifyPanel({
               {classifications.map((classification) => (
                 <div
                   key={classification.documentId}
-                  className={`border-2 rounded-lg p-4 transition-all ${
+                  className={`border-2 rounded-[6px] p-4 transition-all ${
                     selectedForApply.has(classification.documentId)
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'border-brand-500 bg-brand-50'
+                      : 'border-border-subtle bg-white hover:border-border-subtle'
                   } ${classification.applied ? 'opacity-50' : ''}`}
                 >
                   <div className="flex items-start gap-4">
@@ -334,7 +334,7 @@ export default function BatchClassifyPanel({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4 mb-3">
                         <div className="flex-1">
-                          <h4 className="font-bold text-gray-900 line-clamp-2">
+                          <h4 className="font-bold text-ink-primary line-clamp-2">
                             {classification.title}
                           </h4>
                           {classification.applied && (
@@ -348,7 +348,7 @@ export default function BatchClassifyPanel({
                             {classification.suggested.confidence}%
                           </span>
                           {classification.suggested.source === 'claude' && (
-                            <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded">
+                            <span className="px-2 py-1 bg-brand-100 text-brand-800 text-xs font-medium rounded">
                               🤖 IA
                             </span>
                           )}
@@ -359,28 +359,28 @@ export default function BatchClassifyPanel({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         {/* Curso */}
                         <div>
-                          <span className="text-gray-500 font-medium">Curso:</span>
+                          <span className="text-ink-muted font-medium">Curso:</span>
                           <div className="mt-1">
                             {classification.current.courseId && (
-                              <div className="text-gray-700">
-                                <span className="text-xs text-gray-500">Atual:</span> {getCourseTitle(classification.current.courseId)}
+                              <div className="text-ink-secondary">
+                                <span className="text-xs text-ink-muted">Atual:</span> {getCourseTitle(classification.current.courseId)}
                               </div>
                             )}
-                            <div className="text-purple-700 font-medium">
-                              <span className="text-xs text-gray-500">Sugerido:</span> {getCourseTitle(classification.suggested.courseIds[0])}
+                            <div className="text-brand-700 font-medium">
+                              <span className="text-xs text-ink-muted">Sugerido:</span> {getCourseTitle(classification.suggested.courseIds[0])}
                             </div>
                           </div>
                         </div>
 
                         {/* Categoria */}
                         <div>
-                          <span className="text-gray-500 font-medium">Categoria:</span>
+                          <span className="text-ink-muted font-medium">Categoria:</span>
                           <div className="mt-1">
-                            <div className="text-gray-700">
-                              <span className="text-xs text-gray-500">Atual:</span> {classification.current.category}
+                            <div className="text-ink-secondary">
+                              <span className="text-xs text-ink-muted">Atual:</span> {classification.current.category}
                             </div>
-                            <div className="text-purple-700 font-medium">
-                              <span className="text-xs text-gray-500">Sugerido:</span> {classification.suggested.category}
+                            <div className="text-brand-700 font-medium">
+                              <span className="text-xs text-ink-muted">Sugerido:</span> {classification.suggested.category}
                             </div>
                           </div>
                         </div>
@@ -389,10 +389,10 @@ export default function BatchClassifyPanel({
                       {/* Tags */}
                       {classification.suggested.tags.length > 0 && (
                         <div className="mt-3">
-                          <span className="text-xs text-gray-500 font-medium">Tags Sugeridas:</span>
+                          <span className="text-xs text-ink-muted font-medium">Tags Sugeridas:</span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {classification.suggested.tags.map((tag, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
+                              <span key={i} className="px-2 py-0.5 bg-brand-100 text-brand-700 text-xs rounded">
                                 {tag}
                               </span>
                             ))}
@@ -402,9 +402,9 @@ export default function BatchClassifyPanel({
 
                       {/* Reasoning (Claude) */}
                       {classification.suggested.reasoning && (
-                        <div className="mt-3 p-3 bg-indigo-50 rounded-lg">
-                          <span className="text-xs text-indigo-700 font-medium">💭 Raciocínio da IA:</span>
-                          <p className="text-sm text-indigo-900 mt-1">{classification.suggested.reasoning}</p>
+                        <div className="mt-3 p-3 bg-brand-50 rounded-[6px]">
+                          <span className="text-xs text-brand-700 font-medium">💭 Raciocínio da IA:</span>
+                          <p className="text-sm text-brand-900 mt-1">{classification.suggested.reasoning}</p>
                         </div>
                       )}
                     </div>

@@ -29,11 +29,11 @@ const CATEGORY_CONFIG = {
     label: 'Orientação Normativa',
     labelShort: 'ON',
     icon: FileText,
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    textColor: 'text-blue-700',
-    badgeBg: 'bg-blue-100',
-    badgeText: 'text-blue-700',
+    bgColor: 'bg-brand-50',
+    borderColor: 'border-brand-200',
+    textColor: 'text-brand-700',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
     description: 'Orientações da AGU sobre aplicação da lei',
   },
   'decor': {
@@ -51,33 +51,33 @@ const CATEGORY_CONFIG = {
     label: 'Parecer Vinculante',
     labelShort: 'Parecer',
     icon: Scale,
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
-    textColor: 'text-purple-700',
-    badgeBg: 'bg-purple-100',
-    badgeText: 'text-purple-700',
+    bgColor: 'bg-brand-50',
+    borderColor: 'border-brand-200',
+    textColor: 'text-brand-700',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
     description: 'Pareceres vinculantes da AGU',
   },
   'acordao': {
     label: 'Acórdão TCU',
     labelShort: 'TCU',
     icon: Gavel,
-    bgColor: 'bg-amber-50',
-    borderColor: 'border-amber-200',
-    textColor: 'text-amber-700',
-    badgeBg: 'bg-amber-100',
-    badgeText: 'text-amber-700',
+    bgColor: 'bg-amber-accent-soft',
+    borderColor: 'border-amber-accent-soft',
+    textColor: 'text-amber-accent-deep',
+    badgeBg: 'bg-amber-accent-soft',
+    badgeText: 'text-amber-accent-deep',
     description: 'Jurisprudência do Tribunal de Contas da União',
   },
   'default': {
     label: 'Outro Documento',
     labelShort: 'Doc',
     icon: BookOpen,
-    bgColor: 'bg-gray-50',
-    borderColor: 'border-gray-200',
-    textColor: 'text-gray-700',
-    badgeBg: 'bg-gray-100',
-    badgeText: 'text-gray-700',
+    bgColor: 'bg-surface-raised',
+    borderColor: 'border-border-subtle',
+    textColor: 'text-ink-secondary',
+    badgeBg: 'bg-surface-deep',
+    badgeText: 'text-ink-secondary',
     description: 'Outros documentos relacionados',
   },
 } as const;
@@ -106,7 +106,7 @@ export function ArticleContentSections({ documents }: ArticleContentSectionsProp
 
   if (documents.length === 0) {
     return (
-      <div className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="text-sm text-ink-muted italic p-4 bg-surface-raised rounded-[6px] border border-border-subtle">
         Nenhum documento indexado para este artigo ainda.
       </div>
     );
@@ -115,10 +115,10 @@ export function ArticleContentSections({ documents }: ArticleContentSectionsProp
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+        <h4 className="text-sm font-bold text-ink-primary uppercase tracking-wide">
           Documentos Relacionados
         </h4>
-        <span className="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-100 rounded">
+        <span className="text-xs text-ink-muted font-medium px-2 py-1 bg-surface-deep rounded">
           {documents.length} {documents.length === 1 ? 'documento' : 'documentos'}
         </span>
       </div>
@@ -129,7 +129,7 @@ export function ArticleContentSections({ documents }: ArticleContentSectionsProp
         const categoryDocs = groupedDocuments[categoryKey];
 
         return (
-          <div key={categoryKey} className={`rounded-lg border-2 ${config.borderColor} ${config.bgColor} overflow-hidden`}>
+          <div key={categoryKey} className={`rounded-[6px] border-2 ${config.borderColor} ${config.bgColor} overflow-hidden`}>
             {/* Header da Seção */}
             <div className={`px-4 py-3 ${config.borderColor} border-b-2 bg-white/50`}>
               <div className="flex items-center justify-between">
@@ -143,13 +143,13 @@ export function ArticleContentSections({ documents }: ArticleContentSectionsProp
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-ink-muted mt-1">
                 {config.description}
               </p>
             </div>
 
             {/* Lista de Documentos */}
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-border-subtle">
               {categoryDocs.map((doc) => (
                 <Link
                   key={doc.id}
@@ -158,12 +158,12 @@ export function ArticleContentSections({ documents }: ArticleContentSectionsProp
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      <p className="text-sm text-ink-primary group-hover:text-brand-600 transition-colors line-clamp-2">
                         {doc.title}
                       </p>
                     </div>
                     {!doc.isPublic && (
-                      <span className="flex-shrink-0 text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded font-medium">
+                      <span className="flex-shrink-0 text-xs px-2 py-1 bg-amber-accent-soft text-ink-primary rounded font-medium">
                         Restrito
                       </span>
                     )}

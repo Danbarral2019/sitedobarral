@@ -114,11 +114,11 @@ function parseJsonArray(value: string | null): string[] {
 }
 
 function tribunalBadgeColor(code: string): string {
-  if (code.startsWith('TCU')) return 'bg-indigo-100 text-indigo-800';
-  if (code.startsWith('STF')) return 'bg-purple-100 text-purple-800';
-  if (code.startsWith('STJ')) return 'bg-blue-100 text-blue-800';
+  if (code.startsWith('TCU')) return 'bg-brand-100 text-brand-800';
+  if (code.startsWith('STF')) return 'bg-brand-100 text-brand-800';
+  if (code.startsWith('STJ')) return 'bg-brand-100 text-brand-800';
   if (code.startsWith('TCE')) return 'bg-emerald-100 text-emerald-800';
-  return 'bg-gray-100 text-gray-800';
+  return 'bg-surface-deep text-ink-secondary';
 }
 
 function buildQueryString(filters: Filters, page: number, pageSize = 10): string {
@@ -245,19 +245,19 @@ export default function JurisprudenciaRestritaClient() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/40">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-6 lg:py-10">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl shrink-0">
+            <div className="p-3 bg-brand-600 rounded-[6px] shrink-0">
               <Gavel className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl lg:text-3xl font-bold text-ink-primary">
                 Jurisprudência com IA
               </h1>
-              <p className="text-gray-600 mt-1 max-w-3xl">
+              <p className="text-ink-muted mt-1 max-w-3xl">
                 Pesquise decisões de TCU, STJ, STF e tribunais de contas estaduais. Use filtros para
                 refinar e peça à IA para analisar os resultados com fundamento na Lei 14.133/2021.
               </p>
@@ -268,12 +268,12 @@ export default function JurisprudenciaRestritaClient() {
         <FeedbackTipBanner />
 
         {/* Ask AI box */}
-        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+        <section className="bg-white rounded-[6px] border border-border-subtle p-6 mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            <h2 className="font-bold text-gray-900">Pergunte à IA</h2>
+            <Sparkles className="w-5 h-5 text-amber-accent-deep" />
+            <h2 className="font-bold text-ink-primary">Pergunte à IA</h2>
           </div>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-ink-muted mb-4">
             A IA responderá com base nas decisões que casam com os filtros ativos (ou em toda a base
             se nenhum filtro estiver aplicado).
           </p>
@@ -282,13 +282,13 @@ export default function JurisprudenciaRestritaClient() {
               value={aiQuery}
               onChange={e => setAiQuery(e.target.value)}
               placeholder="Ex: Qual o entendimento atual sobre sanções por descumprimento de prazos contratuais?"
-              className="flex-1 min-h-[80px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none"
+              className="flex-1 min-h-[80px] rounded-[6px] border border-border-subtle px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none"
               disabled={loadingAi}
             />
             <button
               onClick={askAI}
               disabled={loadingAi || aiQuery.trim().length < 3}
-              className="sm:self-start inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="sm:self-start inline-flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 text-white font-medium rounded-[6px] hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               {loadingAi ? (
                 <>
@@ -307,10 +307,10 @@ export default function JurisprudenciaRestritaClient() {
             <p className="mt-3 text-sm text-red-600">{aiError}</p>
           )}
           {aiAnswer && (
-            <div className="mt-5 border-t border-gray-100 pt-5">
-              <div className="bg-gradient-to-r from-amber-50 to-emerald-50 border border-amber-100 rounded-xl p-5">
+            <div className="mt-5 border-t border-border-subtle pt-5">
+              <div className="bg-emerald-50 border border-amber-accent-soft rounded-[6px] p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-ink-muted">
                     <Sparkles className="w-3 h-3" />
                     Resposta baseada em {aiAnswer.consulted} decisão(ões)
                   </div>
@@ -321,7 +321,7 @@ export default function JurisprudenciaRestritaClient() {
                         className={`inline-flex items-center p-1.5 rounded transition-all ${
                           aiFeedback === 1
                             ? 'text-green-600 bg-green-50'
-                            : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                            : 'text-ink-muted hover:text-green-600 hover:bg-green-50'
                         }`}
                         aria-label="Resposta útil"
                         aria-pressed={aiFeedback === 1}
@@ -334,7 +334,7 @@ export default function JurisprudenciaRestritaClient() {
                         className={`inline-flex items-center p-1.5 rounded transition-all ${
                           aiFeedback === -1
                             ? 'text-red-600 bg-red-50'
-                            : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                            : 'text-ink-muted hover:text-red-600 hover:bg-red-50'
                         }`}
                         aria-label="Resposta não ajudou"
                         aria-pressed={aiFeedback === -1}
@@ -345,13 +345,13 @@ export default function JurisprudenciaRestritaClient() {
                     </div>
                   )}
                 </div>
-                <div className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                <div className="whitespace-pre-wrap text-sm text-ink-secondary leading-relaxed">
                   {aiAnswer.answer}
                 </div>
               </div>
               {aiAnswer.sources.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <h3 className="text-xs font-semibold text-ink-muted uppercase tracking-wide mb-2">
                     Fontes consultadas
                   </h3>
                   <ul className="space-y-1.5">
@@ -360,7 +360,7 @@ export default function JurisprudenciaRestritaClient() {
                         <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium mr-2 ${tribunalBadgeColor(src.tribunalCode)}`}>
                           {src.tribunalCode}
                         </span>
-                        <span className="text-gray-700">
+                        <span className="text-ink-secondary">
                           {src.decisionType} {src.decisionNumber} — {src.title}
                         </span>
                         {src.url && (
@@ -368,7 +368,7 @@ export default function JurisprudenciaRestritaClient() {
                             href={src.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 ml-2"
+                            className="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 ml-2"
                           >
                             <ExternalLink className="w-3 h-3" />
                           </Link>
@@ -385,15 +385,15 @@ export default function JurisprudenciaRestritaClient() {
         {/* Layout: filters + list */}
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
           {/* Filters panel */}
-          <aside className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-5 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto ${showFilters ? 'block' : 'hidden lg:block'}`}>
+          <aside className={`bg-white rounded-[6px] border border-border-subtle p-5 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900 inline-flex items-center gap-2">
+              <h2 className="font-bold text-ink-primary inline-flex items-center gap-2">
                 <Filter className="w-4 h-4" /> Filtros
               </h2>
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="text-xs text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+                  className="text-xs text-ink-muted hover:text-ink-secondary inline-flex items-center gap-1"
                 >
                   <X className="w-3 h-3" /> Limpar
                 </button>
@@ -402,25 +402,25 @@ export default function JurisprudenciaRestritaClient() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Busca textual</label>
+                <label className="block text-xs font-medium text-ink-secondary mb-1.5">Busca textual</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="search"
                     value={filters.q}
                     onChange={e => handleFilterChange('q', e.target.value)}
                     placeholder="Palavra-chave"
-                    className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    className="w-full pl-9 pr-3 py-2 text-sm rounded-[6px] border border-border-subtle focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Tribunal</label>
+                <label className="block text-xs font-medium text-ink-secondary mb-1.5">Tribunal</label>
                 <select
                   value={filters.tribunal}
                   onChange={e => handleFilterChange('tribunal', e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-[6px] border border-border-subtle focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 >
                   <option value="">Todos</option>
                   {TRIBUNAIS.map(t => (
@@ -430,11 +430,11 @@ export default function JurisprudenciaRestritaClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Ano</label>
+                <label className="block text-xs font-medium text-ink-secondary mb-1.5">Ano</label>
                 <select
                   value={filters.ano}
                   onChange={e => handleFilterChange('ano', e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-[6px] border border-border-subtle focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 >
                   <option value="">Qualquer</option>
                   {years.map(y => (
@@ -444,11 +444,11 @@ export default function JurisprudenciaRestritaClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Tipo de decisão</label>
+                <label className="block text-xs font-medium text-ink-secondary mb-1.5">Tipo de decisão</label>
                 <select
                   value={filters.decisionType}
                   onChange={e => handleFilterChange('decisionType', e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-[6px] border border-border-subtle focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 >
                   <option value="">Todos</option>
                   {TIPOS_DECISAO.map(t => (
@@ -458,13 +458,13 @@ export default function JurisprudenciaRestritaClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">Tema</label>
+                <label className="block text-xs font-medium text-ink-secondary mb-1.5">Tema</label>
                 <input
                   type="text"
                   value={filters.tema}
                   onChange={e => handleFilterChange('tema', e.target.value)}
                   placeholder="Ex.: pregão eletrônico"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-[6px] border border-border-subtle focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 />
                 <div className="flex flex-wrap gap-1 mt-2">
                   {TEMAS_SUGERIDOS.map(t => (
@@ -475,7 +475,7 @@ export default function JurisprudenciaRestritaClient() {
                       className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
                         filters.tema === t
                           ? 'bg-emerald-100 border-emerald-300 text-emerald-800'
-                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                          : 'bg-surface-raised border-border-subtle text-ink-muted hover:bg-surface-deep'
                       }`}
                     >
                       {t}
@@ -485,7 +485,7 @@ export default function JurisprudenciaRestritaClient() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                <label className="block text-xs font-medium text-ink-secondary mb-1.5">
                   Artigo da Lei 14.133
                 </label>
                 <input
@@ -493,7 +493,7 @@ export default function JurisprudenciaRestritaClient() {
                   value={filters.artigo}
                   onChange={e => handleFilterChange('artigo', e.target.value)}
                   placeholder="Ex.: 18 ou art. 75"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-[6px] border border-border-subtle focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 />
               </div>
             </div>
@@ -502,7 +502,7 @@ export default function JurisprudenciaRestritaClient() {
           {/* Results */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-ink-muted">
                 {loadingList ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" /> Buscando...
@@ -510,7 +510,7 @@ export default function JurisprudenciaRestritaClient() {
                 ) : list ? (
                   <span>
                     <strong>{list.total}</strong> decisão(ões) encontrada(s)
-                    {hasActiveFilters && ' com os filtros ativos'}
+                    {hasActiveFilters && 'com os filtros ativos'}
                   </span>
                 ) : null}
               </div>
@@ -524,7 +524,7 @@ export default function JurisprudenciaRestritaClient() {
             </div>
 
             {listError && (
-              <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">
+              <div className="rounded-[6px] bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">
                 {listError}
               </div>
             )}
@@ -539,30 +539,30 @@ export default function JurisprudenciaRestritaClient() {
                 return (
                   <article
                     key={item.id}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
+                    className="bg-white rounded-[6px] border border-border-subtle p-5 hover: transition-shadow"
                   >
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${tribunalBadgeColor(item.tribunalCode)}`}>
                         {item.tribunalCode}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-ink-muted">
                         {item.decisionType} {item.decisionNumber}
                       </span>
                       {dateStr && (
-                        <span className="text-xs text-gray-500">· {dateStr}</span>
+                        <span className="text-xs text-ink-muted">· {dateStr}</span>
                       )}
                       {item.relator && (
-                        <span className="text-xs text-gray-500">· Rel. {item.relator}</span>
+                        <span className="text-xs text-ink-muted">· Rel. {item.relator}</span>
                       )}
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 leading-snug">{item.title}</h3>
-                    <p className="text-sm text-gray-700 leading-relaxed">{item.ementa}</p>
+                    <h3 className="font-semibold text-ink-primary mb-2 leading-snug">{item.title}</h3>
+                    <p className="text-sm text-ink-secondary leading-relaxed">{item.ementa}</p>
                     {item.summary && (
-                      <div className="mt-3 p-3 bg-amber-50/60 border border-amber-100 rounded-lg">
-                        <div className="flex items-center gap-1.5 text-xs text-amber-800 font-semibold mb-1">
+                      <div className="mt-3 p-3 bg-amber-accent-soft/60 border border-amber-accent-soft rounded-[6px]">
+                        <div className="flex items-center gap-1.5 text-xs text-amber-accent-deep font-semibold mb-1">
                           <Sparkles className="w-3 h-3" /> Resumo IA
                         </div>
-                        <p className="text-sm text-gray-700">{item.summary}</p>
+                        <p className="text-sm text-ink-secondary">{item.summary}</p>
                       </div>
                     )}
                     {(themes.length > 0 || articles.length > 0) && (
@@ -573,7 +573,7 @@ export default function JurisprudenciaRestritaClient() {
                           </span>
                         ))}
                         {articles.slice(0, 5).map(a => (
-                          <span key={`a-${a}`} className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full inline-flex items-center gap-1">
+                          <span key={`a-${a}`} className="text-xs px-2 py-0.5 bg-brand-50 text-brand-700 rounded-full inline-flex items-center gap-1">
                             <BookOpen className="w-3 h-3" /> art. {a}
                           </span>
                         ))}
@@ -585,7 +585,7 @@ export default function JurisprudenciaRestritaClient() {
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                          className="text-sm text-brand-600 hover:text-brand-800 inline-flex items-center gap-1"
                         >
                           Abrir decisão original <ExternalLink className="w-3 h-3" />
                         </Link>
@@ -596,9 +596,9 @@ export default function JurisprudenciaRestritaClient() {
               })}
 
               {!loadingList && list && list.items.length === 0 && (
-                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-                  <Gavel className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-600">Nenhuma decisão encontrada com os filtros atuais.</p>
+                <div className="bg-white rounded-[6px] border border-border-subtle p-8 text-center">
+                  <Gavel className="w-10 h-10 text-ink-muted mx-auto mb-3" />
+                  <p className="text-ink-muted">Nenhuma decisão encontrada com os filtros atuais.</p>
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
@@ -617,17 +617,17 @@ export default function JurisprudenciaRestritaClient() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1 || loadingList}
-                  className="px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm rounded-[6px] border border-border-subtle bg-white hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-ink-muted">
                   Página {list.page} de {list.totalPages}
                 </span>
                 <button
                   onClick={() => setPage(p => Math.min(list.totalPages, p + 1))}
                   disabled={page >= list.totalPages || loadingList}
-                  className="px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm rounded-[6px] border border-border-subtle bg-white hover:bg-surface-raised disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Próxima
                 </button>

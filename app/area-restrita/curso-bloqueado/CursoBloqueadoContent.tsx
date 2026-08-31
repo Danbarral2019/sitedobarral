@@ -68,28 +68,28 @@ export default function CursoBloqueadoContent() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
+    <main className="min-h-screen bg-white py-12 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Botão voltar */}
         <button
           onClick={() => router.push('/area-restrita')}
-          className="flex items-center gap-2 text-gray-700 hover:text-blue-600 mb-6 font-medium transition-colors"
+          className="flex items-center gap-2 text-ink-secondary hover:text-brand-600 mb-6 font-medium transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           Voltar para área restrita
         </button>
 
         {/* Card principal */}
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-8">
+          <div className="bg-amber-accent text-white p-8">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
                 <Lock className="w-8 h-8" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold">Curso Bloqueado</h1>
-                <p className="text-orange-100">Você não está matriculado neste curso</p>
+                <p className="text-amber-accent-deep">Você não está matriculado neste curso</p>
               </div>
             </div>
           </div>
@@ -98,10 +98,10 @@ export default function CursoBloqueadoContent() {
           <div className="p-8">
             {/* Informações do curso */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">{course.title}</h2>
-              <p className="text-gray-700 leading-relaxed mb-4">{course.description}</p>
-              <div className="inline-block bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-900 font-medium">
+              <h2 className="text-2xl font-bold text-ink-primary mb-3">{course.title}</h2>
+              <p className="text-ink-secondary leading-relaxed mb-4">{course.description}</p>
+              <div className="inline-block bg-brand-50 px-4 py-2 rounded-[6px] border border-brand-200">
+                <p className="text-sm text-brand-900 font-medium">
                   <strong>Duração:</strong> {course.duration}
                 </p>
               </div>
@@ -109,7 +109,7 @@ export default function CursoBloqueadoContent() {
 
             {/* Mensagem de status (sucesso/erro) */}
             {submitStatus === 'success' && (
-              <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-xl flex items-start gap-3">
+              <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-[6px] flex items-start gap-3">
                 <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-bold text-green-900 mb-1">Interesse registrado com sucesso!</h3>
@@ -121,7 +121,7 @@ export default function CursoBloqueadoContent() {
             )}
 
             {submitStatus === 'error' && (
-              <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-xl flex items-start gap-3">
+              <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-[6px] flex items-start gap-3">
                 <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-bold text-red-900 mb-1">Erro ao enviar</h3>
@@ -133,19 +133,19 @@ export default function CursoBloqueadoContent() {
             )}
 
             {/* CTA de Assinatura */}
-            <div className="mb-8 p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl">
+            <div className="mb-8 p-6 bg-brand-50 border-2 border-brand-200 rounded-[6px]">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-brand-600 rounded-[6px] flex items-center justify-center flex-shrink-0">
                   <CreditCard className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Acesso imediato via assinatura</h3>
-                  <p className="text-gray-700 text-sm mb-4">
+                  <h3 className="text-lg font-bold text-ink-primary mb-2">Acesso imediato via assinatura</h3>
+                  <p className="text-ink-secondary text-sm mb-4">
                     Assine um de nossos planos e tenha acesso imediato a este curso e todo o material exclusivo.
                   </p>
                   <Link
                     href="/planos"
-                    className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"
+                    className="inline-flex items-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-[6px] font-bold hover:bg-brand-700 transition-colors"
                   >
                     <CreditCard className="w-4 h-4" />
                     Ver Planos de Assinatura
@@ -157,50 +157,50 @@ export default function CursoBloqueadoContent() {
             {/* Formulário de interesse */}
             {submitStatus !== 'success' && (
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Demonstrar Interesse</h3>
-                  <p className="text-gray-700 mb-6">
+                <div className="bg-brand-50 p-6 rounded-[6px] border-2 border-brand-200">
+                  <h3 className="text-xl font-bold text-ink-primary mb-4">Demonstrar Interesse</h3>
+                  <p className="text-ink-secondary mb-6">
                     Preencha o formulário abaixo e entraremos em contato para informar sobre novas turmas ou organizar cursos de curta duração.
                   </p>
 
                   {/* Tipo de interesse */}
                   <div className="mb-6">
-                    <label className="block text-sm font-bold text-gray-900 mb-3">
+                    <label className="block text-sm font-bold text-ink-primary mb-3">
                       Qual o seu interesse?
                     </label>
                     <div className="space-y-3">
-                      <label className="flex items-center gap-3 p-4 bg-white border-2 border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 transition-colors">
+                      <label className="flex items-center gap-3 p-4 bg-white border-2 border-border-subtle rounded-[6px] cursor-pointer hover:border-brand-400 transition-colors">
                         <input
                           type="radio"
                           name="interesse"
                           value="proxima-turma"
                           checked={formData.interesse === 'proxima-turma'}
                           onChange={(e) => setFormData({ ...formData, interesse: e.target.value })}
-                          className="w-5 h-5 text-blue-600"
+                          className="w-5 h-5 text-brand-600"
                         />
                         <div className="flex items-center gap-2">
-                          <Mail className="w-5 h-5 text-blue-600" />
+                          <Mail className="w-5 h-5 text-brand-600" />
                           <div>
-                            <p className="font-bold text-gray-900">Participar de uma próxima turma</p>
-                            <p className="text-sm text-gray-600">Ser notificado quando houver nova turma</p>
+                            <p className="font-bold text-ink-primary">Participar de uma próxima turma</p>
+                            <p className="text-sm text-ink-muted">Ser notificado quando houver nova turma</p>
                           </div>
                         </div>
                       </label>
 
-                      <label className="flex items-center gap-3 p-4 bg-white border-2 border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 transition-colors">
+                      <label className="flex items-center gap-3 p-4 bg-white border-2 border-border-subtle rounded-[6px] cursor-pointer hover:border-brand-400 transition-colors">
                         <input
                           type="radio"
                           name="interesse"
                           value="in-company"
                           checked={formData.interesse === 'in-company'}
                           onChange={(e) => setFormData({ ...formData, interesse: e.target.value })}
-                          className="w-5 h-5 text-blue-600"
+                          className="w-5 h-5 text-brand-600"
                         />
                         <div className="flex items-center gap-2">
-                          <Building className="w-5 h-5 text-purple-600" />
+                          <Building className="w-5 h-5 text-brand-600" />
                           <div>
-                            <p className="font-bold text-gray-900">Solicitar cursos de curta duração</p>
-                            <p className="text-sm text-gray-600">Curso exclusivo para sua organização</p>
+                            <p className="font-bold text-ink-primary">Solicitar cursos de curta duração</p>
+                            <p className="text-sm text-ink-muted">Curso exclusivo para sua organização</p>
                           </div>
                         </div>
                       </label>
@@ -209,14 +209,14 @@ export default function CursoBloqueadoContent() {
 
                   {/* Mensagem adicional */}
                   <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">
+                    <label className="block text-sm font-bold text-ink-primary mb-2">
                       Mensagem adicional (opcional)
                     </label>
                     <textarea
                       value={formData.mensagem}
                       onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
                       rows={4}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors resize-none"
+                      className="w-full px-4 py-3 border-2 border-border-subtle rounded-[6px] focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-colors resize-none"
                       placeholder="Compartilhe mais detalhes sobre seu interesse..."
                     />
                   </div>
@@ -227,14 +227,14 @@ export default function CursoBloqueadoContent() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-brand-600 text-white px-6 py-4 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-border-subtle"
                   >
                     {isSubmitting ? 'Enviando...' : 'Enviar Interesse'}
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push('/area-restrita')}
-                    className="px-6 py-4 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 transition-colors"
+                    className="px-6 py-4 bg-surface-deep text-ink-secondary rounded-[6px] font-bold hover:bg-border-strong transition-colors"
                   >
                     Cancelar
                   </button>
@@ -243,11 +243,11 @@ export default function CursoBloqueadoContent() {
             )}
 
             {/* Informações de contato alternativas */}
-            <div className="mt-8 p-6 bg-gray-50 border-2 border-gray-200 rounded-xl">
-              <h3 className="font-bold text-gray-900 mb-3">Ou entre em contato diretamente:</h3>
-              <div className="space-y-2 text-sm text-gray-700">
+            <div className="mt-8 p-6 bg-surface-raised border-2 border-border-subtle rounded-[6px]">
+              <h3 className="font-bold text-ink-primary mb-3">Ou entre em contato diretamente:</h3>
+              <div className="space-y-2 text-sm text-ink-secondary">
                 <p className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-blue-600" />
+                  <Mail className="w-4 h-4 text-brand-600" />
                   <strong>Email:</strong> contato@professorbarral.com.br
                 </p>
               </div>

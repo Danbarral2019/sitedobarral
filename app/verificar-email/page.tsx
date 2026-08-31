@@ -87,15 +87,15 @@ export default function VerificarEmailPage() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-[6px] p-8 border border-border-subtle">
           {/* Loading */}
           {status === 'loading' && (
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 animate-pulse">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-100 rounded-full mb-4 animate-pulse">
                 <svg
-                  className="w-8 h-8 text-blue-600 animate-spin"
+                  className="w-8 h-8 text-brand-600 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >
@@ -114,10 +114,10 @@ export default function VerificarEmailPage() {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-ink-primary mb-2">
                 Verificando seu email...
               </h1>
-              <p className="text-gray-600">
+              <p className="text-ink-muted">
                 Aguarde enquanto confirmamos sua conta
               </p>
             </div>
@@ -141,14 +141,14 @@ export default function VerificarEmailPage() {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-ink-primary mb-2">
                 Email Verificado com Sucesso!
               </h1>
-              <p className="text-gray-600 mb-6">
+              <p className="text-ink-muted mb-6">
                 Sua conta foi ativada e você já está logado.
               </p>
 
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-[6px] p-4 mb-6">
                 <p className="text-sm text-green-800">
                   Você será redirecionado automaticamente para a área restrita em alguns segundos...
                 </p>
@@ -156,7 +156,7 @@ export default function VerificarEmailPage() {
 
               <Link
                 href="/area-restrita"
-                className="inline-block bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="inline-block bg-brand-600 text-white py-3 px-6 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors"
               >
                 Acessar Área Restrita Agora
               </Link>
@@ -166,15 +166,15 @@ export default function VerificarEmailPage() {
           {/* Input - formulário para digitar token */}
           {status === 'input' && (
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-ink-primary mb-2">
                 Verificar Email
               </h1>
-              <p className="text-gray-600 mb-6">
+              <p className="text-ink-muted mb-6">
                 Cole o token de verificação que você recebeu por email.
               </p>
 
@@ -184,18 +184,18 @@ export default function VerificarEmailPage() {
                   value={manualToken}
                   onChange={(e) => setManualToken(e.target.value)}
                   placeholder="Cole o token aqui"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 border border-border-subtle rounded-[6px] focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
                   disabled={verifyLoading}
                 />
                 {errorMessage && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <div className="bg-red-50 border border-red-200 rounded-[6px] p-3">
                     <p className="text-sm text-red-800">{errorMessage}</p>
                   </div>
                 )}
                 <button
                   type="submit"
                   disabled={verifyLoading || !manualToken.trim()}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full bg-brand-600 text-white py-3 px-4 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
                 >
                   {verifyLoading ? 'Verificando...' : 'Verificar'}
                 </button>
@@ -206,12 +206,12 @@ export default function VerificarEmailPage() {
                   <button
                     onClick={handleResend}
                     disabled={resendLoading}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm underline disabled:text-gray-400 disabled:no-underline"
+                    className="text-brand-600 hover:text-brand-700 font-medium text-sm underline disabled:text-ink-muted disabled:no-underline"
                   >
                     {resendLoading ? 'Reenviando...' : 'Reenviar link de verificação'}
                   </button>
                   {resendMessage && (
-                    <p className={`mt-2 text-sm ${resendMessage.includes('reenviado') ? 'text-green-600' : 'text-yellow-600'}`}>
+                    <p className={`mt-2 text-sm ${resendMessage.includes('reenviado') ? 'text-green-600' : 'text-amber-accent-deep'}`}>
                       {resendMessage}
                     </p>
                   )}
@@ -238,20 +238,20 @@ export default function VerificarEmailPage() {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-ink-primary mb-2">
                 Erro na Verificação
               </h1>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="bg-red-50 border border-red-200 rounded-[6px] p-4 mb-6">
                 <p className="text-sm text-red-800">
                   {errorMessage}
                 </p>
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-ink-muted mb-4">
                   Possíveis causas:
                 </p>
-                <ul className="text-sm text-gray-600 space-y-2 mb-6 text-left">
+                <ul className="text-sm text-ink-muted space-y-2 mb-6 text-left">
                   <li className="flex items-start">
                     <span className="text-red-500 mr-2">•</span>
                     <span>O link de verificação expirou (válido por 24 horas)</span>
@@ -269,13 +269,13 @@ export default function VerificarEmailPage() {
                 <div className="space-y-3">
                   <Link
                     href="/login"
-                    className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    className="block w-full bg-brand-600 text-white py-3 px-4 rounded-[6px] font-semibold hover:bg-brand-700 transition-colors"
                   >
                     Tentar Fazer Login
                   </Link>
                   <Link
                     href="/contato"
-                    className="block w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                    className="block w-full border border-border-subtle text-ink-secondary py-3 px-4 rounded-[6px] font-semibold hover:bg-surface-raised transition-colors"
                   >
                     Entrar em Contato
                   </Link>
@@ -289,7 +289,7 @@ export default function VerificarEmailPage() {
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-brand-600 hover:text-brand-700 font-medium"
           >
             ← Voltar para o site
           </Link>

@@ -11,10 +11,10 @@ const TYPE_LABELS: Record<string, string> = {
 
 const TYPE_COLORS: Record<string, string> = {
   revoga: 'bg-red-100 text-red-700 border-red-300',
-  altera: 'bg-amber-100 text-amber-700 border-amber-300',
-  regulamenta: 'bg-blue-100 text-blue-700 border-blue-300',
+  altera: 'bg-amber-accent-soft text-amber-accent-deep border-amber-accent',
+  regulamenta: 'bg-brand-100 text-brand-700 border-brand-300',
   complementa: 'bg-green-100 text-green-700 border-green-300',
-  modifica: 'bg-purple-100 text-purple-700 border-purple-300',
+  modifica: 'bg-brand-100 text-brand-700 border-brand-300',
 };
 
 /**
@@ -103,8 +103,8 @@ export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: Re
 
   if (alters.length === 0 && alteredBy.length === 0) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 my-6">
-        <p className="text-sm text-gray-500 italic">
+      <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-6 my-6">
+        <p className="text-sm text-ink-muted italic">
           Sem relações detectadas com outros atos normativos da base.
         </p>
       </div>
@@ -112,13 +112,13 @@ export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: Re
   }
 
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-xl p-6 my-6 space-y-6">
+    <div className="bg-white border-2 border-border-subtle rounded-[6px] p-6 my-6 space-y-6">
       {alters.length > 0 && (
         <section>
-          <h3 className="font-cinzel font-semibold text-lg text-gray-900 mb-3">
+          <h3 className="font-cinzel font-semibold text-lg text-ink-primary mb-3">
             ✏️ Este ato afeta os seguintes atos:
           </h3>
-          <p className="text-xs text-gray-500 mb-3 font-poppins">
+          <p className="text-xs text-ink-muted mb-3 font-poppins">
             Inclui revogações, alterações, regulamentações, complementações e modificações — o tipo
             específico é indicado pelo selo colorido em cada item.
           </p>
@@ -137,10 +137,10 @@ export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: Re
 
       {alteredBy.length > 0 && (
         <section>
-          <h3 className="font-cinzel font-semibold text-lg text-gray-900 mb-3">
+          <h3 className="font-cinzel font-semibold text-lg text-ink-primary mb-3">
             📌 Este ato é afetado pelos seguintes atos:
           </h3>
-          <p className="text-xs text-gray-500 mb-3 font-poppins">
+          <p className="text-xs text-ink-muted mb-3 font-poppins">
             Inclui atos que revogam, alteram, regulamentam, complementam ou modificam este — o tipo
             específico é indicado pelo selo colorido em cada item.
           </p>
@@ -169,23 +169,23 @@ function RelationItem({
   otherAct: { id: string; fullNumber: string; title: string };
   atypical: boolean;
 }) {
-  const typeColor = TYPE_COLORS[rel.relationType] ?? 'bg-gray-100 text-gray-700 border-gray-300';
+  const typeColor = TYPE_COLORS[rel.relationType] ?? 'bg-surface-deep text-ink-secondary border-border-subtle';
   return (
-    <li className={`border rounded-lg p-3 transition-colors ${atypical ? 'border-orange-300 bg-orange-50/50 hover:border-orange-400' : 'border-gray-200 hover:border-brand-300'}`}>
+    <li className={`border rounded-[6px] p-3 transition-colors ${atypical ? 'border-amber-accent bg-amber-accent-soft/50 hover:border-amber-accent' : 'border-border-subtle hover:border-brand-300'}`}>
       <div className="flex items-start gap-2 flex-wrap">
         <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded border ${typeColor}`}>
           {TYPE_LABELS[rel.relationType] ?? rel.relationType}
         </span>
         {atypical && (
           <span
-            className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-orange-100 text-orange-800 border-orange-300"
+            className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-amber-accent-soft text-ink-primary border-amber-accent"
             title="Relação hierarquicamente atípica: o ato de origem está em nível inferior ao ato afetado. Pode ser falso positivo do detector — verifique no texto."
           >
             ⚠️ atípico
           </span>
         )}
         {rel.reviewStatus === 'pending' && (
-          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-yellow-50 text-yellow-700 border-yellow-300">
+          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-amber-accent-soft text-ink-primary border-amber-accent">
             ⏳ pendente revisão
           </span>
         )}
@@ -196,8 +196,8 @@ function RelationItem({
           {otherAct.fullNumber}
         </Link>
       </div>
-      <p className="text-sm text-gray-700 mt-1 font-poppins">{otherAct.title}</p>
-      <p className="text-xs text-gray-500 italic mt-1 font-poppins">&ldquo;{rel.excerpt}&rdquo;</p>
+      <p className="text-sm text-ink-secondary mt-1 font-poppins">{otherAct.title}</p>
+      <p className="text-xs text-ink-muted italic mt-1 font-poppins">&ldquo;{rel.excerpt}&rdquo;</p>
     </li>
   );
 }

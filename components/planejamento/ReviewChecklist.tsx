@@ -81,7 +81,7 @@ export default function ReviewChecklist({ sessionId }: Props) {
 
   if (loading && !report) {
     return (
-      <p className="inline-flex items-center gap-2 text-sm text-gray-500">
+      <p className="inline-flex items-center gap-2 text-sm text-ink-muted">
         <Loader2 className="h-4 w-4 animate-spin" /> Executando revisão…
       </p>
     );
@@ -101,26 +101,26 @@ export default function ReviewChecklist({ sessionId }: Props) {
     <div className="space-y-5">
       <section
         className={cn(
-          "rounded-xl border p-4",
+          "rounded-[6px] border p-4",
           readyToExport
             ? "border-emerald-200 bg-emerald-50"
-            : "border-amber-200 bg-amber-50",
+            : "border-amber-accent-soft bg-amber-accent-soft",
         )}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2">
             <span
               className={cn(
-                "rounded-lg p-2",
+                "rounded-[6px] p-2",
                 readyToExport
                   ? "bg-emerald-100 text-emerald-700"
-                  : "bg-amber-100 text-amber-800",
+                  : "bg-amber-accent-soft text-amber-accent-deep",
               )}
             >
               <ShieldCheck className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-gray-600">
+              <p className="text-[11px] uppercase tracking-wide text-ink-muted">
                 Estado geral
               </p>
               <h2 className="font-serif text-lg text-brand-900">
@@ -128,7 +128,7 @@ export default function ReviewChecklist({ sessionId }: Props) {
                   ? "Pronto para exportação"
                   : "Há pendências antes da exportação"}
               </h2>
-              <p className="text-xs text-gray-700">
+              <p className="text-xs text-ink-secondary">
                 {counts.error} erro{counts.error === 1 ? "" : "s"} ·{" "}
                 {counts.warn} aviso{counts.warn === 1 ? "" : "s"} ·{" "}
                 {counts.info} observação{counts.info === 1 ? "" : "s"}
@@ -138,7 +138,7 @@ export default function ReviewChecklist({ sessionId }: Props) {
           <button
             onClick={run}
             disabled={loading}
-            className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:border-brand-300 disabled:opacity-60"
+            className="inline-flex items-center gap-1 rounded-[6px] border border-border-subtle bg-white px-3 py-1.5 text-xs font-medium text-ink-secondary hover:border-brand-300 disabled:opacity-60"
           >
             {loading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -185,7 +185,7 @@ export default function ReviewChecklist({ sessionId }: Props) {
         </ul>
       )}
 
-      <p className="text-[11px] text-gray-500">
+      <p className="text-[11px] text-ink-muted">
         Relatório gerado em{" "}
         {new Date(report.generatedAt).toLocaleString("pt-BR")}. As verificações
         são informativas e não bloqueiam a exportação.
@@ -208,13 +208,13 @@ function StatPill({
   return (
     <div
       className={cn(
-        "rounded-lg border px-3 py-2",
+        "rounded-[6px] border px-3 py-2",
         ok
           ? "border-emerald-200 bg-white text-emerald-800"
-          : "border-gray-200 bg-white text-gray-700",
+          : "border-border-subtle bg-white text-ink-secondary",
       )}
     >
-      <p className="text-[10px] uppercase tracking-wide text-gray-500">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide text-ink-muted">{label}</p>
       <p className="text-sm font-medium">
         {current} / {total}
       </p>
@@ -227,7 +227,7 @@ function FindingRow({ finding }: { finding: Finding }) {
   return (
     <li
       className={cn(
-        "rounded-lg border p-3 text-sm",
+        "rounded-[6px] border p-3 text-sm",
         meta.bg,
         meta.border,
       )}
@@ -236,8 +236,8 @@ function FindingRow({ finding }: { finding: Finding }) {
         <span className={cn("mt-0.5", meta.text)}>{meta.icon}</span>
         <div className="flex-1">
           <p className={cn("font-medium", meta.text)}>{finding.title}</p>
-          <p className="mt-0.5 text-xs text-gray-700">{finding.detail}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-wide text-gray-400">
+          <p className="mt-0.5 text-xs text-ink-secondary">{finding.detail}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-ink-muted">
             {finding.documentType ?? "—"} · {finding.kind}
             {finding.sectionKey && ` · ${finding.sectionKey}`}
           </p>
@@ -259,17 +259,17 @@ function severityMeta(s: Severity) {
     case "warn":
       return {
         icon: <AlertTriangle className="h-4 w-4" />,
-        bg: "bg-amber-50",
-        border: "border-amber-200",
-        text: "text-amber-900",
+        bg: "bg-amber-accent-soft",
+        border: "border-amber-accent-soft",
+        text: "text-amber-accent-deep",
       };
     case "info":
     default:
       return {
         icon: <Info className="h-4 w-4" />,
-        bg: "bg-blue-50",
-        border: "border-blue-200",
-        text: "text-blue-900",
+        bg: "bg-brand-50",
+        border: "border-brand-200",
+        text: "text-brand-900",
       };
   }
 }

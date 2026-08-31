@@ -56,29 +56,29 @@ interface Theme {
 }
 
 const THEMES: Theme[] = [
-  { id: 'gerais', label: 'Disposições Gerais e Princípios', articles: ['1','2','3','4','5'], icon: Scale, gradient: 'from-blue-500 to-blue-600' },
-  { id: 'definicoes', label: 'Definições', articles: ['6'], icon: BookOpen, gradient: 'from-blue-600 to-blue-700' },
-  { id: 'agentes', label: 'Agentes de Contratação', articles: ['7','8','9','10','11','12','13'], icon: Users, gradient: 'from-indigo-500 to-indigo-600' },
+  { id: 'gerais', label: 'Disposições Gerais e Princípios', articles: ['1','2','3','4','5'], icon: Scale, gradient: 'from-brand-500 to-brand-600' },
+  { id: 'definicoes', label: 'Definições', articles: ['6'], icon: BookOpen, gradient: 'from-brand-600 to-brand-700' },
+  { id: 'agentes', label: 'Agentes de Contratação', articles: ['7','8','9','10','11','12','13'], icon: Users, gradient: 'from-brand-500 to-brand-600' },
   { id: 'planejamento', label: 'Planejamento e Fase Preparatória', articles: ['14','15','16','17','18','19','20','21','22','23','24','25','26','27'], icon: ClipboardList, gradient: 'from-green-500 to-green-600' },
   { id: 'modalidades', label: 'Modalidades de Licitação', articles: ['28','29','30','31','32'], icon: Layers, gradient: 'from-emerald-500 to-emerald-600' },
-  { id: 'julgamento', label: 'Critérios de Julgamento', articles: ['33','34','35','36','37','38','39'], icon: Target, gradient: 'from-teal-500 to-teal-600' },
-  { id: 'procedimentos', label: 'Procedimentos Licitatórios', articles: ['40','41','42','43','44','45','46','47','48','49','50','51','52','53'], icon: ListOrdered, gradient: 'from-cyan-500 to-cyan-600' },
-  { id: 'divulgacao', label: 'Divulgação e Edital', articles: ['54','55','56'], icon: Megaphone, gradient: 'from-sky-500 to-sky-600' },
-  { id: 'propostas', label: 'Apresentação de Propostas e Julgamento', articles: ['57','58','59','60','61'], icon: FileCheck, gradient: 'from-violet-500 to-violet-600' },
-  { id: 'habilitacao', label: 'Habilitação', articles: ['62','63','64','65','66','67','68','69','70','71'], icon: ShieldCheck, gradient: 'from-purple-500 to-purple-600' },
-  { id: 'direta', label: 'Contratação Direta', articles: ['72','73','74','75'], icon: Zap, gradient: 'from-amber-500 to-amber-600' },
-  { id: 'auxiliares', label: 'Procedimentos Auxiliares', articles: ['76','77','78','79','80','81'], icon: Wrench, gradient: 'from-orange-500 to-orange-600' },
+  { id: 'julgamento', label: 'Critérios de Julgamento', articles: ['33','34','35','36','37','38','39'], icon: Target, gradient: 'from-brand-500 to-brand-600' },
+  { id: 'procedimentos', label: 'Procedimentos Licitatórios', articles: ['40','41','42','43','44','45','46','47','48','49','50','51','52','53'], icon: ListOrdered, gradient: 'from-brand-500 to-brand-600' },
+  { id: 'divulgacao', label: 'Divulgação e Edital', articles: ['54','55','56'], icon: Megaphone, gradient: 'from-brand-500 to-brand-600' },
+  { id: 'propostas', label: 'Apresentação de Propostas e Julgamento', articles: ['57','58','59','60','61'], icon: FileCheck, gradient: 'from-brand-500 to-brand-600' },
+  { id: 'habilitacao', label: 'Habilitação', articles: ['62','63','64','65','66','67','68','69','70','71'], icon: ShieldCheck, gradient: 'from-brand-500 to-brand-600' },
+  { id: 'direta', label: 'Contratação Direta', articles: ['72','73','74','75'], icon: Zap, gradient: 'from-amber-accent to-amber-accent' },
+  { id: 'auxiliares', label: 'Procedimentos Auxiliares', articles: ['76','77','78','79','80','81'], icon: Wrench, gradient: 'from-amber-accent to-amber-accent' },
   { id: 'registro-precos', label: 'Registro de Preços', articles: ['82','83','84','85','86'], icon: Database, gradient: 'from-rose-500 to-rose-600' },
-  { id: 'alienacoes', label: 'Alienações', articles: ['87','88'], icon: ArrowRightLeft, gradient: 'from-pink-500 to-pink-600' },
+  { id: 'alienacoes', label: 'Alienações', articles: ['87','88'], icon: ArrowRightLeft, gradient: 'from-brand-500 to-brand-600' },
   { id: 'contratos', label: 'Contratos Administrativos', articles: ['89','90','91','92','93','94','95','96','97','98','99','100','101','102','103','104','105','106','107','108','109','110','111','112','113','114','115','116','117','118','119','120','121','122','123','124'], icon: FileSignature, gradient: 'from-brand-500 to-brand-600' },
   { id: 'alteracao', label: 'Alteração e Extinção de Contratos', articles: ['124','125','126','127','128','129','130','131','132','133','134','135','136','137','138'], icon: RefreshCw, gradient: 'from-red-500 to-red-600' },
-  { id: 'recebimento', label: 'Recebimento e Pagamento', articles: ['139','140','141','142','143','144','145','146','147','148','149','150','151','152','153','154'], icon: CreditCard, gradient: 'from-lime-500 to-lime-600' },
+  { id: 'recebimento', label: 'Recebimento e Pagamento', articles: ['139','140','141','142','143','144','145','146','147','148','149','150','151','152','153','154'], icon: CreditCard, gradient: 'from-brand-500 to-brand-600' },
   { id: 'sancoes', label: 'Sanções', articles: ['155','156','157','158','159','160','161','162','163'], icon: AlertTriangle, gradient: 'from-red-600 to-red-700' },
-  { id: 'impugnacoes', label: 'Impugnações e Pedidos de Esclarecimento', articles: ['164','165','166','167','168'], icon: MessageCircle, gradient: 'from-slate-500 to-slate-600' },
-  { id: 'controle', label: 'Controle', articles: ['169','170','171','172','173'], icon: Eye, gradient: 'from-gray-500 to-gray-600' },
+  { id: 'impugnacoes', label: 'Impugnações e Pedidos de Esclarecimento', articles: ['164','165','166','167','168'], icon: MessageCircle, gradient: 'from-brand-800 to-brand-800' },
+  { id: 'controle', label: 'Controle', articles: ['169','170','171','172','173'], icon: Eye, gradient: 'from-brand-800 to-brand-800' },
   { id: 'irregularidades', label: 'Irregularidades', articles: ['174','175','176','177'], icon: XCircle, gradient: 'from-red-500 to-rose-600' },
-  { id: 'crimes', label: 'Crimes em Licitações', articles: ['178','179','180','181','182','183'], icon: Gavel, gradient: 'from-gray-700 to-gray-800' },
-  { id: 'finais', label: 'Disposições Finais e Transitórias', articles: ['184','184-A','185','186','187','188','189','190','191','192','193','194'], icon: Flag, gradient: 'from-stone-500 to-stone-600' },
+  { id: 'crimes', label: 'Crimes em Licitações', articles: ['178','179','180','181','182','183'], icon: Gavel, gradient: 'from-brand-800 to-brand-800' },
+  { id: 'finais', label: 'Disposições Finais e Transitórias', articles: ['184','184-A','185','186','187','188','189','190','191','192','193','194'], icon: Flag, gradient: 'from-brand-800 to-brand-800' },
 ];
 
 function getArticleRange(articles: string[]): string {
@@ -89,8 +89,8 @@ function getArticleRange(articles: string[]): string {
 
 function getColorIndicator(count: number): string {
   if (count >= 10) return 'bg-green-500';
-  if (count >= 3) return 'bg-blue-500';
-  return 'bg-gray-400';
+  if (count >= 3) return 'bg-brand-500';
+  return 'bg-border-strong';
 }
 
 function truncateEmenta(ementa: string, maxLen: number = 80): string {
@@ -140,14 +140,14 @@ export function ArticleTreeNavigator({
   };
 
   return (
-    <div className="bg-white rounded-xl border-2 border-gray-200 p-4 shadow-lg">
+    <div className="bg-white rounded-[6px] border-2 border-border-subtle p-4">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <Scale className="w-5 h-5 text-blue-600" />
+        <h3 className="text-lg font-bold text-ink-primary flex items-center gap-2">
+          <Scale className="w-5 h-5 text-brand-600" />
           Temas da Lei 14.133
         </h3>
-        <p className="text-xs text-gray-600 mt-1">
+        <p className="text-xs text-ink-muted mt-1">
           Navegue pelos temas da Lei de Licitações e Contratos
         </p>
       </div>
@@ -155,31 +155,31 @@ export function ArticleTreeNavigator({
       {/* Search Field */}
       <div className="mb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar artigo ou tema..."
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-border-subtle rounded-[6px] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-ink-muted"
           />
         </div>
       </div>
 
       {/* Legend */}
-      <div className="mb-4 pb-4 border-b border-gray-200">
-        <p className="text-xs font-medium text-gray-700 mb-2">Legenda:</p>
-        <div className="flex flex-wrap gap-3 text-[10px] text-gray-600">
+      <div className="mb-4 pb-4 border-b border-border-subtle">
+        <p className="text-xs font-medium text-ink-secondary mb-2">Legenda:</p>
+        <div className="flex flex-wrap gap-3 text-[10px] text-ink-muted">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-green-500"></div>
             <span>&ge;10 docs</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+            <div className="w-2 h-2 rounded-full bg-brand-500"></div>
             <span>3-9 docs</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+            <div className="w-2 h-2 rounded-full bg-border-strong"></div>
             <span>&lt;3 docs</span>
           </div>
         </div>
@@ -197,11 +197,11 @@ export function ArticleTreeNavigator({
               {/* Theme Card */}
               <button
                 onClick={() => toggleTheme(theme.id)}
-                className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left group border border-gray-200"
+                className="w-full flex items-center gap-3 p-3 bg-surface-raised hover:bg-surface-deep rounded-[6px] transition-colors text-left group border border-border-subtle"
               >
                 {/* Icon Circle */}
                 <div
-                  className={`flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br ${theme.gradient} flex items-center justify-center`}
+                  className={`flex-shrink-0 w-9 h-9 rounded-full ${theme.gradient} flex items-center justify-center`}
                 >
                   <Icon className="w-4.5 h-4.5 text-white" />
                 </div>
@@ -209,15 +209,15 @@ export function ArticleTreeNavigator({
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-900 group-hover:text-blue-700 truncate">
+                    <span className="text-xs font-bold text-ink-primary group-hover:text-brand-700 truncate">
                       {theme.label}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-gray-500">
+                    <span className="text-[10px] text-ink-muted">
                       {getArticleRange(theme.articles)}
                     </span>
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-ink-muted">
                       ({theme.articles.length} {theme.articles.length === 1 ? 'artigo' : 'artigos'})
                     </span>
                   </div>
@@ -228,20 +228,20 @@ export function ArticleTreeNavigator({
                   {totalDocs > 0 && (
                     <div className="flex items-center gap-1">
                       <div className={`w-2 h-2 rounded-full ${getColorIndicator(totalDocs)}`}></div>
-                      <span className="text-[10px] text-gray-500">{totalDocs}</span>
+                      <span className="text-[10px] text-ink-muted">{totalDocs}</span>
                     </div>
                   )}
                   {isExpanded ? (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className="w-4 h-4 text-ink-muted" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-ink-muted" />
                   )}
                 </div>
               </button>
 
               {/* Expanded Article List */}
               {isExpanded && (
-                <div className="mt-2 ml-2 mr-1 mb-1 space-y-1 border-l-2 border-gray-200 pl-3">
+                <div className="mt-2 ml-2 mr-1 mb-1 space-y-1 border-l-2 border-border-subtle pl-3">
                   {theme.articles.map((articleNum) => {
                     const article = artigos[articleNum];
                     const docCount = stats[articleNum]?.documentCount || 0;
@@ -251,23 +251,23 @@ export function ArticleTreeNavigator({
                         key={articleNum}
                         href={`${basePath}/${articleNum}`}
                         onClick={() => onArticleClick?.(articleNum)}
-                        className="block p-2 hover:bg-blue-50 rounded-lg transition-colors group/article"
+                        className="block p-2 hover:bg-brand-50 rounded-[6px] transition-colors group/article"
                       >
                         <div className="flex items-start gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-bold text-gray-900 group-hover/article:text-blue-600">
+                              <span className="text-xs font-bold text-ink-primary group-hover/article:text-brand-600">
                                 {formatArticleNumber(articleNum)}
                               </span>
                               {docCount > 0 && (
                                 <div className="flex items-center gap-1">
                                   <div className={`w-1.5 h-1.5 rounded-full ${getColorIndicator(docCount)}`}></div>
-                                  <span className="text-[10px] text-gray-500">{docCount}</span>
+                                  <span className="text-[10px] text-ink-muted">{docCount}</span>
                                 </div>
                               )}
                             </div>
                             {article && (
-                              <p className="text-[10px] text-gray-600 leading-tight line-clamp-2">
+                              <p className="text-[10px] text-ink-muted leading-tight line-clamp-2">
                                 {truncateEmenta(article.ementa)}
                               </p>
                             )}
@@ -283,7 +283,7 @@ export function ArticleTreeNavigator({
         })}
 
         {filteredThemes.length === 0 && (
-          <div className="md:col-span-2 text-center py-8 text-sm text-gray-500">
+          <div className="md:col-span-2 text-center py-8 text-sm text-ink-muted">
             Nenhum tema encontrado para &ldquo;{searchTerm}&rdquo;
           </div>
         )}

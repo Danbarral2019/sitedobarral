@@ -19,9 +19,9 @@ export default function AssinaturaSucessoPage() {
 
 function SuspenseFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
-        <div className="bg-white rounded-2xl shadow-lg p-10 border border-gray-100">
+        <div className="bg-white rounded-[6px] p-10 border border-border-subtle">
           <PollingView />
         </div>
       </div>
@@ -92,9 +92,9 @@ function SucessoContent() {
   }, [sessionId, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
-        <div className="bg-white rounded-2xl shadow-lg p-10 border border-gray-100">
+        <div className="bg-white rounded-[6px] p-10 border border-border-subtle">
           {state === 'polling' && <PollingView />}
           {state === 'confirmed' && <ConfirmedView />}
           {state === 'timeout' && <TimeoutView />}
@@ -110,7 +110,7 @@ function PollingView() {
     <>
       <div className="inline-flex items-center justify-center w-20 h-20 mb-6">
         <svg
-          className="animate-spin w-16 h-16 text-blue-600"
+          className="animate-spin w-16 h-16 text-brand-600"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -121,8 +121,8 @@ function PollingView() {
           <path d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" className="opacity-75" />
         </svg>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-3">Confirmando pagamento…</h1>
-      <p className="text-gray-600">Isso leva poucos segundos. Não feche esta página.</p>
+      <h1 className="text-2xl font-bold text-ink-primary mb-3">Confirmando pagamento…</h1>
+      <p className="text-ink-muted">Isso leva poucos segundos. Não feche esta página.</p>
     </>
   );
 }
@@ -135,11 +135,11 @@ function ConfirmedView() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-3">Assinatura ativada!</h1>
-      <p className="text-gray-600 mb-6">Redirecionando para a área restrita…</p>
+      <h1 className="text-3xl font-bold text-ink-primary mb-3">Assinatura ativada!</h1>
+      <p className="text-ink-muted mb-6">Redirecionando para a área restrita…</p>
       <Link
         href="/area-restrita"
-        className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+        className="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-[6px] transition-colors"
       >
         Ir para área restrita
       </Link>
@@ -150,26 +150,26 @@ function ConfirmedView() {
 function TimeoutView() {
   return (
     <>
-      <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
-        <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="inline-flex items-center justify-center w-20 h-20 bg-brand-100 rounded-full mb-6">
+        <svg className="w-10 h-10 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-3">Estamos finalizando seu pagamento</h1>
-      <p className="text-gray-600 mb-2">
+      <h1 className="text-2xl font-bold text-ink-primary mb-3">Estamos finalizando seu pagamento</h1>
+      <p className="text-ink-muted mb-2">
         A confirmação pode levar alguns minutos (com Pix, até 7 dias).
       </p>
-      <p className="text-gray-600 mb-6">
+      <p className="text-ink-muted mb-6">
         Você receberá um e-mail assim que a assinatura for ativada.
       </p>
       <div className="space-y-3">
         <Link
           href="/area-restrita"
-          className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+          className="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-[6px] transition-colors"
         >
           Ir para área restrita
         </Link>
-        <Link href="/" className="block w-full text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors">
+        <Link href="/" className="block w-full text-ink-muted hover:text-ink-primary font-medium py-2 transition-colors">
           Voltar ao site
         </Link>
       </div>
@@ -185,18 +185,18 @@ function ErrorView() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-3">Não conseguimos validar esta sessão</h1>
-      <p className="text-gray-600 mb-6">
+      <h1 className="text-2xl font-bold text-ink-primary mb-3">Não conseguimos validar esta sessão</h1>
+      <p className="text-ink-muted mb-6">
         Se o pagamento foi efetuado, você receberá um e-mail de confirmação. Em caso de dúvida, entre em contato.
       </p>
       <div className="space-y-3">
         <Link
           href="/planos"
-          className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+          className="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-[6px] transition-colors"
         >
           Ver planos
         </Link>
-        <Link href="/" className="block w-full text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors">
+        <Link href="/" className="block w-full text-ink-muted hover:text-ink-primary font-medium py-2 transition-colors">
           Voltar ao site
         </Link>
       </div>

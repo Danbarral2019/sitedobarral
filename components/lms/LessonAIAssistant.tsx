@@ -100,7 +100,7 @@ export default function LessonAIAssistant({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-50 to-brand-50 border border-purple-200 rounded-2xl text-purple-700 font-semibold text-sm hover:from-purple-100 hover:to-brand-100 transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-50 border border-brand-200 rounded-[6px] text-brand-700 font-semibold text-sm hover:from-brand-100 hover:to-brand-100 transition-colors"
       >
         <Sparkles className="w-4 h-4" />
         Perguntar a IA sobre esta aula
@@ -109,23 +109,23 @@ export default function LessonAIAssistant({
   }
 
   return (
-    <div className="bg-white border border-purple-200 rounded-2xl overflow-hidden">
+    <div className="bg-white border border-brand-200 rounded-[6px] overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setIsOpen(false)}
-        className="w-full flex items-center justify-between px-5 py-3 bg-gradient-to-r from-purple-50 to-brand-50 border-b border-purple-100"
+        className="w-full flex items-center justify-between px-5 py-3 bg-brand-50 border-b border-brand-100"
       >
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-purple-500" />
-          <span className="font-semibold text-purple-900 text-sm">Assistente IA</span>
+          <Sparkles className="w-4 h-4 text-brand-500" />
+          <span className="font-semibold text-brand-900 text-sm">Assistente IA</span>
         </div>
-        <ChevronUp className="w-4 h-4 text-purple-400" />
+        <ChevronUp className="w-4 h-4 text-brand-400" />
       </button>
 
       {/* Messages */}
       <div className="max-h-80 overflow-y-auto px-4 py-3 space-y-3">
         {messages.length === 0 && (
-          <p className="text-xs text-gray-400 text-center py-4">
+          <p className="text-xs text-ink-muted text-center py-4">
             Faca uma pergunta sobre o conteudo desta aula.
           </p>
         )}
@@ -135,10 +135,10 @@ export default function LessonAIAssistant({
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] px-3.5 py-2.5 rounded-xl text-sm leading-relaxed ${
+              className={`max-w-[85%] px-3.5 py-2.5 rounded-[6px] text-sm leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-brand-600 text-white rounded-br-sm'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-sm'
+                  : 'bg-surface-deep text-ink-secondary rounded-bl-sm'
               }`}
             >
               {msg.content}
@@ -147,8 +147,8 @@ export default function LessonAIAssistant({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 px-4 py-3 rounded-xl rounded-bl-sm">
-              <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+            <div className="bg-surface-deep px-4 py-3 rounded-[6px] rounded-bl-sm">
+              <Loader2 className="w-4 h-4 animate-spin text-ink-muted" />
             </div>
           </div>
         )}
@@ -158,7 +158,7 @@ export default function LessonAIAssistant({
       {/* Sources */}
       {sources.length > 0 && (
         <div className="px-4 pb-2">
-          <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Fontes</p>
+          <p className="text-[10px] text-ink-muted uppercase font-bold mb-1">Fontes</p>
           <div className="flex flex-wrap gap-1.5">
             {sources.map((src, idx) => (
               <a
@@ -189,13 +189,13 @@ export default function LessonAIAssistant({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Sua pergunta..."
-            className="flex-1 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-300"
+            className="flex-1 px-3.5 py-2.5 border border-border-subtle rounded-[6px] text-sm focus:outline-none focus:ring-2 focus:ring-brand-300 focus:border-brand-300"
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="px-3 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2.5 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
           </button>

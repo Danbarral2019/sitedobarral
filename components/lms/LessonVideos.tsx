@@ -26,11 +26,11 @@ export default function LessonVideos({ videos }: LessonVideosProps) {
 
   return (
     <div>
-      <h3 className="text-lg font-bold text-gray-900 mb-4">Videos</h3>
+      <h3 className="text-lg font-bold text-ink-primary mb-4">Videos</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {videos.map((video) => (
-          <div key={video.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="relative aspect-video bg-gray-900">
+          <div key={video.id} className="bg-white border border-border-subtle rounded-[6px] overflow-hidden">
+            <div className="relative aspect-video bg-brand-900">
               {video.storageType === 'r2' && video.courseVideoId ? (
                 <HostedVideoPlayer videoId={video.courseVideoId} title={video.title} />
               ) : activeVideoId === video.id ? (
@@ -55,17 +55,17 @@ export default function LessonVideos({ videos }: LessonVideosProps) {
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
-                    <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <Play className="w-6 h-6 text-gray-900 ml-0.5" />
+                    <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform border border-border-subtle">
+                      <Play className="w-6 h-6 text-ink-primary ml-0.5" />
                     </div>
                   </div>
                 </button>
               )}
             </div>
             <div className="p-3">
-              <h4 className="text-sm font-semibold text-gray-900 line-clamp-1">{video.title}</h4>
+              <h4 className="text-sm font-semibold text-ink-primary line-clamp-1">{video.title}</h4>
               {video.description && (
-                <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{video.description}</p>
+                <p className="text-xs text-ink-muted line-clamp-2 mt-0.5">{video.description}</p>
               )}
             </div>
           </div>

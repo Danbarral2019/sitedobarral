@@ -193,10 +193,10 @@ export default function HistoricoIAPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-raised flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Carregando historico...</p>
+          <Loader2 className="w-12 h-12 animate-spin text-brand-600 mx-auto mb-4" />
+          <p className="text-ink-muted">Carregando historico...</p>
         </div>
       </div>
     );
@@ -204,8 +204,8 @@ export default function HistoricoIAPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+      <div className="min-h-screen bg-surface-raised flex items-center justify-center p-4">
+        <div className="bg-red-50 border border-red-200 rounded-[6px] p-6 max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-red-900 text-center mb-2">
             Erro ao Carregar
@@ -213,7 +213,7 @@ export default function HistoricoIAPage() {
           <p className="text-red-700 text-center mb-4">{error}</p>
           <button
             onClick={() => fetchHistory()}
-            className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="w-full px-4 py-2 bg-red-600 text-white rounded-[6px] hover:bg-red-700 transition-colors"
           >
             Tentar Novamente
           </button>
@@ -225,9 +225,9 @@ export default function HistoricoIAPage() {
   const totalQuestions = data?.stats.total || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-raised">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
+      <div className="bg-brand-700 text-white border border-border-subtle">
         <div className="container mx-auto px-4 py-6">
           {/* Navegacao */}
           <div className="flex items-center justify-between mb-4">
@@ -245,7 +245,7 @@ export default function HistoricoIAPage() {
             <History className="w-8 h-8" />
             <div>
               <h1 className="text-2xl font-bold">Historico de Perguntas</h1>
-              <p className="text-blue-100">
+              <p className="text-brand-100">
                 {totalQuestions} pergunta{totalQuestions !== 1 ? 's' : ''} realizada{totalQuestions !== 1 ? 's' : ''}
               </p>
             </div>
@@ -280,15 +280,15 @@ export default function HistoricoIAPage() {
       {/* Content */}
       <div className="container mx-auto px-4 py-6">
         {totalQuestions === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg mb-2">Nenhuma pergunta ainda</p>
-            <p className="text-gray-500 text-sm mb-6">
+          <div className="bg-white rounded-[6px] p-12 text-center border border-border-subtle">
+            <MessageCircle className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+            <p className="text-ink-muted text-lg mb-2">Nenhuma pergunta ainda</p>
+            <p className="text-ink-muted text-sm mb-6">
               Acesse a Lei 14.133 Comentada e faca perguntas sobre os artigos para ver seu historico aqui.
             </p>
             <Link
               href="/area-restrita/lei-comentada"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 transition-colors"
             >
               <Scale className="w-5 h-5" />
               Acessar Lei 14.133
@@ -303,44 +303,44 @@ export default function HistoricoIAPage() {
               const isPeriodExpanded = expandedPeriods.has(period);
 
               return (
-                <div key={period} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div key={period} className="bg-white rounded-[6px] overflow-hidden border border-border-subtle">
                   {/* Header do Periodo */}
                   <button
                     onClick={() => togglePeriod(period)}
-                    className="w-full flex items-center gap-3 p-4 bg-gradient-to-r from-gray-50 to-blue-50 hover:from-gray-100 hover:to-blue-100 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-4 bg-brand-50 hover:from-surface-raised hover:to-brand-100 transition-colors text-left"
                   >
                     {isPeriodExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-brand-600 flex-shrink-0" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-ink-muted flex-shrink-0" />
                     )}
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-900">{periodLabels[period]}</h3>
-                      <p className="text-xs text-gray-600">
+                      <h3 className="font-bold text-ink-primary">{periodLabels[period]}</h3>
+                      <p className="text-xs text-ink-muted">
                         {questions.length} pergunta{questions.length !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-bold">
+                    <div className="px-3 py-1 bg-brand-600 text-white rounded-full text-sm font-bold">
                       {questions.length}
                     </div>
                   </button>
 
                   {/* Lista de Perguntas */}
                   {isPeriodExpanded && (
-                    <div className="border-t border-gray-200">
+                    <div className="border-t border-border-subtle">
                       {questions.map((question) => {
                         const isQuestionExpanded = expandedQuestions.has(question.id);
 
                         return (
-                          <div key={question.id} className="border-b border-gray-100 last:border-b-0">
+                          <div key={question.id} className="border-b border-border-subtle last:border-b-0">
                             <button
                               onClick={() => toggleQuestion(question.id)}
-                              className="w-full flex items-start gap-3 p-4 hover:bg-gray-50 transition-colors text-left"
+                              className="w-full flex items-start gap-3 p-4 hover:bg-surface-raised transition-colors text-left"
                             >
                               {isQuestionExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-blue-600 flex-shrink-0 mt-1" />
+                                <ChevronDown className="w-4 h-4 text-brand-600 flex-shrink-0 mt-1" />
                               ) : (
-                                <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1" />
+                                <ChevronRight className="w-4 h-4 text-ink-muted flex-shrink-0 mt-1" />
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -348,7 +348,7 @@ export default function HistoricoIAPage() {
                                     <Link
                                       href="/area-restrita/assistente"
                                       onClick={(e) => e.stopPropagation()}
-                                      className="px-2 py-0.5 bg-purple-600 text-white rounded text-xs font-bold hover:bg-purple-700 inline-flex items-center gap-1"
+                                      className="px-2 py-0.5 bg-brand-600 text-white rounded text-xs font-bold hover:bg-brand-700 inline-flex items-center gap-1"
                                     >
                                       <Sparkles className="w-3 h-3" /> Assistente
                                     </Link>
@@ -356,12 +356,12 @@ export default function HistoricoIAPage() {
                                     <Link
                                       href={`/area-restrita/lei-comentada?artigo=${question.articleNumber}`}
                                       onClick={(e) => e.stopPropagation()}
-                                      className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
+                                      className="px-2 py-0.5 bg-brand-600 text-white rounded text-xs font-bold hover:bg-brand-700"
                                     >
                                       Art. {question.articleNumber}
                                     </Link>
                                   ) : null}
-                                  <span className="text-xs text-gray-500">{formatDate(question.createdAt)}</span>
+                                  <span className="text-xs text-ink-muted">{formatDate(question.createdAt)}</span>
                                   {question.wasHelpful === true && (
                                     <ThumbsUp className="w-3 h-3 text-green-600" />
                                   )}
@@ -369,28 +369,28 @@ export default function HistoricoIAPage() {
                                     <ThumbsDown className="w-3 h-3 text-red-600" />
                                   )}
                                 </div>
-                                <p className="text-gray-800 text-sm line-clamp-2">{question.question}</p>
+                                <p className="text-ink-secondary text-sm line-clamp-2">{question.question}</p>
                               </div>
                             </button>
 
                             {/* Resposta Expandida */}
                             {isQuestionExpanded && question.answer && (
                               <div className="px-4 pb-4 ml-7">
-                                <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg">
-                                  <h4 className="font-bold text-gray-900 text-sm mb-2">Resposta da IA:</h4>
-                                  <div className="text-gray-800 text-sm whitespace-pre-wrap">
+                                <div className="bg-brand-50 p-4 rounded-[6px]">
+                                  <h4 className="font-bold text-ink-primary text-sm mb-2">Resposta da IA:</h4>
+                                  <div className="text-ink-secondary text-sm whitespace-pre-wrap">
                                     {question.answer}
                                   </div>
 
                                   {/* Acoes */}
-                                  <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between">
+                                  <div className="mt-4 pt-3 border-t border-border-subtle flex items-center justify-between">
                                     <Link
                                       href={
                                         question.source === 'assistant'
                                           ? '/area-restrita/assistente'
                                           : `/area-restrita/lei-comentada?artigo=${question.articleNumber}`
                                       }
-                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                      className="flex items-center gap-1 text-brand-600 hover:text-brand-800 text-sm font-medium"
                                     >
                                       <ExternalLink className="w-4 h-4" />
                                       {question.source === 'assistant' ? 'Ir ao Assistente' : 'Ver no artigo'}
@@ -418,8 +418,8 @@ export default function HistoricoIAPage() {
                             {/* Sem resposta */}
                             {isQuestionExpanded && !question.answer && (
                               <div className="px-4 pb-4 ml-7">
-                                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                                  <p className="text-amber-800 text-sm">
+                                <div className="bg-amber-accent-soft p-4 rounded-[6px] border border-amber-accent-soft">
+                                  <p className="text-amber-accent-deep text-sm">
                                     Esta pergunta ainda nao recebeu resposta da IA.
                                   </p>
 
@@ -430,7 +430,7 @@ export default function HistoricoIAPage() {
                                           ? '/area-restrita/assistente'
                                           : `/area-restrita/lei-comentada?artigo=${question.articleNumber}`
                                       }
-                                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                      className="flex items-center gap-1 text-brand-600 hover:text-brand-800 text-sm font-medium"
                                     >
                                       <ExternalLink className="w-4 h-4" />
                                       {question.source === 'assistant' ? 'Ir ao Assistente' : 'Ver artigo'}

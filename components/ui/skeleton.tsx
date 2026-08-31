@@ -9,7 +9,7 @@ interface SkeletonProps {
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded ${className}`}
+      className={`animate-pulse bg-brand-800 bg-[length:200%_100%] rounded ${className}`}
       style={{
         animation: 'skeleton-loading 1.5s ease-in-out infinite',
       }}
@@ -19,7 +19,7 @@ export function Skeleton({ className = '' }: SkeletonProps) {
 
 export function DocumentCardSkeleton() {
   return (
-    <div className="p-4 rounded-xl border-2 border-gray-200 bg-gray-50">
+    <div className="p-4 rounded-[6px] border-2 border-border-subtle bg-surface-raised">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -30,8 +30,8 @@ export function DocumentCardSkeleton() {
           <Skeleton className="h-4 w-3/4" />
         </div>
         <div className="flex gap-2">
-          <Skeleton className="h-9 w-9 rounded-lg" />
-          <Skeleton className="h-9 w-9 rounded-lg" />
+          <Skeleton className="h-9 w-9 rounded-[6px]" />
+          <Skeleton className="h-9 w-9 rounded-[6px]" />
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export function DocumentCardSkeleton() {
 
 export function QRCardSkeleton() {
   return (
-    <div className="p-4 rounded-xl border-2 border-gray-200 bg-gray-50">
+    <div className="p-4 rounded-[6px] border-2 border-border-subtle bg-surface-raised">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <Skeleton className="h-5 w-2/3 mb-2" />

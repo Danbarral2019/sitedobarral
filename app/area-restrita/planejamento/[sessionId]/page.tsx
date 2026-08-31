@@ -85,13 +85,13 @@ export default async function PlanejamentoSessaoPage({
     etp && !tr && etpRequiredRemaining === 0 && session.natureza === "SERVICO_CONTINUADO";
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="border-b border-gray-200 bg-white">
+    <main className="min-h-screen bg-surface-raised">
+      <div className="border-b border-border-subtle bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-start justify-between gap-3 px-4 py-4">
           <div>
             <Link
               href="/area-restrita/planejamento"
-              className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-brand-700"
+              className="inline-flex items-center gap-1 text-xs text-ink-muted hover:text-brand-700"
             >
               <ArrowLeft className="h-3 w-3" /> Minhas contratações
             </Link>
@@ -99,7 +99,7 @@ export default async function PlanejamentoSessaoPage({
               {session.titulo}
             </h1>
             {session.natureza && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-ink-muted">
                 {friendlyNatureza(session.natureza)} · status:{" "}
                 {friendlyStatus(session.status)}
               </p>
@@ -107,7 +107,7 @@ export default async function PlanejamentoSessaoPage({
           </div>
           <Link
             href={`/area-restrita/planejamento/${session.id}/matriz`}
-            className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-800 hover:border-brand-400"
+            className="inline-flex items-center gap-2 rounded-[6px] border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-800 hover:border-brand-400"
           >
             <Scale className="h-4 w-4" /> Matriz de modalidade
           </Link>
@@ -126,8 +126,8 @@ export default async function PlanejamentoSessaoPage({
 
       {!active || !trail ? (
         <div className="mx-auto max-w-3xl px-4 py-12">
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-6">
-            <p className="text-sm text-amber-900">
+          <div className="rounded-[6px] border border-amber-accent-soft bg-amber-accent-soft p-6">
+            <p className="text-sm text-amber-accent-deep">
               Esta sessão ainda não possui trilha materializada para o
               documento selecionado. Confirme o onboarding ou retorne ao ETP.
             </p>

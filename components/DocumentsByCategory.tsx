@@ -78,12 +78,12 @@ const categoryConfig: Record<string, {
     icon: Scale,
     color: 'blue',
     label: 'Acordãos',
-    gradient: 'from-blue-500/10 via-blue-400/5 to-transparent',
-    iconBg: 'bg-blue-100',
-    iconText: 'text-blue-600',
-    badgeBg: 'bg-blue-100',
-    badgeText: 'text-blue-700',
-    docIconBg: 'bg-blue-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'pareceres': {
     icon: FileEdit,
@@ -100,23 +100,23 @@ const categoryConfig: Record<string, {
     icon: ClipboardList,
     color: 'indigo',
     label: 'Orientações Normativas',
-    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
-    iconBg: 'bg-indigo-100',
-    iconText: 'text-indigo-600',
-    badgeBg: 'bg-indigo-100',
-    badgeText: 'text-indigo-700',
-    docIconBg: 'bg-indigo-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'instrucao-normativa': {
     icon: FileCheck,
     color: 'indigo',
     label: 'Instruções Normativas',
-    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
-    iconBg: 'bg-indigo-100',
-    iconText: 'text-indigo-600',
-    badgeBg: 'bg-indigo-100',
-    badgeText: 'text-indigo-700',
-    docIconBg: 'bg-indigo-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'portaria': {
     icon: ScrollText,
@@ -133,78 +133,78 @@ const categoryConfig: Record<string, {
     icon: Landmark,
     color: 'blue',
     label: 'Decretos',
-    gradient: 'from-blue-500/10 via-blue-400/5 to-transparent',
-    iconBg: 'bg-blue-100',
-    iconText: 'text-blue-600',
-    badgeBg: 'bg-blue-100',
-    badgeText: 'text-blue-700',
-    docIconBg: 'bg-blue-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'lei': {
     icon: Gavel,
     color: 'purple',
     label: 'Leis',
-    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
-    iconBg: 'bg-purple-100',
-    iconText: 'text-purple-600',
-    badgeBg: 'bg-purple-100',
-    badgeText: 'text-purple-700',
-    docIconBg: 'bg-purple-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'resolucao': {
     icon: ScrollText,
     color: 'cyan',
     label: 'Resoluções',
-    gradient: 'from-cyan-500/10 via-cyan-400/5 to-transparent',
-    iconBg: 'bg-cyan-100',
-    iconText: 'text-cyan-600',
-    badgeBg: 'bg-cyan-100',
-    badgeText: 'text-cyan-700',
-    docIconBg: 'bg-cyan-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'artigo': {
     icon: BookOpen,
     color: 'purple',
     label: 'Artigos',
-    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
-    iconBg: 'bg-purple-100',
-    iconText: 'text-purple-600',
-    badgeBg: 'bg-purple-100',
-    badgeText: 'text-purple-700',
-    docIconBg: 'bg-purple-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'edital': {
     icon: FileText,
     color: 'orange',
     label: 'Editais',
-    gradient: 'from-orange-500/10 via-orange-400/5 to-transparent',
-    iconBg: 'bg-orange-100',
-    iconText: 'text-orange-600',
-    badgeBg: 'bg-orange-100',
-    badgeText: 'text-orange-700',
-    docIconBg: 'bg-orange-600',
+    gradient: 'from-amber-accent/10 via-amber-accent/5 to-transparent',
+    iconBg: 'bg-amber-accent-soft',
+    iconText: 'text-amber-accent-deep',
+    badgeBg: 'bg-amber-accent-soft',
+    badgeText: 'text-amber-accent-deep',
+    docIconBg: 'bg-amber-accent',
   },
   'apostila': {
     icon: BookOpen,
     color: 'indigo',
     label: 'Apostilas',
-    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
-    iconBg: 'bg-indigo-100',
-    iconText: 'text-indigo-600',
-    badgeBg: 'bg-indigo-100',
-    badgeText: 'text-indigo-700',
-    docIconBg: 'bg-indigo-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'link': {
     icon: Link2,
     color: 'cyan',
     label: 'Links',
-    gradient: 'from-cyan-500/10 via-cyan-400/5 to-transparent',
-    iconBg: 'bg-cyan-100',
-    iconText: 'text-cyan-600',
-    badgeBg: 'bg-cyan-100',
-    badgeText: 'text-cyan-700',
-    docIconBg: 'bg-cyan-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'video': {
     icon: Tv,
@@ -221,67 +221,67 @@ const categoryConfig: Record<string, {
     icon: ClipboardList,
     color: 'purple',
     label: 'Enunciados',
-    gradient: 'from-purple-500/10 via-purple-400/5 to-transparent',
-    iconBg: 'bg-purple-100',
-    iconText: 'text-purple-600',
-    badgeBg: 'bg-purple-100',
-    badgeText: 'text-purple-700',
-    docIconBg: 'bg-purple-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'sumula': {
     icon: Scale,
     color: 'indigo',
     label: 'Súmulas TCU',
-    gradient: 'from-indigo-500/10 via-indigo-400/5 to-transparent',
-    iconBg: 'bg-indigo-100',
-    iconText: 'text-indigo-600',
-    badgeBg: 'bg-indigo-100',
-    badgeText: 'text-indigo-700',
-    docIconBg: 'bg-indigo-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'consulta_tcu': {
     icon: MessageSquare,
     color: 'sky',
     label: 'Respostas a Consultas TCU',
-    gradient: 'from-sky-500/10 via-sky-400/5 to-transparent',
-    iconBg: 'bg-sky-100',
-    iconText: 'text-sky-600',
-    badgeBg: 'bg-sky-100',
-    badgeText: 'text-sky-700',
-    docIconBg: 'bg-sky-600',
+    gradient: 'from-brand-500/10 via-brand-400/5 to-transparent',
+    iconBg: 'bg-brand-100',
+    iconText: 'text-brand-600',
+    badgeBg: 'bg-brand-100',
+    badgeText: 'text-brand-700',
+    docIconBg: 'bg-brand-600',
   },
   'informativo': {
     icon: Newspaper,
     color: 'orange',
     label: 'Informativos de Licitação TCU',
-    gradient: 'from-orange-500/10 via-orange-400/5 to-transparent',
-    iconBg: 'bg-orange-100',
-    iconText: 'text-orange-600',
-    badgeBg: 'bg-orange-100',
-    badgeText: 'text-orange-700',
-    docIconBg: 'bg-orange-600',
+    gradient: 'from-amber-accent/10 via-amber-accent/5 to-transparent',
+    iconBg: 'bg-amber-accent-soft',
+    iconText: 'text-amber-accent-deep',
+    badgeBg: 'bg-amber-accent-soft',
+    badgeText: 'text-amber-accent-deep',
+    docIconBg: 'bg-amber-accent',
   },
   'outros': {
     icon: File,
     color: 'gray',
     label: 'Outros',
-    gradient: 'from-gray-500/10 via-gray-400/5 to-transparent',
-    iconBg: 'bg-gray-100',
-    iconText: 'text-gray-600',
-    badgeBg: 'bg-gray-100',
-    badgeText: 'text-gray-700',
-    docIconBg: 'bg-gray-600',
+    gradient: 'from-brand-800/10 via-brand-800/5 to-transparent',
+    iconBg: 'bg-surface-deep',
+    iconText: 'text-ink-muted',
+    badgeBg: 'bg-surface-deep',
+    badgeText: 'text-ink-secondary',
+    docIconBg: 'bg-brand-800',
   },
   'outro': {
     icon: File,
     color: 'gray',
     label: 'Outros',
-    gradient: 'from-gray-500/10 via-gray-400/5 to-transparent',
-    iconBg: 'bg-gray-100',
-    iconText: 'text-gray-600',
-    badgeBg: 'bg-gray-100',
-    badgeText: 'text-gray-700',
-    docIconBg: 'bg-gray-600',
+    gradient: 'from-brand-800/10 via-brand-800/5 to-transparent',
+    iconBg: 'bg-surface-deep',
+    iconText: 'text-ink-muted',
+    badgeBg: 'bg-surface-deep',
+    badgeText: 'text-ink-secondary',
+    docIconBg: 'bg-brand-800',
   },
 };
 
@@ -334,7 +334,7 @@ export default function DocumentsByCategory({
 
   if (sortedCategories.length === 0) {
     return (
-      <div className="bg-brand-50 border-2 border-brand-200 rounded-xl p-6 lg:p-6 text-center">
+      <div className="bg-brand-50 border-2 border-brand-200 rounded-[6px] p-6 lg:p-6 text-center">
         <p className="text-base lg:text-lg text-brand-800 font-medium">
           Não há outros documentos disponíveis para este curso no momento.
         </p>
@@ -346,8 +346,8 @@ export default function DocumentsByCategory({
     <div className="space-y-4 lg:space-y-5">
       {/* Header */}
       <div className="mb-2">
-        <h2 className="text-lg lg:text-2xl font-bold text-gray-900">Materiais por Categoria</h2>
-        <p className="text-sm text-gray-500 mt-1">Clique em um documento para ver detalhes completos</p>
+        <h2 className="text-lg lg:text-2xl font-bold text-ink-primary">Materiais por Categoria</h2>
+        <p className="text-sm text-ink-muted mt-1">Clique em um documento para ver detalhes completos</p>
       </div>
 
       {/* Cards por categoria */}
@@ -360,25 +360,25 @@ export default function DocumentsByCategory({
         return (
           <div
             key={category}
-            className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-shadow hover:shadow-lg"
+            className="bg-white rounded-[6px] border border-border-subtle overflow-hidden transition-shadow hover:"
           >
             {/* Header da categoria com gradiente */}
             <button
               onClick={() => toggleCategory(category)}
-              className={`w-full flex items-center justify-between p-4 lg:p-5 bg-gradient-to-r ${config.gradient} hover:opacity-90 transition-opacity`}
+              className={`w-full flex items-center justify-between p-4 lg:p-5 ${config.gradient} hover:opacity-90 transition-opacity`}
             >
               <div className="flex items-center gap-3 lg:gap-4">
-                <div className={`w-10 h-10 lg:w-11 lg:h-11 ${config.iconBg} ${config.iconText} rounded-lg flex items-center justify-center`}>
+                <div className={`w-10 h-10 lg:w-11 lg:h-11 ${config.iconBg} ${config.iconText} rounded-[6px] flex items-center justify-center`}>
                   <IconComponent className="w-5 h-5 lg:w-6 lg:h-6" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-base lg:text-lg font-bold text-gray-900">{config.label}</h3>
+                  <h3 className="text-base lg:text-lg font-bold text-ink-primary">{config.label}</h3>
                 </div>
                 <span className={`${config.badgeBg} ${config.badgeText} px-2.5 py-0.5 rounded-full text-xs font-bold`}>
                   {categoryDocs.length}
                 </span>
               </div>
-              <div className="text-gray-400">
+              <div className="text-ink-muted">
                 {isExpanded ? (
                   <ChevronUp className="w-5 h-5" />
                 ) : (
@@ -391,7 +391,7 @@ export default function DocumentsByCategory({
             <div className="p-3 lg:p-4 space-y-3">
               {/* Aviso de documentos ostensivos para categorias AGU */}
               {['pareceres', 'orientacao-normativa', 'enunciados'].includes(category) && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-xs text-blue-800 leading-relaxed">
+                <div className="bg-brand-50 border border-brand-200 rounded-[6px] px-4 py-3 text-xs text-brand-800 leading-relaxed">
                   <p>
                     <strong>Nota de transparência:</strong> Todos os documentos aqui reunidos são atos administrativos
                     de caráter ostensivo, publicados em portais oficiais de acesso público na internet
@@ -430,15 +430,15 @@ export default function DocumentsByCategory({
                       <div key={entityKey} className="space-y-2">
                         <button
                           onClick={() => toggleCategory(entityExpandKey)}
-                          className="w-full flex items-center justify-between px-3 py-2 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                          className="w-full flex items-center justify-between px-3 py-2 bg-brand-50 rounded-[6px] hover:bg-brand-100 transition-colors"
                         >
                           <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-semibold text-purple-800">{entityLabel}</h4>
-                            <span className="bg-purple-200 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                            <h4 className="text-sm font-semibold text-brand-800">{entityLabel}</h4>
+                            <span className="bg-brand-200 text-brand-700 px-2 py-0.5 rounded-full text-xs font-bold">
                               {entityDocs.length}
                             </span>
                           </div>
-                          <div className="text-purple-400">
+                          <div className="text-brand-400">
                             {isEntityExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                           </div>
                         </button>
@@ -446,7 +446,7 @@ export default function DocumentsByCategory({
                         {(isEntityExpanded ? entityDocs : entityDocs.slice(0, 2)).map((doc) => (
                           <div
                             key={doc.id}
-                            className="bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all"
+                            className="bg-surface-raised hover:bg-white rounded-[6px] p-3 lg:p-4 border border-border-subtle hover:border-brand-200 hover: transition-all"
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div
@@ -457,15 +457,15 @@ export default function DocumentsByCategory({
                                 onKeyDown={(e) => { if (e.key === 'Enter') onDocumentClick(doc); }}
                               >
                                 <div className="flex items-start gap-2.5 lg:gap-3 w-full">
-                                  <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                                  <div className={`w-8 h-8 ${config.docIconBg} rounded-[6px] flex items-center justify-center flex-shrink-0 mt-0.5`}>
                                     <FileText className="w-4 h-4 text-white" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                    <h4 className="text-sm lg:text-base font-semibold text-ink-primary group-hover:text-brand-600 transition-colors line-clamp-2">
                                       {doc.title}
                                     </h4>
                                     {doc.description && (
-                                      <p className="text-xs lg:text-sm text-gray-500 mt-1 line-clamp-2">
+                                      <p className="text-xs lg:text-sm text-ink-muted mt-1 line-clamp-2">
                                         {truncateDescription(doc.description)}
                                       </p>
                                     )}
@@ -477,10 +477,10 @@ export default function DocumentsByCategory({
                                   e.stopPropagation();
                                   toggleFavorite(doc.id, courseId);
                                 }}
-                                className={`p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
+                                className={`p-2 rounded-[6px] transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
                                   isFavorite(doc.id)
                                     ? 'text-red-600 bg-red-100 hover:bg-red-200'
-                                    : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+                                    : 'text-ink-muted hover:text-red-600 hover:bg-red-50'
                                 }`}
                                 title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                               >
@@ -493,7 +493,7 @@ export default function DocumentsByCategory({
                         {!isEntityExpanded && entityDocs.length > 2 && (
                           <button
                             onClick={() => toggleCategory(entityExpandKey)}
-                            className="w-full py-2 border-2 border-dashed border-gray-200 hover:border-purple-300 rounded-xl text-xs font-medium text-gray-500 hover:text-purple-600 hover:bg-purple-50/50 flex items-center justify-center gap-2 transition-all"
+                            className="w-full py-2 border-2 border-dashed border-border-subtle hover:border-brand-300 rounded-[6px] text-xs font-medium text-ink-muted hover:text-brand-600 hover:bg-brand-50/50 flex items-center justify-center gap-2 transition-all"
                           >
                             <span>Ver mais {entityDocs.length - 2} {entityDocs.length - 2 === 1 ? 'enunciado' : 'enunciados'}</span>
                             <ChevronDown className="w-3 h-3" />
@@ -503,7 +503,7 @@ export default function DocumentsByCategory({
                         {isEntityExpanded && entityDocs.length > 2 && (
                           <button
                             onClick={() => toggleCategory(entityExpandKey)}
-                            className="w-full py-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 transition-colors"
+                            className="w-full py-1.5 text-xs font-medium text-ink-muted hover:text-ink-secondary flex items-center justify-center gap-1 transition-colors"
                           >
                             <ChevronUp className="w-3 h-3" />
                             <span>Mostrar menos</span>
@@ -519,7 +519,7 @@ export default function DocumentsByCategory({
                   {(isExpanded ? categoryDocs : categoryDocs.slice(0, 2)).map((doc) => (
                     <div
                       key={doc.id}
-                      className="bg-gray-50 hover:bg-white rounded-xl p-3 lg:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-sm transition-all"
+                      className="bg-surface-raised hover:bg-white rounded-[6px] p-3 lg:p-4 border border-border-subtle hover:border-brand-200 hover: transition-all"
                     >
                       <div className="flex items-start justify-between gap-3">
                         {/* Conteudo do documento */}
@@ -531,7 +531,7 @@ export default function DocumentsByCategory({
                           onKeyDown={(e) => { if (e.key === 'Enter') onDocumentClick(doc); }}
                         >
                           <div className="flex items-start gap-2.5 lg:gap-3 w-full">
-                            <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                            <div className={`w-8 h-8 ${config.docIconBg} rounded-[6px] flex items-center justify-center flex-shrink-0 mt-0.5`}>
                               {doc.type === 'video' ? (
                                 <Video className="w-4 h-4 text-white" />
                               ) : (
@@ -540,13 +540,13 @@ export default function DocumentsByCategory({
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start gap-2">
-                                <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                <h4 className="text-sm lg:text-base font-semibold text-ink-primary group-hover:text-brand-600 transition-colors line-clamp-2">
                                   {doc.title}
                                 </h4>
                                 {PARECER_SUBTYPE_LABELS[doc.category] && (
                                   <span className={`flex-shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
                                     doc.category === 'decor'
-                                      ? 'bg-amber-100 text-amber-800'
+                                      ? 'bg-amber-accent-soft text-amber-accent-deep'
                                       : 'bg-emerald-100 text-emerald-800'
                                   }`}>
                                     {PARECER_SUBTYPE_LABELS[doc.category]}
@@ -554,7 +554,7 @@ export default function DocumentsByCategory({
                                 )}
                               </div>
                               {doc.description && (
-                                <p className="text-xs lg:text-sm text-gray-500 mt-1 line-clamp-2">
+                                <p className="text-xs lg:text-sm text-ink-muted mt-1 line-clamp-2">
                                   {truncateDescription(doc.description)}
                                 </p>
                               )}
@@ -579,10 +579,10 @@ export default function DocumentsByCategory({
                             e.stopPropagation();
                             toggleFavorite(doc.id, courseId);
                           }}
-                          className={`p-2 rounded-lg transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
+                          className={`p-2 rounded-[6px] transition-colors flex-shrink-0 min-h-[40px] min-w-[40px] lg:min-h-0 lg:min-w-0 flex items-center justify-center ${
                             isFavorite(doc.id)
                               ? 'text-red-600 bg-red-100 hover:bg-red-200'
-                              : 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+                              : 'text-ink-muted hover:text-red-600 hover:bg-red-50'
                           }`}
                           title={isFavorite(doc.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                         >
@@ -596,7 +596,7 @@ export default function DocumentsByCategory({
                   {!isExpanded && categoryDocs.length > 2 && (
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="w-full py-3 border-2 border-dashed border-gray-200 hover:border-blue-300 rounded-xl text-sm font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 flex items-center justify-center gap-2 transition-all"
+                      className="w-full py-3 border-2 border-dashed border-border-subtle hover:border-brand-300 rounded-[6px] text-sm font-medium text-ink-muted hover:text-brand-600 hover:bg-brand-50/50 flex items-center justify-center gap-2 transition-all"
                     >
                       <span>Ver mais {categoryDocs.length - 2} {categoryDocs.length - 2 === 1 ? 'documento' : 'documentos'}</span>
                       <ChevronDown className="w-4 h-4" />
@@ -607,7 +607,7 @@ export default function DocumentsByCategory({
                   {isExpanded && categoryDocs.length > 2 && (
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="w-full py-2 text-sm font-medium text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1 transition-colors"
+                      className="w-full py-2 text-sm font-medium text-ink-muted hover:text-ink-secondary flex items-center justify-center gap-1 transition-colors"
                     >
                       <ChevronUp className="w-4 h-4" />
                       <span>Mostrar menos</span>

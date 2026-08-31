@@ -37,7 +37,7 @@ export const Footer = memo(function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram do Prof. Daniel Barral"
-                className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center hover:bg-brand-500 transition-colors"
+                className="w-10 h-10 bg-brand-600 rounded-[6px] flex items-center justify-center hover:bg-brand-500 transition-colors"
               >
                 <Instagram className="w-5 h-5 text-white" />
               </a>
@@ -46,7 +46,7 @@ export const Footer = memo(function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube do Prof. Daniel Barral"
-                className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center hover:bg-brand-500 transition-colors"
+                className="w-10 h-10 bg-brand-600 rounded-[6px] flex items-center justify-center hover:bg-brand-500 transition-colors"
               >
                 <Youtube className="w-5 h-5 text-white" />
               </a>
@@ -55,7 +55,7 @@ export const Footer = memo(function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn do Prof. Daniel Barral"
-                className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center hover:bg-brand-500 transition-colors"
+                className="w-10 h-10 bg-brand-600 rounded-[6px] flex items-center justify-center hover:bg-brand-500 transition-colors"
               >
                 <Linkedin className="w-5 h-5 text-white" />
               </a>

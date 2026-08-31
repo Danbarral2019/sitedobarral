@@ -39,9 +39,9 @@ export default function TrailSidebar({
   ).length;
 
   return (
-    <div className="sticky top-20 rounded-xl border border-gray-200 bg-white p-3">
+    <div className="sticky top-20 rounded-[6px] border border-border-subtle bg-white p-3">
       <div className="mb-3 flex items-center justify-between px-1">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
           Trilha
         </h2>
         <button
@@ -50,7 +50,7 @@ export default function TrailSidebar({
             "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
             learningMode
               ? "bg-brand-50 text-brand-800"
-              : "bg-gray-100 text-gray-700",
+              : "bg-surface-deep text-ink-secondary",
           )}
           title={
             learningMode
@@ -70,7 +70,7 @@ export default function TrailSidebar({
         </button>
       </div>
 
-      <div className="mb-3 px-1 text-[11px] text-gray-500">
+      <div className="mb-3 px-1 text-[11px] text-ink-muted">
         {doneRequired}/{totalRequired} seções obrigatórias concluídas
       </div>
 
@@ -86,13 +86,13 @@ export default function TrailSidebar({
                   "flex w-full items-start gap-2 rounded-md px-2 py-2 text-left text-sm transition",
                   active
                     ? "bg-brand-50 text-brand-900"
-                    : "text-gray-700 hover:bg-gray-50",
+                    : "text-ink-secondary hover:bg-surface-raised",
                 )}
               >
                 <span className="mt-0.5">{renderIcon(st?.status)}</span>
                 <span className="flex-1">
                   <span className="block leading-snug">{s.title}</span>
-                  <span className="mt-0.5 block text-[10px] uppercase tracking-wide text-gray-400">
+                  <span className="mt-0.5 block text-[10px] uppercase tracking-wide text-ink-muted">
                     {s.required ? "obrigatória" : "opcional"}
                     {s.discretionary && " · dispensável c/ justificativa"}
                   </span>
@@ -113,10 +113,10 @@ function renderIcon(status?: string) {
     case "DRAFTED":
       return <CircleDot className="h-4 w-4 text-brand-700" />;
     case "IN_PROGRESS":
-      return <CircleDashed className="h-4 w-4 text-amber-600" />;
+      return <CircleDashed className="h-4 w-4 text-amber-accent-deep" />;
     case "SKIPPED_WITH_JUSTIFICATION":
-      return <CircleDashed className="h-4 w-4 text-gray-400" />;
+      return <CircleDashed className="h-4 w-4 text-ink-muted" />;
     default:
-      return <Circle className="h-4 w-4 text-gray-300" />;
+      return <Circle className="h-4 w-4 text-ink-muted" />;
   }
 }

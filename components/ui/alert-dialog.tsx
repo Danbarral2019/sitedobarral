@@ -43,8 +43,8 @@ export function AlertDialog({
 
   const variantStyles = {
     danger: 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800',
-    warning: 'from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800',
-    info: 'from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800',
+    warning: 'from-amber-accent to-amber-accent hover:from-amber-accent hover:to-amber-accent',
+    info: 'from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800',
   };
 
   return (
@@ -54,13 +54,13 @@ export function AlertDialog({
           <div className="flex items-center gap-3 mb-2">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
               variant === 'danger' ? 'bg-red-100' :
-              variant === 'warning' ? 'bg-yellow-100' :
-              'bg-blue-100'
+              variant === 'warning' ? 'bg-amber-accent-soft' :
+              'bg-brand-100'
             }`}>
               <AlertTriangle className={`w-6 h-6 ${
                 variant === 'danger' ? 'text-red-600' :
-                variant === 'warning' ? 'text-yellow-600' :
-                'text-blue-600'
+                variant === 'warning' ? 'text-amber-accent-deep' :
+                'text-brand-600'
               }`} />
             </div>
             <DialogTitle className="text-xl">{title}</DialogTitle>
@@ -74,7 +74,7 @@ export function AlertDialog({
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className="px-4 py-2 border-2 border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border-2 border-border-subtle rounded-[6px] font-medium text-ink-secondary hover:bg-surface-raised transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelText}
           </button>
@@ -82,7 +82,7 @@ export function AlertDialog({
             type="button"
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 bg-gradient-to-r text-white rounded-lg font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]}`}
+            className={`px-4 py-2 text-white rounded-[6px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]}`}
           >
             {isLoading ? 'Processando...' : confirmText}
           </button>

@@ -70,7 +70,7 @@ export default function DocumentTabs({
         <button
           onClick={transitionToTR}
           disabled={transitioning}
-          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+          className="inline-flex items-center gap-1 rounded-[6px] bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800 disabled:opacity-60"
         >
           {transitioning ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -81,7 +81,7 @@ export default function DocumentTabs({
         </button>
       ) : etpPresent ? (
         <span
-          className="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-xs text-gray-500"
+          className="inline-flex items-center gap-1 rounded-[6px] bg-surface-deep px-3 py-1.5 text-xs text-ink-muted"
           title={
             etpRequiredRemaining > 0
               ? `Faltam ${etpRequiredRemaining} seções obrigatórias do ETP`
@@ -96,7 +96,7 @@ export default function DocumentTabs({
       {(etpPresent || trPresent) && (
         <Link
           href={`/area-restrita/planejamento/${sessionId}/revisao`}
-          className="ml-auto inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:border-brand-300 hover:text-brand-800"
+          className="ml-auto inline-flex items-center gap-1 rounded-[6px] border border-border-subtle bg-white px-3 py-1.5 text-xs font-medium text-ink-secondary hover:border-brand-300 hover:text-brand-800"
         >
           <ShieldCheck className="h-3.5 w-3.5" /> Revisão final
         </Link>
@@ -126,10 +126,10 @@ function TabLink({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition",
+        "inline-flex items-center gap-1 rounded-[6px] px-3 py-1.5 text-xs font-medium transition",
         active
           ? "bg-brand-700 text-white"
-          : "border border-gray-200 bg-white text-gray-700 hover:border-brand-300",
+          : "border border-border-subtle bg-white text-ink-secondary hover:border-brand-300",
       )}
     >
       {icon} {label}

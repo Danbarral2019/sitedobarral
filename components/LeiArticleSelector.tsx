@@ -136,9 +136,9 @@ export default function LeiArticleSelector({
     <div className="space-y-3">
       {/* Label */}
       {label && (
-        <label className="block text-sm font-medium text-gray-900">
+        <label className="block text-sm font-medium text-ink-primary">
           {label}
-          <span className="ml-2 text-xs text-gray-500">
+          <span className="ml-2 text-xs text-ink-muted">
             ({selectedArticles.length}/{maxArticles})
           </span>
         </label>
@@ -146,7 +146,7 @@ export default function LeiArticleSelector({
 
       {/* Tags de artigos selecionados */}
       {selectedArticles.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-3 bg-gray-50 border-2 border-gray-200 rounded-lg">
+        <div className="flex flex-wrap gap-2 p-3 bg-surface-raised border-2 border-border-subtle rounded-[6px]">
           {selectedArticles.map((articleNumber) => {
             const article = artigos[articleNumber];
             if (!article) return null;
@@ -154,19 +154,19 @@ export default function LeiArticleSelector({
             return (
               <div
                 key={articleNumber}
-                className="group inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 transition-colors"
+                className="group inline-flex items-center gap-2 px-3 py-1.5 bg-brand-100 text-brand-900 rounded-[6px] hover:bg-brand-200 transition-colors"
               >
                 <Hash className="w-3.5 h-3.5" />
                 <span className="text-sm font-medium">
                   {formatArticleNumber(articleNumber)}
                 </span>
-                <span className="text-xs text-blue-700 max-w-[200px] truncate">
+                <span className="text-xs text-brand-700 max-w-[200px] truncate">
                   {article.ementa}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeArticle(articleNumber)}
-                  className="ml-1 p-0.5 hover:bg-blue-300 rounded transition-colors"
+                  className="ml-1 p-0.5 hover:bg-brand-300 rounded transition-colors"
                   title="Remover artigo"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -180,7 +180,7 @@ export default function LeiArticleSelector({
       {/* Campo de busca com autocomplete */}
       <div className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
           <input
             ref={inputRef}
             type="text"
@@ -194,7 +194,7 @@ export default function LeiArticleSelector({
             }}
             placeholder={placeholder}
             disabled={selectedArticles.length >= maxArticles}
-            className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full pl-10 pr-4 py-2.5 border-2 border-border-subtle rounded-[6px] focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all disabled:bg-surface-deep disabled:cursor-not-allowed"
           />
         </div>
 
@@ -202,29 +202,29 @@ export default function LeiArticleSelector({
         {isDropdownOpen && filteredArticles.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-2 bg-white border-2 border-border-subtle rounded-[6px] max-h-80 overflow-y-auto"
           >
             {filteredArticles.map((article, index) => (
               <button
                 key={article.numero}
                 type="button"
                 onClick={() => addArticle(article.numero)}
-                className={`w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                  index === highlightedIndex ? 'bg-blue-50' : ''
+                className={`w-full px-4 py-3 text-left hover:bg-brand-50 transition-colors border-b border-border-subtle last:border-b-0 ${
+                  index === highlightedIndex ? 'bg-brand-50' : ''
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+                  <div className="flex-shrink-0 w-14 h-14 bg-brand-600 rounded-[6px] flex items-center justify-center text-white font-bold border border-border-subtle">
                     {article.numero}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold text-gray-900 mb-1">
+                    <div className="font-bold text-ink-primary mb-1">
                       {formatArticleNumber(article.numero)}
                     </div>
-                    <div className="text-sm text-gray-700 line-clamp-2">
+                    <div className="text-sm text-ink-secondary line-clamp-2">
                       {article.ementa}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-ink-muted mt-1">
                       {article.capitulo}
                       {article.secao && ` • ${article.secao}`}
                     </div>
@@ -239,7 +239,7 @@ export default function LeiArticleSelector({
       {/* Artigos populares (opcional) */}
       {showPopularArticles && selectedArticles.length === 0 && !searchTerm && (
         <div className="space-y-2">
-          <p className="text-xs text-gray-600 font-medium">Artigos populares:</p>
+          <p className="text-xs text-ink-muted font-medium">Artigos populares:</p>
           <div className="flex flex-wrap gap-2">
             {ARTIGOS_POPULARES.slice(0, 6).map((articleNumber) => {
               const article = artigos[articleNumber];
@@ -250,7 +250,7 @@ export default function LeiArticleSelector({
                   key={articleNumber}
                   type="button"
                   onClick={() => addArticle(articleNumber)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-900 rounded-lg transition-colors text-sm"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-deep hover:bg-brand-100 text-ink-secondary hover:text-brand-900 rounded-[6px] transition-colors text-sm"
                 >
                   <Hash className="w-3.5 h-3.5" />
                   <span className="font-medium">{formatArticleNumber(articleNumber)}</span>
@@ -265,7 +265,7 @@ export default function LeiArticleSelector({
       )}
 
       {/* Dica de uso */}
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-ink-muted">
         💡 Dica: Digite o número do artigo ou palavras-chave da ementa. Use as setas ↑↓ para navegar e Enter para selecionar.
       </p>
     </div>

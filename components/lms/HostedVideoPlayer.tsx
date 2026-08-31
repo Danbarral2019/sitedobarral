@@ -49,7 +49,7 @@ export default function HostedVideoPlayer({ videoId, title }: Props) {
 
   if (error) {
     return (
-      <div className="aspect-video bg-gray-900 rounded-xl flex flex-col items-center justify-center text-white gap-2">
+      <div className="aspect-video bg-brand-900 rounded-[6px] flex flex-col items-center justify-center text-white gap-2">
         <AlertCircle className="w-8 h-8 text-red-400" />
         <p className="text-sm">{error}</p>
       </div>
@@ -58,7 +58,7 @@ export default function HostedVideoPlayer({ videoId, title }: Props) {
 
   if (!url) {
     return (
-      <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center">
+      <div className="aspect-video bg-brand-900 rounded-[6px] flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-white animate-spin" />
       </div>
     );
@@ -72,7 +72,7 @@ export default function HostedVideoPlayer({ videoId, title }: Props) {
       controlsList="nodownload"
       onContextMenu={(e) => e.preventDefault()}
       onError={handleVideoError}
-      className="w-full aspect-video bg-black rounded-xl"
+      className="w-full aspect-video bg-black rounded-[6px]"
       title={title}
     >
       <source src={url} />

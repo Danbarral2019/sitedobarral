@@ -14,9 +14,9 @@ export default async function CertificatePage({
 
   if (!courseId || !course) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <main className="min-h-screen flex items-center justify-center bg-surface-raised">
         <div className="text-center">
-          <p className="text-gray-500 mb-4">Curso nao encontrado.</p>
+          <p className="text-ink-muted mb-4">Curso nao encontrado.</p>
           <Link
             href="/area-restrita"
             className="text-brand-600 hover:text-brand-700 font-semibold text-sm"
@@ -29,18 +29,18 @@ export default async function CertificatePage({
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
+    <main className="min-h-screen bg-surface-raised">
+      <header className="bg-white border-b border-border-subtle">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link
             href={`/area-restrita/curso/${courseSlug}`}
-            className="p-2 rounded-lg text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+            className="p-2 rounded-[6px] text-ink-muted hover:text-brand-600 hover:bg-brand-50 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <p className="text-xs text-gray-400">{course.title.split('(')[0].trim()}</p>
-            <h1 className="text-lg font-bold text-gray-900">Certificado de Conclusao</h1>
+            <p className="text-xs text-ink-muted">{course.title.split('(')[0].trim()}</p>
+            <h1 className="text-lg font-bold text-ink-primary">Certificado de Conclusao</h1>
           </div>
         </div>
       </header>

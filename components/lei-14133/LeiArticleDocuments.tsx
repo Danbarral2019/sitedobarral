@@ -18,23 +18,23 @@ const THEME_SECTION = '__tema__';
 
 export function LeiArticleDocuments({ loading, data, expandedCategories, onToggleCategory }: LeiArticleDocumentsProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white rounded-[6px] p-6 border border-border-subtle">
       {loading && !data ? (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <Loader2 className="w-6 h-6 animate-spin text-brand-600" />
         </div>
       ) : data ? (
         <>
           {data.debatedInVoto?.length > 0 && (
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-1">
-                <Scale className="w-5 h-5 text-indigo-600" />
-                <h3 className="text-lg font-bold text-gray-900">Debatido no voto</h3>
-                <span className="text-sm text-gray-500">
+                <Scale className="w-5 h-5 text-brand-600" />
+                <h3 className="text-lg font-bold text-ink-primary">Debatido no voto</h3>
+                <span className="text-sm text-ink-muted">
                   ({data.debatedInVoto.length} {data.debatedInVoto.length === 1 ? 'acórdão' : 'acórdãos'})
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-ink-muted mb-4">
                 Acórdãos do TCU em que este artigo foi <strong>razão de decidir</strong> — aplicado no voto,
                 não citado de passagem.
               </p>
@@ -49,9 +49,9 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
           {data.highlights.length > 0 && (
             <section className="mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <h3 className="text-lg font-bold text-gray-900">Regulamentações em destaque</h3>
-                <span className="text-sm text-gray-500">
+                <Star className="w-5 h-5 text-amber-accent-deep fill-amber-accent" />
+                <h3 className="text-lg font-bold text-ink-primary">Regulamentações em destaque</h3>
+                <span className="text-sm text-ink-muted">
                   ({data.highlights.length} de {data.total})
                 </span>
               </div>
@@ -64,8 +64,8 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
           )}
 
           <section>
-            <h3 className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-gray-500" />
+            <h3 className="text-base font-semibold text-ink-secondary mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-ink-muted" />
               Documentos que citam este artigo ({data.total})
             </h3>
             <div className="space-y-2">
@@ -90,14 +90,14 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
             Ref.: docs/audits/2026-07-15-lei-comentada-RESULTADOS.md
           */}
           {data.relatedByTheme?.length > 0 && (
-            <section className="mt-6 pt-6 border-t border-gray-200">
+            <section className="mt-6 pt-6 border-t border-border-subtle">
               <CategoryAccordion
                 displayName="Relacionados por tema (não citam o artigo)"
                 docs={data.relatedByTheme}
                 expanded={expandedCategories.has(THEME_SECTION)}
                 onToggle={() => onToggleCategory(THEME_SECTION)}
               />
-              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+              <p className="mt-2 text-xs text-ink-muted leading-relaxed">
                 Tratam de assunto próximo ao do artigo, mas não o mencionam. Sugeridos
                 automaticamente — confira a pertinência antes de citar.
               </p>
@@ -105,7 +105,7 @@ export function LeiArticleDocuments({ loading, data, expandedCategories, onToggl
           )}
         </>
       ) : (
-        <p className="text-sm text-gray-500 text-center py-4">
+        <p className="text-sm text-ink-muted text-center py-4">
           Não foi possível carregar os documentos relacionados.
         </p>
       )}

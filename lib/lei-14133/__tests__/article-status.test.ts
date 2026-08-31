@@ -11,25 +11,26 @@ describe('getArticleStatus', () => {
   it('retorna "Sem documentos" para count 0', () => {
     const status = getArticleStatus(0);
     expect(status.label).toBe('Sem documentos');
-    expect(status.color).toContain('gray');
+    expect(status.color).toContain('surface-deep');
   });
 
   it('retorna "Inicial" para count 1-2', () => {
     expect(getArticleStatus(1).label).toBe('Inicial');
     expect(getArticleStatus(2).label).toBe('Inicial');
-    expect(getArticleStatus(1).color).toContain('orange');
+    expect(getArticleStatus(1).color).toContain('amber-accent');
   });
 
   it('retorna "Medio" para count 3-5', () => {
     expect(getArticleStatus(3).label).toBe('Médio');
     expect(getArticleStatus(5).label).toBe('Médio');
-    expect(getArticleStatus(3).color).toContain('blue');
+    expect(getArticleStatus(3).color).toContain('brand');
   });
 
   it('retorna "Bom" para count 6-14', () => {
     expect(getArticleStatus(6).label).toBe('Bom');
     expect(getArticleStatus(10).label).toBe('Bom');
     expect(getArticleStatus(14).label).toBe('Bom');
+    // Verde preservado: sinaliza cobertura completa, e a paleta não tem verde.
     expect(getArticleStatus(10).color).toContain('green');
   });
 

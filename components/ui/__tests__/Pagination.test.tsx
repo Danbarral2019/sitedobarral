@@ -180,7 +180,8 @@ describe('Pagination Component', () => {
       render(<Pagination {...defaultProps} currentPage={3} totalPages={5} totalItems={50} />);
 
       const pageButton = screen.getAllByRole('button').find(b => b.textContent === '3');
-      expect(pageButton).toHaveClass('bg-gradient-to-r');
+      // O sistema não usa gradiente: a página atual é destacada por tom sólido.
+      expect(pageButton).toHaveClass('bg-brand-600');
     });
   });
 

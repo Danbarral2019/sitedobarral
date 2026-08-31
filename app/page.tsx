@@ -20,7 +20,7 @@ export const revalidate = 3600;
 const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCarousel'), {
   loading: () => (
     <div className="flex justify-center py-12">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
     </div>
   ),
   ssr: true
@@ -106,7 +106,7 @@ export default async function Home() {
   return (
     <main>
       {/* 1. Hero Section */}
-      <section className="text-white py-20 md:py-24 relative overflow-hidden bg-gradient-to-b from-brand-600 via-brand-600 to-brand-700">
+      <section className="text-white py-20 md:py-24 relative overflow-hidden bg-brand-700">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-6 tracking-wide">
@@ -128,14 +128,14 @@ export default async function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/cursos"
-                className="bg-white text-brand-700 px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-brand-50 transition-colors inline-flex items-center justify-center gap-2"
+                className="bg-white text-brand-700 px-8 py-3 rounded-[6px] font-poppins font-semibold hover:bg-brand-50 transition-colors inline-flex items-center justify-center gap-2"
               >
                 <BookOpen className="w-5 h-5" />
                 Explorar Cursos
               </Link>
               <Link
                 href="/login"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
+                className="bg-brand-600 text-white px-8 py-3 rounded-[6px] font-poppins font-semibold hover:bg-brand-700 transition-colors inline-flex items-center justify-center gap-2 border border-brand-500"
               >
                 Área do Aluno
                 <ArrowRight className="w-5 h-5 text-white" />
@@ -146,7 +146,7 @@ export default async function Home() {
       </section>
 
       {/* 2. Numeros / Acervo */}
-      <section className="py-16 bg-gradient-to-b from-brand-700 to-brand-800 text-white">
+      <section className="py-16 bg-brand-800 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
@@ -172,7 +172,7 @@ export default async function Home() {
                     </p>
                   </>
                 );
-                const baseClassName = `bg-white/10 backdrop-blur-sm rounded-xl p-5 text-center border border-white/10 hover:bg-white/15 transition-colors ${item.href ? 'cursor-pointer hover:border-white/30 hover:scale-[1.02] transition-all' : ''}`;
+                const baseClassName = `bg-white/10 rounded-[6px] p-5 text-center border border-white/10 hover:bg-white/15 transition-colors ${item.href ? 'cursor-pointer hover:border-white/30 hover:scale-[1.02] transition-all' : ''}`;
                 return item.href ? (
                   <Link
                     key={item.label}
@@ -195,7 +195,7 @@ export default async function Home() {
             <div className="text-center mt-8">
               <Link
                 href="/busca"
-                className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/25 transition-colors border border-white/20"
+                className="inline-flex items-center gap-2 bg-white/15 text-white px-6 py-3 rounded-[6px] font-semibold hover:bg-white/25 transition-colors border border-white/20"
               >
                 Pesquisar no Acervo
                 <ArrowRight className="w-4 h-4" />
@@ -211,23 +211,23 @@ export default async function Home() {
       </Suspense>
 
       {/* 4. Depoimentos */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Depoimentos de Alunos</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full mx-auto"></div>
+              <h2 className="text-4xl font-bold text-ink-primary mb-2">Depoimentos de Alunos</h2>
+              <div className="h-1 w-24 bg-accent-400 rounded-full mx-auto"></div>
             </div>
 
             <TestimonialsCarousel />
 
             <div className="text-center mt-10">
-              <p className="text-gray-700 mb-4 text-lg">
+              <p className="text-ink-secondary mb-4 text-lg">
                 Você também é aluno e quer compartilhar sua experiência?
               </p>
               <Link
                 href="/contato?motivo=depoimento"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-amber-accent text-white px-8 py-4 rounded-[6px] font-bold hover:from-amber-accent hover:to-amber-accent transition-all hover: transform hover:-translate-y-0.5 border border-border-subtle"
               >
                 <Star className="w-5 h-5 fill-white" />
                 Enviar Meu Depoimento
@@ -239,15 +239,15 @@ export default async function Home() {
       </section>
 
       {/* 5. Newsletter */}
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 rounded-2xl p-10 md:p-12 text-center shadow-2xl border-4 border-blue-700">
+            <div className="relative overflow-hidden bg-brand-600 rounded-[6px] p-10 md:p-12 text-center border-4 border-brand-700">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50"></div>
 
               <div className="relative z-10">
                 <div className="inline-block mb-4">
-                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                  <div className="bg-white/20 px-4 py-2 rounded-full">
                     <span className="text-white font-semibold text-sm">Newsletter Jurídica</span>
                   </div>
                 </div>
@@ -260,8 +260,8 @@ export default async function Home() {
                   jurisprudência e novos materiais disponíveis.
                 </p>
 
-                <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
-                  <NewsletterForm variant="inline" className="[&_input]:bg-white [&_input]:text-gray-900 [&_input]:placeholder:text-gray-500 [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:bg-accent-400 [&_button]:text-gray-900 [&_button]:font-bold [&_button]:hover:bg-accent-500 [&_button]:shadow-xl" />
+                <div className="max-w-xl mx-auto bg-white/10 p-2 rounded-[6px] border-2 border-white/30">
+                  <NewsletterForm variant="inline" className="[&_input]:bg-white [&_input]:text-ink-primary [&_input]:placeholder:text-ink-muted [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:bg-accent-400 [&_button]:text-ink-primary [&_button]:font-bold [&_button]:hover:bg-accent-500 [&_button]:" />
                 </div>
 
                 <p className="text-white/80 text-sm mt-4">
@@ -274,12 +274,12 @@ export default async function Home() {
       </section>
 
       {/* 6. Botao Admin - Discreto */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-surface-raised">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <Link
               href="/admin/login"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-ink-muted hover:text-ink-secondary transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

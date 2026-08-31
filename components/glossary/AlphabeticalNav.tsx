@@ -14,15 +14,15 @@ export function AlphabeticalNav({
   availableLetters,
 }: AlphabeticalNavProps) {
   return (
-    <div className="bg-white border rounded-lg p-4">
+    <div className="bg-white border rounded-[6px] p-4">
       <div className="flex flex-wrap gap-2 justify-center">
         <button
           onClick={() => onLetterClick(null)}
           className={`
             px-3 py-2 rounded-md font-semibold text-sm transition-colors
             ${!activeLetter
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              ? 'bg-brand-600 text-white'
+              : 'bg-surface-deep hover:bg-border-subtle text-ink-secondary'
             }
           `}
         >
@@ -40,10 +40,10 @@ export function AlphabeticalNav({
               className={`
                 w-10 h-10 rounded-md font-semibold transition-colors
                 ${isActive
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-brand-600 text-white'
                   : isAvailable
-                    ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    : 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                    ? 'bg-surface-deep hover:bg-border-subtle text-ink-secondary'
+                    : 'bg-surface-raised text-ink-muted cursor-not-allowed'
                 }
               `}
             >

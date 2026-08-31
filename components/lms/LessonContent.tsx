@@ -21,23 +21,23 @@ export default function LessonContent({
     <div className="space-y-6">
       {/* AI Summary */}
       {aiSummary && (
-        <div className="bg-gradient-to-r from-purple-50 to-brand-50 border border-purple-200 rounded-2xl overflow-hidden">
+        <div className="bg-brand-50 border border-brand-200 rounded-[6px] overflow-hidden">
           <button
             onClick={() => setSummaryOpen(!summaryOpen)}
             className="w-full flex items-center justify-between px-5 py-4 text-left"
           >
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-500" />
-              <span className="font-semibold text-purple-900 text-sm">Resumo IA</span>
+              <Sparkles className="w-5 h-5 text-brand-500" />
+              <span className="font-semibold text-brand-900 text-sm">Resumo IA</span>
             </div>
             {summaryOpen ? (
-              <ChevronUp className="w-4 h-4 text-purple-400" />
+              <ChevronUp className="w-4 h-4 text-brand-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-purple-400" />
+              <ChevronDown className="w-4 h-4 text-brand-400" />
             )}
           </button>
           {summaryOpen && (
-            <div className="px-5 pb-4 text-sm text-purple-900 leading-relaxed">
+            <div className="px-5 pb-4 text-sm text-brand-900 leading-relaxed">
               <LessonMarkdownContent content={aiSummary} />
             </div>
           )}
@@ -46,14 +46,14 @@ export default function LessonContent({
 
       {/* AI Key Points */}
       {aiKeyPoints && aiKeyPoints.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-          <h3 className="font-semibold text-amber-900 text-sm mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
+        <div className="bg-amber-accent-soft border border-amber-accent-soft rounded-[6px] p-5">
+          <h3 className="font-semibold text-amber-accent-deep text-sm mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-accent" />
             Pontos-Chave
           </h3>
           <ul className="space-y-2">
             {aiKeyPoints.map((point, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 text-sm text-amber-900">
+              <li key={idx} className="flex items-start gap-2.5 text-sm text-amber-accent-deep">
                 <span
                   className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5"
                   style={{

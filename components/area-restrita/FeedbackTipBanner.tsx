@@ -33,14 +33,14 @@ export default function FeedbackTipBanner() {
   return (
     <div
       role="status"
-      className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm"
+      className="mb-4 flex items-start gap-3 rounded-[6px] border border-amber-accent-soft bg-amber-accent-soft px-4 py-3 text-sm text-ink-primary"
     >
       <div className="flex-shrink-0 pt-0.5" aria-hidden="true">
         <span className="text-base">💡</span>
       </div>
       <div className="flex-1">
         <p className="font-medium">Avalie as respostas e ajude a melhorar a busca</p>
-        <p className="mt-1 text-amber-800">
+        <p className="mt-1 text-amber-accent-deep">
           Após cada resposta, você pode clicar em{' '}
           <ThumbsUp
             className="inline-block h-3.5 w-3.5 align-text-bottom"
@@ -59,7 +59,7 @@ export default function FeedbackTipBanner() {
         type="button"
         onClick={dismiss}
         aria-label="Fechar dica"
-        className="flex-shrink-0 rounded p-1 text-amber-700 transition-colors hover:bg-amber-100 hover:text-amber-900"
+        className="flex-shrink-0 rounded p-1 text-ink-primary transition-colors hover:bg-amber-accent-soft hover:text-ink-primary"
       >
         <X className="h-4 w-4" />
       </button>

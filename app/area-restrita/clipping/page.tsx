@@ -37,8 +37,8 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
   if (!eligible) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
-        <h1 className="text-2xl font-bold text-slate-900 mb-3">Clipping TCU — Arquivo</h1>
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-sm text-amber-900">
+        <h1 className="text-2xl font-bold text-ink-primary mb-3">Clipping TCU — Arquivo</h1>
+        <div className="bg-amber-accent-soft border border-amber-accent-soft rounded-md p-4 text-sm text-ink-primary">
           O arquivo de clippings é exclusivo para alunos com matrícula ou assinatura ativa. Se você
           acha que isso é um engano, escreva para{' '}
           <a href="mailto:contato@profdanielbarral.com" className="underline">
@@ -62,8 +62,8 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold text-slate-900 mb-2">Clipping TCU — Arquivo</h1>
-      <p className="text-sm text-slate-600 mb-5">
+      <h1 className="text-2xl font-bold text-ink-primary mb-2">Clipping TCU — Arquivo</h1>
+      <p className="text-sm text-ink-muted mb-5">
         Releia clippings diários enviados anteriormente. Os trechos são extraídos do inteiro teor
         dos acórdãos.
       </p>
@@ -75,18 +75,18 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
             name="q"
             defaultValue={query}
             placeholder="Buscar por número do acórdão ou palavra na ementa…"
-            className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 border border-border-subtle rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <button
             type="submit"
-            className="bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-blue-800"
+            className="bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-brand-800"
           >
             Buscar
           </button>
           {query ? (
             <Link
               href="/area-restrita/clipping"
-              className="text-sm text-slate-500 self-center px-2 hover:underline"
+              className="text-sm text-ink-muted self-center px-2 hover:underline"
             >
               limpar
             </Link>
@@ -96,7 +96,7 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
 
       {query.length >= 2 ? (
         <section>
-          <p className="text-xs text-slate-500 mb-3">
+          <p className="text-xs text-ink-muted mb-3">
             {searchHits.length === 0
               ? `Nenhum resultado para "${query}".`
               : `${searchHits.length} ${searchHits.length === 1 ? 'envio' : 'envios'} contém "${query}":`}
@@ -105,19 +105,19 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
             {searchHits.map((hit) => {
               const dateParam = formatSentDateParam(hit.sentDate);
               return (
-                <li key={dateParam} className="bg-white border border-slate-200 rounded-md p-4">
+                <li key={dateParam} className="bg-white border border-border-subtle rounded-md p-4">
                   <Link
                     href={`/area-restrita/clipping/${dateParam}`}
-                    className="font-semibold text-blue-700 hover:underline"
+                    className="font-semibold text-brand-700 hover:underline"
                   >
                     {fmtDateLong(hit.sentDate)}
                   </Link>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-ink-muted mt-1">
                     {hit.acordaoCount} {hit.acordaoCount === 1 ? 'acórdão' : 'acórdãos'} no envio · matched:{' '}
                     {hit.matchedNumeros.slice(0, 3).join(', ')}
                   </p>
                   {hit.snippet ? (
-                    <p className="text-sm text-slate-600 mt-2 line-clamp-2">{hit.snippet}…</p>
+                    <p className="text-sm text-ink-muted mt-2 line-clamp-2">{hit.snippet}…</p>
                   ) : null}
                 </li>
               );
@@ -127,25 +127,25 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
       ) : (
         <section>
           {list && list.entries.length === 0 ? (
-            <p className="text-sm text-slate-500 italic">Nenhum clipping enviado ainda.</p>
+            <p className="text-sm text-ink-muted italic">Nenhum clipping enviado ainda.</p>
           ) : (
             <ul className="space-y-3">
               {list?.entries.map((e) => {
                 const dateParam = formatSentDateParam(e.sentDate);
                 return (
-                  <li key={dateParam} className="bg-white border border-slate-200 rounded-md p-4">
+                  <li key={dateParam} className="bg-white border border-border-subtle rounded-md p-4">
                     <Link
                       href={`/area-restrita/clipping/${dateParam}`}
-                      className="font-semibold text-blue-700 hover:underline"
+                      className="font-semibold text-brand-700 hover:underline"
                     >
                       {fmtDateLong(e.sentDate)}
                     </Link>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-ink-muted mt-1">
                       {e.acordaoCount} {e.acordaoCount === 1 ? 'acórdão' : 'acórdãos'}
                       {e.totalSent != null ? ` · enviado a ${e.totalSent}` : ''}
                     </p>
                     {e.preview && e.preview !== '(sem preview)' ? (
-                      <p className="text-sm text-slate-600 mt-2 line-clamp-2">{e.preview}</p>
+                      <p className="text-sm text-ink-muted mt-2 line-clamp-2">{e.preview}</p>
                     ) : null}
                   </li>
                 );
@@ -157,7 +157,7 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
               {offset > 0 ? (
                 <Link
                   href={`/area-restrita/clipping?offset=${Math.max(offset - pageSize, 0)}`}
-                  className="text-blue-700 hover:underline"
+                  className="text-brand-700 hover:underline"
                 >
                   ← Mais recentes
                 </Link>
@@ -167,7 +167,7 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
               {offset + pageSize < list.total ? (
                 <Link
                   href={`/area-restrita/clipping?offset=${offset + pageSize}`}
-                  className="text-blue-700 hover:underline"
+                  className="text-brand-700 hover:underline"
                 >
                   Mais antigos →
                 </Link>

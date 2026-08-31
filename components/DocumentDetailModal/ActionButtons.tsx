@@ -25,14 +25,14 @@ export default function ActionButtons({
   onClose,
 }: ActionButtonsProps) {
   return (
-    <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+    <div className="flex flex-wrap gap-3 pt-4 border-t border-border-subtle">
       {document.type === 'link' && primaryUrl ? (
         <a
           href={primaryUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleView}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
+          className="flex-1 bg-brand-700 text-white px-6 py-3 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-800 transition-all flex items-center justify-center gap-2 min-w-[200px] border border-border-subtle"
         >
           <ExternalLink className="w-5 h-5" />
           Acessar Documento
@@ -41,7 +41,7 @@ export default function ActionButtons({
         <a
           href={`/api/documents/${documentId}/download`}
           onClick={handleDownload}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg min-w-[200px]"
+          className="flex-1 bg-brand-700 text-white px-6 py-3 rounded-[6px] font-bold hover:from-brand-700 hover:to-brand-800 transition-all flex items-center justify-center gap-2 min-w-[200px] border border-border-subtle"
         >
           <Download className="w-5 h-5" />
           Download do Arquivo
@@ -55,7 +55,7 @@ export default function ActionButtons({
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleView}
-          className="px-5 py-3 bg-sky-100 text-sky-800 rounded-xl font-bold hover:bg-sky-200 transition-colors flex items-center gap-2"
+          className="px-5 py-3 bg-brand-100 text-brand-800 rounded-[6px] font-bold hover:bg-brand-200 transition-colors flex items-center gap-2"
         >
           <Newspaper className="w-4 h-4" />
           DOU
@@ -64,7 +64,7 @@ export default function ActionButtons({
 
       <button
         onClick={onClose}
-        className="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold hover:bg-gray-300 transition-colors"
+        className="px-6 py-3 bg-surface-deep text-ink-secondary rounded-[6px] font-bold hover:bg-border-strong transition-colors"
       >
         Fechar
       </button>

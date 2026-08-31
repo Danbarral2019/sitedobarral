@@ -47,21 +47,21 @@ export default function LegislativeActsPanel() {
   } = useLegislativeActs();
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden">
       {/* Header com Abas */}
       <div className="p-6 pb-0">
         <div className="flex items-center gap-3 mb-4">
           {isTic
-            ? <Monitor className="w-8 h-8 text-cyan-600" />
+            ? <Monitor className="w-8 h-8 text-brand-600" />
             : isBoasPraticas
               ? <FileText className="w-8 h-8 text-emerald-600" />
-              : <Gavel className="w-8 h-8 text-amber-600" />
+              : <Gavel className="w-8 h-8 text-amber-accent-deep" />
           }
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-ink-primary">
               {isTic ? 'Contratações de TIC' : isBoasPraticas ? 'Outros Atos Normativos' : 'Atos Normativos Infralegais'}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-ink-muted">
               {isTic
                 ? 'Normativos sobre contratações de Tecnologia da Informação e Comunicação'
                 : isBoasPraticas
@@ -72,19 +72,19 @@ export default function LegislativeActsPanel() {
         </div>
 
         {/* Abas */}
-        <div className="flex gap-1 border-b-2 border-gray-200">
+        <div className="flex gap-1 border-b-2 border-border-subtle">
           <button
             onClick={() => switchTab('atos')}
             className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
               activeTab === 'atos'
-                ? 'text-amber-700 border-amber-600'
-                : 'text-gray-500 border-transparent hover:text-amber-600'
+                ? 'text-amber-accent-deep border-amber-accent'
+                : 'text-ink-muted border-transparent hover:text-amber-accent-deep'
             }`}
           >
             <Scale className="w-4 h-4" />
             Atos Normativos
             <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-              activeTab === 'atos' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
+              activeTab === 'atos' ? 'bg-amber-accent-soft text-amber-accent-deep' : 'bg-surface-deep text-ink-muted'
             }`}>
               {tabCounts.atos}
             </span>
@@ -93,14 +93,14 @@ export default function LegislativeActsPanel() {
             onClick={() => switchTab('tic')}
             className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
               activeTab === 'tic'
-                ? 'text-cyan-700 border-cyan-600'
-                : 'text-gray-500 border-transparent hover:text-cyan-600'
+                ? 'text-brand-700 border-brand-600'
+                : 'text-ink-muted border-transparent hover:text-brand-600'
             }`}
           >
             <Monitor className="w-4 h-4" />
             TIC
             <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-              activeTab === 'tic' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-500'
+              activeTab === 'tic' ? 'bg-brand-100 text-brand-700' : 'bg-surface-deep text-ink-muted'
             }`}>
               {tabCounts.tic}
             </span>
@@ -110,13 +110,13 @@ export default function LegislativeActsPanel() {
             className={`flex items-center gap-1.5 px-4 py-2.5 font-semibold text-sm transition-colors -mb-[2px] border-b-2 ${
               activeTab === 'boas-praticas'
                 ? 'text-emerald-700 border-emerald-600'
-                : 'text-gray-500 border-transparent hover:text-emerald-600'
+                : 'text-ink-muted border-transparent hover:text-emerald-600'
             }`}
           >
             <FileText className="w-4 h-4" />
             Outros Atos
             <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-              activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+              activeTab === 'boas-praticas' ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-deep text-ink-muted'
             }`}>
               {tabCounts.boasPraticas}
             </span>
@@ -154,7 +154,7 @@ export default function LegislativeActsPanel() {
         {/* Count */}
         {!isLoading && (
           <div className="mb-4 flex items-center justify-between">
-            <span className="flex items-center gap-1 text-sm text-gray-600">
+            <span className="flex items-center gap-1 text-sm text-ink-muted">
               <FileText className="w-4 h-4" />
               {total} {isTic
                 ? (total === 1 ? 'ato de TIC' : 'atos de TIC')
@@ -164,7 +164,7 @@ export default function LegislativeActsPanel() {
               {hasActiveFilters && ' encontrado(s)'}
             </span>
             {totalPages > 1 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-ink-muted">
                 Pág. {page}/{totalPages}
               </span>
             )}
@@ -174,16 +174,16 @@ export default function LegislativeActsPanel() {
         {/* Loading */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className={`w-8 h-8 animate-spin ${isTic ? 'text-cyan-600' : isBoasPraticas ? 'text-emerald-600' : 'text-amber-600'}`} />
+            <Loader2 className={`w-8 h-8 animate-spin ${isTic ? 'text-brand-600' : isBoasPraticas ? 'text-emerald-600' : 'text-amber-accent-deep'}`} />
           </div>
         ) : acts.length === 0 ? (
           /* Empty state */
           <div className="text-center py-12">
             {isBoasPraticas ? (
               <>
-                <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">Nenhum ato normativo encontrado</p>
-                <p className="text-sm text-gray-400 mt-1 max-w-sm mx-auto">
+                <FileText className="w-12 h-12 text-ink-muted mx-auto mb-3" />
+                <p className="text-ink-muted font-medium">Nenhum ato normativo encontrado</p>
+                <p className="text-sm text-ink-muted mt-1 max-w-sm mx-auto">
                   {hasActiveFilters
                     ? 'Tente ajustar os filtros ou busca.'
                     : 'Outros atos normativos de órgãos federais e estaduais são adicionados regularmente.'}
@@ -191,14 +191,14 @@ export default function LegislativeActsPanel() {
               </>
             ) : (
               <>
-                <Gavel className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">Nenhum ato normativo encontrado.</p>
+                <Gavel className="w-12 h-12 text-ink-muted mx-auto mb-3" />
+                <p className="text-ink-muted font-medium">Nenhum ato normativo encontrado.</p>
               </>
             )}
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className={`mt-3 text-sm font-medium ${isTic ? 'text-cyan-600 hover:text-cyan-700' : isBoasPraticas ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'}`}
+                className={`mt-3 text-sm font-medium ${isTic ? 'text-brand-600 hover:text-brand-700' : isBoasPraticas ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-accent-deep hover:text-amber-accent-deep'}`}
               >
                 Limpar filtros
               </button>
@@ -226,17 +226,17 @@ export default function LegislativeActsPanel() {
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border-2 border-border-subtle rounded-[6px] text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-raised transition-colors"
             >
               Anterior
             </button>
-            <span className="px-3 py-2 text-sm text-gray-600 font-medium">
+            <span className="px-3 py-2 text-sm text-ink-muted font-medium">
               {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 border-2 border-gray-200 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border-2 border-border-subtle rounded-[6px] text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-raised transition-colors"
             >
               Próxima
             </button>

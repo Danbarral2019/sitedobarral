@@ -103,12 +103,12 @@ export function MultiFileDropzone({
   const getFileIcon = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (['mp4', 'avi', 'mov'].includes(ext || '')) {
-      return <Film className="w-6 h-6 text-purple-600" />;
+      return <Film className="w-6 h-6 text-brand-600" />;
     }
     if (['pdf'].includes(ext || '')) {
       return <FileText className="w-6 h-6 text-red-600" />;
     }
-    return <File className="w-6 h-6 text-blue-600" />;
+    return <File className="w-6 h-6 text-brand-600" />;
   };
 
   const getTotalSize = () => {
@@ -124,10 +124,10 @@ export function MultiFileDropzone({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer
+          relative border-2 border-dashed rounded-[6px] p-6 text-center transition-all cursor-pointer
           ${isDragging
-            ? 'border-blue-500 bg-blue-50 scale-105'
-            : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+            ? 'border-brand-500 bg-brand-50 scale-105'
+            : 'border-border-subtle hover:border-brand-400 hover:bg-surface-raised'
           }
         `}
       >
@@ -142,16 +142,16 @@ export function MultiFileDropzone({
         <div className="flex flex-col items-center gap-3">
           <div className={`
             w-14 h-14 rounded-full flex items-center justify-center transition-all
-            ${isDragging ? 'bg-blue-100' : 'bg-gray-100'}
+            ${isDragging ? 'bg-brand-100' : 'bg-surface-deep'}
           `}>
-            <Upload className={`w-7 h-7 ${isDragging ? 'text-blue-600' : 'text-gray-600'}`} />
+            <Upload className={`w-7 h-7 ${isDragging ? 'text-brand-600' : 'text-ink-muted'}`} />
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-gray-900">
+            <p className="text-sm font-semibold text-ink-primary">
               {isDragging ? 'Solte os arquivos aqui' : 'Arraste múltiplos arquivos ou clique para selecionar'}
             </p>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               PDF, DOC, DOCX, MP4, AVI, MOV • Máx. {maxSize}MB cada • Até {maxFiles} arquivos
             </p>
           </div>
@@ -159,25 +159,25 @@ export function MultiFileDropzone({
       </div>
 
       {selectedFiles.length > 0 && (
-        <div className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4">
+        <div className="border-2 border-brand-200 bg-brand-50 rounded-[6px] p-4">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-bold text-gray-900">
+            <h4 className="text-sm font-bold text-ink-primary">
               {selectedFiles.length} arquivo{selectedFiles.length !== 1 ? 's' : ''} selecionado{selectedFiles.length !== 1 ? 's' : ''}
             </h4>
-            <span className="text-xs font-medium text-gray-600">
+            <span className="text-xs font-medium text-ink-muted">
               Total: {getTotalSize()} MB
             </span>
           </div>
 
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {selectedFiles.map((file, index) => (
-              <div key={index} className="flex items-center gap-2 bg-white rounded-lg p-2">
+              <div key={index} className="flex items-center gap-2 bg-white rounded-[6px] p-2">
                 {getFileIcon(file)}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-ink-primary truncate">
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-ink-muted">
                     {(file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
@@ -195,7 +195,7 @@ export function MultiFileDropzone({
       )}
 
       {error && (
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-sm text-red-800">
+        <div className="bg-red-50 border-2 border-red-200 rounded-[6px] p-3 text-sm text-red-800">
           {error}
         </div>
       )}

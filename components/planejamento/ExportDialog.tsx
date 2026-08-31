@@ -137,15 +137,15 @@ export default function ExportDialog({
       <aside
         role="dialog"
         aria-label="Exportar documento"
-        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-xl flex-col border-l border-gray-200 bg-white shadow-xl"
+        className="fixed right-0 top-0 z-50 flex h-full w-full max-w-xl flex-col border-l border-border-subtle bg-white"
       >
-        <header className="flex items-start justify-between border-b border-gray-100 px-5 py-4">
+        <header className="flex items-start justify-between border-b border-border-subtle px-5 py-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 rounded-lg bg-brand-50 p-2 text-brand-700">
+            <span className="mt-0.5 rounded-[6px] bg-brand-50 p-2 text-brand-700">
               <Download className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+              <p className="text-[11px] uppercase tracking-wide text-ink-muted">
                 Exportação
               </p>
               <h3 className="font-serif text-lg text-brand-900">
@@ -155,7 +155,7 @@ export default function ExportDialog({
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+            className="rounded-md p-1 text-ink-muted hover:bg-surface-raised hover:text-ink-muted"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
@@ -170,10 +170,10 @@ export default function ExportDialog({
                 <label
                   key={f}
                   className={cn(
-                    "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition",
+                    "flex cursor-pointer items-start gap-3 rounded-[6px] border p-3 transition",
                     selected[f]
                       ? "border-brand-300 bg-brand-50/50"
-                      : "border-gray-200 bg-white hover:border-brand-200",
+                      : "border-border-subtle bg-white hover:border-brand-200",
                   )}
                 >
                   <input
@@ -191,7 +191,7 @@ export default function ExportDialog({
                     <p className="text-sm font-medium text-brand-900">
                       {meta.label}
                     </p>
-                    <p className="text-xs text-gray-600">{meta.desc}</p>
+                    <p className="text-xs text-ink-muted">{meta.desc}</p>
                   </div>
                 </label>
               );
@@ -207,7 +207,7 @@ export default function ExportDialog({
           <button
             onClick={handleExport}
             disabled={running}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
           >
             {running ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -218,19 +218,19 @@ export default function ExportDialog({
           </button>
 
           <div className="mt-6">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
               Histórico (mais recentes)
             </p>
             {loading && (
-              <p className="inline-flex items-center gap-2 text-xs text-gray-500">
+              <p className="inline-flex items-center gap-2 text-xs text-ink-muted">
                 <Loader2 className="h-4 w-4 animate-spin" /> Carregando…
               </p>
             )}
             {history && history.length === 0 && !loading && (
-              <p className="text-xs text-gray-500">Sem exportações anteriores.</p>
+              <p className="text-xs text-ink-muted">Sem exportações anteriores.</p>
             )}
             {history && history.length > 0 && (
-              <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200">
+              <ul className="divide-y divide-border-subtle rounded-[6px] border border-border-subtle">
                 {history.map((h) => {
                   const meta = FORMAT_META[h.format];
                   return (
@@ -240,8 +240,8 @@ export default function ExportDialog({
                     >
                       <div className="flex items-center gap-2">
                         <meta.Icon className="h-3.5 w-3.5 text-brand-700" />
-                        <span className="text-gray-800">{meta.label}</span>
-                        <span className="text-[11px] text-gray-500">
+                        <span className="text-ink-secondary">{meta.label}</span>
+                        <span className="text-[11px] text-ink-muted">
                           {new Date(h.createdAt).toLocaleString("pt-BR")}
                           {typeof h.sizeBytes === "number" && (
                             <> · {Math.round(h.sizeBytes / 102.4) / 10} KB</>
@@ -259,7 +259,7 @@ export default function ExportDialog({
                           <ArrowUpRightFromSquare className="h-3 w-3" />
                         </a>
                       ) : (
-                        <span className="text-[11px] text-gray-400">
+                        <span className="text-[11px] text-ink-muted">
                           URL indisponível
                         </span>
                       )}

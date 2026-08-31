@@ -78,19 +78,19 @@ function TreeNodeComponent({
       <button
         onClick={handleClick}
         style={{ paddingLeft }}
-        className={`w-full flex items-center gap-2 py-2 pr-3 rounded-lg transition-colors text-left group ${
+        className={`w-full flex items-center gap-2 py-2 pr-3 rounded-[6px] transition-colors text-left group ${
           isSelected
             ? `${config.bgColor} ${config.color}`
-            : 'hover:bg-gray-50 text-gray-700'
+            : 'hover:bg-surface-raised text-ink-secondary'
         }`}
       >
         {/* Expand/Collapse Icon */}
         {hasChildren ? (
           <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
             {isExpanded ? (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-ink-muted" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-ink-muted" />
             )}
           </span>
         ) : (
@@ -99,10 +99,10 @@ function TreeNodeComponent({
 
         {/* Icon */}
         {level === 0 ? (
-          <Icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-gray-400'}`} />
+          <Icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-ink-muted'}`} />
         ) : level === 1 ? (
           <FolderOpen
-            className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-gray-400'}`}
+            className={`w-4 h-4 flex-shrink-0 ${isSelected ? config.color : 'text-ink-muted'}`}
           />
         ) : null}
 
@@ -110,7 +110,7 @@ function TreeNodeComponent({
         <span
           className={`flex-1 text-sm truncate ${
             isSelected ? 'font-semibold' : 'font-medium'
-          } ${level > 0 ? 'text-gray-600' : ''}`}
+          } ${level > 0 ? 'text-ink-muted' : ''}`}
         >
           {node.label}
         </span>
@@ -119,8 +119,8 @@ function TreeNodeComponent({
         <span
           className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${
             isSelected
-              ? 'bg-white/60 text-gray-700'
-              : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+              ? 'bg-white/60 text-ink-secondary'
+              : 'bg-surface-deep text-ink-muted group-hover:bg-surface-deep'
           }`}
         >
           {node.count}
@@ -158,8 +158,8 @@ export function ContentTree({
 }: ContentTreeProps) {
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6">
-        <div className="flex items-center justify-center gap-2 text-gray-500">
+      <div className="bg-white rounded-[6px] border-2 border-border-subtle p-6">
+        <div className="flex items-center justify-center gap-2 text-ink-muted">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span className="text-sm">Carregando...</span>
         </div>
@@ -169,18 +169,18 @@ export function ContentTree({
 
   if (error) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-6">
+      <div className="bg-white rounded-[6px] border-2 border-border-subtle p-6">
         <p className="text-sm text-red-600">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200">
+    <div className="bg-white rounded-[6px] border-2 border-border-subtle">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="font-bold text-gray-900 text-sm">Navegar por Tipo</h3>
-        <p className="text-xs text-gray-500 mt-0.5">Explore o acervo completo</p>
+      <div className="px-4 py-3 border-b border-border-subtle">
+        <h3 className="font-bold text-ink-primary text-sm">Navegar por Tipo</h3>
+        <p className="text-xs text-ink-muted mt-0.5">Explore o acervo completo</p>
       </div>
 
       {/* Tree */}
@@ -198,9 +198,9 @@ export function ContentTree({
       </div>
 
       {/* Legend */}
-      <div className="px-4 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-        <p className="text-xs text-gray-500 flex items-center gap-1">
-          <span className="font-medium text-gray-700">Dica:</span>
+      <div className="px-4 py-3 border-t border-border-subtle bg-surface-raised rounded-b-[6px]">
+        <p className="text-xs text-ink-muted flex items-center gap-1">
+          <span className="font-medium text-ink-secondary">Dica:</span>
           Clique nos itens para navegar
         </p>
       </div>

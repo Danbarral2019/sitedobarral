@@ -108,7 +108,7 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
     return (
       <button
         onClick={handleOpenPanel}
-        className="fixed bottom-20 lg:bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2 z-40"
+        className="fixed bottom-20 lg:bottom-6 right-6 bg-brand-600 text-white px-6 py-3 rounded-full hover:bg-brand-700 transition-all flex items-center gap-2 z-40 border border-border-subtle"
         title="Exportar documentos para PDF"
       >
         <FileDown className="w-5 h-5" />
@@ -118,37 +118,37 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
   }
 
   return (
-    <div className="fixed bottom-0 right-0 left-0 bg-white border-t-2 border-blue-600 shadow-2xl z-50 max-h-[80vh] overflow-hidden flex flex-col">
+    <div className="fixed bottom-0 right-0 left-0 bg-white border-t-2 border-brand-600 z-50 max-h-[80vh] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+      <div className="p-4 border-b bg-brand-50">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <FileDown className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-bold text-ink-primary flex items-center gap-2">
+              <FileDown className="w-5 h-5 text-brand-600" />
               Exportar Documentos para PDF
             </h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-ink-muted mt-1">
               Selecione os documentos que deseja compilar em um PDF com marca d&apos;agua
             </p>
           </div>
           <button
             onClick={() => setShowPanel(false)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-surface-deep rounded-[6px] transition-colors"
             title="Fechar painel"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-ink-muted" />
           </button>
         </div>
 
         {/* Stats e Acoes */}
         <div className="mt-4 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-ink-secondary">
               {selectedIds.size} de {documents.length} selecionados
             </span>
             <button
               onClick={toggleAll}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+              className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"
             >
               {selectedIds.size === documents.length ? (
                 <>
@@ -177,7 +177,7 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
           <button
             onClick={handleExport}
             disabled={selectedIds.size === 0 || isExporting}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
+            className="px-6 py-2 bg-green-600 text-white rounded-[6px] hover:bg-green-700 disabled:bg-border-strong disabled:cursor-not-allowed transition-colors flex items-center gap-2 font-medium"
           >
             {isExporting ? (
               <>
@@ -205,23 +205,23 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
               <div
                 key={doc.id}
                 onClick={() => toggleSelection(doc.id)}
-                className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                className={`p-3 border-2 rounded-[6px] cursor-pointer transition-all ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-brand-500 bg-brand-50'
+                    : 'border-border-subtle bg-white hover:border-border-subtle'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-1">
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 text-blue-600" />
+                      <CheckSquare className="w-5 h-5 text-brand-600" />
                     ) : (
-                      <Square className="w-5 h-5 text-gray-400" />
+                      <Square className="w-5 h-5 text-ink-muted" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-medium text-sm text-gray-900 line-clamp-2 flex-1">
+                      <h4 className="font-medium text-sm text-ink-primary line-clamp-2 flex-1">
                         {doc.title}
                       </h4>
                       {isFavorite && (
@@ -229,12 +229,12 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
                       )}
                     </div>
                     {doc.description && (
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                      <p className="text-xs text-ink-muted mt-1 line-clamp-2">
                         {doc.description}
                       </p>
                     )}
                     <div className="mt-2">
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                      <span className="text-xs bg-surface-deep text-ink-secondary px-2 py-0.5 rounded">
                         {doc.category}
                       </span>
                     </div>
@@ -246,7 +246,7 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
         </div>
 
         {documents.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-ink-muted">
             <FileDown className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p>Nenhum documento disponivel para exportacao</p>
           </div>
@@ -254,7 +254,7 @@ export function PDFExportPanel({ documents, userName, userEmail, favoriteIds }: 
       </div>
 
       {/* Info Footer */}
-      <div className="p-3 bg-gray-50 border-t text-xs text-gray-600 flex items-center gap-2">
+      <div className="p-3 bg-surface-raised border-t text-xs text-ink-muted flex items-center gap-2">
         <span className="font-semibold">Info:</span>
         <span>
           O PDF incluira marca d&apos;agua com <strong>{userName}</strong> ({userEmail}) e data de exportacao

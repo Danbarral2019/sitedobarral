@@ -64,22 +64,22 @@ export default function OnboardingForm() {
 
   if (classification && sessionId) {
     return (
-      <div className="rounded-xl border border-brand-100 bg-brand-50 p-6">
+      <div className="rounded-[6px] border border-brand-100 bg-brand-50 p-6">
         <div className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-brand-800">
           <Sparkles className="h-4 w-4" /> Classificação sugerida
         </div>
         <p className="mb-1 text-lg font-medium text-brand-900">
           {friendlyNatureza(classification.naturezaSugerida)}
         </p>
-        <p className="mb-4 text-sm text-gray-600">
+        <p className="mb-4 text-sm text-ink-muted">
           Confiança estimada: {(classification.confianca * 100).toFixed(0)}%
         </p>
         {classification.perguntasFollowUp.length > 0 && (
-          <div className="mb-4 rounded-lg bg-white p-4">
-            <p className="mb-2 text-sm font-medium text-gray-800">
+          <div className="mb-4 rounded-[6px] bg-white p-4">
+            <p className="mb-2 text-sm font-medium text-ink-secondary">
               Para refinar, considere:
             </p>
-            <ul className="space-y-1 text-sm text-gray-700">
+            <ul className="space-y-1 text-sm text-ink-secondary">
               {classification.perguntasFollowUp.map((q, i) => (
                 <li key={i}>· {q}</li>
               ))}
@@ -87,7 +87,7 @@ export default function OnboardingForm() {
           </div>
         )}
         {!documentId && (
-          <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+          <p className="mb-4 rounded-[6px] bg-amber-accent-soft p-3 text-sm text-ink-primary">
             Trilha ainda não publicada para esta natureza. O time do curso
             receberá sinalização automática. Por enquanto você pode abrir a
             sessão e continuar manualmente.
@@ -97,7 +97,7 @@ export default function OnboardingForm() {
           onClick={() =>
             router.push(`/area-restrita/planejamento/${sessionId}`)
           }
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
+          className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
         >
           Abrir trilha
         </button>
@@ -108,7 +108,7 @@ export default function OnboardingForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="titulo" className="mb-1 block text-sm font-medium text-gray-800">
+        <label htmlFor="titulo" className="mb-1 block text-sm font-medium text-ink-secondary">
           Título interno da contratação
         </label>
         <input
@@ -117,7 +117,7 @@ export default function OnboardingForm() {
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
           placeholder="Ex: Limpeza e conservação — Edifício-sede 2026"
-          className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 text-sm focus:border-brand-600 focus:outline-none"
+          className="w-full rounded-[6px] border-2 border-border-subtle px-4 py-2.5 text-sm focus:border-brand-600 focus:outline-none"
           maxLength={200}
           minLength={3}
           required
@@ -125,7 +125,7 @@ export default function OnboardingForm() {
       </div>
 
       <div>
-        <label htmlFor="descricao" className="mb-1 block text-sm font-medium text-gray-800">
+        <label htmlFor="descricao" className="mb-1 block text-sm font-medium text-ink-secondary">
           Descrição da contratação
         </label>
         <textarea
@@ -134,18 +134,18 @@ export default function OnboardingForm() {
           onChange={(e) => setDescricao(e.target.value)}
           placeholder="Ex: Serviço continuado de limpeza e conservação para unidade com 4.000 m² e aproximadamente 20 postos, com dedicação exclusiva de mão de obra, em regime de 12 meses prorrogáveis."
           rows={8}
-          className="w-full resize-none rounded-lg border-2 border-gray-200 px-4 py-3 text-sm leading-relaxed focus:border-brand-600 focus:outline-none"
+          className="w-full resize-none rounded-[6px] border-2 border-border-subtle px-4 py-3 text-sm leading-relaxed focus:border-brand-600 focus:outline-none"
           maxLength={4000}
           minLength={20}
           required
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-ink-muted">
           Entre 20 e 4 000 caracteres. Quanto mais contexto, melhor a classificação.
         </p>
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <p className="rounded-[6px] border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           {error}
         </p>
       )}
@@ -154,7 +154,7 @@ export default function OnboardingForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-[6px] bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
         >
           {submitting ? (
             <>

@@ -40,19 +40,19 @@ export default function SobrePage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Prof. Daniel Barral</h1>
-              <div className="h-1.5 w-48 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Prof. Daniel Barral</h1>
+              <div className="h-1.5 w-48 bg-brand-500 rounded-full mx-auto mb-6"></div>
             </div>
-            <p className="text-xl text-gray-700 leading-relaxed">
+            <p className="text-xl text-ink-secondary leading-relaxed">
               Mestre em Direito Público e Professor Especializado em Licitações e Contratos Administrativos
             </p>
           </div>
 
           {/* Bio Section */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200 hover:border-brand-400 hover:shadow-2xl transition-all">
+          <div className="bg-white rounded-[6px] p-8 mb-8 border-2 border-border-subtle hover:border-brand-400 hover: transition-all">
             <div className="flex flex-col md:flex-row items-center gap-8 mb-8">
               <div className="relative group">
-                <div className="w-64 h-64 relative rounded-2xl overflow-hidden ring-4 ring-brand-100 group-hover:ring-brand-300 transition-all">
+                <div className="w-64 h-64 relative rounded-[6px] overflow-hidden ring-4 ring-brand-100 group-hover:ring-brand-300 transition-all">
                   <Image
                     src="/images/professor/sobre.jpg"
                     alt="Prof. Daniel Barral"
@@ -61,33 +61,33 @@ export default function SobrePage() {
                     priority
                   />
                 </div>
-                <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center border border-border-subtle">
                   <Scale className="w-8 h-8 text-white" />
                 </div>
               </div>
               <div className="flex-1">
                 <div className="inline-block mb-4">
-                  <h2 className="text-2xl font-bold mb-2 text-gray-900">Perfil Profissional</h2>
-                  <div className="h-1 w-24 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"></div>
+                  <h2 className="text-2xl font-bold mb-2 text-ink-primary">Perfil Profissional</h2>
+                  <div className="h-1 w-24 bg-brand-500 rounded-full"></div>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-brand-50 to-brand-100 p-3 rounded-xl border-l-4 border-brand-500">
-                    <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-brand-100 p-3 rounded-[6px] border-l-4 border-brand-500">
+                    <div className="w-10 h-10 bg-brand-600 rounded-[6px] flex items-center justify-center flex-shrink-0">
                       <GraduationCap className="text-white" size={20} />
                     </div>
-                    <span className="text-gray-900 font-semibold">Mestre em Direito Público</span>
+                    <span className="text-ink-primary font-semibold">Mestre em Direito Público</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-brand-50 to-brand-100 p-3 rounded-xl border-l-4 border-brand-500">
-                    <div className="w-10 h-10 bg-white border-4 border-brand-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-brand-100 p-3 rounded-[6px] border-l-4 border-brand-500">
+                    <div className="w-10 h-10 bg-white border-4 border-brand-500 rounded-[6px] flex items-center justify-center flex-shrink-0">
                       <BookOpen className="text-brand-600" size={20} />
                     </div>
-                    <span className="text-gray-900 font-semibold">Professor de Licitações e Contratos</span>
+                    <span className="text-ink-primary font-semibold">Professor de Licitações e Contratos</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-gray-50 to-gray-100 p-3 rounded-xl border-l-4 border-gray-600">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-surface-raised p-3 rounded-[6px] border-l-4 border-border-strong">
+                    <div className="w-10 h-10 bg-brand-800 rounded-[6px] flex items-center justify-center flex-shrink-0">
                       <Briefcase className="text-white" size={20} />
                     </div>
-                    <span className="text-gray-900 font-semibold">Palestrante Especializado</span>
+                    <span className="text-ink-primary font-semibold">Palestrante Especializado</span>
                   </div>
                 </div>
               </div>
@@ -96,11 +96,11 @@ export default function SobrePage() {
 
           {/* Mission Section */}
           <div className="relative overflow-hidden mb-8">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 opacity-95"></div>
+            <div className="absolute inset-0 bg-brand-600 opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
-            <div className="relative p-10 md:p-12 text-center rounded-2xl">
+            <div className="relative p-10 md:p-12 text-center rounded-[6px]">
               <div className="inline-block mb-4">
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <div className="bg-white/20 px-4 py-2 rounded-full">
                   <span className="text-white font-semibold text-sm flex items-center gap-2">
                     <Award className="w-4 h-4" />
                     Nossa Missão
@@ -131,49 +131,49 @@ export default function SobrePage() {
           </div>
 
           {/* Areas of Expertise */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200 hover:shadow-2xl transition-all">
+          <div className="bg-white rounded-[6px] p-8 mb-8 border-2 border-border-subtle hover: transition-all">
             <div className="inline-block mb-6">
-              <h2 className="text-2xl font-bold mb-2 text-gray-900">Áreas de Especialização</h2>
-              <div className="h-1 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"></div>
+              <h2 className="text-2xl font-bold mb-2 text-ink-primary">Áreas de Especialização</h2>
+              <div className="h-1 w-32 bg-brand-500 rounded-full"></div>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <div className="flex items-start gap-4 bg-gradient-to-r from-brand-50 to-brand-100 p-4 rounded-xl border-l-4 border-brand-500 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-4 bg-brand-50 p-4 rounded-[6px] border-l-4 border-brand-500 hover: transition-all group">
+                  <div className="w-12 h-12 bg-brand-600 rounded-[6px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Scale className="text-white" size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Direito Administrativo</h3>
-                    <p className="text-gray-800 text-sm leading-relaxed">Atuação especializada em todos os aspectos do Direito Administrativo, com foco em aplicação prática</p>
+                    <h3 className="font-bold text-ink-primary mb-1">Direito Administrativo</h3>
+                    <p className="text-ink-secondary text-sm leading-relaxed">Atuação especializada em todos os aspectos do Direito Administrativo, com foco em aplicação prática</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 bg-gradient-to-r from-brand-50 to-brand-100 p-4 rounded-xl border-l-4 border-brand-500 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-white border-4 border-brand-500 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-4 bg-brand-50 p-4 rounded-[6px] border-l-4 border-brand-500 hover: transition-all group">
+                  <div className="w-12 h-12 bg-white border-4 border-brand-500 rounded-[6px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <BookOpen className="text-brand-600" size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Licitações e Contratos</h3>
-                    <p className="text-gray-800 text-sm leading-relaxed">Especialista na Nova Lei de Licitações (Lei nº 14.133/2021) e gestão de contratos administrativos</p>
+                    <h3 className="font-bold text-ink-primary mb-1">Licitações e Contratos</h3>
+                    <p className="text-ink-secondary text-sm leading-relaxed">Especialista na Nova Lei de Licitações (Lei nº 14.133/2021) e gestão de contratos administrativos</p>
                   </div>
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="flex items-start gap-4 bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border-l-4 border-gray-600 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-4 bg-surface-raised p-4 rounded-[6px] border-l-4 border-border-strong hover: transition-all group">
+                  <div className="w-12 h-12 bg-brand-800 rounded-[6px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Briefcase className="text-white" size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Processo Administrativo</h3>
-                    <p className="text-gray-800 text-sm leading-relaxed">Conhecimento aprofundado em processos administrativos e procedimentos sancionadores</p>
+                    <h3 className="font-bold text-ink-primary mb-1">Processo Administrativo</h3>
+                    <p className="text-ink-secondary text-sm leading-relaxed">Conhecimento aprofundado em processos administrativos e procedimentos sancionadores</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 bg-gradient-to-r from-brand-100 to-brand-200 p-4 rounded-xl border-l-4 border-brand-600 hover:shadow-md transition-all group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-brand-600 to-brand-700 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <div className="flex items-start gap-4 bg-brand-100 p-4 rounded-[6px] border-l-4 border-brand-600 hover: transition-all group">
+                  <div className="w-12 h-12 bg-brand-700 rounded-[6px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                     <Award className="text-white" size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Inovação nas Contratações</h3>
-                    <p className="text-gray-800 text-sm leading-relaxed">Orientação sobre novas modalidades e tecnologias aplicadas às contratações públicas</p>
+                    <h3 className="font-bold text-ink-primary mb-1">Inovação nas Contratações</h3>
+                    <p className="text-ink-secondary text-sm leading-relaxed">Orientação sobre novas modalidades e tecnologias aplicadas às contratações públicas</p>
                   </div>
                 </div>
               </div>
@@ -181,21 +181,21 @@ export default function SobrePage() {
           </div>
 
           {/* Education and Professional Experience */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200 hover:shadow-2xl transition-all">
+          <div className="bg-white rounded-[6px] p-8 mb-8 border-2 border-border-subtle hover: transition-all">
             <div className="inline-block mb-6">
-              <h2 className="text-2xl font-bold mb-2 text-gray-900">Formação e Experiência Profissional</h2>
-              <div className="h-1 w-40 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"></div>
+              <h2 className="text-2xl font-bold mb-2 text-ink-primary">Formação e Experiência Profissional</h2>
+              <div className="h-1 w-40 bg-brand-500 rounded-full"></div>
             </div>
 
             <div className="space-y-8">
-              <div className="bg-gradient-to-r from-brand-50 to-brand-100 p-6 rounded-xl border-l-4 border-brand-500">
+              <div className="bg-brand-50 p-6 rounded-[6px] border-l-4 border-brand-500">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-brand-600 rounded-[6px] flex items-center justify-center">
                     <GraduationCap className="text-white" size={20} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Formação Acadêmica</h3>
+                  <h3 className="text-xl font-bold text-ink-primary">Formação Acadêmica</h3>
                 </div>
-                <div className="space-y-4 text-gray-800">
+                <div className="space-y-4 text-ink-secondary">
                   <p className="leading-relaxed">
                     <strong>Graduado em Direito</strong> pela Universidade Católica do Salvador (2004), desenvolveu sólida especialização em direito público através de formação continuada que inclui:
                   </p>
@@ -213,20 +213,20 @@ export default function SobrePage() {
                       <p className="leading-relaxed"><strong>Mestrado em Direito Público</strong> pela Universidade Nova de Lisboa (2022)</p>
                     </div>
                   </div>
-                  <p className="mt-4 leading-relaxed bg-white/50 p-3 rounded-lg">
+                  <p className="mt-4 leading-relaxed bg-white/50 p-3 rounded-[6px]">
                     Sua dissertação de mestrado investigou a legitimação do direito regulador através de processos administrativos democráticos, com foco nos acordos integrativos em contratos de concessão durante a pandemia de Covid-19.
                   </p>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-brand-50 to-brand-100 p-6 rounded-xl border-l-4 border-brand-500">
+              <div className="bg-brand-50 p-6 rounded-[6px] border-l-4 border-brand-500">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-white border-4 border-brand-500 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white border-4 border-brand-500 rounded-[6px] flex items-center justify-center">
                     <Briefcase className="text-brand-600" size={20} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Experiência como Procurador Federal</h3>
+                  <h3 className="text-xl font-bold text-ink-primary">Experiência como Procurador Federal</h3>
                 </div>
-                <div className="space-y-4 text-gray-800">
+                <div className="space-y-4 text-ink-secondary">
                   <p className="leading-relaxed">
                     Como <strong>Procurador Federal da classe Especial desde 2008</strong>, acumulou dezesseis anos de experiência em consultoria jurídica especializada, desenvolvendo capacidade analítica apurada através da atuação em diferentes setores da administração federal.
                   </p>
@@ -236,14 +236,14 @@ export default function SobrePage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border-l-4 border-gray-600">
+              <div className="bg-surface-raised p-6 rounded-[6px] border-l-4 border-border-strong">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-brand-800 rounded-[6px] flex items-center justify-center">
                     <BookOpen className="text-white" size={20} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Atividades Acadêmicas e Docência</h3>
+                  <h3 className="text-xl font-bold text-ink-primary">Atividades Acadêmicas e Docência</h3>
                 </div>
-                <div className="space-y-4 text-gray-800">
+                <div className="space-y-4 text-ink-secondary">
                   <p className="leading-relaxed">
                     Combina a prática jurídica com atividades acadêmicas em diversas instituições públicas e privadas como a <strong>Esafi, Inove, Escola Nacional de Administração Pública (ENAP), Escola da AGU e grupo educacional Damásio</strong>.
                   </p>
@@ -256,30 +256,30 @@ export default function SobrePage() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-brand-100 to-brand-200 p-6 rounded-xl border-l-4 border-brand-600">
+              <div className="bg-brand-100 p-6 rounded-[6px] border-l-4 border-brand-600">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-brand-600 to-brand-700 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-brand-700 rounded-[6px] flex items-center justify-center">
                     <Users className="text-white" size={20} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Participação Institucional</h3>
+                  <h3 className="text-xl font-bold text-ink-primary">Participação Institucional</h3>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white p-5 rounded-xl border-2 border-brand-200 hover:border-brand-400 transition-all hover:shadow-md">
+                  <div className="bg-white p-5 rounded-[6px] border-2 border-brand-200 hover:border-brand-400 transition-all hover:">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 bg-brand-600 rounded-full"></div>
-                      <h4 className="font-bold text-gray-900">INCP</h4>
+                      <h4 className="font-bold text-ink-primary">INCP</h4>
                     </div>
-                    <p className="text-sm text-gray-800 leading-relaxed">Membro do Instituto Nacional de Concurso Público</p>
+                    <p className="text-sm text-ink-secondary leading-relaxed">Membro do Instituto Nacional de Concurso Público</p>
                   </div>
-                  <div className="bg-white p-5 rounded-xl border-2 border-brand-200 hover:border-brand-400 transition-all hover:shadow-md">
+                  <div className="bg-white p-5 rounded-[6px] border-2 border-brand-200 hover:border-brand-400 transition-all hover:">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 bg-brand-600 rounded-full"></div>
-                      <h4 className="font-bold text-gray-900">IDASAN</h4>
+                      <h4 className="font-bold text-ink-primary">IDASAN</h4>
                     </div>
-                    <p className="text-sm text-gray-800 leading-relaxed">Membro do Instituto de Direito Administrativo Sancionador Brasileiro</p>
+                    <p className="text-sm text-ink-secondary leading-relaxed">Membro do Instituto de Direito Administrativo Sancionador Brasileiro</p>
                   </div>
                 </div>
-                <p className="text-gray-800 leading-relaxed">
+                <p className="text-ink-secondary leading-relaxed">
                   Organizações que refletem seu compromisso com o desenvolvimento das práticas administrativas e do direito administrativo sancionador brasileiro.
                 </p>
               </div>
@@ -287,65 +287,65 @@ export default function SobrePage() {
           </div>
 
           {/* Public Target */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2 border-gray-200">
+          <div className="bg-white rounded-[6px] p-8 mb-8 border-2 border-border-subtle">
             <div className="inline-block mb-6">
-              <h2 className="text-2xl font-bold mb-2 text-gray-900">Público-Alvo</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"></div>
+              <h2 className="text-2xl font-bold mb-2 text-ink-primary">Público-Alvo</h2>
+              <div className="h-1 w-24 bg-brand-500 rounded-full"></div>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-brand-50 to-brand-100 p-6 rounded-xl border-2 border-brand-200 hover:border-brand-400 hover:shadow-lg transition-all">
+              <div className="bg-brand-50 p-6 rounded-[6px] border-2 border-brand-200 hover:border-brand-400 hover: transition-all">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-brand-600 rounded-[6px] flex items-center justify-center">
                     <Users className="text-white" size={20} />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">Perfil Principal</h3>
+                  <h3 className="text-lg font-bold text-ink-primary">Perfil Principal</h3>
                 </div>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-900 font-medium leading-relaxed">Servidores públicos (ativos ou futuros)</span>
+                    <span className="text-ink-primary font-medium leading-relaxed">Servidores públicos (ativos ou futuros)</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-900 font-medium leading-relaxed">Profissionais de nível iniciante a avançado</span>
+                    <span className="text-ink-primary font-medium leading-relaxed">Profissionais de nível iniciante a avançado</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-900 font-medium leading-relaxed">Foco no aprimoramento das atividades funcionais</span>
+                    <span className="text-ink-primary font-medium leading-relaxed">Foco no aprimoramento das atividades funcionais</span>
                   </li>
                 </ul>
               </div>
-              <div className="bg-gradient-to-br from-brand-50 to-brand-100 p-6 rounded-xl border-2 border-brand-200 hover:border-brand-400 hover:shadow-lg transition-all">
+              <div className="bg-brand-50 p-6 rounded-[6px] border-2 border-brand-200 hover:border-brand-400 hover: transition-all">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-white border-4 border-brand-500 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white border-4 border-brand-500 rounded-[6px] flex items-center justify-center">
                     <Scale className="text-brand-600" size={20} />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">Perfil Secundário</h3>
+                  <h3 className="text-lg font-bold text-ink-primary">Perfil Secundário</h3>
                 </div>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-900 font-medium leading-relaxed">Advogados especializados em Direito Público</span>
+                    <span className="text-ink-primary font-medium leading-relaxed">Advogados especializados em Direito Público</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-900 font-medium leading-relaxed">Concurseiros de nível superior</span>
+                    <span className="text-ink-primary font-medium leading-relaxed">Concurseiros de nível superior</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-gray-900 font-medium leading-relaxed">Procuradores e operadores do direito</span>
+                    <span className="text-ink-primary font-medium leading-relaxed">Procuradores e operadores do direito</span>
                   </li>
                 </ul>
               </div>
@@ -354,11 +354,11 @@ export default function SobrePage() {
 
           {/* Call to Action */}
           <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-700 to-brand-600 opacity-95"></div>
+            <div className="absolute inset-0 bg-brand-600 opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
-            <div className="relative p-10 md:p-12 text-center rounded-2xl">
+            <div className="relative p-10 md:p-12 text-center rounded-[6px]">
               <div className="inline-block mb-4">
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <div className="bg-white/20 px-4 py-2 rounded-full">
                   <span className="text-white font-semibold text-sm">💼 Próximos Passos</span>
                 </div>
               </div>
@@ -372,7 +372,7 @@ export default function SobrePage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/cursos"
-                  className="inline-flex items-center gap-3 bg-white text-gray-900 px-10 py-5 rounded-xl text-lg font-bold hover:bg-gray-50 transition-all hover:scale-105 shadow-2xl"
+                  className="inline-flex items-center gap-3 bg-white text-ink-primary px-10 py-5 rounded-[6px] text-lg font-bold hover:bg-surface-raised transition-all hover:scale-105 border border-border-subtle"
                   aria-label="Ver todos os cursos disponíveis"
                 >
                   <BookOpen className="w-6 h-6" />
@@ -381,7 +381,7 @@ export default function SobrePage() {
                 </Link>
                 <Link
                   href="/contato"
-                  className="inline-flex items-center gap-3 bg-white/15 border-2 border-white/40 text-white px-10 py-5 rounded-xl text-lg font-bold hover:bg-white/25 transition-all hover:scale-105 shadow-2xl"
+                  className="inline-flex items-center gap-3 bg-white/15 border-2 border-white/40 text-white px-10 py-5 rounded-[6px] text-lg font-bold hover:bg-white/25 transition-all hover:scale-105"
                   aria-label="Entre em contato conosco"
                 >
                   Entre em Contato
