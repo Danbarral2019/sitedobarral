@@ -239,6 +239,20 @@ describe('buildTribunalDecisionWhere', () => {
     );
   });
 
+  // O TCU vive nas duas tabelas (676 linhas em TribunalDecision, todas também
+  // presentes como Document). Sem esta exclusão o UNION ALL devolve cada
+  // acórdão duas vezes na listagem.
+  it('exclui o TCU do ramo A por padrão', () => {
+    const where = buildTribunalDecisionWhere({});
+    expect(where.text).toMatch(/"tribunalCode"\s*<>\s*\$\d+/);
+    expect(where.values).toContain('TCU');
+  });
+
+  it('mantém o TCU quando excludeTcu é false', () => {
+    const where = buildTribunalDecisionWhere({}, { excludeTcu: false });
+    expect(where.text).not.toMatch(/"tribunalCode"\s*<>/);
+  });
+
   it('adiciona filtro de tribunal', () => {
     const where = buildTribunalDecisionWhere({ tribunal: 'TCE-SP' });
     expect(where.text).toMatch(/"tribunalCode"\s*=\s*\$/);
@@ -418,6 +432,19 @@ describe('fetchUnifiedTopK', () => {
 });
 
 describe('fetchUnifiedById', () => {
+  // O sitemap publica /jurisprudencia/{id} para as 676 linhas TCU de
+  // TribunalDecision. Se a busca por id herdasse a exclusão da listagem, esses
+  // endereços já indexados passariam a devolver 404.
+  it('não aplica a exclusão do TCU ao buscar por id', async () => {
+    const { fetchUnifiedById } = await import('../unified-query');
+    mockQueryRaw.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+    await fetchUnifiedById('td-tcu-1');
+
+    const sqlRamoA = mockQueryRaw.mock.calls[0][0];
+    expect(sqlRamoA.text).not.toMatch(/"tribunalCode"\s*<>/);
+  });
+
   it('tenta ramo A, retorna match se encontrar', async () => {
     const { fetchUnifiedById } = await import('../unified-query');
     mockQueryRaw.mockResolvedValueOnce([

@@ -175,13 +175,33 @@ export function mapDocumentTcuToDecision(doc: DocumentTcuRaw): UnifiedDecision {
   };
 }
 
+export interface TribunalDecisionWhereOptions {
+  /**
+   * Excluir do ramo A as decisões do TCU. Default `true`.
+   *
+   * O TCU vive nas duas tabelas: são 676 linhas em `TribunalDecision` e todas
+   * as 676 também existem como `Document` (conferido número a número). Como
+   * `composeUnifiedBody` faz `UNION ALL` sem dedup, sem esta exclusão cada
+   * acórdão do TCU aparece duas vezes na listagem — o que estava acontecendo
+   * em produção, 20 repetições nos 50 primeiros resultados.
+   *
+   * O TCU passa a vir só do ramo B, que é a fonte mais rica: ementa oficial
+   * completa, inteiro teor, análise de relevância e página em /documento/[id].
+   *
+   * `false` só no caminho de busca por id — ver `fetchUnifiedById`.
+   */
+  excludeTcu?: boolean;
+}
+
 /**
  * WHERE de TribunalDecision.
  * - Sempre aplica `isRelevant=true AND approvalStatus IN (...)`
+ * - Por padrão exclui o TCU, que pertence ao ramo B (ver `excludeTcu`)
  * - Filtros dinâmicos são adicionados apenas quando presentes
  */
 export function buildTribunalDecisionWhere(
-  filters: JurisprudenciaFilters
+  filters: JurisprudenciaFilters,
+  { excludeTcu = true }: TribunalDecisionWhereOptions = {}
 ): Prisma.Sql {
   const fragments: Prisma.Sql[] = [
     Prisma.sql`"isRelevant" = ${true}`,
@@ -190,6 +210,10 @@ export function buildTribunalDecisionWhere(
       'manually_approved',
     ])})`,
   ];
+
+  if (excludeTcu) {
+    fragments.push(Prisma.sql`"tribunalCode" <> ${'TCU'}`);
+  }
 
   if (filters.tribunal) {
     fragments.push(Prisma.sql`"tribunalCode" = ${filters.tribunal}`);
@@ -552,10 +576,14 @@ export async function fetchUnifiedById(
   id: string
 ): Promise<UnifiedDecision | null> {
   // true: página de detalhe precisa do inteiro teor.
-  // Tenta ramo A primeiro (filtros equivalentes ao default)
+  // Tenta ramo A primeiro (filtros equivalentes ao default).
+  //
+  // excludeTcu:false — a listagem esconde as 676 linhas TCU desta tabela por
+  // serem duplicata, mas o sitemap já publicou /jurisprudencia/{id} para elas.
+  // Herdar a exclusão aqui transformaria endereços indexados em 404.
   const tribA = await prisma.$queryRaw<UnifiedDecision[]>(Prisma.sql`
     SELECT * FROM (${tribunalDecisionSelect(
-      buildTribunalDecisionWhere({}),
+      buildTribunalDecisionWhere({}, { excludeTcu: false }),
       true
     )}) unified
     WHERE id = ${id}
