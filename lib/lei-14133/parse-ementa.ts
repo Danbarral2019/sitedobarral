@@ -127,6 +127,116 @@ export function isLikelyTruncated(text: string): boolean {
   return continuationPatterns.some((p) => p.test(last));
 }
 
+// ──────────────────────────────────────────────────────────────────────────
+// Redações e entulho do Planalto
+// ──────────────────────────────────────────────────────────────────────────
+
+/**
+ * Marcadores que a página do Planalto intercala no corpo do artigo e que não
+ * são texto de lei. No art. 75 chegam a aparecer quatro vezes seguidas dentro
+ * de um único inciso, no meio da frase.
+ *
+ * `(Redação dada|Incluído|Revogado)` NÃO entra aqui de propósito: dizer qual
+ * lei fixou a redação é informação, e o público confere antes de citar.
+ */
+// O marcador de vigência aparece nas três formas na mesma página: entre
+// parênteses, solto depois de um Vide, e solto antes do próximo Vide.
+const ENTULHO =
+  /\s*\((?:Vide[^)]*|Regulamento|Vig[êe]ncia)\)|\s*(?<=\))\s*Vig[êe]ncia\b|\s*\bVig[êe]ncia\b(?=\s*\()/g;
+
+/** Nota de alteração — a prova de que uma redação superou outra. */
+const NOTA_ALTERACAO = /\((?:Reda[çc][ãa]o dada|Inclu[íi]d[oa]|Revogad[oa])[^)]*\)/;
+
+/** Marcador de item de lista no início da linha, já normalizada. */
+const MARCADOR_LINHA = /^((?:[IVXLCDM]{1,6})\s+—|§\s*\d+\s*[ºo°]?|Parágrafo único)/;
+
+/**
+ * Tira do texto o entulho da página do Planalto, preservando a atribuição de
+ * redação.
+ */
+export function limparBoilerplate(texto: string): string {
+  return texto
+    .replace(ENTULHO, '')
+    .replace(/[^\S\n]{2,}/g, ' ')
+    .replace(/\s+([,;.])/g, '$1')
+    .trim();
+}
+
+export interface RedacaoAnterior {
+  /** "XVI", "§ 6º" — o item a que a redação se refere. */
+  marcador: string;
+  texto: string;
+  /** "Redação dada pela Medida Provisória nº 1.166, de 2023", quando houver. */
+  fonte: string | null;
+}
+
+export interface EmentaSeparada {
+  /** Texto a exibir no corpo do artigo. */
+  vigente: string;
+  /** Redações superadas, para exibir recolhidas — nunca descartadas. */
+  anteriores: RedacaoAnterior[];
+}
+
+/**
+ * Separa a redação vigente das anteriores quando o scrape empilhou o histórico.
+ *
+ * A página do Planalto mostra, para um mesmo inciso, a redação original e cada
+ * alteração. O scrape achatou isso numa sequência: no art. 75 o inciso XVI
+ * aparece três vezes seguidas, em redações diferentes, e o leitor não tem como
+ * saber qual vale.
+ *
+ * A regra é deliberadamente conservadora: só recolhe quando ao menos um dos
+ * blocos repetidos traz nota de alteração — a prova de que houve mudança. Sem
+ * nota, o texto fica exatamente como está, porque esconder seria adivinhar, e
+ * apresentar redação revogada como vigente é o erro mais caro possível para
+ * quem lê isto antes de citar.
+ *
+ * Só considera repetição ADJACENTE. Artigo cujo `§` tem lista própria repete
+ * `I, II, III` legitimamente, e ali as ocorrências não são vizinhas.
+ */
+export function separarRedacoes(normalizado: string): EmentaSeparada {
+  const blocos = normalizado.split('\n\n');
+  // O travessão sai do rótulo: "XVI", não "XVI —". Ele serve para agrupar e
+  // para rotular a redação anterior na interface.
+  const marcadorDe = (b: string) =>
+    b.match(MARCADOR_LINHA)?.[1].replace(/\s+/g, ' ').replace(/\s*—$/, '').trim() ?? null;
+
+  const anteriores: RedacaoAnterior[] = [];
+  const mantidos: string[] = [];
+
+  for (let i = 0; i < blocos.length; ) {
+    const marcador = marcadorDe(blocos[i]);
+    if (!marcador) {
+      mantidos.push(blocos[i]);
+      i++;
+      continue;
+    }
+
+    // Junta a corrida de blocos vizinhos com o mesmo marcador.
+    let fim = i;
+    while (fim + 1 < blocos.length && marcadorDe(blocos[fim + 1]) === marcador) fim++;
+    const corrida = blocos.slice(i, fim + 1);
+
+    const temProva = corrida.some((b) => NOTA_ALTERACAO.test(b));
+    if (corrida.length > 1 && temProva) {
+      for (const superado of corrida.slice(0, -1)) {
+        anteriores.push({
+          marcador,
+          texto: limparBoilerplate(superado.replace(NOTA_ALTERACAO, '')),
+          fonte: superado.match(NOTA_ALTERACAO)?.[0].slice(1, -1) ?? null,
+        });
+      }
+      mantidos.push(corrida[corrida.length - 1]);
+    } else {
+      mantidos.push(...corrida);
+    }
+
+    i = fim + 1;
+  }
+
+  return { vigente: mantidos.join('\n\n'), anteriores };
+}
+
 /**
  * Remove o prefixo "Art. Nº" / "Art. N-A" / "Art. Nº" do início.
  */

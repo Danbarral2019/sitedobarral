@@ -12,7 +12,13 @@
 import Link from 'next/link';
 import { ExternalLink, Scale, FileText, AlertTriangle } from 'lucide-react';
 import type { ArticleCounts } from '@/lib/lei-14133/queries';
-import { normalizeEmenta, stripArticlePrefix, isLikelyTruncated } from '@/lib/lei-14133/parse-ementa';
+import {
+  normalizeEmenta,
+  stripArticlePrefix,
+  isLikelyTruncated,
+  separarRedacoes,
+  limparBoilerplate,
+} from '@/lib/lei-14133/parse-ementa';
 
 const PLANALTO_LEI_URL =
   'https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm';
@@ -43,9 +49,15 @@ function shouldUseOrdinal(numero: string): boolean {
 export function ArticleFull({ numero, ementa, counts, withDropCap, comLink = true }: ArticleFullProps) {
   const cleaned = stripArticlePrefix(ementa);
   const normalized = normalizeEmenta(cleaned);
-  const truncated = isLikelyTruncated(normalized);
+  // O scrape do Planalto empilha o histórico de redações e intercala
+  // "(Vide Decreto ...)" e "Vigência" no meio da frase. Separa-se o que vale
+  // hoje do que foi superado, e tira-se o entulho — sem descartar nada: as
+  // redações anteriores vão para o bloco recolhido no fim do artigo.
+  const { vigente, anteriores } = separarRedacoes(normalized);
+  const corpo = limparBoilerplate(vigente);
+  const truncated = isLikelyTruncated(corpo);
 
-  const paragraphs = normalized.split('\n\n').map((p) => p.trim()).filter(Boolean);
+  const paragraphs = corpo.split('\n\n').map((p) => p.trim()).filter(Boolean);
   const acordaos = counts?.acordaos ?? 0;
   const pareceresOns = counts?.pareceresOns ?? 0;
 
@@ -175,6 +187,31 @@ export function ArticleFull({ numero, ementa, counts, withDropCap, comLink = tru
             </a>
           </div>
         </div>
+      )}
+
+      {/* Redações anteriores: recolhidas, nunca descartadas. Quem confere
+          antes de citar precisa poder ver o que mudou. */}
+      {anteriores.length > 0 && (
+        <details className="mt-5">
+          <summary className="cursor-pointer font-sans text-sm text-ink-muted hover:text-ink-primary transition-colors">
+            {anteriores.length === 1
+              ? 'Ver a redação anterior'
+              : `Ver as ${anteriores.length} redações anteriores`}
+          </summary>
+          <ul className="mt-3 space-y-3 border-l-2 border-border-subtle pl-4">
+            {anteriores.map((r, i) => (
+              <li key={`${r.marcador}-${i}`}>
+                <p className="font-sans text-xs text-ink-muted mb-1">
+                  {r.marcador}
+                  {r.fonte ? ` · ${r.fonte}` : ' · redação original'}
+                </p>
+                <p className="font-reading text-[0.95rem] leading-relaxed text-ink-muted text-justify hyphens-auto">
+                  {r.texto}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       {/* Refs e link planalto */}
