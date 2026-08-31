@@ -10,6 +10,11 @@ import {
   searchTribunalDecisions,
 } from '@/lib/search/full-text-search';
 import { handleApiError } from '@/lib/errors/error-handler';
+import { hybridSearch } from '@/lib/embeddings/hybrid-search';
+import { dedupeByDocument } from '@/lib/search/hybrid-documents';
+import { mesclarSemDuplicar, contarNovos } from '@/lib/search/mesclar-semantica';
+import { prisma } from '@/lib/prisma';
+import { apiLogger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -62,6 +67,23 @@ export async function GET(request: NextRequest) {
       searchFAQs(query, { limit: 5 }),
     ]);
 
+    // Busca semântica sobre os 27.291 chunks já indexados no pgvector, que até
+    // aqui só a área logada usava. Full-text casa palavra; quem digita "posso
+    // contratar sem licitação até quanto" não tem nenhuma dessas no título de
+    // documento nenhum, e não achava o art. 75.
+    //
+    // Degrada em silêncio de propósito: sem chave do Gemini, com quota estourada
+    // ou com o pgvector fora, a busca textual segue respondendo. Melhor uma
+    // busca pior do que uma busca quebrada.
+    //
+    // Não vaza acervo pago: esta rota devolve título, descrição e categoria —
+    // nunca o trecho do chunk. Documento restrito encontrado aqui aparece
+    // marcado como restrito, igual ao que o full-text já fazia.
+    const docsSemanticos = await buscarSemanticos(query, {
+      userCourseId,
+      isAdmin: authResult.user?.role === 'admin',
+    }).catch(() => []);
+
     // Artigos da Lei 14.133 (busca local em dados estáticos)
     const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10);
 
@@ -86,6 +108,14 @@ export async function GET(request: NextRequest) {
         requiresEnrollment: !hasAccess,
       };
     });
+
+    const documentosFinais = mesclarSemDuplicar(processedDocuments, docsSemanticos, 20);
+    if (docsSemanticos.length > 0) {
+      apiLogger.info(
+        { query, novos: contarNovos(processedDocuments, docsSemanticos) },
+        'busca integrada: semântica acrescentou resultados',
+      );
+    }
 
     return NextResponse.json({
       query,
@@ -113,7 +143,7 @@ export async function GET(request: NextRequest) {
           issuer: data.issuer,
           publishDate: data.publish_date,
         })),
-        documents: processedDocuments,
+        documents: documentosFinais,
         decisions: decisionResults.map(({ data }) => ({
           id: data.id,
           tribunalCode: data.tribunal_code,
@@ -148,4 +178,60 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return handleApiError(error);
   }
+}
+
+/**
+ * Documentos encontrados por similaridade semântica, no mesmo formato dos que
+ * vêm do full-text. Devolve [] em qualquer falha — o chamador não trata erro.
+ */
+async function buscarSemanticos(
+  query: string,
+  acesso: { userCourseId: string | null; isAdmin: boolean },
+) {
+  const { results } = await hybridSearch({
+    query,
+    limit: 12,
+    includeTribunalDecisions: false,
+    useCache: true,
+  });
+
+  const ids = dedupeByDocument(results)
+    .filter((r) => r.sourceType === 'document')
+    .map((r) => r.documentId);
+
+  if (ids.length === 0) return [];
+
+  const rows = await prisma.document.findMany({
+    where: { id: { in: ids } },
+    select: {
+      id: true, title: true, description: true, category: true, type: true,
+      url: true, courseId: true, uploadedAt: true, isPublic: true,
+    },
+  });
+
+  // Preserva a ordem de relevância do híbrido, que o findMany não garante.
+  const porId = new Map(rows.map((r) => [r.id, r]));
+  return ids.flatMap((id) => {
+    const d = porId.get(id);
+    if (!d) return [];
+    // Mesma regra de acesso do ramo full-text: divergir aqui faria o mesmo
+    // documento aparecer destravado ou trancado conforme o ramo que o achou.
+    const hasAccess =
+      d.isPublic ||
+      (!!acesso.userCourseId && d.courseId === acesso.userCourseId) ||
+      acesso.isAdmin;
+    return [{
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      category: d.category,
+      type: d.type,
+      url: d.url,
+      courseId: d.courseId,
+      uploadedAt: d.uploadedAt,
+      isPublic: d.isPublic,
+      hasAccess,
+      requiresEnrollment: !hasAccess,
+    }];
+  });
 }
