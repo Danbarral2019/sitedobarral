@@ -180,6 +180,94 @@ export async function hasAccessToCourse(courseId: string): Promise<boolean> {
 }
 
 /**
+ * Verifica se o usuário tem QUALQUER acesso ativo — matrícula válida ou
+ * assinatura ativa, em qualquer curso. É a regra do acervo comum: documento
+ * sem curso vinculado pertence aos dois planos, não a um curso específico.
+ */
+export async function hasAnyActiveAccess(userId: string): Promise<boolean> {
+  const { prisma } = await import('@/lib/prisma');
+
+  const enrollment = await prisma.enrollment.findFirst({
+    where: {
+      userId,
+      OR: [
+        { isLifetime: true },
+        { expiresAt: null },
+        { expiresAt: { gt: new Date() } },
+      ],
+    },
+    select: { id: true },
+  });
+
+  if (enrollment) {
+    return true;
+  }
+
+  const subscription = await prisma.subscription.findFirst({
+    where: { userId, status: 'active' },
+    select: { id: true },
+  });
+
+  return !!subscription;
+}
+
+/** Campos de um Document que decidem quem pode lê-lo. */
+export interface DocumentAccessFields {
+  isPublic: boolean;
+  isCommon: boolean;
+  courseId: string | null;
+}
+
+interface DocumentAccessDeps {
+  getUser: () => Promise<AuthPayload | null>;
+  hasCourseAccess: (courseId: string) => Promise<boolean>;
+  hasAnyActiveAccess: (userId: string) => Promise<boolean>;
+}
+
+/**
+ * Verifica se o visitante atual pode ver o CONTEÚDO de um documento.
+ *
+ * Não confundir com existir: documento restrito continua tendo página, com
+ * amostra e oferta, para quem não tem acesso. Ver app/documento/[id]/page.tsx.
+ *
+ * Cascata: público → livre · admin → tudo · acervo comum → qualquer acesso
+ * ativo · documento de um curso → delega a hasAccessToCourse.
+ *
+ * isCommon vence courseId, e não é detalhe: em produção os 151 documentos
+ * restritos são TODOS isCommon, e 102 deles também trazem courseId. Ali o
+ * courseId marca a origem, não a restrição — o schema diz que ele seria nulo
+ * quando isCommon, mas o dado real diz o contrário. Ler courseId primeiro
+ * negaria dois terços do acervo restrito a um assinante Básico de outro curso.
+ */
+export async function hasAccessToDocument(
+  doc: DocumentAccessFields,
+  deps: DocumentAccessDeps = {
+    getUser: getCurrentUser,
+    hasCourseAccess: hasAccessToCourse,
+    hasAnyActiveAccess,
+  },
+): Promise<boolean> {
+  if (doc.isPublic) {
+    return true;
+  }
+
+  const user = await deps.getUser();
+  if (!user) {
+    return false;
+  }
+
+  if (user.role === 'admin') {
+    return true;
+  }
+
+  if (!doc.isCommon && doc.courseId) {
+    return deps.hasCourseAccess(doc.courseId);
+  }
+
+  return deps.hasAnyActiveAccess(user.userId);
+}
+
+/**
  * Verifica se o usuário é admin
  */
 export async function isAdmin(): Promise<boolean> {
