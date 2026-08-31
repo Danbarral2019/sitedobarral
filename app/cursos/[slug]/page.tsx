@@ -395,7 +395,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
                   <p className="text-xs text-white/80 mt-4">
                     Primeiro acesso?{' '}
-                    <Link href="/validar-acesso"className="underline hover:text-white">
+                    <Link href="/validar-acesso" className="underline hover:text-white">
                       Use o QR Code do curso
                     </Link>
                   </p>

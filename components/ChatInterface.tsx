@@ -820,11 +820,11 @@ export default function ChatInterface({
       <div className="border-t border-border-subtle p-4 space-y-3">
         {/* Scope chips: aluno controla o foco da pesquisa */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1 text-xs text-ink-muted"title="Escopo da pesquisa">
+          <span className="inline-flex items-center gap-1 text-xs text-ink-muted" title="Escopo da pesquisa">
             <Filter className="w-3 h-3"aria-hidden="true" />
             <span>Escopo:</span>
           </span>
-          <div className="inline-flex rounded-md border border-border-subtle bg-white p-0.5"role="group"aria-label="Escopo da pesquisa">
+          <div className="inline-flex rounded-md border border-border-subtle bg-white p-0.5" role="group"aria-label="Escopo da pesquisa">
             {SCOPE_OPTIONS.map((opt) => {
               const active = scope === opt.value;
               return (

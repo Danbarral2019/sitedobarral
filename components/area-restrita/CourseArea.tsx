@@ -295,7 +295,7 @@ export default function CourseArea({
                       className="w-8 h-8 rounded-[6px] flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: section.accent + '12' }}
                     >
-                      <Icon className="w-4 h-4"style={{ color: section.accent }} />
+                      <Icon className="w-4 h-4" style={{ color: section.accent }} />
                     </div>
                     <h3 className="text-sm font-bold text-ink-secondary">{section.title}</h3>
                     <span

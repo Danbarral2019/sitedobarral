@@ -139,7 +139,7 @@ export default function ArtigosIndexPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Error State */}
         {fetchError && (
-          <div role="alert"className="bg-amber-accent-soft border-2 border-amber-accent rounded-[6px] p-4 mb-6">
+          <div role="alert" className="bg-amber-accent-soft border-2 border-amber-accent rounded-[6px] p-4 mb-6">
             <p className="text-amber-accent-deep font-medium">{fetchError}</p>
           </div>
         )}

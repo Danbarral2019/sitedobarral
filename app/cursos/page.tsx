@@ -65,7 +65,7 @@ export default function CursosPage() {
                 </p>
                 <p className="text-brand-900 text-base leading-relaxed">
                   Deseja acesso contínuo? Conheça nossos{' '}
-                  <a href="/planos"className="text-brand-600 font-semibold underline hover:text-brand-700">
+                  <a href="/planos" className="text-brand-600 font-semibold underline hover:text-brand-700">
                     planos de assinatura
                   </a>{' '}
                   a partir de R$ {process.env.NEXT_PUBLIC_PRICE_BASICO || '49,90'}/mês.

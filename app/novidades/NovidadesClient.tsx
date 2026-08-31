@@ -137,7 +137,7 @@ export default function NovidadesClient({
       {/* Header */}
       <div className="bg-[#1e3a5f] to-brand-600 text-white">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          <Link href="/"className="text-brand-200 hover:text-white text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
+          <Link href="/" className="text-brand-200 hover:text-white text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
           <h1 className="text-3xl font-bold font-serif mb-2">Novidades da Plataforma</h1>
           <p className="text-brand-200">Todos os documentos e conteúdos adicionados no período</p>
         </div>
@@ -202,7 +202,7 @@ export default function NovidadesClient({
                 <h4 className="font-semibold text-ink-primary mt-1">{pub.title}</h4>
                 <p className="text-sm text-ink-muted mt-1">{pub.description.substring(0, 200)}{pub.description.length > 200 ? '...' : ''}</p>
                 {pub.externalUrl && (
-                  <a href={pub.externalUrl} target="_blank"rel="noopener noreferrer"className="text-sm text-amber-accent-deep font-medium hover:underline mt-2 inline-block">Acessar &rarr;</a>
+                  <a href={pub.externalUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-accent-deep font-medium hover:underline mt-2 inline-block">Acessar &rarr;</a>
                 )}
               </div>
             ))}
@@ -210,7 +210,7 @@ export default function NovidadesClient({
               <div key={i} className="p-4 border border-amber-accent-soft rounded-[6px] bg-amber-accent-soft mb-3">
                 <span className="text-xs font-semibold text-amber-accent-deep uppercase tracking-wider flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo</span>
                 <h4 className="font-semibold text-ink-primary mt-1">{video.title}</h4>
-                <a href={video.youtubeUrl ?? ''} target="_blank"rel="noopener noreferrer"className="text-sm text-amber-accent-deep font-medium hover:underline mt-1 inline-block">Assistir &rarr;</a>
+                <a href={video.youtubeUrl ?? ''} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-accent-deep font-medium hover:underline mt-1 inline-block">Assistir &rarr;</a>
               </div>
             ))}
           </Section>

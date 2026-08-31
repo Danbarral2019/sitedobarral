@@ -170,7 +170,7 @@ export default async function BlogPage() {
               </p>
 
               <div className="max-w-xl mx-auto bg-white/10 p-2 rounded-[6px] border-2 border-white/30">
-                <NewsletterForm variant="inline"className="[&_input]:bg-white [&_input]:text-ink-primary [&_input]:placeholder:text-ink-muted [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:[&_button]:from-green-400 [&_button]:to-brand-500 [&_button]:text-ink-primary [&_button]:font-bold [&_button]:hover:from-green-500 [&_button]:hover:to-brand-600 [&_button]:" />
+                <NewsletterForm variant="inline" className="[&_input]:bg-white [&_input]:text-ink-primary [&_input]:placeholder:text-ink-muted [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:[&_button]:from-green-400 [&_button]:to-brand-500 [&_button]:text-ink-primary [&_button]:font-bold [&_button]:hover:from-green-500 [&_button]:hover:to-brand-600 [&_button]:" />
               </div>
 
               <p className="text-white/80 text-sm mt-4">
