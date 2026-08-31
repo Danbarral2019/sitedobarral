@@ -137,7 +137,7 @@ export default function NovidadesClient({
       {/* Header */}
       <div className="bg-surface-raised text-ink-primary">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          <Link href="/" className="text-ink-muted hover:text-surface-page text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
+          <Link href="/" className="text-ink-muted hover:text-ink-secondary text-sm mb-4 inline-block">&larr; Voltar ao site</Link>
           <h1 className="text-3xl font-bold font-serif mb-2">Novidades da Plataforma</h1>
           <p className="text-ink-muted">Todos os documentos e conteúdos adicionados no período</p>
         </div>

@@ -157,7 +157,7 @@ export default async function BlogPage() {
             <div className="relative z-10">
               <div className="inline-block mb-4">
                 <div className="bg-surface-page/20 px-4 py-2 rounded-full">
-                  <span className="text-surface-page font-semibold text-sm">📰 Blog Jurídico</span>
+                  <span className="text-ink-secondary font-semibold text-sm">📰 Blog Jurídico</span>
                 </div>
               </div>
 

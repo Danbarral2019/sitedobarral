@@ -74,7 +74,7 @@ export default function MeuPlanoClient({ subscription, enrollments }: Props) {
  <header className="mb-8">
  <div className="flex items-start gap-4">
  <div className="p-3 bg-surface-raised rounded-md shrink-0">
- <CreditCard className="w-7 h-7 text-surface-page" />
+ <CreditCard className="w-7 h-7 text-brand-600" />
  </div>
  <div>
  <h1 className="text-2xl lg:text-3xl font-bold text-ink-primary">Meu plano</h1>

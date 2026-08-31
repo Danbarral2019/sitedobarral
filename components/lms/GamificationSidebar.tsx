@@ -71,7 +71,7 @@ export default function GamificationSidebar({ courseId }: GamificationSidebarPro
  <div className="bg-surface-page rounded-md border border-border-subtle overflow-hidden">
  {/* Header */}
  <div className="bg-surface-raised px-4 py-3">
- <h3 className="text-sm font-bold text-surface-page flex items-center gap-1.5">
+ <h3 className="text-sm font-bold text-ink-secondary flex items-center gap-1.5">
  <Trophy className="w-4 h-4" />
  Sua Jornada
  </h3>

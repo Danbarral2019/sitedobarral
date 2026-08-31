@@ -136,7 +136,7 @@ export default function CursosPage() {
             <div className="absolute inset-0 bg-surface-raised opacity-95"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
             <div className="relative p-10 md:p-12 text-center rounded-md">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-surface-page">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-ink-secondary">
                 Interessado em nossos cursos?
               </h2>
               <p className="text-surface-page text-xl mb-8 max-w-2xl mx-auto leading-relaxed opacity-95">

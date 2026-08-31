@@ -222,7 +222,7 @@ export default function JurisprudenciaDetailPage() {
       <div className="bg-surface-raised text-ink-primary py-12 border-b border-border-subtle">
         <div className="max-w-4xl mx-auto px-4">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-surface-page/80 mb-6">
+          <nav className="flex items-center gap-2 text-sm text-ink-secondary mb-6">
             <Link href="/" className="hover:text-surface-page transition-colors">Início</Link>
             <span>/</span>
             <Link href="/jurisprudencia" className="hover:text-surface-page transition-colors">Jurisprudência</Link>

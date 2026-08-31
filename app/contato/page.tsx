@@ -122,7 +122,7 @@ function ContatoContent() {
                 {isSubmitted ? (
                   <div role="alert" className="bg-surface-raised border-2 border-brand-500 rounded-md p-8 text-center">
                     <div className="w-20 h-20 bg-surface-raised rounded-full flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle className="w-12 h-12 text-surface-page" />
+                      <CheckCircle className="w-12 h-12 text-brand-600" />
                     </div>
                     <h3 className="text-2xl font-bold text-ink-primary mb-3">Mensagem enviada com sucesso!</h3>
                     <p className="text-ink-primary text-lg font-medium">Retornaremos em breve pelo e-mail informado.</p>
@@ -255,7 +255,7 @@ function ContatoContent() {
                 <div className="space-y-4">
                   <div className="flex items-start gap-3 bg-surface-raised p-3 rounded-md border-l-4 border-brand-500">
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 text-surface-page" />
+                      <Mail className="w-5 h-5 text-brand-600" />
                     </div>
                     <div>
                       <p className="font-bold text-ink-primary">E-mail</p>
@@ -265,7 +265,7 @@ function ContatoContent() {
 
                   <div className="flex items-start gap-3 bg-surface-raised p-3 rounded-md border-l-4 border-brand-600">
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 text-surface-page" />
+                      <Phone className="w-5 h-5 text-brand-600" />
                     </div>
                     <div>
                       <p className="font-bold text-ink-primary">Telefone</p>
@@ -275,7 +275,7 @@ function ContatoContent() {
 
                   <div className="flex items-start gap-3 bg-surface-raised p-3 rounded-md border-l-4 border-brand-600">
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-surface-page" />
+                      <MapPin className="w-5 h-5 text-brand-600" />
                     </div>
                     <div>
                       <p className="font-bold text-ink-primary">Localização</p>
@@ -300,7 +300,7 @@ function ContatoContent() {
                     className="flex items-center gap-3 bg-surface-raised p-3 rounded-md border-l-2 border-border-strong  transition-all group"
                   >
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Instagram className="w-5 h-5 text-surface-page" />
+                      <Instagram className="w-5 h-5 text-brand-600" />
                     </div>
                     <span className="text-ink-primary font-bold">@danbarral</span>
                   </a>
@@ -312,7 +312,7 @@ function ContatoContent() {
                     className="flex items-center gap-3 bg-surface-raised p-3 rounded-md border-l-2 border-border-strong  transition-all group"
                   >
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Youtube className="w-5 h-5 text-surface-page" />
+                      <Youtube className="w-5 h-5 text-brand-600" />
                     </div>
                     <span className="text-ink-primary font-bold">@danbarral</span>
                   </a>
@@ -324,7 +324,7 @@ function ContatoContent() {
                     className="flex items-center gap-3 bg-surface-raised p-3 rounded-md border-l-2 border-border-strong  transition-all group"
                   >
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Linkedin className="w-5 h-5 text-surface-page" />
+                      <Linkedin className="w-5 h-5 text-brand-600" />
                     </div>
                     <span className="text-ink-primary font-bold">Daniel Barral</span>
                   </a>

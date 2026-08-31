@@ -244,7 +244,7 @@ export default function HistoricoIAPage() {
  <div className="flex items-center gap-3">
  <History className="w-8 h-8" />
  <div>
- <h1 className="text-2xl font-bold">Historico de Perguntas</h1>
+ <h1 className="text-2xl font-bold">Histórico de Perguntas</h1>
  <p className="text-ink-muted">
  {totalQuestions} pergunta{totalQuestions !== 1 ? 's' : ''} realizada{totalQuestions !== 1 ? 's' : ''}
  </p>

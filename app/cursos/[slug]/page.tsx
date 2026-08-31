@@ -232,8 +232,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {/* Número do Curso */}
               <div className="hidden md:block">
                 <div className="bg-surface-page/20 rounded-md p-6 text-center">
-                  <div className="text-6xl font-bold text-surface-page mb-2">{courseNumber}</div>
-                  <div className="text-sm uppercase tracking-wider font-semibold text-surface-page/90">Curso</div>
+                  <div className="text-6xl font-bold text-ink-secondary mb-2">{courseNumber}</div>
+                  <div className="text-sm uppercase tracking-wider font-semibold text-ink-secondary/90">Curso</div>
                 </div>
               </div>
 
@@ -256,15 +256,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 <div className="flex flex-wrap gap-4 mt-8">
                   {modules.length > 0 && (
                     <div className="bg-surface-page/20 rounded-md px-6 py-3 flex items-center gap-3">
-                      <Layers className="w-5 h-5 text-surface-page" />
-                      <span className="text-surface-page font-semibold">
+                      <Layers className="w-5 h-5 text-brand-600" />
+                      <span className="text-ink-secondary font-semibold">
                         {modules.length} {modules.length === 1 ? 'Módulo' : 'Módulos'} · {modules.reduce((s, m) => s + m._count.lessons, 0)} Aulas
                       </span>
                     </div>
                   )}
                   <div className="bg-surface-page/20 rounded-md px-6 py-3 flex items-center gap-3">
-                    <Award className="w-5 h-5 text-surface-page" />
-                    <span className="text-surface-page font-semibold">Certificado</span>
+                    <Award className="w-5 h-5 text-brand-600" />
+                    <span className="text-ink-secondary font-semibold">Certificado</span>
                   </div>
                 </div>
               </div>

@@ -68,7 +68,7 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
       {/* Header */}
       <header className="bg-surface-raised text-ink-primary py-6 border-b border-border-subtle">
         <div className="max-w-3xl mx-auto px-4">
-          <Link href="/" className="text-surface-page/80 hover:text-surface-page text-sm font-medium transition-colors">
+          <Link href="/" className="text-ink-secondary hover:text-ink-secondary text-sm font-medium transition-colors">
             Prof. Daniel Barral
           </Link>
           <p className="text-ink-muted text-sm mt-1">Resposta do Assistente de IA</p>

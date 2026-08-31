@@ -85,7 +85,7 @@ export default async function AssistentePage() {
  <div className="bg-surface-page rounded-md p-8 border border-border-subtle">
  <div className="flex items-start gap-4">
  <div className="p-3 bg-surface-raised rounded-md">
- <Sparkles className="w-8 h-8 text-surface-page" />
+ <Sparkles className="w-8 h-8 text-brand-600" />
  </div>
  <div className="flex-1">
  <h1 className="text-3xl font-bold text-ink-primary mb-2">

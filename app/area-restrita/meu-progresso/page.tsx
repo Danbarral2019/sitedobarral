@@ -128,7 +128,7 @@ export default function MeuProgressoPage() {
  onClick={() => router.push('/area-restrita')}
  className="text-brand-600 hover:text-brand-700 font-medium"
  >
- Voltar para area restrita
+ Voltar para a área restrita
  </button>
  </div>
  </div>
@@ -144,7 +144,7 @@ export default function MeuProgressoPage() {
  className="flex items-center gap-2 text-ink-secondary hover:text-brand-600 mb-6 font-medium transition-colors"
  >
  <ArrowLeft className="w-5 h-5" />
- Voltar para area restrita
+ Voltar para a área restrita
  </button>
 
  <div className="bg-surface-page rounded-md p-12 text-center border border-border-subtle">
@@ -175,16 +175,16 @@ export default function MeuProgressoPage() {
  className="flex items-center gap-2 text-ink-secondary hover:text-brand-600 mb-6 font-medium transition-colors"
  >
  <ArrowLeft className="w-5 h-5" />
- Voltar para area restrita
+ Voltar para a área restrita
  </button>
 
  <div className="flex items-center gap-4 mb-4">
  <div className="w-16 h-16 bg-surface-raised rounded-full flex items-center justify-center">
- <TrendingUp className="w-8 h-8 text-surface-page" />
+ <TrendingUp className="w-8 h-8 text-brand-600" />
  </div>
  <div>
  <h1 className="text-3xl font-bold text-ink-primary">Meu Progresso</h1>
- <p className="text-ink-secondary">Acompanhe sua evolucao nos cursos</p>
+ <p className="text-ink-secondary">Acompanhe sua evolução nos cursos</p>
  </div>
  </div>
  </div>

@@ -75,7 +75,7 @@ export default function LeaderboardModal({ courseId, onClose }: LeaderboardModal
  <div className="relative bg-surface-page rounded-md w-full max-w-md max-h-[80vh] overflow-hidden">
  {/* Header */}
  <div className="bg-surface-raised px-5 py-4 flex items-center justify-between">
- <h2 className="text-lg font-bold text-surface-page flex items-center gap-2">
+ <h2 className="text-lg font-bold text-ink-secondary flex items-center gap-2">
  <Trophy className="w-5 h-5" />
  Ranking
  </h2>
@@ -122,7 +122,7 @@ export default function LeaderboardModal({ courseId, onClose }: LeaderboardModal
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2">
  <div className="w-7 h-7 rounded-full bg-surface-raised flex items-center justify-center flex-shrink-0">
- <span className="text-surface-page text-xs font-bold">{entry.initial}</span>
+ <span className="text-ink-secondary text-xs font-bold">{entry.initial}</span>
  </div>
  <div className="min-w-0">
  <p className={`text-sm font-medium truncate ${entry.isCurrentUser ? 'text-brand-700 font-semibold' : 'text-ink-primary'}`}>

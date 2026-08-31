@@ -251,7 +251,7 @@ export default function JurisprudenciaRestritaClient() {
  <div className="mb-6">
  <div className="flex items-start gap-4">
  <div className="p-3 bg-surface-raised rounded-md shrink-0">
- <Gavel className="w-8 h-8 text-surface-page" />
+ <Gavel className="w-8 h-8 text-brand-600" />
  </div>
  <div>
  <h1 className="text-2xl lg:text-3xl font-bold text-ink-primary">

@@ -366,7 +366,7 @@ export default function FavoritosPage() {
 
  <div className="flex items-center gap-4 mb-4">
  <div className="w-16 h-16 bg-surface-raised rounded-full flex items-center justify-center">
- <Heart className="w-8 h-8 text-surface-page fill-current" />
+ <Heart className="w-8 h-8 text-brand-600 fill-current" />
  </div>
  <div>
  <h1 className="text-3xl font-bold text-ink-primary">Meus Favoritos</h1>

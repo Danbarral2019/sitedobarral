@@ -72,11 +72,11 @@ export default function OnboardingGuide() {
  <div className="flex items-center justify-between mb-4">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-surface-raised rounded-md">
- <Sparkles className="w-5 h-5 text-surface-page" />
+ <Sparkles className="w-5 h-5 text-brand-600" />
  </div>
  <div>
  <h3 className="text-lg font-bold text-ink-primary">Bem-vindo a Area Restrita!</h3>
- <p className="text-sm text-ink-muted">Veja o que voce pode fazer aqui</p>
+ <p className="text-sm text-ink-muted">Veja o que você pode fazer aqui</p>
  </div>
  </div>
  <button

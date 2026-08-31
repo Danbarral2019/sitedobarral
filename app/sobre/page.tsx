@@ -62,7 +62,7 @@ export default function SobrePage() {
                   />
                 </div>
                 <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-surface-raised rounded-full flex items-center justify-center">
-                  <Scale className="w-8 h-8 text-surface-page" />
+                  <Scale className="w-8 h-8 text-brand-600" />
                 </div>
               </div>
               <div className="flex-1">
@@ -73,7 +73,7 @@ export default function SobrePage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 bg-surface-raised p-3 rounded-md border-l-4 border-brand-500">
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0">
-                      <GraduationCap className="text-surface-page" size={20} />
+                      <GraduationCap className="text-ink-secondary" size={20} />
                     </div>
                     <span className="text-ink-primary font-semibold">Mestre em Direito Público</span>
                   </div>
@@ -85,7 +85,7 @@ export default function SobrePage() {
                   </div>
                   <div className="flex items-center gap-3 bg-surface-raised p-3 rounded-md border-l-2 border-border-strong">
                     <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0">
-                      <Briefcase className="text-surface-page" size={20} />
+                      <Briefcase className="text-ink-secondary" size={20} />
                     </div>
                     <span className="text-ink-primary font-semibold">Palestrante Especializado</span>
                   </div>
@@ -101,7 +101,7 @@ export default function SobrePage() {
             <div className="relative p-10 md:p-12 text-center rounded-md">
               <div className="inline-block mb-4">
                 <div className="bg-surface-page/20 px-4 py-2 rounded-full">
-                  <span className="text-surface-page font-semibold text-sm flex items-center gap-2">
+                  <span className="text-ink-secondary font-semibold text-sm flex items-center gap-2">
                     <Award className="w-4 h-4" />
                     Nossa Missão
                   </span>
@@ -140,7 +140,7 @@ export default function SobrePage() {
               <div className="space-y-4">
                 <div className="flex items-start gap-4 bg-surface-raised p-4 rounded-md border-l-4 border-brand-500  transition-all group">
                   <div className="w-12 h-12 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <Scale className="text-surface-page" size={24} />
+                    <Scale className="text-ink-secondary" size={24} />
                   </div>
                   <div>
                     <h3 className="font-bold text-ink-primary mb-1">Direito Administrativo</h3>
@@ -160,7 +160,7 @@ export default function SobrePage() {
               <div className="space-y-4">
                 <div className="flex items-start gap-4 bg-surface-raised p-4 rounded-md border-l-2 border-border-strong  transition-all group">
                   <div className="w-12 h-12 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <Briefcase className="text-surface-page" size={24} />
+                    <Briefcase className="text-ink-secondary" size={24} />
                   </div>
                   <div>
                     <h3 className="font-bold text-ink-primary mb-1">Processo Administrativo</h3>
@@ -169,7 +169,7 @@ export default function SobrePage() {
                 </div>
                 <div className="flex items-start gap-4 bg-surface-raised p-4 rounded-md border-l-4 border-brand-600  transition-all group">
                   <div className="w-12 h-12 bg-surface-raised rounded-[3px] flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <Award className="text-surface-page" size={24} />
+                    <Award className="text-ink-secondary" size={24} />
                   </div>
                   <div>
                     <h3 className="font-bold text-ink-primary mb-1">Inovação nas Contratações</h3>
@@ -191,7 +191,7 @@ export default function SobrePage() {
               <div className="bg-surface-raised p-6 rounded-md border-l-4 border-brand-500">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center">
-                    <GraduationCap className="text-surface-page" size={20} />
+                    <GraduationCap className="text-ink-secondary" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-ink-primary">Formação Acadêmica</h3>
                 </div>
@@ -239,7 +239,7 @@ export default function SobrePage() {
               <div className="bg-surface-raised p-6 rounded-md border-l-2 border-border-strong">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center">
-                    <BookOpen className="text-surface-page" size={20} />
+                    <BookOpen className="text-ink-secondary" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-ink-primary">Atividades Acadêmicas e Docência</h3>
                 </div>
@@ -259,7 +259,7 @@ export default function SobrePage() {
               <div className="bg-surface-raised p-6 rounded-md border-l-4 border-brand-600">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center">
-                    <Users className="text-surface-page" size={20} />
+                    <Users className="text-ink-secondary" size={20} />
                   </div>
                   <h3 className="text-xl font-bold text-ink-primary">Participação Institucional</h3>
                 </div>
@@ -296,7 +296,7 @@ export default function SobrePage() {
               <div className="bg-surface-raised p-6 rounded-md border-2 border-brand-200 hover:border-brand-400 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-surface-raised rounded-[3px] flex items-center justify-center">
-                    <Users className="text-surface-page" size={20} />
+                    <Users className="text-ink-secondary" size={20} />
                   </div>
                   <h3 className="text-lg font-bold text-ink-primary">Perfil Principal</h3>
                 </div>
@@ -359,7 +359,7 @@ export default function SobrePage() {
             <div className="relative p-10 md:p-12 text-center rounded-md">
               <div className="inline-block mb-4">
                 <div className="bg-surface-page/20 px-4 py-2 rounded-full">
-                  <span className="text-surface-page font-semibold text-sm">Próximos passos</span>
+                  <span className="text-ink-secondary font-semibold text-sm">Próximos passos</span>
                 </div>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-surface-page">

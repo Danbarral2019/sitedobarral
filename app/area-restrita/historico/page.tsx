@@ -338,7 +338,7 @@ export default function HistoricoPage() {
  <div className="bg-surface-page rounded-md p-8 border border-border-subtle">
  <div className="flex items-center gap-4 mb-4">
  <div className="w-14 h-14 bg-surface-raised rounded-full flex items-center justify-center">
- <Clock className="w-7 h-7 text-surface-page" />
+ <Clock className="w-7 h-7 text-brand-600" />
  </div>
  <div>
  <h1 className="text-3xl font-bold text-ink-primary">Histórico</h1>

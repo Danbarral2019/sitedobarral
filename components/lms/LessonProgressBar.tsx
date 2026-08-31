@@ -49,7 +49,7 @@ export default function LessonProgressBar({
  })}
  </div>
  <p className="text-[11px] text-ink-muted mt-1">
- {completedLessons}/{totalLessons} {totalLessons === 1 ? 'licao concluida' : 'licoes concluidas'}
+ {completedLessons}/{totalLessons} {totalLessons === 1 ? 'licao concluida' : 'lições concluidas'}
  </p>
  </div>
  );

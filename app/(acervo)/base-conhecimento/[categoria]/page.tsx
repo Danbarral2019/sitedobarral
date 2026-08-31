@@ -401,7 +401,7 @@ export default async function CategoriaPage({ params, searchParams }: PageProps)
 
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 bg-surface-page/15 rounded-md flex items-center justify-center flex-shrink-0">
-                <Icon className="w-7 h-7 text-surface-page" />
+                <Icon className="w-7 h-7 text-brand-600" />
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-cinzel font-semibold mb-2 tracking-wide">

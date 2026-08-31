@@ -280,7 +280,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
           <div className="bg-surface-raised rounded-md overflow-hidden mb-6">
             {/* Header destacado */}
             <div className="bg-surface-raised px-6 py-4">
-              <h3 className="flex items-center gap-3 text-lg font-bold text-surface-page">
+              <h3 className="flex items-center gap-3 text-lg font-bold text-ink-secondary">
                 <BookOpen className="w-6 h-6" />
                 Resumo Didático
               </h3>

@@ -34,7 +34,7 @@ export default async function FAQPage({
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-surface-page/20 rounded-md flex items-center justify-center">
-              <HelpCircle className="w-10 h-10 text-surface-page" />
+              <HelpCircle className="w-10 h-10 text-brand-600" />
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-2">Perguntas Frequentes</h1>

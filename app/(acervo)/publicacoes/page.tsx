@@ -78,7 +78,7 @@ export default async function PublicacoesPage() {
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-surface-raised rounded-md flex items-center justify-center">
-                <BookOpen className="w-7 h-7 text-surface-page" />
+                <BookOpen className="w-7 h-7 text-brand-600" />
               </div>
               <h2 className="text-3xl font-bold text-ink-primary">Livros</h2>
             </div>
@@ -135,7 +135,7 @@ export default async function PublicacoesPage() {
           <section className="mb-16">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-surface-raised rounded-md flex items-center justify-center">
-                <FileText className="w-7 h-7 text-surface-page" />
+                <FileText className="w-7 h-7 text-brand-600" />
               </div>
               <h2 className="text-3xl font-bold text-ink-primary">Artigos Científicos</h2>
             </div>
@@ -185,7 +185,7 @@ export default async function PublicacoesPage() {
           <section>
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-surface-raised rounded-md flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-surface-page" />
+                <Calendar className="w-7 h-7 text-brand-600" />
               </div>
               <h2 className="text-3xl font-bold text-ink-primary">Notícias & Eventos</h2>
             </div>

@@ -46,7 +46,7 @@ export function HeroPlanejamento() {
  <span className="inline-flex items-center gap-1 rounded-full bg-surface-page/15 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide">
  <Sparkles className="h-3 w-3" /> Novo
  </span>
- <span className="text-[11px] uppercase tracking-wide text-surface-page/70">
+ <span className="text-[11px] uppercase tracking-wide text-ink-secondary/70">
  Módulo prático
  </span>
  </div>
@@ -82,7 +82,7 @@ export function HeroPlanejamento() {
 
  <div className="relative hidden shrink-0 lg:block">
  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-surface-page/15">
- <Scale className="h-16 w-16 text-surface-page/90" strokeWidth={1.5} />
+ <Scale className="h-16 w-16 text-ink-secondary/90" strokeWidth={1.5} />
  </div>
  </div>
  </div>

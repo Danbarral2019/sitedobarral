@@ -202,7 +202,7 @@ export default function CourseLandingPage({
  <div className="bg-surface-page rounded-md border border-border-subtle p-6 lg:p-8 mb-6">
  <div className="flex items-start gap-4">
  <div className="p-3 bg-surface-raised rounded-md flex-shrink-0">
- <BookOpen className="w-6 h-6 text-surface-page" />
+ <BookOpen className="w-6 h-6 text-brand-600" />
  </div>
  <div className="flex-1 min-w-0">
  <h2 className="text-xl lg:text-2xl font-bold text-ink-primary leading-tight">

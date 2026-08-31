@@ -82,7 +82,7 @@ export default function NewsletterForm({
     return (
       <div className={`bg-surface-raised border-2 border-brand-600 rounded-md p-6 text-center ${className}`}>
         <div className="w-12 h-12 bg-surface-raised0 rounded-full flex items-center justify-center mx-auto mb-3">
-          <CheckCircle className="w-6 h-6 text-surface-page" />
+          <CheckCircle className="w-6 h-6 text-brand-600" />
         </div>
         <h3 className="text-lg font-bold text-ink-primary mb-2">Cadastro realizado!</h3>
         <p className="text-ink-secondary">Você receberá nossos conteúdos no e-mail informado.</p>

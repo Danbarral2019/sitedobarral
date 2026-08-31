@@ -96,12 +96,12 @@ export default function MeusCertificadosPage() {
  className="flex items-center gap-2 text-ink-secondary hover:text-brand-600 mb-6 font-medium transition-colors"
  >
  <ArrowLeft className="w-5 h-5" />
- Voltar para area restrita
+ Voltar para a área restrita
  </button>
 
  <div className="flex items-center gap-4 mb-4">
  <div className="w-16 h-16 bg-surface-raised rounded-full flex items-center justify-center">
- <Award className="w-8 h-8 text-surface-page" />
+ <Award className="w-8 h-8 text-brand-600" />
  </div>
  <div>
  <h1 className="text-3xl font-bold text-ink-primary">Meus Certificados</h1>

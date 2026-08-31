@@ -216,7 +216,7 @@ export default function CourseArea({
  <div className="p-5 lg:p-6">
  <div className="flex items-start gap-4">
  <div className="p-3 bg-surface-raised rounded-md flex-shrink-0">
- <GraduationCap className="w-6 h-6 lg:w-7 lg:h-7 text-surface-page" />
+ <GraduationCap className="w-6 h-6 lg:w-7 lg:h-7 text-brand-600" />
  </div>
  <div className="flex-1 min-w-0">
  <h2 className="text-lg lg:text-xl font-bold text-ink-primary leading-tight">
