@@ -8,9 +8,11 @@ import {
   X, Loader2, AlertCircle, BookOpen, Sparkles, Database, MessageCircle,
   Newspaper, HelpCircle, Landmark
 } from 'lucide-react';
+import { AnaliseIADemo } from '@/components/busca/AnaliseIADemo';
 
 interface SearchResults {
   query: string;
+  viewer?: { hasAiAccess: boolean };
   results: {
     glossaryTerms: Array<{
       id: string;
@@ -410,6 +412,13 @@ function BuscaIntegradaContent() {
           </div>
         ) : results && (
           <div className="space-y-8">
+            {/* Demonstração da Análise IA — só para quem ainda não tem o
+                assistente, e só na aba "Todos", onde não compete com a
+                listagem que o usuário escolheu ver. */}
+            {!results.viewer?.hasAiAccess && activeTab === 'all' && (
+              <AnaliseIADemo totalResultados={totalResults} />
+            )}
+
             {/* Glossário - Prioridade máxima */}
             {results.results.glossaryTerms.length > 0 && shouldShowSection('glossary') && (
               <section className="bg-white rounded-2xl shadow-lg border-2 border-green-200 p-8">

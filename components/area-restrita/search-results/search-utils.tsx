@@ -69,21 +69,34 @@ export function SourceIcon({ category }: { category: string }) {
   }
 }
 
-// Format markdown-like text in AI answer (bold, bullet points)
+/** Negrito em **texto**, usado tanto no título quanto no corpo da linha. */
+function formatBold(text: string): React.ReactNode {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={i}>{part.slice(2, -2)}</strong>
+      : part,
+  );
+}
+
+// Format markdown-like text in AI answer (headings, bold, bullet points)
 export function formatLine(text: string): React.ReactNode {
+  // Títulos de seção. O sintetizador estrutura respostas longas com "## " e
+  // "### ", e sem este caso os marcadores apareciam crus na tela do assinante.
+  const headingMatch = text.match(/^(#{1,4})\s+(.*)/);
+  if (headingMatch) {
+    return (
+      <span className="block font-bold text-gray-900 mt-3 mb-1">
+        {formatBold(headingMatch[2])}
+      </span>
+    );
+  }
+
   // Check if line is a bullet point
   const bulletMatch = text.match(/^(\s*)[*\-]\s+(.*)/);
   const content = bulletMatch ? bulletMatch[2] : text;
   const isBullet = !!bulletMatch;
 
-  // Format bold (**text**)
-  const parts = content.split(/(\*\*[^*]+\*\*)/g);
-  const formatted = parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
-    }
-    return part;
-  });
+  const formatted = formatBold(content);
 
   if (isBullet) {
     return <span className="flex gap-1.5 ml-2"><span className="text-purple-400">&#8226;</span><span>{formatted}</span></span>;

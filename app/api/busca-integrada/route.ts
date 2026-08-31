@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchLeiArticlesWithExcerpts } from '@/data/lei-14133-artigos';
-import { verifyAuth } from '@/lib/auth';
+import { verifyAuth, hasAnyActiveAccess } from '@/lib/auth';
 import {
   searchDocuments,
   searchGlossary,
@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     if (!query || query.length < 2) {
       return NextResponse.json({
         query: query || '',
+        viewer: { hasAiAccess: false },
         results: {
           glossaryTerms: [],
           articles: [],
@@ -37,6 +38,12 @@ export async function GET(request: NextRequest) {
     const userCourseId = isAuthenticated && authResult.user?.courseId
       ? authResult.user.courseId
       : null;
+
+    // Quem já tem o assistente não deve ver a demonstração dele nem a oferta.
+    // Admin e qualquer acesso ativo (matrícula válida ou assinatura) contam.
+    const hasAiAccess = authResult.user
+      ? authResult.user.role === 'admin' || await hasAnyActiveAccess(authResult.user.userId)
+      : false;
 
     // Executar todas as buscas em paralelo via FTS (tsvector + stemming português)
     const [
@@ -82,6 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       query,
+      viewer: { hasAiAccess },
       results: {
         glossaryTerms: glossaryResults.map(({ data }) => ({
           id: data.id,
