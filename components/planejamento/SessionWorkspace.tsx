@@ -210,7 +210,7 @@ export default function SessionWorkspace({
         <VersionHistoryButton documentId={documentId} />
         <button
           onClick={() => setExportOpen(true)}
-          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800"
+          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-medium text-surface-page hover:bg-brand-800"
         >
           <Download className="h-3.5 w-3.5" /> Exportar
         </button>

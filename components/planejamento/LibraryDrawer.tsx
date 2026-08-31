@@ -173,7 +173,7 @@ export default function LibraryDrawer({
             />
             <button
               onClick={() => setCreating((v) => !v)}
-              className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-800"
+              className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-3 py-1.5 text-sm font-medium text-surface-page hover:bg-brand-800"
             >
               <Plus className="h-3.5 w-3.5" /> Novo
             </button>
@@ -211,7 +211,7 @@ export default function LibraryDrawer({
                   disabled={
                     formTitulo.trim().length < 3 || formCorpo.trim().length < 5
                   }
-                  className="rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                  className="rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
                 >
                   Salvar snippet
                 </button>
@@ -269,7 +269,7 @@ export default function LibraryDrawer({
                         onInsert(s.corpoMd);
                         onClose();
                       }}
-                      className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-brand-800"
+                      className="inline-flex items-center gap-1 rounded-md bg-brand-700 px-2.5 py-1 text-[11px] font-medium text-surface-page hover:bg-brand-800"
                     >
                       <ArrowUpToLine className="h-3 w-3" />
                       Inserir na seção

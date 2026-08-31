@@ -70,7 +70,7 @@ export default function DocumentTabs({
         <button
           onClick={transitionToTR}
           disabled={transitioning}
-          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
         >
           {transitioning ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -128,7 +128,7 @@ function TabLink({
       className={cn(
         "inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition",
         active
-          ? "bg-brand-700 text-white"
+          ? "bg-brand-700 text-surface-page"
           : "border border-gray-200 bg-white text-gray-700 hover:border-brand-300",
       )}
     >

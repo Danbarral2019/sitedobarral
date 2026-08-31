@@ -78,10 +78,10 @@ export default async function BlogPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-block">
-              <h1 className="text-5xl font-bold mb-3 text-gray-900 font-cinzel">Blog Jurídico</h1>
-              <div className="h-1.5 w-32 bg-gradient-to-r from-brand-500 to-brand-600 rounded-full mx-auto mb-6"></div>
+              <h1 className="text-5xl font-bold mb-3 text-ink-primary font-cinzel">Blog Jurídico</h1>
+              <div className="h-1.5 w-32 bg-surface-raised rounded-full mx-auto mb-6"></div>
             </div>
-            <p className="text-xl text-gray-800 leading-relaxed">
+            <p className="text-xl text-ink-primary leading-relaxed">
               Artigos, análises e comentários sobre Direito Administrativo,
               Licitações e Contratos Públicos
             </p>
@@ -92,7 +92,7 @@ export default async function BlogPage() {
               const borderColor = getBlogPostBorderColor(index);
 
               return (
-                <article key={post.id} className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all border-l-4 ${borderColor} hover:scale-[1.01]`}>
+                <article key={post.id} className={`bg-surface-page rounded-md overflow-hidden hover:shadow-2xl transition-all border-l-4 ${borderColor} hover:scale-[1.01]`}>
                   <div className="p-8">
                     <div className="flex flex-wrap gap-2 mb-4">
                       {post.tags.map((tag: string, idx: number) => {
@@ -111,13 +111,13 @@ export default async function BlogPage() {
                     <h2 className="text-3xl font-bold mb-3">
                       <Link
                         href={`/blog/${post.slug}`}
-                        className="text-gray-900 hover:text-brand-700 transition-colors"
+                        className="text-ink-primary hover:text-brand-700 transition-colors"
                       >
                         {post.title}
                       </Link>
                     </h2>
 
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-800 font-medium mb-4">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-ink-primary font-medium mb-4">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       <span>{formatDate(post.publishedAt)}</span>
@@ -128,13 +128,13 @@ export default async function BlogPage() {
                     </div>
                   </div>
 
-                  <p className="text-gray-800 mb-4 line-clamp-3 leading-relaxed">
+                  <p className="text-ink-primary mb-4 line-clamp-3 leading-relaxed">
                     {post.excerpt}
                   </p>
 
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-2 text-white bg-gradient-to-r from-brand-600 to-brand-700 px-6 py-3 rounded-xl font-bold hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
+                    className="inline-flex items-center gap-2 text-surface-page bg-brand-600 px-6 py-3 rounded-md font-bold hover: transition-all hover:shadow-lg"
                   >
                     Ler artigo completo
                     <ArrowRight className="w-5 h-5" />
@@ -147,33 +147,33 @@ export default async function BlogPage() {
 
           {publishedPosts.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-600">Nenhum artigo publicado ainda.</p>
+              <p className="text-ink-secondary">Nenhum artigo publicado ainda.</p>
             </div>
           )}
 
-          <div className="mt-12 relative overflow-hidden bg-gradient-to-br from-green-600 via-teal-600 to-blue-600 rounded-2xl p-10 md:p-12 text-center shadow-2xl border-4 border-green-400">
+          <div className="mt-12 relative overflow-hidden bg-surface-raised rounded-md p-10 md:p-12 text-center border-4 border-border-strong">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50"></div>
 
             <div className="relative z-10">
               <div className="inline-block mb-4">
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <span className="text-white font-semibold text-sm">📰 Blog Jurídico</span>
+                <div className="bg-surface-page/20 px-4 py-2 rounded-full">
+                  <span className="text-ink-secondary font-semibold text-sm">📰 Blog Jurídico</span>
                 </div>
               </div>
 
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-surface-page">
                 Receba Novos Artigos
               </h2>
-              <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-xl text-surface-page mb-10 max-w-2xl mx-auto leading-relaxed">
                 Cadastre-se para receber notificações sobre novos artigos e materiais exclusivos
                 diretamente no seu e-mail
               </p>
 
-              <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
-                <NewsletterForm variant="inline" className="[&_input]:bg-white [&_input]:text-gray-900 [&_input]:placeholder:text-gray-500 [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:bg-gradient-to-r [&_button]:from-green-400 [&_button]:to-teal-500 [&_button]:text-gray-900 [&_button]:font-bold [&_button]:hover:from-green-500 [&_button]:hover:to-teal-600 [&_button]:shadow-xl" />
+              <div className="max-w-xl mx-auto bg-surface-page/10 p-2 rounded-md border-2 border-white/30">
+                <NewsletterForm variant="inline" className="[&_input]:bg-surface-page [&_input]:text-ink-primary [&_input]:placeholder:text-ink-muted [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-amber-accent/25 [&_input]:border-0 [&_button]:bg-brand-600 [&_button]: [&_button]: [&_button]:text-ink-primary [&_button]:font-bold [&_button]:hover: [&_button]:hover: [&_button]:" />
               </div>
 
-              <p className="text-white/80 text-sm mt-4">
+              <p className="text-surface-page/80 text-sm mt-4">
                 ✓ Conteúdo semanal · ✓ Sem spam · ✓ Cancele quando quiser
               </p>
             </div>

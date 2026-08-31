@@ -73,7 +73,7 @@ export default function ValidarAcessoForm({ initialError = '' }: ValidarAcessoFo
 
             <div className="text-center mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <KeyRound className="w-10 h-10 text-white" />
+                <KeyRound className="w-10 h-10 text-surface-page" />
               </div>
               <h1 className="text-3xl font-bold mb-2 text-gray-900">Primeiro Acesso</h1>
               <p className="text-gray-700">
@@ -84,7 +84,7 @@ export default function ValidarAcessoForm({ initialError = '' }: ValidarAcessoFo
             {success ? (
               <div className="bg-gradient-to-r from-green-50 to-teal-100 border-2 border-green-500 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <CheckCircle className="w-10 h-10 text-white" />
+                  <CheckCircle className="w-10 h-10 text-surface-page" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">QR Code Validado!</h3>
                 <p className="text-gray-800 font-medium">Redirecionando...</p>
@@ -114,7 +114,7 @@ export default function ValidarAcessoForm({ initialError = '' }: ValidarAcessoFo
                 </div>
 
                 {error && (
-                  <div className="bg-gradient-to-r from-red-50 to-rose-100 border-2 border-red-500 rounded-xl p-4 flex items-start gap-3">
+                  <div className="bg-gradient-to-r from-red-50 to-rose-100 border border-semantic-error rounded-xl p-4 flex items-start gap-3">
                     <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                     <p className="text-red-800 font-medium">{error}</p>
                   </div>
@@ -123,7 +123,7 @@ export default function ValidarAcessoForm({ initialError = '' }: ValidarAcessoFo
                 <button
                   type="submit"
                   disabled={isLoading || !code.trim()}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-surface-page px-6 py-4 rounded-xl text-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg hover:shadow-2xl"
                 >
                   {isLoading ? (
                     <>

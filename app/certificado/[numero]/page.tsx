@@ -104,14 +104,14 @@ export default async function CertificateVerificationPage({
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Status header */}
         {revoked ? (
-          <div className="bg-red-600 text-white rounded-t-2xl px-8 py-5 flex items-center justify-center gap-3 shadow-lg">
+          <div className="bg-red-600 text-surface-page rounded-t-2xl px-8 py-5 flex items-center justify-center gap-3 shadow-lg">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
             <p className="font-bold text-lg uppercase tracking-wide">Certificado revogado</p>
           </div>
         ) : (
-          <div className="bg-emerald-600 text-white rounded-t-2xl px-8 py-5 flex items-center justify-center gap-3 shadow-lg">
+          <div className="bg-emerald-600 text-surface-page rounded-t-2xl px-8 py-5 flex items-center justify-center gap-3 shadow-lg">
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -122,7 +122,7 @@ export default async function CertificateVerificationPage({
         {/* Card principal */}
         <div className="bg-white rounded-b-2xl shadow-2xl overflow-hidden border border-slate-200">
           {/* Hero navy */}
-          <div className="bg-gradient-to-br from-[#20364e] to-[#142232] px-8 py-12 text-center text-white relative">
+          <div className="bg-gradient-to-br from-[#20364e] to-[#142232] px-8 py-12 text-center text-surface-page relative">
             <div className="absolute top-4 right-4 text-xs uppercase tracking-widest text-slate-300/60">
               Autenticação
             </div>
@@ -130,7 +130,7 @@ export default async function CertificateVerificationPage({
             <p className="text-sm font-light text-slate-200 mb-2">Certifica que</p>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">{certificate.studentName}</h1>
             <p className="text-sm font-light text-slate-200 mb-2">concluiu o curso</p>
-            <p className="text-xl md:text-2xl font-semibold text-white mb-6">{certificate.courseTitle}</p>
+            <p className="text-xl md:text-2xl font-semibold text-surface-page mb-6">{certificate.courseTitle}</p>
             {certificate.estimatedHours ? (
               <p className="inline-block text-xs uppercase tracking-widest text-slate-200 border border-slate-400/40 px-4 py-1.5 rounded-full">
                 Carga horária: {certificate.estimatedHours} h

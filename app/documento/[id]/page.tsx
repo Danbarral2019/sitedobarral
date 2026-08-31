@@ -22,13 +22,13 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  acordao: 'bg-blue-100 text-blue-800',
-  'manual-tcu': 'bg-emerald-100 text-emerald-800',
-  'orientacao-normativa': 'bg-purple-100 text-purple-800',
-  enunciados: 'bg-amber-100 text-amber-800',
-  decor: 'bg-indigo-100 text-indigo-800',
-  'parecer-vinculante': 'bg-rose-100 text-rose-800',
-  'ato-normativo': 'bg-teal-100 text-teal-800',
+  acordao: 'bg-surface-deep text-ink-primary',
+  'manual-tcu': 'bg-surface-deep text-ink-primary',
+  'orientacao-normativa': 'bg-surface-deep text-ink-primary',
+  enunciados: 'bg-amber-accent-soft text-amber-accent-deep',
+  decor: 'bg-surface-deep text-ink-primary',
+  'parecer-vinculante': 'bg-surface-deep text-ink-primary',
+  'ato-normativo': 'bg-surface-deep text-ink-primary',
 };
 
 interface PageProps {
@@ -88,7 +88,7 @@ export default async function DocumentoPage({ params }: PageProps) {
   }
 
   const categoryLabel = CATEGORY_LABELS[doc.category] || 'Documento';
-  const categoryColor = CATEGORY_COLORS[doc.category] || 'bg-gray-100 text-gray-800';
+  const categoryColor = CATEGORY_COLORS[doc.category] || 'bg-surface-deep text-ink-primary';
 
   // Parse tags and leiArticles safely
   let tags: string[] = [];
@@ -100,7 +100,7 @@ export default async function DocumentoPage({ params }: PageProps) {
   const displayContent = doc.content || doc.description || '';
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <main className="min-h-screen bg-surface-raised">
       <div className="container mx-auto px-4 max-w-4xl py-8">
         {/* Navigation — preserva contexto de busca via router.back() */}
         <div className="mb-8">
@@ -108,25 +108,25 @@ export default async function DocumentoPage({ params }: PageProps) {
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-surface-page rounded-md border border-border-subtle overflow-hidden">
           <div className="p-8">
             {/* Category + Vigência Badges */}
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-              <span className={`px-3 py-1 text-sm font-bold rounded-lg ${categoryColor}`}>
+              <span className={`px-3 py-1 text-sm font-bold rounded-[3px] ${categoryColor}`}>
                 {categoryLabel}
               </span>
               {vigencia === 'revogado' && (
-                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-red-100 text-red-800 rounded-lg">
+                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-surface-deep text-semantic-error rounded-[3px]">
                   Revogado
                 </span>
               )}
               {vigencia === 'modificado' && (
-                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-amber-100 text-amber-800 rounded-lg">
+                <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-amber-accent-soft text-amber-accent-deep rounded-[3px]">
                   Modificado
                 </span>
               )}
               {doc.uploadedAt && (
-                <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                <span className="flex items-center gap-1.5 text-sm text-ink-muted">
                   <Calendar className="w-4 h-4" />
                   {new Date(doc.uploadedAt).toLocaleDateString('pt-BR', {
                     day: '2-digit',
@@ -138,19 +138,19 @@ export default async function DocumentoPage({ params }: PageProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-ink-primary mb-6 leading-tight">
               {doc.title}
             </h1>
 
             {/* Lei Articles */}
             {leiArticles.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 mb-6">
-                <span className="text-sm font-semibold text-gray-600">Artigos da Lei 14.133:</span>
+                <span className="text-sm font-semibold text-ink-secondary">Artigos da Lei 14.133:</span>
                 {leiArticles.map(art => (
                   <Link
                     key={art}
                     href={`/area-restrita/artigo/${art}`}
-                    className="px-2.5 py-1 bg-indigo-50 text-indigo-800 text-xs font-semibold rounded-lg border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                    className="px-2.5 py-1 bg-surface-raised text-ink-primary text-xs font-semibold rounded-[3px] border border-border-subtle hover:bg-surface-deep transition-colors"
                   >
                     Art. {art}
                   </Link>
@@ -160,12 +160,12 @@ export default async function DocumentoPage({ params }: PageProps) {
 
             {/* Resumo IA contextualizado (gerado pelo pipeline CONUNI) */}
             {summary && (
-              <div className="mb-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-l-4 border-blue-500 rounded-r-xl p-5">
+              <div className="mb-6 bg-surface-raised border-l-4 border-brand-600 rounded-r-xl p-5">
                 <div className="flex items-start gap-3">
-                  <div className="text-blue-600 font-bold text-xs uppercase tracking-wider whitespace-nowrap pt-0.5">
+                  <div className="text-brand-600 font-bold text-xs uppercase tracking-wider whitespace-nowrap pt-0.5">
                     Resumo
                   </div>
-                  <p className="text-gray-800 leading-relaxed">{summary}</p>
+                  <p className="text-ink-primary leading-relaxed">{summary}</p>
                 </div>
               </div>
             )}
@@ -174,7 +174,7 @@ export default async function DocumentoPage({ params }: PageProps) {
             {displayContent && (
               <div className="prose prose-gray max-w-none">
                 {displayContent.split('\n').map((paragraph, i) => (
-                  <p key={i} className="text-gray-700 leading-relaxed mb-3">
+                  <p key={i} className="text-ink-secondary leading-relaxed mb-3">
                     {paragraph}
                   </p>
                 ))}
@@ -183,12 +183,12 @@ export default async function DocumentoPage({ params }: PageProps) {
 
             {/* Tags */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 mt-6 pt-6 border-t border-gray-100">
-                <Tag className="w-4 h-4 text-gray-400" />
+              <div className="flex flex-wrap items-center gap-2 mt-6 pt-6 border-t border-border-subtle">
+                <Tag className="w-4 h-4 text-ink-muted" />
                 {tags.map(tag => (
                   <span
                     key={tag}
-                    className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                    className="px-2.5 py-1 bg-surface-deep text-ink-secondary text-xs rounded-full"
                   >
                     {tag}
                   </span>
@@ -199,12 +199,12 @@ export default async function DocumentoPage({ params }: PageProps) {
 
           {/* Footer with source link */}
           {doc.url && (
-            <div className="px-8 py-4 bg-gray-50 border-t border-gray-200">
+            <div className="px-8 py-4 bg-surface-raised border-t border-border-subtle">
               <a
                 href={doc.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors font-semibold text-sm"
               >
                 <ExternalLink className="w-4 h-4" />
                 Ver fonte original

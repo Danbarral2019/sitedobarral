@@ -76,15 +76,24 @@
   --color-amber-accent-deep: #8a6235;
   --color-amber-accent-soft: #e9d8b8;
 
+  /* ---- Semânticas (DESIGN.md §2) ----
+     Estavam declaradas no DESIGN.md e nunca chegaram ao CSS, então cada tela
+     inventava o seu verde e o seu vermelho a partir da paleta crua. */
+  --color-semantic-success: #2f6f4a;
+  --color-semantic-warning: #a86b1c;
+  --color-semantic-error: #a23830;
+
   /* ---- primary-* e accent-* (RESGATE) ----
-     Estas escalas viviam em tailwind.config.ts, que NÃO é carregado:
-     no Tailwind 4 o config JS só é lido via diretiva @config, ausente
-     do projeto. Resultado: `bg-primary-600`, `bg-accent-400` e afins
-     não geravam CSS nenhum, e elementos como o botão do NewsletterForm
-     renderizavam `text-white` sem fundo (na /coming-soon, branco sobre
-     quase-branco, ~1.05:1).
+     Estas escalas viviam em tailwind.config.ts, que nunca era carregado:
+     no Tailwind 4 o config JS só é lido pela diretiva @config, que não
+     existia no projeto. Resultado: `bg-primary-600`, `bg-accent-400` e
+     afins não geravam CSS nenhum, e elementos como o botão do
+     NewsletterForm renderizavam `text-white` sem fundo (na /coming-soon,
+     branco sobre quase-branco, ~1.05:1).
      Os valores abaixo são cópia literal dos que estavam no config, para
-     que isto seja restauração de comportamento e não mudança de design.
+     que isto fosse restauração de comportamento, não mudança de design.
+     O arquivo foi removido em seguida: o que ainda importava está aqui,
+     e mantê-lo era manter a armadilha de pé.
      `primary-*` é idêntico a `brand-*`; prefira `brand-*` em código novo. */
   --color-primary-50: #f0f4f7;
   --color-primary-100: #d9e2ea;

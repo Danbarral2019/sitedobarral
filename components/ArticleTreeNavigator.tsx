@@ -90,7 +90,7 @@ function getArticleRange(articles: string[]): string {
 function getColorIndicator(count: number): string {
   if (count >= 10) return 'bg-green-500';
   if (count >= 3) return 'bg-blue-500';
-  return 'bg-gray-400';
+  return 'bg-border-strong';
 }
 
 function truncateEmenta(ementa: string, maxLen: number = 80): string {
@@ -179,7 +179,7 @@ export function ArticleTreeNavigator({
             <span>3-9 docs</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+            <div className="w-2 h-2 rounded-full bg-border-strong"></div>
             <span>&lt;3 docs</span>
           </div>
         </div>
@@ -201,9 +201,9 @@ export function ArticleTreeNavigator({
               >
                 {/* Icon Circle */}
                 <div
-                  className={`flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br ${theme.gradient} flex items-center justify-center`}
+                  className={`flex-shrink-0 w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center`}
                 >
-                  <Icon className="w-4.5 h-4.5 text-white" />
+                  <Icon className="w-4.5 h-4.5 text-surface-page" />
                 </div>
 
                 {/* Content */}

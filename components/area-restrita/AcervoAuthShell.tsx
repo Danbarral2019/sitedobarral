@@ -6,17 +6,17 @@ import { AreaRestritaSidebar } from './AreaRestritaSidebar';
 import { AreaRestritaShell } from './AreaRestritaShell';
 
 export function AcervoAuthShell({
-  isAuthed,
-  children,
+ isAuthed,
+ children,
 }: {
-  isAuthed: boolean;
-  children: ReactNode;
+ isAuthed: boolean;
+ children: ReactNode;
 }) {
-  if (!isAuthed) return <>{children}</>;
-  return (
-    <SidebarProvider>
-      <AreaRestritaSidebar />
-      <AreaRestritaShell>{children}</AreaRestritaShell>
-    </SidebarProvider>
-  );
+ if (!isAuthed) return <>{children}</>;
+ return (
+ <SidebarProvider>
+ <AreaRestritaSidebar />
+ <AreaRestritaShell>{children}</AreaRestritaShell>
+ </SidebarProvider>
+ );
 }

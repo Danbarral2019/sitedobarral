@@ -70,7 +70,7 @@ export default function RecommendedSites({ sites, compact }: RecommendedSitesPro
       <div className="flex items-center gap-3">
         {!compact && (
           <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-md">
-            <Globe className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+            <Globe className="w-5 h-5 lg:w-6 lg:h-6 text-surface-page" />
           </div>
         )}
         <div className="flex items-center gap-2 flex-1">

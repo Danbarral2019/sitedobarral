@@ -365,7 +365,7 @@ export default function DocumentsByCategory({
             {/* Header da categoria com gradiente */}
             <button
               onClick={() => toggleCategory(category)}
-              className={`w-full flex items-center justify-between p-4 lg:p-5 bg-gradient-to-r ${config.gradient} hover:opacity-90 transition-opacity`}
+              className={`w-full flex items-center justify-between p-4 lg:p-5 bg-brand-600 hover:opacity-90 transition-opacity`}
             >
               <div className="flex items-center gap-3 lg:gap-4">
                 <div className={`w-10 h-10 lg:w-11 lg:h-11 ${config.iconBg} ${config.iconText} rounded-lg flex items-center justify-center`}>
@@ -458,7 +458,7 @@ export default function DocumentsByCategory({
                               >
                                 <div className="flex items-start gap-2.5 lg:gap-3 w-full">
                                   <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                                    <FileText className="w-4 h-4 text-white" />
+                                    <FileText className="w-4 h-4 text-surface-page" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h4 className="text-sm lg:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
@@ -533,9 +533,9 @@ export default function DocumentsByCategory({
                           <div className="flex items-start gap-2.5 lg:gap-3 w-full">
                             <div className={`w-8 h-8 ${config.docIconBg} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
                               {doc.type === 'video' ? (
-                                <Video className="w-4 h-4 text-white" />
+                                <Video className="w-4 h-4 text-surface-page" />
                               ) : (
-                                <FileText className="w-4 h-4 text-white" />
+                                <FileText className="w-4 h-4 text-surface-page" />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">

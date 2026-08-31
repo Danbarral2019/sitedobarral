@@ -19,36 +19,36 @@ const TABS: TabDef[] = [
     key: 'atos',
     label: 'Atos Normativos',
     icon: Scale,
-    activeColor: 'text-blue-700',
-    activeBadge: 'bg-blue-100 text-blue-700',
-    hoverText: 'hover:text-blue-700',
+    activeColor: 'text-brand-700',
+    activeBadge: 'bg-surface-deep text-brand-700',
+    hoverText: 'hover:text-brand-700',
     countKey: 'atos',
   },
   {
     key: 'tic',
     label: 'Contratações de TIC',
     icon: Monitor,
-    activeColor: 'text-cyan-700',
-    activeBadge: 'bg-cyan-100 text-cyan-700',
-    hoverText: 'hover:text-cyan-700',
+    activeColor: 'text-ink-secondary',
+    activeBadge: 'bg-surface-deep text-ink-secondary',
+    hoverText: 'hover:text-ink-secondary',
     countKey: 'tic',
   },
   {
     key: 'boas-praticas',
     label: 'Outros Atos',
     icon: FileText,
-    activeColor: 'text-emerald-700',
-    activeBadge: 'bg-emerald-100 text-emerald-700',
-    hoverText: 'hover:text-emerald-700',
+    activeColor: 'text-ink-secondary',
+    activeBadge: 'bg-surface-deep text-ink-secondary',
+    hoverText: 'hover:text-ink-secondary',
     countKey: 'boasPraticas',
   },
   {
     key: 'orientacoes',
     label: 'Orientações',
     icon: Lightbulb,
-    activeColor: 'text-amber-700',
-    activeBadge: 'bg-amber-100 text-amber-700',
-    hoverText: 'hover:text-amber-700',
+    activeColor: 'text-amber-accent-deep',
+    activeBadge: 'bg-amber-accent-soft text-amber-accent-deep',
+    hoverText: 'hover:text-amber-accent-deep',
     countKey: 'orientacoes',
   },
 ];
@@ -72,15 +72,15 @@ export function LegislacaoTabs({ activeTab, counts, onSwitch }: LegislacaoTabsPr
               onClick={() => onSwitch(tab.key)}
               className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold text-sm transition-colors ${
                 isActive
-                  ? `bg-white ${tab.activeColor} border-2 border-b-0 border-gray-200 shadow-sm`
-                  : `bg-white/70 text-gray-600 ${tab.hoverText} hover:bg-white/90 border-2 border-transparent`
+                  ? `bg-surface-page ${tab.activeColor} border-2 border-b-0 border-border-subtle`
+                  : `bg-surface-page/70 text-ink-secondary ${tab.hoverText} hover:bg-surface-page/90 border-2 border-transparent`
               }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
               <span
                 className={`px-2 py-0.5 rounded-full text-xs ${
-                  isActive ? tab.activeBadge : 'bg-gray-100 text-gray-600'
+                  isActive ? tab.activeBadge : 'bg-surface-deep text-ink-secondary'
                 }`}
               >
                 {counts[tab.countKey]}

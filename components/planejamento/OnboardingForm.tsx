@@ -97,7 +97,7 @@ export default function OnboardingForm() {
           onClick={() =>
             router.push(`/area-restrita/planejamento/${sessionId}`)
           }
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-800"
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-medium text-surface-page hover:bg-brand-800"
         >
           Abrir trilha
         </button>
@@ -154,7 +154,7 @@ export default function OnboardingForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-surface-page hover:bg-brand-800 disabled:opacity-60"
         >
           {submitting ? (
             <>

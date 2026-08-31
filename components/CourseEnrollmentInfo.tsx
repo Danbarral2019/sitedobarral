@@ -52,7 +52,7 @@ export default function CourseEnrollmentInfo({ courseId }: CourseEnrollmentInfoP
 
           <Link
             href="/area-restrita"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-md text-sm"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-surface-page px-6 py-2 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-md text-sm"
           >
             Ir para Área Restrita
           </Link>

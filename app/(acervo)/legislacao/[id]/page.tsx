@@ -94,15 +94,15 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  'decreto': 'bg-blue-100 text-blue-800 border-blue-300',
-  'portaria': 'bg-green-100 text-green-800 border-green-300',
-  'in': 'bg-purple-100 text-purple-800 border-purple-300',
-  'ordem-servico': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  'lei': 'bg-red-100 text-red-800 border-red-300',
-  'medida-provisoria': 'bg-orange-100 text-orange-800 border-orange-300',
-  'boa_pratica': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  'orientacao_procedimento': 'bg-amber-100 text-amber-800 border-amber-300',
-  'resolucao': 'bg-teal-100 text-teal-800 border-teal-300',
+  'decreto': 'bg-surface-deep text-ink-primary border-border-strong',
+  'portaria': 'bg-surface-deep text-ink-primary border-border-strong',
+  'in': 'bg-surface-deep text-ink-primary border-border-strong',
+  'ordem-servico': 'bg-amber-accent-soft text-amber-accent-deep border-border-subtle',
+  'lei': 'bg-surface-deep text-semantic-error border-border-strong',
+  'medida-provisoria': 'bg-surface-deep text-ink-primary border-border-subtle',
+  'boa_pratica': 'bg-surface-deep text-ink-primary border-border-subtle',
+  'orientacao_procedimento': 'bg-amber-accent-soft text-amber-accent-deep border-border-strong',
+  'resolucao': 'bg-surface-deep text-ink-primary border-border-subtle',
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -130,7 +130,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
   }
 
   const typeLabel = TYPE_LABELS[act.type] || act.type.toUpperCase();
-  const typeColor = TYPE_COLORS[act.type] || 'bg-gray-100 text-gray-800 border-gray-300';
+  const typeColor = TYPE_COLORS[act.type] || 'bg-surface-deep text-ink-primary border-border-strong';
 
   // Parse leiArticles JSON string to array
   const leiArticlesArray: string[] = getLeiArticles(act);
@@ -141,12 +141,12 @@ export default async function LegislativeActPage({ params }: PageProps) {
   const hasRelations = relations.alters.length > 0 || relations.alteredBy.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-surface-raised">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Link
           href="/legislacao"
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-700 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para Legislação
@@ -155,11 +155,11 @@ export default async function LegislativeActPage({ params }: PageProps) {
         {/* Banner de ato revogado — o ato continua acessível por link direto,
             mas com aviso destacado (não aparece em buscas/listagens públicas). */}
         {act.revoked && (
-          <div className="mb-6 rounded-xl border-2 border-red-300 bg-red-50 p-5 flex items-start gap-3">
+          <div className="mb-6 rounded-md border border-border-strong bg-surface-raised p-5 flex items-start gap-3">
             <span className="text-2xl leading-none" aria-hidden="true">🚫</span>
             <div>
-              <p className="font-bold text-red-800">Ato revogado</p>
-              <p className="text-sm text-red-700 mt-1">
+              <p className="font-bold text-semantic-error">Ato revogado</p>
+              <p className="text-sm text-semantic-error mt-1">
                 {act.revokedNote
                   ? act.revokedNote
                   : 'Este ato normativo foi revogado e não está mais em vigor. Mantido na base apenas para consulta histórica.'}
@@ -169,42 +169,42 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+        <div className="bg-surface-page rounded-md p-8 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium border ${typeColor}`}>
                   {typeLabel}
                 </span>
-                <span className="text-sm text-gray-500 flex items-center gap-1">
+                <span className="text-sm text-ink-muted flex items-center gap-1">
                   <Eye className="w-4 h-4" />
                   {act.viewCount} visualizações
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-ink-primary mb-2">
                 {act.fullNumber}
               </h1>
-              <h2 className="text-xl text-gray-700 mb-4">
+              <h2 className="text-xl text-ink-secondary mb-4">
                 {act.title}
               </h2>
             </div>
           </div>
 
           {/* Metadata */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-surface-raised rounded-[3px]">
             <div className="flex items-start gap-3">
-              <Building className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
+              <Building className="w-5 h-5 text-ink-muted mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Órgão Emissor</p>
-                <p className="text-sm font-medium text-gray-900">{act.issuer}</p>
+                <p className="text-xs text-ink-muted uppercase tracking-wide">Órgão Emissor</p>
+                <p className="text-sm font-medium text-ink-primary">{act.issuer}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
+              <Calendar className="w-5 h-5 text-ink-muted mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Publicação</p>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-xs text-ink-muted uppercase tracking-wide">Publicação</p>
+                <p className="text-sm font-medium text-ink-primary">
                   {new Date(act.publishDate).toLocaleDateString('pt-BR')}
                 </p>
               </div>
@@ -212,10 +212,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
             {act.effectiveDate && (
               <div className="flex items-start gap-3">
-                <Scale className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
+                <Scale className="w-5 h-5 text-ink-muted mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Vigência</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-ink-muted uppercase tracking-wide">Vigência</p>
+                  <p className="text-sm font-medium text-ink-primary">
                     {new Date(act.effectiveDate).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -231,7 +231,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Ver no Planalto
@@ -242,7 +242,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Baixar PDF
@@ -263,12 +263,12 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Ementa */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-4">
-            <FileText className="w-5 h-5 text-blue-600" />
+        <div className="bg-surface-page rounded-md p-8 mb-6">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-4">
+            <FileText className="w-5 h-5 text-brand-600" />
             Ementa
           </h3>
-          <div className="prose prose-slate max-w-none prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-p:mb-3">
+          <div className="prose prose-slate max-w-none prose-p:text-ink-secondary prose-p:leading-relaxed prose-p:text-justify prose-p:mb-3">
             {normalizeTextContent(act.ementa).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
@@ -277,10 +277,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
         {/* Resumo Didático (se existir) */}
         {act.summary && (
-          <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl shadow-lg overflow-hidden mb-6">
+          <div className="bg-surface-raised rounded-md overflow-hidden mb-6">
             {/* Header destacado */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-              <h3 className="flex items-center gap-3 text-lg font-bold text-white">
+            <div className="bg-surface-raised px-6 py-4">
+              <h3 className="flex items-center gap-3 text-lg font-bold text-ink-secondary">
                 <BookOpen className="w-6 h-6" />
                 Resumo Didático
               </h3>
@@ -294,9 +294,9 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
         {/* Conteúdo Completo */}
         {act.content ? (
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-6">
-              <Scale className="w-5 h-5 text-blue-600" />
+          <div className="bg-surface-page rounded-md p-8">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-6">
+              <Scale className="w-5 h-5 text-brand-600" />
               Texto Integral
             </h3>
             <MarkdownContent
@@ -316,9 +316,9 @@ export default async function LegislativeActPage({ params }: PageProps) {
               if (annexes.length === 0) return null;
 
               return (
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <h4 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <Download className="w-5 h-5 text-blue-600" />
+                <div className="mt-8 pt-6 border-t border-border-subtle">
+                  <h4 className="text-base font-bold text-ink-primary mb-4 flex items-center gap-2">
+                    <Download className="w-5 h-5 text-brand-600" />
                     Anexos
                   </h4>
                   <div className="space-y-2">
@@ -328,17 +328,17 @@ export default async function LegislativeActPage({ params }: PageProps) {
                         href={annex.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-blue-300 transition-colors group"
+                        className="flex items-center gap-3 p-3 rounded-[3px] border border-border-subtle hover:bg-surface-raised hover:border-border-strong transition-colors group"
                       >
                         {annex.type === 'pdf' ? (
-                          <FileDown className="w-5 h-5 text-red-500 flex-shrink-0" />
+                          <FileDown className="w-5 h-5 text-semantic-error flex-shrink-0" />
                         ) : (
-                          <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                          <FileText className="w-5 h-5 text-brand-500 flex-shrink-0" />
                         )}
-                        <span className="flex-1 text-sm text-gray-700 group-hover:text-blue-700">
+                        <span className="flex-1 text-sm text-ink-secondary group-hover:text-brand-700">
                           {annex.name}
                         </span>
-                        <span className="text-xs text-gray-400 uppercase font-medium">
+                        <span className="text-xs text-ink-muted uppercase font-medium">
                           {annex.type}
                         </span>
                       </a>
@@ -349,16 +349,16 @@ export default async function LegislativeActPage({ params }: PageProps) {
             })()}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <div className="bg-surface-page rounded-md p-8 text-center">
             <div className="flex flex-col items-center gap-4 py-6">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                <FileText className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-surface-deep rounded-full flex items-center justify-center">
+                <FileText className="w-8 h-8 text-ink-muted" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                <h3 className="text-lg font-semibold text-ink-secondary mb-2">
                   Texto integral ainda não disponível
                 </h3>
-                <p className="text-gray-500 max-w-md">
+                <p className="text-ink-muted max-w-md">
                   O texto completo deste ato normativo ainda não foi incorporado à nossa base.
                   {act.officialUrl && ' Você pode consultar o texto na fonte oficial.'}
                 </p>
@@ -368,7 +368,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Consultar fonte oficial
@@ -380,8 +380,8 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
         {/* Artigos Relacionados da Lei 14.133 */}
         {leiArticlesArray.length > 0 && (
-          <div className="bg-amber-50 border-l-4 border-amber-600 rounded-xl shadow-md p-6 mt-6">
-            <h3 className="text-lg font-bold text-amber-900 mb-3">
+          <div className="bg-surface-raised border-l-4 border-amber-accent rounded-md p-6 mt-6">
+            <h3 className="text-lg font-bold text-amber-accent-deep mb-3">
               🔗 Artigos Relacionados da Lei 14.133/2021
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -389,7 +389,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                 <Link
                   key={articleNum}
                   href={`/artigos?numero=${articleNum}`}
-                  className="inline-flex items-center px-3 py-1 bg-white border border-amber-300 rounded-lg text-amber-800 hover:bg-amber-100 transition-colors text-sm font-medium"
+                  className="inline-flex items-center px-3 py-1 bg-surface-page border border-border-strong rounded-[3px] text-amber-accent-deep hover:bg-amber-accent-soft transition-colors text-sm font-medium"
                 >
                   Art. {articleNum}º
                 </Link>

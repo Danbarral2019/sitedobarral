@@ -160,17 +160,17 @@ function BuscaIntegradaContent() {
   const hasSearch = debouncedSearch.trim().length >= 2;
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
+      <div className="bg-surface-raised text-ink-primary py-16 border-b border-border-subtle">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-surface-page/20 rounded-md flex items-center justify-center">
               <Search className="w-10 h-10" />
             </div>
             <div>
               <h1 className="text-4xl font-bold mb-2">Busca Integrada</h1>
-              <p className="text-xl text-blue-100">
+              <p className="text-xl text-ink-muted">
                 Pesquise em artigos da lei, atos normativos, documentos, blog e FAQ
               </p>
             </div>
@@ -178,19 +178,19 @@ function BuscaIntegradaContent() {
 
           {/* Campo de Pesquisa */}
           <div className="relative max-w-3xl">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-ink-muted" />
             <input
               type="text"
               placeholder="Ex: planejamento, licitação, dispensa..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-12 py-5 text-lg text-gray-900 bg-white rounded-2xl border-2 border-transparent focus:border-white focus:ring-4 focus:ring-white/30 shadow-xl"
+              className="w-full pl-14 pr-12 py-5 text-lg text-ink-primary bg-surface-page rounded-md border-2 border-transparent focus:border-white focus:ring-4 focus:ring-white/30"
               autoFocus
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-ink-muted hover:text-ink-secondary transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -198,7 +198,7 @@ function BuscaIntegradaContent() {
           </div>
 
           {hasSearch && (
-            <div className="mt-4 text-sm text-white/80">
+            <div className="mt-4 text-sm text-surface-page/80">
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -216,15 +216,15 @@ function BuscaIntegradaContent() {
 
       {/* Tabs - Only show when there are results */}
       {hasSearch && results && totalResults > 0 && (
-        <div className="bg-white border-b-2 border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="bg-surface-page border-b-2 border-border-subtle sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center gap-1 overflow-x-auto">
               <button
                 onClick={() => setActiveTab('all')}
                 className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 ${
                   activeTab === 'all'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                    ? 'border-brand-600 text-brand-600'
+                    : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                 }`}
               >
                 Todos ({totalResults})
@@ -235,8 +235,8 @@ function BuscaIntegradaContent() {
                   onClick={() => setActiveTab('glossary')}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
                     activeTab === 'glossary'
-                      ? 'border-green-600 text-green-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                   }`}
                 >
                   <BookOpen className="w-4 h-4" />
@@ -249,8 +249,8 @@ function BuscaIntegradaContent() {
                   onClick={() => setActiveTab('lei')}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
                     activeTab === 'lei'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                   }`}
                 >
                   <Gavel className="w-4 h-4" />
@@ -263,8 +263,8 @@ function BuscaIntegradaContent() {
                   onClick={() => setActiveTab('acts')}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
                     activeTab === 'acts'
-                      ? 'border-indigo-600 text-indigo-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                   }`}
                 >
                   <Scale className="w-4 h-4" />
@@ -277,8 +277,8 @@ function BuscaIntegradaContent() {
                   onClick={() => setActiveTab('docs')}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
                     activeTab === 'docs'
-                      ? 'border-purple-600 text-purple-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                   }`}
                 >
                   <FileText className="w-4 h-4" />
@@ -291,8 +291,8 @@ function BuscaIntegradaContent() {
                   onClick={() => setActiveTab('blog')}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
                     activeTab === 'blog'
-                      ? 'border-rose-600 text-rose-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                   }`}
                 >
                   <Newspaper className="w-4 h-4" />
@@ -305,8 +305,8 @@ function BuscaIntegradaContent() {
                   onClick={() => setActiveTab('faq')}
                   className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
                     activeTab === 'faq'
-                      ? 'border-amber-600 text-amber-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-secondary hover:text-ink-primary hover:border-border-strong'
                   }`}
                 >
                   <HelpCircle className="w-4 h-4" />
@@ -321,60 +321,60 @@ function BuscaIntegradaContent() {
       {/* Conteúdo */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         {!hasSearch ? (
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-12">
+          <div className="bg-surface-page rounded-md border border-border-subtle p-12">
             <div className="text-center">
-              <Search className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <Search className="w-20 h-20 text-border-strong mx-auto mb-6" />
+              <h2 className="text-2xl font-bold text-ink-primary mb-4">
                 Como funciona a busca integrada?
               </h2>
-              <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+              <p className="text-ink-secondary mb-8 max-w-2xl mx-auto">
                 Digite qualquer termo relacionado a licitações e contratos. A busca retornará resultados em:
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
-                <div className="p-5 bg-blue-50 rounded-xl border-2 border-blue-200">
-                  <Gavel className="w-10 h-10 text-blue-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Lei 14.133/2021</h3>
-                  <p className="text-xs text-gray-600">195 artigos organizados por capítulos</p>
+                <div className="p-5 bg-surface-raised rounded-md border border-border-subtle">
+                  <Gavel className="w-10 h-10 text-brand-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-ink-primary mb-1 text-sm">Lei 14.133/2021</h3>
+                  <p className="text-xs text-ink-secondary">195 artigos organizados por capítulos</p>
                 </div>
 
-                <div className="p-5 bg-indigo-50 rounded-xl border-2 border-indigo-200">
-                  <Scale className="w-10 h-10 text-indigo-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Atos Normativos</h3>
-                  <p className="text-xs text-gray-600">Decretos, portarias e instruções normativas</p>
+                <div className="p-5 bg-surface-raised rounded-md border border-border-subtle">
+                  <Scale className="w-10 h-10 text-brand-600 mx-auto mb-3" />
+                  <h3 className="font-bold text-ink-primary mb-1 text-sm">Atos Normativos</h3>
+                  <p className="text-xs text-ink-secondary">Decretos, portarias e instruções normativas</p>
                 </div>
 
-                <div className="p-5 bg-purple-50 rounded-xl border-2 border-purple-200">
-                  <FileText className="w-10 h-10 text-purple-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Documentos</h3>
-                  <p className="text-xs text-gray-600">Acórdãos, pareceres e materiais exclusivos</p>
+                <div className="p-5 bg-surface-raised rounded-md border border-border-subtle">
+                  <FileText className="w-10 h-10 text-ink-secondary mx-auto mb-3" />
+                  <h3 className="font-bold text-ink-primary mb-1 text-sm">Documentos</h3>
+                  <p className="text-xs text-ink-secondary">Acórdãos, pareceres e materiais exclusivos</p>
                 </div>
 
-                <div className="p-5 bg-green-50 rounded-xl border-2 border-green-200">
-                  <BookOpen className="w-10 h-10 text-green-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Glossário</h3>
-                  <p className="text-xs text-gray-600">Termos técnicos de licitações</p>
+                <div className="p-5 bg-surface-raised rounded-md border border-border-subtle">
+                  <BookOpen className="w-10 h-10 text-ink-secondary mx-auto mb-3" />
+                  <h3 className="font-bold text-ink-primary mb-1 text-sm">Glossário</h3>
+                  <p className="text-xs text-ink-secondary">Termos técnicos de licitações</p>
                 </div>
 
-                <div className="p-5 bg-rose-50 rounded-xl border-2 border-rose-200">
-                  <Newspaper className="w-10 h-10 text-rose-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Blog</h3>
-                  <p className="text-xs text-gray-600">Artigos e análises especializadas</p>
+                <div className="p-5 bg-surface-raised rounded-md border border-border-subtle">
+                  <Newspaper className="w-10 h-10 text-ink-secondary mx-auto mb-3" />
+                  <h3 className="font-bold text-ink-primary mb-1 text-sm">Blog</h3>
+                  <p className="text-xs text-ink-secondary">Artigos e análises especializadas</p>
                 </div>
 
-                <div className="p-5 bg-amber-50 rounded-xl border-2 border-amber-200">
-                  <HelpCircle className="w-10 h-10 text-amber-600 mx-auto mb-3" />
-                  <h3 className="font-bold text-gray-900 mb-1 text-sm">FAQ</h3>
-                  <p className="text-xs text-gray-600">Perguntas frequentes respondidas</p>
+                <div className="p-5 bg-surface-raised rounded-md border border-border-subtle">
+                  <HelpCircle className="w-10 h-10 text-amber-accent mx-auto mb-3" />
+                  <h3 className="font-bold text-ink-primary mb-1 text-sm">FAQ</h3>
+                  <p className="text-xs text-ink-secondary">Perguntas frequentes respondidas</p>
                 </div>
               </div>
             </div>
           </div>
         ) : results && totalResults === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-12 text-center">
-            <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Nenhum resultado encontrado</h2>
-            <p className="text-gray-600">
+          <div className="bg-surface-page rounded-md border border-border-subtle p-12 text-center">
+            <AlertCircle className="w-16 h-16 text-ink-muted mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-ink-primary mb-2">Nenhum resultado encontrado</h2>
+            <p className="text-ink-secondary">
               Tente usar outros termos ou palavras-chave relacionadas
             </p>
           </div>
@@ -382,13 +382,13 @@ function BuscaIntegradaContent() {
           <div className="space-y-8">
             {/* Glossário - Prioridade máxima */}
             {results.results.glossaryTerms.length > 0 && shouldShowSection('glossary') && (
-              <section className="bg-white rounded-2xl shadow-lg border-2 border-green-200 p-8">
+              <section className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <BookOpen className="w-8 h-8 text-green-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <BookOpen className="w-8 h-8 text-ink-secondary" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
                     Glossário
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-surface-deep text-ink-secondary rounded-full text-sm font-bold">
                     {results.results.glossaryTerms.length} {results.results.glossaryTerms.length === 1 ? 'termo' : 'termos'}
                   </span>
                 </div>
@@ -397,17 +397,17 @@ function BuscaIntegradaContent() {
                   {results.results.glossaryTerms.map(term => (
                     <div
                       key={term.id}
-                      className="p-5 bg-green-50 rounded-xl border-2 border-green-200"
+                      className="p-5 bg-surface-raised rounded-md border border-border-subtle"
                     >
-                      <h3 className="font-bold text-lg text-gray-900 mb-2">
+                      <h3 className="font-bold text-lg text-ink-primary mb-2">
                         {term.term}
                       </h3>
-                      <p className="text-sm text-gray-700 leading-relaxed">
+                      <p className="text-sm text-ink-secondary leading-relaxed">
                         {term.definition}
                       </p>
                       {term.category && (
                         <div className="mt-2">
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                          <span className="text-xs px-2 py-1 bg-surface-deep text-ink-secondary rounded-full">
                             {term.category}
                           </span>
                         </div>
@@ -420,13 +420,13 @@ function BuscaIntegradaContent() {
 
             {/* Artigos da Lei 14.133 */}
             {results.results.articles.length > 0 && shouldShowSection('lei') && (
-              <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+              <section className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <Gavel className="w-8 h-8 text-blue-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <Gavel className="w-8 h-8 text-brand-600" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
                     Lei 14.133/2021
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-surface-deep text-brand-700 rounded-full text-sm font-bold">
                     {results.results.articles.length} {results.results.articles.length === 1 ? 'artigo' : 'artigos'}
                   </span>
                 </div>
@@ -436,15 +436,15 @@ function BuscaIntegradaContent() {
                     <Link
                       key={article.numero}
                       href={`/artigo/${article.numero}`}
-                      className="block p-5 bg-blue-50 rounded-xl border-2 border-blue-200 hover:border-blue-500 hover:bg-blue-100 transition-all group"
+                      className="block p-5 bg-surface-raised rounded-md border border-border-subtle hover:border-brand-600 hover:bg-surface-deep transition-all group"
                     >
                       <div className="flex items-start gap-3">
                         {/* Badge compacto com número do artigo */}
-                        <div className="flex-shrink-0 px-3 py-1 bg-blue-600 rounded-md text-white text-xs font-bold">
+                        <div className="flex-shrink-0 px-3 py-1 bg-brand-600 rounded-md text-surface-page text-xs font-bold">
                           Art. {article.numero}
                         </div>
                         <div className="flex-1">
-                          <div className="text-xs text-blue-600 mb-1">{article.capitulo}</div>
+                          <div className="text-xs text-brand-600 mb-1">{article.capitulo}</div>
 
                           {/* Trechos relevantes com destaque */}
                           {article.excerpts && article.excerpts.length > 0 ? (
@@ -452,7 +452,7 @@ function BuscaIntegradaContent() {
                               {article.excerpts.map((excerpt, idx) => (
                                 <p
                                   key={idx}
-                                  className="text-sm text-gray-700 leading-relaxed"
+                                  className="text-sm text-ink-secondary leading-relaxed"
                                   dangerouslySetInnerHTML={{
                                     __html: excerpt.replace(
                                       /<mark>/g,
@@ -463,10 +463,10 @@ function BuscaIntegradaContent() {
                               ))}
                             </div>
                           ) : (
-                            <p className="text-sm text-gray-600 line-clamp-2">{article.ementa}</p>
+                            <p className="text-sm text-ink-secondary line-clamp-2">{article.ementa}</p>
                           )}
                         </div>
-                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                        <ArrowRight className="w-5 h-5 text-ink-muted group-hover:text-brand-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>
                     </Link>
                   ))}
@@ -476,13 +476,13 @@ function BuscaIntegradaContent() {
 
             {/* Atos Normativos */}
             {results.results.acts.length > 0 && shouldShowSection('acts') && (
-              <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+              <section className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <Scale className="w-8 h-8 text-indigo-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <Scale className="w-8 h-8 text-brand-600" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
                     Atos Normativos
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-surface-deep text-brand-700 rounded-full text-sm font-bold">
                     {results.results.acts.length} {results.results.acts.length === 1 ? 'ato' : 'atos'}
                   </span>
                 </div>
@@ -492,23 +492,23 @@ function BuscaIntegradaContent() {
                     <Link
                       key={act.id}
                       href={`/legislacao#${act.id}`}
-                      className="block p-5 bg-indigo-50 rounded-xl border-2 border-indigo-200 hover:border-indigo-500 hover:bg-indigo-100 transition-all group"
+                      className="block p-5 bg-surface-raised rounded-md border border-border-subtle hover:border-border-strong hover:bg-surface-deep transition-all group"
                     >
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0">
-                          <div className="px-3 py-1 bg-indigo-600 text-white text-sm font-bold rounded-lg">
+                          <div className="px-3 py-1 bg-brand-600 text-surface-page text-sm font-bold rounded-[3px]">
                             {act.type.toUpperCase()}
                           </div>
-                          <div className="text-center text-xs text-gray-600 mt-1">{act.fullNumber}</div>
+                          <div className="text-center text-xs text-ink-secondary mt-1">{act.fullNumber}</div>
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
+                          <h3 className="font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                             {act.title}
                           </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-2">{act.ementa}</p>
-                          <div className="text-xs text-gray-500">{act.issuer}</div>
+                          <p className="text-sm text-ink-secondary line-clamp-2 mb-2">{act.ementa}</p>
+                          <div className="text-xs text-ink-muted">{act.issuer}</div>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                        <ArrowRight className="w-5 h-5 text-ink-muted group-hover:text-brand-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>
                     </Link>
                   ))}
@@ -518,13 +518,13 @@ function BuscaIntegradaContent() {
 
             {/* Documentos */}
             {results.results.documents.length > 0 && shouldShowSection('docs') && (
-              <section className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+              <section className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <FileText className="w-8 h-8 text-purple-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <FileText className="w-8 h-8 text-ink-secondary" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
                     Documentos
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-surface-deep text-ink-secondary rounded-full text-sm font-bold">
                     {results.results.documents.length} {results.results.documents.length === 1 ? 'documento' : 'documentos'}
                   </span>
                 </div>
@@ -533,45 +533,45 @@ function BuscaIntegradaContent() {
                   {results.results.documents.map(doc => (
                     <div
                       key={doc.id}
-                      className={`p-5 rounded-xl border-2 transition-all ${
+                      className={`p-5 rounded-md border-2 transition-all ${
                         doc.requiresEnrollment
-                          ? 'bg-gray-50 border-gray-300'
-                          : 'bg-purple-50 border-purple-200 hover:border-purple-500 hover:bg-purple-100'
+                          ? 'bg-surface-raised border-border-strong'
+                          : 'bg-surface-raised border-border-subtle hover:border-brand-600 hover:bg-surface-deep'
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         {doc.requiresEnrollment ? (
-                          <div className="flex-shrink-0 w-12 h-12 bg-gray-400 rounded-lg flex items-center justify-center">
-                            <Lock className="w-6 h-6 text-white" />
+                          <div className="flex-shrink-0 w-12 h-12 bg-border-strong rounded-[3px] flex items-center justify-center">
+                            <Lock className="w-6 h-6 text-surface-page" />
                           </div>
                         ) : (
-                          <div className="flex-shrink-0 w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
-                            <FileText className="w-6 h-6 text-white" />
+                          <div className="flex-shrink-0 w-12 h-12 bg-brand-600 rounded-[3px] flex items-center justify-center">
+                            <FileText className="w-6 h-6 text-surface-page" />
                           </div>
                         )}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-bold rounded">
+                            <span className="px-2 py-0.5 bg-surface-deep text-ink-secondary text-xs font-bold rounded">
                               {CATEGORY_LABELS[doc.category] || doc.category}
                             </span>
                             {doc.requiresEnrollment && (
-                              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded flex items-center gap-1">
+                              <span className="px-2 py-0.5 bg-surface-deep text-ink-secondary text-xs font-bold rounded flex items-center gap-1">
                                 <Lock className="w-3 h-3" />
                                 Requer Inscrição
                               </span>
                             )}
                           </div>
-                          <h3 className={`font-bold mb-1 ${doc.requiresEnrollment ? 'text-gray-600' : 'text-gray-900'}`}>
+                          <h3 className={`font-bold mb-1 ${doc.requiresEnrollment ? 'text-ink-secondary' : 'text-ink-primary'}`}>
                             {doc.title}
                           </h3>
                           {doc.description && (
-                            <p className="text-sm text-gray-600 line-clamp-2">{doc.description}</p>
+                            <p className="text-sm text-ink-secondary line-clamp-2">{doc.description}</p>
                           )}
                         </div>
                         {doc.requiresEnrollment ? (
                           <Link
                             href="/cursos"
-                            className="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold"
+                            className="flex-shrink-0 px-4 py-2 bg-brand-600 text-surface-page rounded-[3px] hover:bg-brand-800 transition-colors text-sm font-semibold"
                           >
                             Ver Cursos
                           </Link>
@@ -580,7 +580,7 @@ function BuscaIntegradaContent() {
                             href={`/area-restrita#doc-${doc.id}`}
                             className="flex-shrink-0"
                           >
-                            <ArrowRight className="w-5 h-5 text-purple-600 hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-5 h-5 text-ink-secondary hover:translate-x-1 transition-transform" />
                           </Link>
                         )}
                       </div>
@@ -590,20 +590,20 @@ function BuscaIntegradaContent() {
 
                 {/* Call to Action para documentos restritos */}
                 {results.results.documents.some(d => d.requiresEnrollment) && (
-                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200">
+                  <div className="mt-6 p-6 bg-surface-raised rounded-md border border-border-subtle">
                     <div className="flex items-start gap-4">
-                      <Lock className="w-8 h-8 text-blue-600 flex-shrink-0" />
+                      <Lock className="w-8 h-8 text-brand-600 flex-shrink-0" />
                       <div className="flex-1">
-                        <h3 className="font-bold text-gray-900 mb-2">
+                        <h3 className="font-bold text-ink-primary mb-2">
                           Quer acesso completo aos documentos exclusivos?
                         </h3>
-                        <p className="text-gray-700 mb-4">
+                        <p className="text-ink-secondary mb-4">
                           Inscreva-se em nossos cursos e tenha acesso ilimitado a acórdãos, pareceres,
                           orientações normativas e muito mais!
                         </p>
                         <Link
                           href="/cursos"
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 text-surface-page rounded-[3px] font-bold hover:bg-brand-800 transition-colors"
                         >
                           Conhecer os Cursos
                           <ArrowRight className="w-5 h-5" />
@@ -617,13 +617,13 @@ function BuscaIntegradaContent() {
 
             {/* Blog Posts */}
             {results.results.blogPosts?.length > 0 && shouldShowSection('blog') && (
-              <section className="bg-white rounded-2xl shadow-lg border-2 border-rose-200 p-8">
+              <section className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <Newspaper className="w-8 h-8 text-rose-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <Newspaper className="w-8 h-8 text-ink-secondary" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
                     Blog
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-surface-deep text-ink-secondary rounded-full text-sm font-bold">
                     {results.results.blogPosts.length} {results.results.blogPosts.length === 1 ? 'artigo' : 'artigos'}
                   </span>
                 </div>
@@ -633,27 +633,27 @@ function BuscaIntegradaContent() {
                     <Link
                       key={post.id}
                       href={`/blog/${post.slug}`}
-                      className="block p-5 bg-rose-50 rounded-xl border-2 border-rose-200 hover:border-rose-500 hover:bg-rose-100 transition-all group"
+                      className="block p-5 bg-surface-raised rounded-md border border-border-subtle hover:border-brand-600 hover:bg-surface-deep transition-all group"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-12 h-12 bg-rose-600 rounded-lg flex items-center justify-center">
-                          <Newspaper className="w-6 h-6 text-white" />
+                        <div className="flex-shrink-0 w-12 h-12 bg-brand-600 rounded-[3px] flex items-center justify-center">
+                          <Newspaper className="w-6 h-6 text-surface-page" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-rose-700 transition-colors">
+                          <h3 className="font-bold text-ink-primary mb-1 group-hover:text-ink-secondary transition-colors">
                             {post.title}
                           </h3>
                           {post.excerpt && (
-                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">{post.excerpt}</p>
+                            <p className="text-sm text-ink-secondary line-clamp-2 mb-2">{post.excerpt}</p>
                           )}
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
+                          <div className="flex items-center gap-3 text-xs text-ink-muted">
                             <span>{post.author}</span>
                             {post.publishedAt && (
                               <span>{new Date(post.publishedAt).toLocaleDateString('pt-BR')}</span>
                             )}
                           </div>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-rose-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                        <ArrowRight className="w-5 h-5 text-ink-muted group-hover:text-ink-secondary group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>
                     </Link>
                   ))}
@@ -663,13 +663,13 @@ function BuscaIntegradaContent() {
 
             {/* FAQ */}
             {results.results.faqs?.length > 0 && shouldShowSection('faq') && (
-              <section className="bg-white rounded-2xl shadow-lg border-2 border-amber-200 p-8">
+              <section className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <HelpCircle className="w-8 h-8 text-amber-600" />
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <HelpCircle className="w-8 h-8 text-amber-accent" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
                     Perguntas Frequentes
                   </h2>
-                  <span className="ml-auto px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-bold">
+                  <span className="ml-auto px-3 py-1 bg-amber-accent-soft text-amber-accent-deep rounded-full text-sm font-bold">
                     {results.results.faqs.length} {results.results.faqs.length === 1 ? 'resultado' : 'resultados'}
                   </span>
                 </div>
@@ -678,18 +678,18 @@ function BuscaIntegradaContent() {
                   {results.results.faqs.map(faq => (
                     <div
                       key={faq.id}
-                      className="p-5 bg-amber-50 rounded-xl border-2 border-amber-200"
+                      className="p-5 bg-surface-raised rounded-md border border-border-subtle"
                     >
-                      <h3 className="font-bold text-gray-900 mb-2 flex items-start gap-2">
-                        <HelpCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <h3 className="font-bold text-ink-primary mb-2 flex items-start gap-2">
+                        <HelpCircle className="w-5 h-5 text-amber-accent flex-shrink-0 mt-0.5" />
                         {faq.question}
                       </h3>
-                      <p className="text-sm text-gray-700 leading-relaxed ml-7">
+                      <p className="text-sm text-ink-secondary leading-relaxed ml-7">
                         {faq.answer}
                       </p>
                       {faq.category && (
                         <div className="mt-2 ml-7">
-                          <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full">
+                          <span className="text-xs px-2 py-1 bg-amber-accent-soft text-amber-accent-deep rounded-full">
                             {faq.category}
                           </span>
                         </div>
@@ -704,47 +704,47 @@ function BuscaIntegradaContent() {
       </div>
 
       {/* Seção de Preview - Recursos Exclusivos para Assinantes */}
-      <div className="bg-gradient-to-b from-gray-100 to-gray-200 py-16 mt-8">
+      <div className="bg-surface-raised py-16 mt-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            <h2 className="text-3xl font-bold text-ink-primary mb-3">
               Recursos exclusivos para assinantes
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <p className="text-ink-secondary max-w-2xl mx-auto">
               Potencialize sua pesquisa com ferramentas avançadas e acesso completo a toda a base de conhecimento
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {/* Card: Análise com IA */}
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-purple-200 p-8 hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-5">
-                <Sparkles className="w-8 h-8 text-purple-600" />
+            <div className="bg-surface-page rounded-md border border-border-subtle p-8 hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-surface-deep rounded-md flex items-center justify-center mb-5">
+                <Sparkles className="w-8 h-8 text-ink-secondary" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Análise com IA</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-ink-primary mb-3">Análise com IA</h3>
+              <p className="text-sm text-ink-secondary leading-relaxed">
                 Na área restrita, a IA analisa seus resultados e gera resumos contextuais automaticamente
               </p>
             </div>
 
             {/* Card: Base de Conhecimento */}
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-200 p-8 hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-5">
-                <Database className="w-8 h-8 text-blue-600" />
+            <div className="bg-surface-page rounded-md border border-border-subtle p-8 hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-surface-deep rounded-md flex items-center justify-center mb-5">
+                <Database className="w-8 h-8 text-brand-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Base de Conhecimento</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-ink-primary mb-3">Base de Conhecimento</h3>
+              <p className="text-sm text-ink-secondary leading-relaxed">
                 Mais de 800 documentos organizados: Acórdãos TCU, Pareceres, Orientações Normativas, Enunciados...
               </p>
             </div>
 
             {/* Card: Assistente Virtual */}
-            <div className="bg-white rounded-2xl shadow-lg border-2 border-green-200 p-8 hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-5">
-                <MessageCircle className="w-8 h-8 text-green-600" />
+            <div className="bg-surface-page rounded-md border border-border-subtle p-8 hover:shadow-xl transition-shadow">
+              <div className="w-14 h-14 bg-surface-deep rounded-md flex items-center justify-center mb-5">
+                <MessageCircle className="w-8 h-8 text-ink-secondary" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Assistente Virtual</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-ink-primary mb-3">Assistente Virtual</h3>
+              <p className="text-sm text-ink-secondary leading-relaxed">
                 Tire dúvidas diretamente com nosso assistente especializado em licitações
               </p>
             </div>
@@ -754,7 +754,7 @@ function BuscaIntegradaContent() {
           <div className="text-center">
             <Link
               href="/planos"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-brand-600 text-surface-page rounded-md font-bold text-lg hover: transition-all hover:shadow-xl"
             >
               Assine e tenha acesso completo
               <ArrowRight className="w-5 h-5" />
@@ -768,7 +768,7 @@ function BuscaIntegradaContent() {
 
 export default function BuscaIntegradaPage() {
   return (
-    <Suspense fallback={<main className="min-h-screen bg-gray-50" />}>
+    <Suspense fallback={<main className="min-h-screen bg-surface-raised" />}>
       <BuscaIntegradaContent />
     </Suspense>
   );

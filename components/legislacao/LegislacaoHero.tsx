@@ -9,7 +9,7 @@ interface LegislacaoHeroProps {
 }
 
 function HeroIcon({ tab }: { tab: LegislacaoTab }) {
-  const iconClass = 'w-10 h-10 text-white';
+  const iconClass = 'w-10 h-10 text-surface-page';
   if (tab === 'orientacoes') return <Lightbulb className={iconClass} />;
   if (tab === 'tic') return <Monitor className={iconClass} />;
   if (tab === 'boas-praticas') return <FileText className={iconClass} />;
@@ -18,10 +18,10 @@ function HeroIcon({ tab }: { tab: LegislacaoTab }) {
 
 export function LegislacaoHero({ tab, theme }: LegislacaoHeroProps) {
   return (
-    <section className={`bg-gradient-to-r ${theme.heroGradient} text-white py-16 transition-colors duration-300`}>
+    <section className={'bg-surface-page border-b border-border-subtle py-12'}>
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+          <div className="w-16 h-16 bg-surface-page/20 rounded-md flex items-center justify-center">
             <HeroIcon tab={tab} />
           </div>
           <div>

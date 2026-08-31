@@ -10,23 +10,23 @@ import { usePathname, useRouter } from 'next/navigation';
  * com focus automático na busca.
  */
 export function GlobalSearchShortcut() {
-  const pathname = usePathname();
-  const router = useRouter();
+ const pathname = usePathname();
+ const router = useRouter();
 
-  useEffect(() => {
-    // Na página principal, o GlobalSearchBar já cuida do Ctrl+K
-    if (pathname === '/area-restrita') return;
+ useEffect(() => {
+ // Na página principal, o GlobalSearchBar já cuida do Ctrl+K
+ if (pathname === '/area-restrita') return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        router.push('/area-restrita?focus=search');
-      }
-    };
+ const handleKeyDown = (e: KeyboardEvent) => {
+ if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+ e.preventDefault();
+ router.push('/area-restrita?focus=search');
+ }
+ };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [pathname, router]);
+ document.addEventListener('keydown', handleKeyDown);
+ return () => document.removeEventListener('keydown', handleKeyDown);
+ }, [pathname, router]);
 
-  return null;
+ return null;
 }

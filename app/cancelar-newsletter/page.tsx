@@ -53,7 +53,7 @@ export default function CancelarNewsletterPage() {
             // Mensagem de Sucesso
             <div className="text-center">
               <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-8 h-8 text-white" />
+                <CheckCircle className="w-8 h-8 text-surface-page" />
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
                 Inscrição Cancelada
@@ -67,7 +67,7 @@ export default function CancelarNewsletterPage() {
               </p>
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                className="inline-flex items-center gap-2 bg-primary-600 text-surface-page px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
               >
                 Voltar para o Site
               </Link>
@@ -89,7 +89,7 @@ export default function CancelarNewsletterPage() {
               </div>
 
               {error && (
-                <div className="bg-red-50 border-2 border-red-500 rounded-lg p-4 mb-6">
+                <div className="bg-red-50 border border-semantic-error rounded-lg p-4 mb-6">
                   <p className="text-red-800 font-medium">{error}</p>
                 </div>
               )}
@@ -129,7 +129,7 @@ export default function CancelarNewsletterPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-red-600 text-white px-6 py-4 rounded-lg font-bold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-red-600 text-surface-page px-6 py-4 rounded-lg font-bold hover:bg-semantic-error transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>

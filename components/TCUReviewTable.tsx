@@ -491,7 +491,7 @@ export default function TCUReviewTable({
                   <button
                     onClick={addTag}
                     type="button"
-                    className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-3 py-1.5 text-sm bg-blue-600 text-surface-page rounded-md hover:bg-blue-700"
                   >
                     Adicionar
                   </button>
@@ -533,7 +533,7 @@ export default function TCUReviewTable({
                   <button
                     onClick={addArtigo}
                     type="button"
-                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
+                    className="px-3 py-1.5 text-sm bg-green-600 text-surface-page rounded-md hover:bg-green-700"
                   >
                     Adicionar
                   </button>
@@ -585,7 +585,7 @@ export default function TCUReviewTable({
             </button>
             <button
               onClick={handleApprove}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-green-600 text-surface-page rounded-md hover:bg-green-700 flex items-center justify-center gap-2"
             >
               <Check className="h-4 w-4" />
               Aprovar e Próximo

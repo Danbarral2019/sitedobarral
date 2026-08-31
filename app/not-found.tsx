@@ -63,7 +63,7 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/busca"
-              className="inline-flex items-center justify-center gap-2 bg-brand-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-brand-700 transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-brand-600 text-surface-page px-6 py-3 rounded-lg font-bold hover:bg-brand-800 transition-colors"
             >
               <Search className="w-4 h-4" />
               Buscar no Site

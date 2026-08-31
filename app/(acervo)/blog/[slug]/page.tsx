@@ -157,7 +157,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             }}
           />
 
-          <article className="bg-white rounded-lg shadow-lg p-8">
+          <article className="bg-surface-page rounded-[3px] p-8">
             <header className="mb-8">
               <div className="flex flex-wrap gap-2 mb-4">
                 {post.tags.map((tag: string) => (
@@ -171,11 +171,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 ))}
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-ink-primary">
                 {post.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 pb-6 border-b">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-ink-secondary pb-6 border-b">
                 <div className="flex items-center gap-1">
                   <User className="w-4 h-4" />
                   <span>{post.author}</span>
@@ -192,7 +192,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </header>
 
             <div className="mb-8">
-              <div className="text-xl text-gray-700 font-medium mb-6 text-justify leading-relaxed">
+              <div className="text-xl text-ink-secondary font-medium mb-6 text-justify leading-relaxed">
                 {post.excerpt}
               </div>
               <MarkdownContent content={post.content} />
@@ -208,11 +208,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </article>
 
           {process.env.COMING_SOON_ENABLED === 'true' && (
-            <aside className="mt-12 border-t border-slate-200 pt-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            <aside className="mt-12 border-t border-border-subtle pt-8">
+              <h2 className="text-2xl font-bold text-ink-primary mb-2">
                 Em breve, novidades
               </h2>
-              <p className="text-slate-600 mb-6">
+              <p className="text-ink-secondary mb-6">
                 Estamos preparando um lançamento. Cadastre seu email para ser avisado
                 primeiro.
               </p>
@@ -228,10 +228,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <Link
                     key={relatedPost.id}
                     href={`/blog/${relatedPost.slug}`}
-                    className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+                    className="bg-surface-page rounded-[3px] p-6 hover:shadow-xl transition-shadow"
                   >
                     <h3 className="font-semibold mb-2 line-clamp-2">{relatedPost.title}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-3">{relatedPost.excerpt}</p>
+                    <p className="text-sm text-ink-secondary line-clamp-3">{relatedPost.excerpt}</p>
                     <p className="text-primary-600 text-sm font-semibold mt-3">
                       Ler mais →
                     </p>
@@ -242,9 +242,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           )}
 
           {process.env.COMING_SOON_ENABLED !== 'true' && (
-            <div className="mt-12 bg-primary-50 rounded-lg p-8 text-center">
+            <div className="mt-12 bg-primary-50 rounded-[3px] p-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Gostou deste conteúdo?</h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-ink-secondary mb-6">
                 Cadastre-se para receber novos artigos e materiais exclusivos sobre
                 Direito Administrativo diretamente em seu e-mail.
               </p>
@@ -252,11 +252,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <input
                   type="email"
                   placeholder="Seu e-mail"
-                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-primary-500"
+                  className="flex-1 px-4 py-3 rounded-[3px] border border-border-strong focus:outline-none focus:border-primary-500"
                 />
                 <button
                   type="submit"
-                  className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                  className="bg-primary-600 text-surface-page px-6 py-3 rounded-[3px] font-semibold hover:bg-primary-700 transition-colors"
                 >
                   Cadastrar
                 </button>

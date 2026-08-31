@@ -188,23 +188,23 @@ export function PWAProvider() {
     <>
       {/* SW Update Banner */}
       {showUpdateBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-surface-page px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <RefreshCw className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
-              Nova versao disponivel
+              Nova versão disponível
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleUpdate}
-              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-surface-page text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-surface-deep transition-colors"
             >
               Atualizar
             </button>
             <button
               onClick={handleDismissUpdate}
-              className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+              className="p-1.5 hover:bg-surface-page/10 rounded-md transition-colors"
               aria-label="Fechar"
             >
               <X className="h-4 w-4" />
@@ -215,7 +215,7 @@ export function PWAProvider() {
 
       {/* Install PWA Banner */}
       {showBanner && !showUpdateBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-surface-page px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Download className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
@@ -225,13 +225,13 @@ export function PWAProvider() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleInstall}
-              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-surface-page text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-surface-deep transition-colors"
             >
               Instalar
             </button>
             <button
               onClick={handleDismiss}
-              className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+              className="p-1.5 hover:bg-surface-page/10 rounded-md transition-colors"
               aria-label="Fechar"
             >
               <X className="h-4 w-4" />
@@ -242,23 +242,23 @@ export function PWAProvider() {
 
       {/* Push Notification Permission Prompt */}
       {showNotificationPrompt && !showBanner && !showUpdateBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-white px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#20364e] text-surface-page px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Bell className="h-5 w-5 shrink-0" />
             <p className="text-sm truncate">
-              Ative as notificacoes para receber avisos de novos materiais
+              Ative as notificações para receber avisos de novos materiais
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleEnableNotifications}
-              className="bg-white text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+              className="bg-surface-page text-[#20364e] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-surface-deep transition-colors"
             >
               Ativar
             </button>
             <button
               onClick={handleDismissNotifications}
-              className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
+              className="p-1.5 hover:bg-surface-page/10 rounded-md transition-colors"
               aria-label="Fechar"
             >
               <X className="h-4 w-4" />

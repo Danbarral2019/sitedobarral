@@ -116,8 +116,8 @@ function GroupBlock({ group }: { group: ClippingGroup }) {
         className="flex items-center justify-between rounded-md px-3.5 py-2.5 mb-4"
         style={{ backgroundColor: brand.color }}
       >
-        <span className="text-sm font-bold tracking-wide text-white">{brand.code}</span>
-        <span className="text-xs text-white/85">
+        <span className="text-sm font-bold tracking-wide text-surface-page">{brand.code}</span>
+        <span className="text-xs text-surface-page/85">
           {count} {count === 1 ? 'decisão' : 'decisões'}
         </span>
       </div>
@@ -146,7 +146,7 @@ export function ClippingArchiveDetail({
           <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">
             {showSiteHeader ? 'Prof. Daniel Barral' : 'Arquivo do Clipping'}
           </p>
-          <h1 className="text-2xl font-bold text-white m-0">Clipping Jurídico</h1>
+          <h1 className="text-2xl font-bold text-surface-page m-0">Clipping Jurídico</h1>
           <p className="text-sm text-slate-300 mt-1">
             Decisões publicadas em {dataRef} · {count} {count === 1 ? 'destaque' : 'destaques'}
             {tribunais > 1 ? ` · ${tribunais} tribunais` : ''}

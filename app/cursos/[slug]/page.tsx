@@ -67,7 +67,7 @@ const getCourseColor = (courseId: string) => {
     hover: string;
   }> = {
     '1': {
-      gradient: 'from-brand-500 to-brand-600',
+      gradient: '',
       border: 'border-brand-300',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -75,31 +75,31 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-600',
     },
     '2': {
-      gradient: 'from-brand-600 to-brand-700',
+      gradient: '',
       border: 'border-brand-400',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
       text: 'text-brand-700',
-      hover: 'hover:bg-brand-700',
+      hover: 'hover:bg-brand-800',
     },
     '3': {
-      gradient: 'from-brand-600 to-brand-700',
+      gradient: '',
       border: 'border-brand-500',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
       text: 'text-brand-700',
-      hover: 'hover:bg-brand-700',
+      hover: 'hover:bg-brand-800',
     },
     '4': {
-      gradient: 'from-brand-600 to-brand-700',
+      gradient: '',
       border: 'border-brand-600',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
       text: 'text-brand-800',
-      hover: 'hover:bg-brand-700',
+      hover: 'hover:bg-brand-800',
     },
     '5': {
-      gradient: 'from-brand-700 to-brand-800',
+      gradient: '',
       border: 'border-brand-700',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -107,7 +107,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-800',
     },
     '6': {
-      gradient: 'from-brand-800 to-brand-900',
+      gradient: '',
       border: 'border-brand-800',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -115,7 +115,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-900',
     },
     '7': {
-      gradient: 'from-brand-500 to-brand-600',
+      gradient: '',
       border: 'border-brand-500',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -123,15 +123,15 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-600',
     },
     '8': {
-      gradient: 'from-brand-600 to-brand-700',
+      gradient: '',
       border: 'border-brand-600',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
       text: 'text-brand-800',
-      hover: 'hover:bg-brand-700',
+      hover: 'hover:bg-brand-800',
     },
     '9': {
-      gradient: 'from-brand-700 to-brand-800',
+      gradient: '',
       border: 'border-brand-700',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -139,7 +139,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-800',
     },
     '10': {
-      gradient: 'from-brand-800 to-brand-900',
+      gradient: '',
       border: 'border-brand-800',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -213,15 +213,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
       />
 
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <main className="min-h-screen bg-surface-raised">
       {/* Hero Section com Cor do Curso */}
-      <div className={`relative overflow-hidden bg-gradient-to-br ${color.gradient}`}>
+      <div className={`relative overflow-hidden bg-brand-600`}>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMTRjMy4zMTQgMCA2IDIuNjg2IDYgNnMtMi42ODYgNi02IDYtNi0yLjY4Ni02LTYgMi42ODYtNiA2LTZ6TTI0IDM4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
 
         <div className="container mx-auto px-4 py-8 relative">
           <Link
             href="/cursos"
-            className="inline-flex items-center gap-2 text-white hover:text-white/90 mb-6 transition-colors"
+            className="inline-flex items-center gap-2 text-surface-page hover:text-surface-page/90 mb-6 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="font-semibold">Voltar para Cursos</span>
@@ -231,40 +231,40 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <div className="flex items-start gap-6 pb-12">
               {/* Número do Curso */}
               <div className="hidden md:block">
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 text-center">
-                  <div className="text-6xl font-bold text-white mb-2">{courseNumber}</div>
-                  <div className="text-sm uppercase tracking-wider font-semibold text-white/90">Curso</div>
+                <div className="bg-surface-page/20 rounded-md p-6 text-center">
+                  <div className="text-6xl font-bold text-ink-secondary mb-2">{courseNumber}</div>
+                  <div className="text-sm uppercase tracking-wider font-semibold text-ink-secondary/90">Curso</div>
                 </div>
               </div>
 
               {/* Título e Descrição */}
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
-                  <BookOpen className="w-10 h-10 text-white" />
-                  <span className="bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-bold text-white uppercase tracking-wide">
+                  <BookOpen className="w-10 h-10 text-surface-page" />
+                  <span className="bg-surface-deep px-4 py-1.5 rounded-full text-sm font-bold text-ink-secondary uppercase tracking-wide">
                     Curso Especializado
                   </span>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                <h1 className="text-4xl md:text-5xl font-bold text-surface-page mb-6 leading-tight">
                   {course.title}
                 </h1>
-                <p className="text-xl text-white/95 leading-relaxed max-w-3xl">
+                <p className="text-xl text-surface-page/95 leading-relaxed max-w-3xl">
                   {course.shortDescription}
                 </p>
 
                 {/* Stats */}
                 <div className="flex flex-wrap gap-4 mt-8">
                   {modules.length > 0 && (
-                    <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
-                      <Layers className="w-5 h-5 text-white" />
-                      <span className="text-white font-semibold">
+                    <div className="bg-surface-page/20 rounded-md px-6 py-3 flex items-center gap-3">
+                      <Layers className="w-5 h-5 text-brand-600" />
+                      <span className="text-ink-secondary font-semibold">
                         {modules.length} {modules.length === 1 ? 'Módulo' : 'Módulos'} · {modules.reduce((s, m) => s + m._count.lessons, 0)} Aulas
                       </span>
                     </div>
                   )}
-                  <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center gap-3">
-                    <Award className="w-5 h-5 text-white" />
-                    <span className="text-white font-semibold">Certificado</span>
+                  <div className="bg-surface-page/20 rounded-md px-6 py-3 flex items-center gap-3">
+                    <Award className="w-5 h-5 text-brand-600" />
+                    <span className="text-ink-secondary font-semibold">Certificado</span>
                   </div>
                 </div>
               </div>
@@ -282,45 +282,45 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             {/* Coluna Principal */}
             <div className="lg:col-span-2 space-y-8">
               {/* Sobre o Curso */}
-              <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
+              <div className={`bg-surface-page rounded-md p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
-                    <Target className="w-6 h-6 text-white" />
+                  <div className={`w-12 h-12 bg-brand-600 rounded-md flex items-center justify-center`}>
+                    <Target className="w-6 h-6 text-surface-page" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900">Sobre o Curso</h2>
+                  <h2 className="text-3xl font-bold text-ink-primary">Sobre o Curso</h2>
                 </div>
-                <div className={`${color.bg} p-6 rounded-xl mb-6 border-l-4 ${color.border}`}>
-                  <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
+                <div className={`${color.bg} p-6 rounded-md mb-6 border-l-4 ${color.border}`}>
+                  <div className="prose prose-lg max-w-none text-ink-primary leading-relaxed whitespace-pre-line">
                     {course.description}
                   </div>
                 </div>
 
                 {/* Diferenciais */}
                 <div className="grid md:grid-cols-3 gap-4">
-                  <div className={`${color.bg} p-4 rounded-xl`}>
+                  <div className={`${color.bg} p-4 rounded-md`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Conteúdo Atualizado</h3>
-                        <p className="text-sm text-gray-700">Material revisado conforme nova legislação</p>
+                        <h3 className="font-bold text-ink-primary mb-1">Conteúdo Atualizado</h3>
+                        <p className="text-sm text-ink-secondary">Material revisado conforme nova legislação</p>
                       </div>
                     </div>
                   </div>
-                  <div className={`${color.bg} p-4 rounded-xl`}>
+                  <div className={`${color.bg} p-4 rounded-md`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Abordagem Prática</h3>
-                        <p className="text-sm text-gray-700">Casos reais e jurisprudência aplicada</p>
+                        <h3 className="font-bold text-ink-primary mb-1">Abordagem Prática</h3>
+                        <p className="text-sm text-ink-secondary">Casos reais e jurisprudência aplicada</p>
                       </div>
                     </div>
                   </div>
-                  <div className={`${color.bg} p-4 rounded-xl`}>
+                  <div className={`${color.bg} p-4 rounded-md`}>
                     <div className="flex items-start gap-3">
                       <CheckCircle className={`w-6 h-6 ${color.text} flex-shrink-0 mt-1`} />
                       <div>
-                        <h3 className="font-bold text-gray-900 mb-1">Material Exclusivo</h3>
-                        <p className="text-sm text-gray-700">Acórdãos, pareceres e apostilas especializadas</p>
+                        <h3 className="font-bold text-ink-primary mb-1">Material Exclusivo</h3>
+                        <p className="text-sm text-ink-secondary">Acórdãos, pareceres e apostilas especializadas</p>
                       </div>
                     </div>
                   </div>
@@ -329,14 +329,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
               {/* Conteúdo Programático (Preview de Módulos) */}
               {modules.length > 0 && (
-                <div className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
+                <div className={`bg-surface-page rounded-md p-8 border-2 ${color.border} hover:shadow-xl transition-shadow`}>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center`}>
-                      <Layers className="w-6 h-6 text-white" />
+                    <div className={`w-12 h-12 bg-brand-600 rounded-md flex items-center justify-center`}>
+                      <Layers className="w-6 h-6 text-surface-page" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900">Conteudo Programatico</h2>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <h2 className="text-3xl font-bold text-ink-primary">Conteudo Programatico</h2>
+                      <p className="text-sm text-ink-secondary mt-1">
                         {modules.length} {modules.length === 1 ? 'modulo' : 'modulos'} com{' '}
                         {modules.reduce((sum, m) => sum + m._count.lessons, 0)} aulas estruturadas
                       </p>
@@ -347,27 +347,27 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                     {modules.map((mod, index) => (
                       <div
                         key={mod.id}
-                        className={`${color.bg} rounded-xl p-4 flex items-center gap-4 border border-white`}
+                        className={`${color.bg} rounded-md p-4 flex items-center gap-4 border border-white`}
                       >
-                        <div className={`w-10 h-10 bg-gradient-to-br ${color.gradient} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                          <span className="text-white font-bold text-sm">{index + 1}</span>
+                        <div className={`w-10 h-10 bg-brand-600 rounded-[3px] flex items-center justify-center flex-shrink-0`}>
+                          <span className="text-surface-page font-bold text-sm">{index + 1}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate">{mod.title}</h3>
+                          <h3 className="font-semibold text-ink-primary truncate">{mod.title}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <PlayCircle className={`w-3.5 h-3.5 ${color.text}`} />
-                            <span className="text-xs text-gray-600">
+                            <span className="text-xs text-ink-secondary">
                               {mod._count.lessons} {mod._count.lessons === 1 ? 'aula' : 'aulas'}
                             </span>
                           </div>
                         </div>
-                        <Lock className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                        <Lock className="w-4 h-4 text-border-strong flex-shrink-0" />
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="mt-6 pt-4 border-t border-border-subtle">
+                    <div className="flex items-center gap-2 text-sm text-ink-muted">
                       <Lock className="w-4 h-4" />
                       <span>Conteudo completo disponivel para alunos matriculados</span>
                     </div>
@@ -379,23 +379,23 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className={`bg-gradient-to-br ${color.gradient} rounded-2xl shadow-xl p-8 text-white sticky top-8`}>
+              <div className={`bg-brand-600 rounded-md p-8 text-surface-page sticky top-8`}>
                 <div className="text-center">
                   <h3 className="text-2xl font-bold mb-3">Já é Aluno?</h3>
-                  <p className="text-white/90 leading-relaxed mb-6 text-sm">
+                  <p className="text-surface-page/90 leading-relaxed mb-6 text-sm">
                     Faça login para acessar o material exclusivo deste curso na área restrita.
                   </p>
 
                   <Link
                     href={`/login?curso=${course.id}`}
-                    className={`block bg-white ${color.text} px-8 py-4 rounded-xl font-bold hover:bg-white/90 transition-all shadow-lg`}
+                    className={`block bg-surface-page ${color.text} px-8 py-4 rounded-md font-bold hover:bg-surface-page/90 transition-all`}
                   >
                     Fazer Login
                   </Link>
 
-                  <p className="text-xs text-white/80 mt-4">
+                  <p className="text-xs text-surface-page/80 mt-4">
                     Primeiro acesso?{' '}
-                    <Link href="/validar-acesso" className="underline hover:text-white">
+                    <Link href="/validar-acesso" className="underline hover:text-surface-page">
                       Use o QR Code do curso
                     </Link>
                   </p>
@@ -408,7 +408,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           <div className="mt-16 text-center">
             <Link
               href="/cursos"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-brand-700 transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 text-ink-secondary hover:text-brand-700 transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Ver todos os cursos

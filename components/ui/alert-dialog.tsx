@@ -59,7 +59,7 @@ export function AlertDialog({
             }`}>
               <AlertTriangle className={`w-6 h-6 ${
                 variant === 'danger' ? 'text-red-600' :
-                variant === 'warning' ? 'text-yellow-600' :
+                variant === 'warning' ? 'text-amber-accent-deep' :
                 'text-blue-600'
               }`} />
             </div>
@@ -82,7 +82,7 @@ export function AlertDialog({
             type="button"
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 bg-gradient-to-r text-white rounded-lg font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]}`}
+            className={`px-4 py-2 bg-gradient-to-r text-surface-page rounded-lg font-bold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]}`}
           >
             {isLoading ? 'Processando...' : confirmText}
           </button>

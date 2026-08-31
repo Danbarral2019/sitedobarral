@@ -207,7 +207,7 @@ export default function DocumentDetailModal({
             <p className="text-red-700 mb-4">{error || 'Documento nao encontrado'}</p>
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-6 py-2 bg-red-600 text-surface-page rounded-lg hover:bg-semantic-error transition-colors"
             >
               Fechar
             </button>
@@ -251,7 +251,7 @@ export default function DocumentDetailModal({
     >
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-t-2xl z-10">
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-700 text-surface-page p-6 rounded-t-2xl z-10">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4 flex-1">
               <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -289,7 +289,7 @@ export default function DocumentDetailModal({
                         <Link
                           href={`/area-restrita/artigo/${artNum}`}
                           onClick={onClose}
-                          className="hover:text-white underline transition-colors"
+                          className="hover:text-surface-page underline transition-colors"
                         >
                           Art. {artNum}
                         </Link>

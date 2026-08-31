@@ -86,34 +86,34 @@ export default function ArtigosIndexPage() {
   const showSkeleton = isLoading && Object.keys(artigos).length === 0;
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Header Simplificado */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+      <div className="bg-surface-raised text-ink-primary py-12 border-b border-border-subtle">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-surface-page/20 rounded-md flex items-center justify-center">
               <BookOpen className="w-10 h-10" />
             </div>
             <div>
               <h1 className="text-4xl font-bold mb-2">Lei 14.133/2021</h1>
-              <p className="text-xl text-blue-100">Nova Lei de Licitações e Contratos</p>
+              <p className="text-xl text-ink-muted">Nova Lei de Licitações e Contratos</p>
             </div>
           </div>
 
           {/* Campo de Pesquisa Principal */}
           <div className="relative max-w-3xl">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-ink-muted" />
             <input
               type="text"
               placeholder="Pesquisar por número do artigo, palavra-chave ou tema..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-12 py-5 text-lg text-gray-900 bg-white rounded-2xl border-2 border-transparent focus:border-white focus:ring-4 focus:ring-white/30 shadow-xl"
+              className="w-full pl-14 pr-12 py-5 text-lg text-ink-primary bg-surface-page rounded-md border-2 border-transparent focus:border-white focus:ring-4 focus:ring-white/30"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-ink-muted hover:text-ink-secondary transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -126,7 +126,7 @@ export default function ArtigosIndexPage() {
               href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur text-white rounded-lg font-semibold hover:bg-white/30 transition-all text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-deep text-ink-secondary rounded-[3px] font-semibold hover:bg-surface-deep transition-all text-sm"
             >
               <FileText className="w-4 h-4" />
               Ver Lei Completa no Planalto
@@ -139,40 +139,40 @@ export default function ArtigosIndexPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Error State */}
         {fetchError && (
-          <div role="alert" className="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6">
-            <p className="text-amber-800 font-medium">{fetchError}</p>
+          <div role="alert" className="bg-surface-raised border border-amber-accent rounded-[3px] p-4 mb-6">
+            <p className="text-amber-accent-deep font-medium">{fetchError}</p>
           </div>
         )}
 
         {/* Loading / Resultados */}
         {showSkeleton ? (
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8" aria-busy="true">
+          <div className="bg-surface-page rounded-md border border-border-subtle p-8" aria-busy="true">
             <div className="animate-pulse space-y-4">
-              <div className="h-6 w-1/3 bg-gray-200 rounded" />
-              <div className="h-12 w-full bg-gray-100 rounded-xl" />
+              <div className="h-6 w-1/3 bg-surface-deep rounded" />
+              <div className="h-12 w-full bg-surface-deep rounded-md" />
               <div className="space-y-3 pt-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-20 bg-gray-100 rounded-xl" />
+                  <div key={i} className="h-20 bg-surface-deep rounded-md" />
                 ))}
               </div>
             </div>
           </div>
         ) : hasSearch ? (
-          <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+          <div className="bg-surface-page rounded-md border border-border-subtle p-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-ink-primary">
                 Resultados da Busca
               </h2>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-ink-secondary">
                 {searchResults.length} {searchResults.length === 1 ? 'resultado' : 'resultados'}
               </span>
             </div>
 
             {searchResults.length === 0 ? (
               <div className="text-center py-12">
-                <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 text-lg mb-2">Nenhum artigo encontrado</p>
-                <p className="text-gray-500">Tente usar outros termos de busca</p>
+                <Search className="w-16 h-16 text-border-strong mx-auto mb-4" />
+                <p className="text-ink-secondary text-lg mb-2">Nenhum artigo encontrado</p>
+                <p className="text-ink-muted">Tente usar outros termos de busca</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -180,22 +180,22 @@ export default function ArtigosIndexPage() {
                   <Link
                     key={article.numero}
                     href={`/artigo/${article.numero}`}
-                    className="block p-6 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                    className="block p-6 bg-surface-raised rounded-md border border-border-subtle hover:border-brand-600 hover:bg-surface-raised transition-all group"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-lg group-hover:bg-blue-200 transition-colors">
+                      <div className="flex-shrink-0 w-16 h-16 bg-surface-deep rounded-[3px] flex items-center justify-center text-brand-700 font-bold text-lg group-hover:bg-border-strong transition-colors">
                         {formatArticleNumber(article.numero)}
                       </div>
                       <div className="flex-1">
-                        <div className="text-sm text-gray-600 mb-1">{article.capitulo}</div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">
+                        <div className="text-sm text-ink-secondary mb-1">{article.capitulo}</div>
+                        <h3 className="text-lg font-bold text-ink-primary mb-2 group-hover:text-brand-700 transition-colors">
                           {article.titulo}
                         </h3>
-                        <p className="text-gray-700 leading-relaxed line-clamp-2">
+                        <p className="text-ink-secondary leading-relaxed line-clamp-2">
                           {article.ementa}
                         </p>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
+                      <ArrowRight className="w-5 h-5 text-ink-muted group-hover:text-brand-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
                     </div>
                   </Link>
                 ))}
@@ -205,13 +205,13 @@ export default function ArtigosIndexPage() {
         ) : (
           <>
             {/* Tabs de Navegação */}
-            <div className="flex items-center gap-4 mb-6 bg-white rounded-xl p-2 shadow-md border-2 border-gray-200">
+            <div className="flex items-center gap-4 mb-6 bg-surface-page rounded-md p-2 border border-border-subtle">
               <button
                 onClick={() => setMode('articles')}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-[3px] font-bold transition-all ${
                   mode === 'articles'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-brand-600 text-surface-page'
+                    : 'text-ink-secondary hover:bg-surface-deep'
                 }`}
               >
                 <Hash className="w-5 h-5" />
@@ -219,10 +219,10 @@ export default function ArtigosIndexPage() {
               </button>
               <button
                 onClick={() => setMode('groups')}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-[3px] font-bold transition-all ${
                   mode === 'groups'
-                    ? 'bg-indigo-600 text-white shadow-lg'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-brand-600 text-surface-page'
+                    : 'text-ink-secondary hover:bg-surface-deep'
                 }`}
               >
                 <List className="w-5 h-5" />
@@ -232,33 +232,33 @@ export default function ArtigosIndexPage() {
 
             {/* Conteúdo baseado no modo */}
             {mode === 'articles' ? (
-              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+              <div className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  <h2 className="text-2xl font-bold text-ink-primary mb-4">
                     Todos os 195 Artigos da Lei
                   </h2>
 
                   {/* Campo de busca de artigos */}
                   <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
                     <input
                       type="text"
                       placeholder="Buscar por número, título ou palavra-chave..."
                       value={articleSearch}
                       onChange={(e) => setArticleSearch(e.target.value)}
-                      className="w-full pl-12 pr-12 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-12 pr-12 py-3 border border-border-strong rounded-md focus:ring-2 focus:ring-amber-accent focus:border-transparent"
                     />
                     {articleSearch && (
                       <button
                         onClick={() => setArticleSearch('')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-ink-muted hover:text-ink-secondary"
                       >
                         <X className="w-5 h-5" />
                       </button>
                     )}
                   </div>
 
-                  <p className="text-sm text-gray-600 mt-3">
+                  <p className="text-sm text-ink-secondary mt-3">
                     {filteredArticles.length} {filteredArticles.length === 1 ? 'artigo encontrado' : 'artigos encontrados'}
                   </p>
                 </div>
@@ -269,7 +269,7 @@ export default function ArtigosIndexPage() {
                     <Link
                       key={article.numero}
                       href={`/artigo/${article.numero}`}
-                      className="aspect-square bg-blue-100 hover:bg-blue-600 rounded-lg flex items-center justify-center font-bold text-blue-700 hover:text-white transition-all hover:scale-105 hover:shadow-md"
+                      className="aspect-square bg-surface-deep hover:bg-brand-600 rounded-[3px] flex items-center justify-center font-bold text-brand-700 hover:text-ink-primary transition-all hover:scale-105"
                       title={`Artigo ${article.numero}: ${article.titulo}`}
                     >
                       <span className="text-sm sm:text-base">{article.numero}</span>
@@ -278,12 +278,12 @@ export default function ArtigosIndexPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-200 p-8">
+              <div className="bg-surface-page rounded-md border border-border-subtle p-8">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-2xl font-bold text-ink-primary mb-2">
                     Grupos Temáticos
                   </h2>
-                  <p className="text-gray-600">
+                  <p className="text-ink-secondary">
                     {LEI_14133_GRUPOS.length} grupos organizados por assunto
                   </p>
                 </div>
@@ -298,25 +298,25 @@ export default function ArtigosIndexPage() {
                       <div>
                         <button
                           onClick={() => setSelectedGroup(null)}
-                          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-6"
+                          className="flex items-center gap-2 text-brand-600 hover:text-brand-700 font-semibold mb-6"
                         >
                           <ArrowRight className="w-5 h-5 rotate-180" />
                           Voltar para todos os grupos
                         </button>
 
-                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border-2 border-indigo-200">
+                        <div className="bg-surface-raised rounded-md p-6 mb-6 border border-border-subtle">
                           <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                            <div className="w-12 h-12 bg-brand-600 rounded-md flex items-center justify-center text-2xl flex-shrink-0">
                               {group.icon}
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                              <h3 className="text-2xl font-bold text-ink-primary mb-2">
                                 {group.title}
                               </h3>
-                              <p className="text-gray-700 leading-relaxed">
+                              <p className="text-ink-secondary leading-relaxed">
                                 {group.description}
                               </p>
-                              <div className="mt-3 text-sm text-gray-600">
+                              <div className="mt-3 text-sm text-ink-secondary">
                                 <strong>{group.articles.length}</strong> artigos neste grupo
                               </div>
                             </div>
@@ -332,21 +332,21 @@ export default function ArtigosIndexPage() {
                               <Link
                                 key={numero}
                                 href={`/artigo/${numero}`}
-                                className="block p-5 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 transition-all group"
+                                className="block p-5 bg-surface-raised rounded-md border border-border-subtle hover:border-border-strong hover:bg-surface-raised transition-all group"
                               >
                                 <div className="flex items-start gap-4">
-                                  <div className="flex-shrink-0 w-14 h-14 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700 font-bold group-hover:bg-indigo-200 transition-colors">
+                                  <div className="flex-shrink-0 w-14 h-14 bg-surface-deep rounded-[3px] flex items-center justify-center text-brand-700 font-bold group-hover:bg-border-strong transition-colors">
                                     {formatArticleNumber(numero)}
                                   </div>
                                   <div className="flex-1">
-                                    <h4 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
+                                    <h4 className="font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                                       {article.titulo}
                                     </h4>
-                                    <p className="text-sm text-gray-600 line-clamp-2">
+                                    <p className="text-sm text-ink-secondary line-clamp-2">
                                       {article.ementa}
                                     </p>
                                   </div>
-                                  <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
+                                  <ArrowRight className="w-5 h-5 text-ink-muted group-hover:text-brand-600 group-hover:translate-x-1 transition-all flex-shrink-0 mt-2" />
                                 </div>
                               </Link>
                             );
@@ -362,22 +362,22 @@ export default function ArtigosIndexPage() {
                       <button
                         key={group.id}
                         onClick={() => setSelectedGroup(group.id)}
-                        className="text-left p-6 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-lg transition-all group"
+                        className="text-left p-6 bg-surface-raised rounded-md border border-border-subtle hover:border-border-strong hover:bg-surface-raised hover:shadow-lg transition-all group"
                       >
                         <div className="flex items-start gap-4 mb-3">
-                          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-200 transition-colors flex-shrink-0">
+                          <div className="w-12 h-12 bg-surface-deep rounded-md flex items-center justify-center text-2xl group-hover:bg-border-strong transition-colors flex-shrink-0">
                             {group.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-900 mb-1 group-hover:text-indigo-700 transition-colors">
+                            <h3 className="font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">
                               {group.title}
                             </h3>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-ink-secondary">
                               {group.articles.length} artigos
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                        <p className="text-sm text-ink-secondary line-clamp-2 leading-relaxed">
                           {group.description}
                         </p>
                       </button>

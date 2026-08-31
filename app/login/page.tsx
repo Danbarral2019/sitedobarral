@@ -78,22 +78,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-surface-raised py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-surface-page rounded-[3px] p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 font-cinzel">
+            <h1 className="text-3xl font-bold text-ink-primary mb-2 font-cinzel">
               Área do Aluno
             </h1>
-            <p className="text-gray-600">
+            <p className="text-ink-secondary">
               Faça login para acessar os materiais do curso
             </p>
           </div>
 
           {/* Mensagem de informação */}
           {message === 'account-exists' && (
-            <div className="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-lg">
+            <div className="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-[3px]">
               <p className="text-sm text-brand-800 font-medium">
                 Você já possui uma conta cadastrada. Faça login para acessar os materiais do curso.
               </p>
@@ -102,8 +102,8 @@ export default function LoginPage() {
 
           {/* Erro */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-6 p-4 bg-surface-raised border border-border-subtle rounded-[3px]">
+              <p className="text-sm text-semantic-error">{error}</p>
             </div>
           )}
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-ink-secondary mb-2">
                 Email
               </label>
               <input
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 id="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="seu@email.com"
                 disabled={loading}
                 autoComplete="email"
@@ -128,7 +128,7 @@ export default function LoginPage() {
 
             {/* Senha */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-ink-secondary mb-2">
                 Senha
               </label>
               <input
@@ -136,7 +136,7 @@ export default function LoginPage() {
                 id="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-border-strong rounded-[3px] focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Sua senha"
                 disabled={loading}
                 autoComplete="current-password"
@@ -147,7 +147,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-brand-600 text-surface-page py-3 px-4 rounded-[3px] font-semibold hover:bg-brand-800 transition-colors disabled:bg-border-strong disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
@@ -156,7 +156,7 @@ export default function LoginPage() {
           {/* Links úteis */}
           <div className="mt-6 space-y-3">
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-ink-secondary">
                 Primeiro acesso?{' '}
                 <Link
                   href="/registro"
@@ -167,8 +167,8 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <div className="text-center pt-3 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
+            <div className="text-center pt-3 border-t border-border-subtle">
+              <p className="text-sm text-ink-secondary">
                 Esqueceu sua senha?{' '}
                 <Link
                   href="/esqueci-senha"
@@ -183,7 +183,7 @@ export default function LoginPage() {
 
         {/* Informações adicionais */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-ink-muted">
             A plataforma oferece conteúdo gratuito e planos de assinatura.
           </p>
         </div>

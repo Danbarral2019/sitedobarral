@@ -108,9 +108,9 @@ export default function GlossarioPage() {
   ).sort();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-raised">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-brand-600 to-brand-800 text-white">
+      <div className="bg-surface-raised text-ink-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="flex justify-center mb-4">
@@ -152,15 +152,15 @@ export default function GlossarioPage() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-            <span className="ml-2 text-gray-600">Carregando termos...</span>
+            <span className="ml-2 text-ink-secondary">Carregando termos...</span>
           </div>
         ) : filteredTerms.length === 0 ? (
           <div className="text-center py-12">
-            <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <BookOpen className="h-16 w-16 text-ink-muted mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-ink-primary mb-2">
               Nenhum termo encontrado
             </h3>
-            <p className="text-gray-600">
+            <p className="text-ink-secondary">
               {searchQuery
                 ? `Não encontramos termos para "${searchQuery}"`
                 : 'Não há termos para os filtros selecionados'}
@@ -168,14 +168,14 @@ export default function GlossarioPage() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-4 text-sm text-ink-secondary">
               Exibindo {filteredTerms.length} {filteredTerms.length === 1 ? 'termo' : 'termos'}
               {searchQuery && ` para "${searchQuery}"`}
               {activeLetter && ` começando com "${activeLetter}"`}
               {activeCategory && ` na categoria "${activeCategory}"`}
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-200">
+            <div className="bg-surface-page rounded-md border border-border-subtle divide-y divide-border-subtle">
               {filteredTerms.map((term) => (
                 <GlossaryTermCard
                   key={term.id}

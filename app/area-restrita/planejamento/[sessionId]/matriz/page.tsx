@@ -11,73 +11,73 @@ import type { DecisionRunResult } from "@/components/planejamento/matrix-types";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: Promise<{ sessionId: string }>;
+ params: Promise<{ sessionId: string }>;
 }
 
 export default async function MatrizPage({ params }: PageProps) {
-  const { sessionId } = await params;
-  const cookieStore = await cookies();
-  const token =
-    cookieStore.get("auth-token")?.value ||
-    cookieStore.get("auth_token")?.value;
-  if (!token)
-    redirect(`/login?redirect=/area-restrita/planejamento/${sessionId}/matriz`);
-  const decoded = await verifyToken(token);
-  if (!decoded)
-    redirect(`/login?redirect=/area-restrita/planejamento/${sessionId}/matriz`);
+ const { sessionId } = await params;
+ const cookieStore = await cookies();
+ const token =
+ cookieStore.get("auth-token")?.value ||
+ cookieStore.get("auth_token")?.value;
+ if (!token)
+ redirect(`/login?redirect=/area-restrita/planejamento/${sessionId}/matriz`);
+ const decoded = await verifyToken(token);
+ if (!decoded)
+ redirect(`/login?redirect=/area-restrita/planejamento/${sessionId}/matriz`);
 
-  const session = await prisma.planningSession.findFirst({
-    where: { id: sessionId, userId: decoded.userId, deletedAt: null },
-    include: {
-      decisionRuns: {
-        orderBy: { executedAt: "desc" },
-        take: 1,
-      },
-    },
-  });
-  if (!session) notFound();
+ const session = await prisma.planningSession.findFirst({
+ where: { id: sessionId, userId: decoded.userId, deletedAt: null },
+ include: {
+ decisionRuns: {
+ orderBy: { executedAt: "desc" },
+ take: 1,
+ },
+ },
+ });
+ if (!session) notFound();
 
-  const lastRun = session.decisionRuns[0];
-  const lastResult: DecisionRunResult | null = lastRun
-    ? (() => {
-        try {
-          return JSON.parse(lastRun.resultJson) as DecisionRunResult;
-        } catch {
-          return null;
-        }
-      })()
-    : null;
+ const lastRun = session.decisionRuns[0];
+ const lastResult: DecisionRunResult | null = lastRun
+ ? (() => {
+ try {
+ return JSON.parse(lastRun.resultJson) as DecisionRunResult;
+ } catch {
+ return null;
+ }
+ })()
+ : null;
 
-  return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
-      <Link
-        href={`/area-restrita/planejamento/${sessionId}`}
-        className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-brand-700"
-      >
-        <ArrowLeft className="h-4 w-4" /> Voltar à trilha
-      </Link>
-      <h1 className="mt-3 font-serif text-2xl text-brand-900">
-        Matriz de modalidade e critério
-      </h1>
-      <p className="mt-1 mb-6 max-w-2xl text-sm text-gray-600">
-        A recomendação é gerada por regras determinísticas fundadas nos arts.
-        28 a 36 da Lei 14.133/2021. Os inputs informados são registrados para
-        auditoria e podem ser revistos a qualquer momento.
-      </p>
+ return (
+ <main className="mx-auto max-w-4xl px-4 py-8">
+ <Link
+ href={`/area-restrita/planejamento/${sessionId}`}
+ className="inline-flex items-center gap-1 text-sm text-ink-secondary hover:text-brand-700"
+ >
+ <ArrowLeft className="h-4 w-4" /> Voltar à trilha
+ </Link>
+ <h1 className="mt-3 font-serif text-2xl text-brand-900">
+ Matriz de modalidade e critério
+ </h1>
+ <p className="mt-1 mb-6 max-w-2xl text-sm text-ink-secondary">
+ A recomendação é gerada por regras determinísticas fundadas nos arts.
+ 28 a 36 da Lei 14.133/2021. Os inputs informados são registrados para
+ auditoria e podem ser revistos a qualquer momento.
+ </p>
 
-      {lastResult && (
-        <div className="mb-8">
-          <p className="mb-2 text-xs text-gray-500">
-            Última execução em{" "}
-            {new Date(lastRun.executedAt).toLocaleString("pt-BR")}
-          </p>
-          <MatrixResultCard result={lastResult} />
-        </div>
-      )}
+ {lastResult && (
+ <div className="mb-8">
+ <p className="mb-2 text-xs text-ink-muted">
+ Última execução em{" "}
+ {new Date(lastRun.executedAt).toLocaleString("pt-BR")}
+ </p>
+ <MatrixResultCard result={lastResult} />
+ </div>
+ )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <MatrixWizard sessionId={sessionId} />
-      </div>
-    </main>
-  );
+ <div className="rounded-md border border-border-subtle bg-surface-page p-6">
+ <MatrixWizard sessionId={sessionId} />
+ </div>
+ </main>
+ );
 }

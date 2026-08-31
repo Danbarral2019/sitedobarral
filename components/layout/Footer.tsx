@@ -20,7 +20,7 @@ export const Footer = memo(function Footer() {
                   className="object-contain opacity-90"
                 />
               </div>
-              <h3 className="text-white font-cinzel font-semibold text-lg tracking-wide">
+              <h3 className="text-surface-page font-cinzel font-semibold text-lg tracking-wide">
                 Daniel Barral
               </h3>
             </div>
@@ -39,7 +39,7 @@ export const Footer = memo(function Footer() {
                 aria-label="Instagram do Prof. Daniel Barral"
                 className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center hover:bg-brand-500 transition-colors"
               >
-                <Instagram className="w-5 h-5 text-white" />
+                <Instagram className="w-5 h-5 text-surface-page" />
               </a>
               <a
                 href="https://www.youtube.com/@danbarral"
@@ -48,7 +48,7 @@ export const Footer = memo(function Footer() {
                 aria-label="YouTube do Prof. Daniel Barral"
                 className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center hover:bg-brand-500 transition-colors"
               >
-                <Youtube className="w-5 h-5 text-white" />
+                <Youtube className="w-5 h-5 text-surface-page" />
               </a>
               <a
                 href="https://www.linkedin.com/in/daniel-de-andrade-oliveira-barral-b5110870/"
@@ -57,54 +57,54 @@ export const Footer = memo(function Footer() {
                 aria-label="LinkedIn do Prof. Daniel Barral"
                 className="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center hover:bg-brand-500 transition-colors"
               >
-                <Linkedin className="w-5 h-5 text-white" />
+                <Linkedin className="w-5 h-5 text-surface-page" />
               </a>
             </div>
           </div>
 
           {/* Coluna 2: Links Rapidos */}
           <div>
-            <h4 className="text-white font-cinzel font-semibold mb-4 tracking-wide">
+            <h4 className="text-surface-page font-cinzel font-semibold mb-4 tracking-wide">
               Links Rápidos
             </h4>
             <ul className="space-y-2 font-poppins">
               <li>
-                <Link href="/sobre" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/sobre" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Sobre o Professor
                 </Link>
               </li>
               <li>
-                <Link href="/cursos" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/cursos" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Cursos Disponíveis
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/blog" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Blog Jurídico
                 </Link>
               </li>
               <li>
-                <Link href="/legislacao" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/legislacao" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Legislação
                 </Link>
               </li>
               <li>
-                <Link href="/jurisprudencia" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/jurisprudencia" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Jurisprudência
                 </Link>
               </li>
               <li>
-                <Link href="/glossario" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/glossario" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Glossário
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/faq" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/contato" className="text-sm text-brand-200 hover:text-white transition-colors">
+                <Link href="/contato" className="text-sm text-brand-200 hover:text-surface-page transition-colors">
                   Contato
                 </Link>
               </li>
@@ -113,14 +113,14 @@ export const Footer = memo(function Footer() {
 
           {/* Coluna 3: Principais Cursos */}
           <div>
-            <h4 className="text-white font-cinzel font-semibold mb-4 tracking-wide">
+            <h4 className="text-surface-page font-cinzel font-semibold mb-4 tracking-wide">
               Principais Cursos
             </h4>
             <ul className="space-y-2 font-poppins">
               <li>
                 <Link
                   href="/cursos/planejamento-contratacoes"
-                  className="text-sm text-brand-200 hover:text-white transition-colors"
+                  className="text-sm text-brand-200 hover:text-surface-page transition-colors"
                 >
                   Planejamento de Contratações
                 </Link>
@@ -128,7 +128,7 @@ export const Footer = memo(function Footer() {
               <li>
                 <Link
                   href="/cursos/gestao-fiscalizacao-contratos"
-                  className="text-sm text-brand-200 hover:text-white transition-colors"
+                  className="text-sm text-brand-200 hover:text-surface-page transition-colors"
                 >
                   Gestão de Contratos
                 </Link>
@@ -136,7 +136,7 @@ export const Footer = memo(function Footer() {
               <li>
                 <Link
                   href="/cursos/processo-sancionador"
-                  className="text-sm text-brand-200 hover:text-white transition-colors"
+                  className="text-sm text-brand-200 hover:text-surface-page transition-colors"
                 >
                   Processo Sancionador
                 </Link>
@@ -144,7 +144,7 @@ export const Footer = memo(function Footer() {
               <li>
                 <Link
                   href="/cursos/contratacao-direta"
-                  className="text-sm text-brand-200 hover:text-white transition-colors"
+                  className="text-sm text-brand-200 hover:text-surface-page transition-colors"
                 >
                   Contratação Direta
                 </Link>
@@ -152,7 +152,7 @@ export const Footer = memo(function Footer() {
               <li>
                 <Link
                   href="/cursos/planejamento-contratacoes"
-                  className="text-sm text-brand-200 hover:text-white transition-colors"
+                  className="text-sm text-brand-200 hover:text-surface-page transition-colors"
                 >
                   Planejamento das Contratações
                 </Link>
@@ -172,14 +172,14 @@ export const Footer = memo(function Footer() {
           <div className="mt-4 flex justify-center items-center gap-3 text-xs font-poppins">
             <Link
               href="/termos"
-              className="text-brand-200 hover:text-white transition-colors"
+              className="text-brand-200 hover:text-surface-page transition-colors"
             >
               Termos de Uso
             </Link>
             <span className="text-brand-300" aria-hidden="true">·</span>
             <Link
               href="/privacidade"
-              className="text-brand-200 hover:text-white transition-colors"
+              className="text-brand-200 hover:text-surface-page transition-colors"
             >
               Política de Privacidade
             </Link>

@@ -24,7 +24,7 @@ export default function BackLink() {
     <Link
       href="/busca"
       onClick={handleClick}
-      className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+      className="inline-flex items-center gap-2 text-sm text-ink-secondary hover:text-ink-primary transition-colors cursor-pointer"
     >
       <ArrowLeft className="w-4 h-4" />
       Voltar

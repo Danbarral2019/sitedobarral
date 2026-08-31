@@ -64,22 +64,22 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
   const legalSources = data.legalSources as Array<{ type: string; title: string; url: string }>;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <main className="min-h-screen bg-surface-raised">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-6">
+      <header className="bg-surface-raised text-ink-primary py-6 border-b border-border-subtle">
         <div className="max-w-3xl mx-auto px-4">
-          <Link href="/" className="text-white/80 hover:text-white text-sm font-medium transition-colors">
+          <Link href="/" className="text-ink-secondary hover:text-ink-secondary text-sm font-medium transition-colors">
             Prof. Daniel Barral
           </Link>
-          <p className="text-blue-100 text-sm mt-1">Resposta do Assistente de IA</p>
+          <p className="text-ink-muted text-sm mt-1">Resposta do Assistente de IA</p>
         </div>
       </header>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Pergunta */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{data.query}</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-ink-primary mb-2">{data.query}</h1>
+          <p className="text-sm text-ink-muted">
             {new Date(data.createdAt).toLocaleDateString('pt-BR', {
               day: '2-digit',
               month: 'long',
@@ -90,8 +90,8 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
 
         {/* Resposta */}
         {data.aiAnswer && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
-            <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
+          <div className="bg-surface-page rounded-md border border-border-subtle p-6 mb-6">
+            <div className="prose prose-sm max-w-none text-ink-primary whitespace-pre-wrap">
               {data.aiAnswer}
             </div>
           </div>
@@ -99,8 +99,8 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
 
         {/* Fundamentacao Legal */}
         {legalSources.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
-            <h2 className="text-sm font-bold text-gray-700 mb-3">Fundamentacao Legal</h2>
+          <div className="bg-surface-page rounded-md border border-border-subtle p-6 mb-6">
+            <h2 className="text-sm font-bold text-ink-secondary mb-3">Fundamentacao Legal</h2>
             <div className="flex flex-wrap gap-2">
               {legalSources.map((ls, i) => (
                 <a
@@ -108,7 +108,7 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
                   href={ls.url}
                   target={ls.url.startsWith('http') ? '_blank' : undefined}
                   rel={ls.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-xs text-indigo-800 hover:bg-indigo-100 transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-surface-raised border border-border-subtle rounded-[3px] text-xs text-ink-primary hover:bg-surface-deep transition-colors"
                 >
                   {ls.title}
                 </a>
@@ -119,15 +119,15 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
 
         {/* Fontes */}
         {sources.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
-            <h2 className="text-sm font-bold text-gray-700 mb-3">Fontes Consultadas</h2>
+          <div className="bg-surface-page rounded-md border border-border-subtle p-6 mb-6">
+            <h2 className="text-sm font-bold text-ink-secondary mb-3">Fontes Consultadas</h2>
             <div className="space-y-2">
               {sources.map((source, i) => (
-                <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                <div key={i} className="flex items-center gap-3 p-2 bg-surface-raised rounded-[3px]">
+                  <span className="px-2 py-0.5 bg-surface-deep text-ink-secondary text-xs font-medium rounded">
                     {source.category}
                   </span>
-                  <span className="text-sm text-gray-800">{source.title}</span>
+                  <span className="text-sm text-ink-primary">{source.title}</span>
                 </div>
               ))}
             </div>
@@ -135,13 +135,13 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
         )}
 
         {/* CTA */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200 p-6 text-center">
-          <p className="text-gray-700 mb-4">
+        <div className="bg-surface-raised rounded-md border border-border-subtle p-6 text-center">
+          <p className="text-ink-secondary mb-4">
             Quer fazer suas proprias perguntas ao assistente de IA?
           </p>
           <Link
             href="/planos"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+            className="inline-block px-6 py-3 bg-brand-600 text-surface-page rounded-md font-bold hover: transition-all"
           >
             Conheca nossos planos
           </Link>
@@ -149,8 +149,8 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-6 mt-8">
-        <div className="max-w-3xl mx-auto px-4 text-center text-sm text-gray-500">
+      <footer className="border-t border-border-subtle py-6 mt-8">
+        <div className="max-w-3xl mx-auto px-4 text-center text-sm text-ink-muted">
           &copy; {new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados
         </div>
       </footer>

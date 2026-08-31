@@ -1,291 +1,367 @@
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
-import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, ScrollText, Gavel, FileText, Building2 } from 'lucide-react';
-import NewsletterForm from '@/components/NewsletterForm';
-import HomeNovidadesSection from '@/components/HomeNovidadesSection';
-import HomeHeroSearch from '@/components/HomeHeroSearch';
-import {
-  getCachedDocumentCountByCategory,
-  getCachedLeiArticleCount,
-  getCachedGlossaryTermCount,
-  getCachedLegislativeActCount,
-  getCachedTribunalDecisionCount,
-} from '@/lib/cached-queries';
+import Image from 'next/image';
+import { prisma } from '@/lib/prisma';
+import { getAcervoIndex, getAcervoLatest } from '@/lib/acervo-counts';
+import HomeSearch from '@/components/home/HomeSearch';
 
-// Revalidate every 1 hour so novidades section stays fresh
+// Revalida de hora em hora: as contagens e o painel de últimas entradas
+// mudam com a ingestão diária, não a cada requisição.
 export const revalidate = 3600;
 
-// Lazy load do carrossel de depoimentos (otimização de performance)
-const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCarousel'), {
-  loading: () => (
-    <div className="flex justify-center py-12">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>
-  ),
-  ssr: true
-});
+const PRECO_BASICO = process.env.NEXT_PUBLIC_PRICE_BASICO || '49,90';
+const PRECO_PREMIUM = process.env.NEXT_PUBLIC_PRICE_PREMIUM || '89,90';
+
+/**
+ * Remove do texto legal os marcadores de tramitação que o Planalto embute no
+ * meio da frase: "(Vide Decreto nº X)", "(Vigência)", "(Redação dada...)".
+ * São ruído de publicação, não texto da lei, e quebram a leitura corrida.
+ */
+function limparTextoLegal(texto: string): string {
+  return texto
+    .replace(/\((?:Vide|Vigência|Redação dada|Incluído|Revogado)[^)]*\)/gi, '')
+    .replace(/\s+Vigência\b/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function formatarData(d: Date): string {
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+}
+
+const ROTULOS: Record<string, string> = {
+  informativo: 'Informativo TCU',
+  parecer: 'Parecer AGU',
+  'parecer-vinculante': 'Parecer vinculante',
+  'nota-tecnica': 'Nota AGU',
+  despacho: 'Despacho AGU',
+  decor: 'DECOR',
+  acordao: 'Acórdão TCU',
+  'manual-tcu': 'Manual TCU',
+  consulta_tcu: 'Consulta TCU',
+  sumula: 'Súmula TCU',
+  'orientacao-normativa': 'ON AGU',
+  enunciados: 'Enunciado',
+  'ato-normativo': 'Ato normativo',
+};
+
+/**
+ * Vitrine do art. 75: mostra o produto em vez de descrevê-lo. O artigo e os
+ * documentos relacionados vêm do banco (leiArticlesArr), então a seção
+ * acompanha o acervo em vez de congelar um exemplo.
+ */
+async function getVitrineArt75() {
+  try {
+    const [artigo, relacionados] = await Promise.all([
+      prisma.leiArticle.findFirst({
+        where: { numero: '75' },
+        select: { ementa: true, secao: true },
+      }),
+      prisma.document.findMany({
+        where: { leiArticlesArr: { has: '75' }, isPublic: true },
+        select: { id: true, title: true, category: true },
+        take: 3,
+      }),
+    ]);
+    if (!artigo?.ementa) return null;
+    const paragrafos = artigo.ementa
+      .split('\n\n')
+      .slice(0, 3)
+      .map(limparTextoLegal)
+      .filter(Boolean);
+    if (paragrafos.length === 0) return null;
+    return { paragrafos, secao: artigo.secao, relacionados };
+  } catch {
+    return null;
+  }
+}
 
 export default async function Home() {
-  let categoryCounts: Record<string, number> = {};
-  let leiArticleCount = 195;
-  let glossaryCount = 95;
-  let legislativeActCount = 53;
-  let tribunalDecisionCount = 0;
+  const [acervo, ultimas, vitrine] = await Promise.all([
+    getAcervoIndex(),
+    getAcervoLatest(4),
+    getVitrineArt75(),
+  ]);
 
-  try {
-    [categoryCounts, leiArticleCount, glossaryCount, legislativeActCount, tribunalDecisionCount] = await Promise.all([
-      getCachedDocumentCountByCategory(),
-      getCachedLeiArticleCount(),
-      getCachedGlossaryTermCount(),
-      getCachedLegislativeActCount(),
-      getCachedTribunalDecisionCount(),
-    ]);
-  } catch {
-    // DB unavailable (e.g. CI build) — use defaults
-  }
-
-  const acervoCounts = [
-    {
-      label: 'Acórdãos TCU',
-      count: categoryCounts['acordao'] || 0,
-      icon: Gavel,
-      href: '/jurisprudencia',
-    },
-    {
-      label: 'Pareceres, Notas e Despachos',
-      count:
-        (categoryCounts['parecer'] || 0) +
-        (categoryCounts['parecer-vinculante'] || 0) +
-        (categoryCounts['nota-tecnica'] || 0) +
-        (categoryCounts['despacho'] || 0) +
-        (categoryCounts['decor'] || 0),
-      icon: FileCheck,
-      href: '/base-conhecimento/pareceres',
-    },
-    {
-      label: 'Orientações Normativas',
-      count: categoryCounts['orientacao-normativa'] || 0,
-      icon: ScrollText,
-      href: '/base-conhecimento/orientacoes-normativas',
-    },
-    {
-      label: 'Enunciados',
-      count: categoryCounts['enunciados'] || 0,
-      icon: BookMarked,
-      href: '/base-conhecimento/enunciados',
-    },
-    {
-      label: 'Artigos da Lei 14.133',
-      count: leiArticleCount,
-      icon: Scale,
-      href: '/lei-14133',
-    },
-    {
-      label: 'Atos Normativos',
-      count: legislativeActCount,
-      icon: FileText,
-      href: '/legislacao',
-    },
-    {
-      label: 'Termos no Glossário',
-      count: glossaryCount,
-      icon: Landmark,
-      href: '/glossario',
-    },
-    {
-      label: 'Decisões TCEs e CNJ',
-      count: tribunalDecisionCount,
-      icon: Building2,
-      href: '/jurisprudencia',
-    },
-  ];
-
-  const totalDocuments = Object.values(categoryCounts).reduce((sum, c) => sum + c, 0) + tribunalDecisionCount;
+  const linha = (key: string) => acervo.find((r) => r.key === key)?.count ?? 0;
+  const temContagens = acervo.length > 0;
 
   return (
-    <main>
-      {/* 1. Hero Section */}
-      <section className="text-white py-20 md:py-24 relative overflow-hidden bg-gradient-to-b from-brand-600 via-brand-600 to-brand-700">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-cinzel font-semibold mb-6 tracking-wide">
-              Prof. Daniel Barral
-            </h1>
-            <p className="text-xl md:text-2xl mb-4 font-poppins font-normal">
-              Professor | Mestre em Direito Público
-            </p>
-            <p className="text-lg mb-8 text-brand-100 font-poppins">
-              Especialista em Licitações e Contratos Administrativos
-            </p>
-            <p className="text-lg mb-10 max-w-2xl mx-auto text-brand-100/90 font-poppins leading-relaxed">
-              Repositório especializado de materiais jurídicos em Direito Administrativo,
-              com foco em fortalecer seu conhecimento e aprimorar suas atividades funcionais.
-            </p>
-
-            <HomeHeroSearch className="max-w-xl mx-auto mb-10" />
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/cursos"
-                className="bg-white text-brand-700 px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-brand-50 transition-colors inline-flex items-center justify-center gap-2"
-              >
-                <BookOpen className="w-5 h-5" />
-                Explorar Cursos
-              </Link>
-              <Link
-                href="/login"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2 border border-blue-500"
-              >
-                Área do Aluno
-                <ArrowRight className="w-5 h-5 text-white" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. Numeros / Acervo */}
-      <section className="py-16 bg-gradient-to-b from-brand-700 to-brand-800 text-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-cinzel font-semibold mb-3">
-                Base de Conhecimento
-              </h2>
-              <p className="text-brand-200 font-poppins text-lg">
-                Mais de {totalDocuments > 0 ? totalDocuments.toLocaleString('pt-BR') : '2.000'} documentos jurídicos atualizados constantemente
+    <main className="bg-surface-page">
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="py-16 md:py-[68px]">
+        <div className="container mx-auto px-4 max-w-[1280px]">
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-[72px] items-start">
+            <div className="lg:w-[700px] flex-shrink-0">
+              <p className="font-label text-ink-muted mb-5">
+                Repositório de consulta · Licitações e contratos administrativos
               </p>
-            </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {acervoCounts.map((item) => {
-                const Icon = item.icon;
-                const content = (
-                  <>
-                    <Icon className="w-7 h-7 mx-auto mb-3 text-brand-200" />
-                    <p className="text-3xl md:text-4xl font-bold text-white mb-1">
-                      {item.count > 0 ? item.count.toLocaleString('pt-BR') : '--'}
-                    </p>
-                    <p className="text-sm text-brand-200 font-poppins leading-tight">
-                      {item.label}
-                    </p>
-                  </>
-                );
-                const baseClassName = `bg-white/10 backdrop-blur-sm rounded-xl p-5 text-center border border-white/10 hover:bg-white/15 transition-colors ${item.href ? 'cursor-pointer hover:border-white/30 hover:scale-[1.02] transition-all' : ''}`;
-                return item.href ? (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={baseClassName}
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <div
-                    key={item.label}
-                    className={baseClassName}
-                  >
-                    {content}
-                  </div>
-                );
-              })}
-            </div>
+              <h1 className="font-display text-[2.5rem] md:text-[3.5rem] text-ink-primary mb-6">
+                O texto da lei, o acórdão e o parecer na mesma busca.
+              </h1>
 
-            <div className="text-center mt-8">
-              <Link
-                href="/busca"
-                className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/25 transition-colors border border-white/20"
-              >
-                Pesquisar no Acervo
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Novidades + Blog */}
-      <Suspense fallback={null}>
-        <HomeNovidadesSection />
-      </Suspense>
-
-      {/* 4. Depoimentos */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Depoimentos de Alunos</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-accent-400 to-accent-500 rounded-full mx-auto"></div>
-            </div>
-
-            <TestimonialsCarousel />
-
-            <div className="text-center mt-10">
-              <p className="text-gray-700 mb-4 text-lg">
-                Você também é aluno e quer compartilhar sua experiência?
-              </p>
-              <Link
-                href="/contato?motivo=depoimento"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                <Star className="w-5 h-5 fill-white" />
-                Enviar Meu Depoimento
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Newsletter */}
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 rounded-2xl p-10 md:p-12 text-center shadow-2xl border-4 border-blue-700">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE0YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02ek0yNCAzOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50"></div>
-
-              <div className="relative z-10">
-                <div className="inline-block mb-4">
-                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                    <span className="text-white font-semibold text-sm">Newsletter Jurídica</span>
-                  </div>
-                </div>
-
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-                  Mantenha-se Atualizado
-                </h2>
-                <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
-                  Cadastre-se em nossa newsletter e receba novidades sobre legislação,
-                  jurisprudência e novos materiais disponíveis.
+              {temContagens && (
+                <p className="text-[1.0625rem] leading-relaxed text-ink-secondary max-w-[62ch] mb-8">
+                  Os {linha('lei')} artigos da Lei 14.133, {linha('atos').toLocaleString('pt-BR')} atos
+                  normativos, {linha('agu').toLocaleString('pt-BR')} pareceres e notas da AGU,{' '}
+                  {linha('acordaos').toLocaleString('pt-BR')} acórdãos do TCU e{' '}
+                  {linha('tribunais').toLocaleString('pt-BR')} decisões de STF, STJ e Tribunais de
+                  Contas. Cada peça com a fonte oficial e a data à vista.
                 </p>
+              )}
 
-                <div className="max-w-xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-2xl border-2 border-white/30">
-                  <NewsletterForm variant="inline" className="[&_input]:bg-white [&_input]:text-gray-900 [&_input]:placeholder:text-gray-500 [&_input]:font-medium [&_input]:text-lg [&_input]:focus:ring-white/50 [&_input]:border-0 [&_button]:bg-accent-400 [&_button]:text-gray-900 [&_button]:font-bold [&_button]:hover:bg-accent-500 [&_button]:shadow-xl" />
+              <HomeSearch />
+            </div>
+
+            {ultimas.length > 0 && (
+              <aside className="w-full lg:flex-1 bg-surface-raised border border-border-subtle rounded-md px-6 pt-5 pb-2">
+                <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+                  <p className="font-label text-ink-muted">Últimas entradas no acervo</p>
+                  <span className="flex items-center gap-1.5 text-xs text-ink-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-semantic-success" aria-hidden="true" />
+                    diário
+                  </span>
                 </div>
 
-                <p className="text-white/80 text-sm mt-4">
-                  Sem spam · Cancele quando quiser · Conteúdo exclusivo
+                {ultimas.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className="block py-4 border-b border-border-subtle group"
+                  >
+                    <span className="flex items-baseline gap-2.5 mb-1.5">
+                      <span className="font-mono text-xs text-ink-muted">
+                        {formatarData(item.date)}
+                      </span>
+                      <span className="font-label text-[0.6875rem] text-ink-secondary bg-surface-deep rounded-[3px] px-2 py-0.5">
+                        {item.label}
+                      </span>
+                    </span>
+                    <span className="block font-serif text-[0.9375rem] leading-snug text-ink-primary line-clamp-2 group-hover:text-brand-600 transition-colors">
+                      {item.title}
+                    </span>
+                  </Link>
+                ))}
+
+                <Link
+                  href="/novidades"
+                  className="block py-4 text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors"
+                >
+                  Ver tudo o que entrou
+                </Link>
+              </aside>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Índice do acervo ─────────────────────────────────────────────── */}
+      {temContagens && (
+        <section className="border-t border-border-subtle py-16">
+          <div className="container mx-auto px-4 max-w-[1280px]">
+            <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
+              <div>
+                <h2 className="font-heading text-[2rem] text-ink-primary mb-2">O que há no acervo</h2>
+                <p className="text-[0.9375rem] text-ink-muted">
+                  Selecionado e conferido peça a peça, com fonte e data em cada uma.
                 </p>
               </div>
+              <Link
+                href="/base-conhecimento"
+                className="text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors"
+              >
+                Ver todo o acervo
+              </Link>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16">
+              {acervo.map((row) => (
+                <Link
+                  key={row.key}
+                  href={row.href}
+                  className="flex gap-5 py-5 border-t border-border-subtle group"
+                >
+                  <span className="font-mono text-2xl text-brand-600 w-[82px] text-right pr-3.5 border-r border-border-subtle flex-shrink-0 leading-tight">
+                    {row.count.toLocaleString('pt-BR')}
+                  </span>
+                  <span>
+                    <span className="block font-heading text-[1.125rem] text-ink-primary mb-0.5 group-hover:text-brand-600 transition-colors">
+                      {row.label}
+                    </span>
+                    <span className="block text-sm leading-relaxed text-ink-muted">
+                      {row.description}
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Autoria ──────────────────────────────────────────────────────── */}
+      <section className="bg-surface-raised border-y border-border-subtle py-11">
+        <div className="container mx-auto px-4 max-w-[1280px]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-7">
+            <Image
+              src="/images/professor/sobre.jpg"
+              alt="Daniel Barral"
+              width={92}
+              height={92}
+              className="w-[92px] h-[92px] rounded-full object-cover flex-shrink-0 border border-border-subtle"
+            />
+            <div className="flex-1">
+              <p className="font-heading text-[1.375rem] text-ink-primary mb-1">Daniel Barral</p>
+              <p className="font-label text-ink-muted mb-3">
+                Procurador Federal · Mestre em Direito Público
+              </p>
+              <p className="font-reading text-ink-secondary max-w-[68ch]">
+                O acervo é selecionado e mantido por mim. Cada peça publicada aqui passa por
+                conferência de fonte e de data antes de entrar, e o texto oficial é reproduzido na
+                íntegra, sem paráfrase.
+              </p>
+            </div>
+            <Link
+              href="/sobre"
+              className="text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors flex-shrink-0"
+            >
+              Sobre o autor
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 6. Botao Admin - Discreto */}
-      <section className="py-8 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
+      {/* ── Como é uma consulta ──────────────────────────────────────────── */}
+      {vitrine && (
+        <section className="py-16">
+          <div className="container mx-auto px-4 max-w-[1280px]">
+            <div className="mb-9">
+              <h2 className="font-heading text-[2rem] text-ink-primary mb-2">Como é uma consulta</h2>
+              <p className="text-[0.9375rem] text-ink-muted">
+                O texto oficial de um lado, o que o acervo já reuniu sobre ele do outro.
+              </p>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-14 items-start">
+              <div className="lg:w-[660px] flex-shrink-0">
+                <div className="flex flex-wrap items-baseline gap-4 pb-3.5 border-b border-border-subtle mb-5">
+                  <span className="font-mono text-2xl text-brand-600">Art. 75</span>
+                  {vitrine.secao && <span className="font-label text-ink-muted">{vitrine.secao}</span>}
+                </div>
+
+                <div className="bg-surface-raised border-l-4 border-brand-600 px-6 py-5 mb-4">
+                  {vitrine.paragrafos.map((p, i) => (
+                    <p
+                      key={i}
+                      className={`font-reading text-ink-primary max-w-[62ch] ${i > 0 ? 'mt-3.5' : ''}`}
+                    >
+                      {p}
+                    </p>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3.5">
+                  <span className="text-sm text-ink-muted">Lei 14.133/2021, redação vigente</span>
+                  <span className="w-px h-3 bg-border-strong inline-block" aria-hidden="true" />
+                  <a
+                    href="https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-amber-accent-deep bg-amber-accent-soft rounded-[3px] px-2.5 py-1 transition-opacity hover:opacity-80"
+                  >
+                    Texto oficial no Planalto
+                  </a>
+                </div>
+
+                <Link
+                  href="/lei-14133?artigo=75"
+                  className="inline-block mt-6 text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors"
+                >
+                  Abrir o artigo 75 na lei comentada
+                </Link>
+              </div>
+
+              {vitrine.relacionados.length > 0 && (
+                <div className="flex-1 w-full">
+                  <p className="font-label text-ink-muted pb-3.5 border-b border-border-subtle">
+                    O que o acervo reúne sobre este artigo
+                  </p>
+                  {vitrine.relacionados.map((doc) => (
+                    <Link
+                      key={doc.id}
+                      href={`/documento/${doc.id}`}
+                      className="block py-4 border-b border-border-subtle group"
+                    >
+                      <span className="font-label text-[0.6875rem] text-ink-secondary bg-surface-deep rounded-[3px] px-2 py-0.5 inline-block mb-2">
+                        {ROTULOS[doc.category] ?? 'Documento'}
+                      </span>
+                      <span className="block font-serif text-[0.9375rem] leading-snug text-ink-secondary line-clamp-3 group-hover:text-brand-600 transition-colors">
+                        {doc.title}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Acesso ───────────────────────────────────────────────────────── */}
+      <section className="border-t border-border-subtle py-16">
+        <div className="container mx-auto px-4 max-w-[1280px]">
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+            <div>
+              <h2 className="font-heading text-[2rem] text-ink-primary mb-2">Acesso</h2>
+              <p className="text-[0.9375rem] text-ink-muted max-w-[74ch]">
+                O acervo público fica aberto e continua aberto. A assinatura libera os documentos
+                restritos, a análise por IA com as fontes citadas e os cursos.
+              </p>
+            </div>
             <Link
-              href="/admin/login"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              href="/planos"
+              className="text-sm font-medium text-brand-600 hover:text-brand-800 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Área Administrativa
+              Comparar os planos
             </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-surface-page border border-border-subtle rounded-md p-7">
+              <p className="font-label text-ink-muted mb-3.5">Básico</p>
+              <p className="font-heading text-[2rem] text-ink-primary">
+                R$ {PRECO_BASICO}
+                <span className="text-[0.9375rem] font-sans font-normal text-ink-muted"> por mês</span>
+              </p>
+              <p className="text-sm leading-relaxed text-ink-secondary my-4">
+                Um curso à escolha, acervo restrito liberado e o assistente de IA com citação de
+                fontes.
+              </p>
+              <Link
+                href="/planos"
+                className="inline-block text-sm font-semibold text-brand-600 border border-border-strong rounded-[3px] px-5 py-2.5 hover:bg-surface-raised transition-colors"
+              >
+                Assinar o Básico
+              </Link>
+            </div>
+
+            <div className="bg-surface-page border border-border-strong rounded-md p-7">
+              <p className="font-label text-ink-muted mb-3.5">Premium</p>
+              <p className="font-heading text-[2rem] text-ink-primary">
+                R$ {PRECO_PREMIUM}
+                <span className="text-[0.9375rem] font-sans font-normal text-ink-muted"> por mês</span>
+              </p>
+              <p className="text-sm leading-relaxed text-ink-secondary my-4">
+                Todos os cursos, o acervo restrito completo e o assistente de IA sem limite de
+                consultas.
+              </p>
+              <Link
+                href="/planos"
+                className="inline-block text-sm font-semibold text-surface-page bg-brand-600 rounded-[3px] px-5 py-2.5 hover:bg-brand-800 transition-colors"
+              >
+                Assinar o Premium
+              </Link>
+            </div>
           </div>
         </div>
       </section>

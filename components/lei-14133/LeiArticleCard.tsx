@@ -25,11 +25,11 @@ export function LeiArticleCard({
   const Icon = status.icon;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-surface-page rounded-md border border-border-subtle p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="flex items-center gap-3 mb-2 flex-wrap">
-            <span className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg">
+            <span className="px-4 py-2 bg-brand-600 text-surface-page font-bold rounded-lg">
               Artigo {numero}
             </span>
             <span
@@ -39,12 +39,12 @@ export function LeiArticleCard({
               {status.label}
             </span>
           </div>
-          {titulo && <p className="text-sm text-gray-600 mb-1">{titulo}</p>}
-          {capituloCompleto && <p className="text-sm text-gray-600 mb-2">{capituloCompleto}</p>}
+          {titulo && <p className="text-sm text-ink-secondary mb-1">{titulo}</p>}
+          {capituloCompleto && <p className="text-sm text-ink-secondary mb-2">{capituloCompleto}</p>}
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="text-2xl font-bold text-blue-600">{documentCount}</p>
-          <p className="text-sm text-gray-600">documentos</p>
+          <p className="text-2xl font-bold text-brand-600">{documentCount}</p>
+          <p className="text-sm text-ink-secondary">documentos</p>
         </div>
       </div>
 

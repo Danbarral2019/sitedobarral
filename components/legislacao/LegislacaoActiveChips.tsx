@@ -37,7 +37,7 @@ export function LegislacaoActiveChips({
 }: LegislacaoActiveChipsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 mt-4">
-      <span className="text-sm font-semibold text-gray-600">Filtros:</span>
+      <span className="text-sm font-semibold text-ink-secondary">Filtros:</span>
       {esferaFilter && (
         <Chip label={getEsferaLabel(esferaFilter)} color="blue" onClear={onEsferaClear} />
       )}
@@ -46,7 +46,7 @@ export function LegislacaoActiveChips({
       {yearFilter && <Chip label={yearFilter} color="orange" onClear={onYearClear} />}
       {themeFilter && <Chip label={getThemeLabel(themeFilter)} color="indigo" onClear={onThemeClear} />}
       {searchTerm && <Chip label={`"${searchTerm}"`} color="gray" onClear={onSearchClear} />}
-      <button onClick={onClearAll} className="text-sm text-gray-500 hover:text-red-600 underline ml-2">
+      <button onClick={onClearAll} className="text-sm text-ink-muted hover:text-semantic-error underline ml-2">
         Limpar todos
       </button>
     </div>
@@ -54,12 +54,12 @@ export function LegislacaoActiveChips({
 }
 
 const CHIP_COLORS: Record<string, string> = {
-  blue: 'bg-blue-50 text-blue-700 border-blue-200',
-  purple: 'bg-purple-50 text-purple-700 border-purple-200',
-  green: 'bg-green-50 text-green-700 border-green-200',
-  orange: 'bg-orange-50 text-orange-700 border-orange-200',
-  indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  gray: 'bg-gray-100 text-gray-700 border-gray-200',
+  blue: 'bg-surface-raised text-brand-700 border-border-subtle',
+  purple: 'bg-surface-raised text-ink-secondary border-border-subtle',
+  green: 'bg-surface-raised text-ink-secondary border-border-subtle',
+  orange: 'bg-surface-raised text-ink-secondary border-border-subtle',
+  indigo: 'bg-surface-raised text-brand-700 border-border-subtle',
+  gray: 'bg-surface-deep text-ink-secondary border-border-subtle',
 };
 
 function Chip({ label, color, onClear }: { label: string; color: string; onClear: () => void }) {

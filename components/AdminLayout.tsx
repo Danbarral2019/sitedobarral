@@ -280,7 +280,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 />
               </div>
               <div>
-                <h1 className="text-base font-cinzel font-semibold text-white">Painel Admin</h1>
+                <h1 className="text-base font-cinzel font-semibold text-surface-page">Painel Admin</h1>
                 <p className="text-xs text-brand-200 mt-0.5 font-poppins">Prof. Daniel Barral</p>
               </div>
             </div>
@@ -301,9 +301,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             title={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
           >
             {isCollapsed ? (
-              <ChevronRight className="w-5 h-5 text-white" />
+              <ChevronRight className="w-5 h-5 text-surface-page" />
             ) : (
-              <ChevronLeft className="w-5 h-5 text-white" />
+              <ChevronLeft className="w-5 h-5 text-surface-page" />
             )}
           </button>
         </div>
@@ -342,8 +342,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     active
-                      ? 'bg-white/20 text-white font-semibold'
-                      : 'text-brand-100 hover:bg-brand-500 hover:text-white'
+                      ? 'bg-white/20 text-surface-page font-semibold'
+                      : 'text-brand-100 hover:bg-brand-500 hover:text-surface-page'
                   }`}
                   title={isCollapsed ? item.label : ''}
                 >
@@ -352,7 +352,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div className="flex items-center gap-2 flex-1">
                       <span>{item.label}</span>
                       {item.badge && item.badge > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        <span className="bg-red-500 text-surface-page text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                           {item.badge}
                         </span>
                       )}
@@ -372,7 +372,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-brand-500 font-medium transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-surface-page hover:bg-brand-500 font-medium transition-colors"
               title={isCollapsed ? 'Area do Aluno (abre em nova aba)' : ''}
             >
               <GraduationCap className="w-5 h-5 flex-shrink-0" />
@@ -388,7 +388,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-brand-200 hover:bg-brand-500 hover:text-white font-medium transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-brand-200 hover:bg-brand-500 hover:text-surface-page font-medium transition-colors"
               title={isCollapsed ? 'Voltar ao Site' : ''}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
