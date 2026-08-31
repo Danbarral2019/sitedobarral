@@ -1708,6 +1708,11 @@ model TribunalDecision {
   chunks     TribunalDecisionChunk[]
   highlights TribunalHighlight[]
 
+  // Full-Text Search (gerido via triggers SQL, não pelo Prisma).
+  // Pesos: A = title + decisionNumber, B = ementa, C = summary. `fullText` fica
+  // fora — só as súmulas do TST o preenchem. Ver scripts/setup-full-text-search.ts.
+  search_vector Unsupported("tsvector")?
+
   @@index([tribunalCode])
   @@index([tribunalCode, year])
   @@index([decisionType])

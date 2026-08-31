@@ -4,20 +4,27 @@
  * Este script configura busca textual completa com stemming português,
  * tratamento de acentos (unaccent), e ranking por relevância (ts_rank).
  *
- * Tabelas afetadas (7):
+ * Tabelas afetadas (8):
  *   Document, GlossaryTerm, LegislativeAct, CourseVideo,
- *   RecommendedSite, BlogPost, FAQ
+ *   RecommendedSite, BlogPost, FAQ, TribunalDecision
  *
  * Uso:
  *   npx tsx scripts/setup-full-text-search.ts             # Setup completo (DDL + backfill)
  *   npx tsx scripts/setup-full-text-search.ts --dry-run   # Simular sem alterar
  *   npx tsx scripts/setup-full-text-search.ts --backfill  # Só backfill (pular DDL)
  *   npx tsx scripts/setup-full-text-search.ts --verify    # Verificar status
+ *   npx tsx scripts/setup-full-text-search.ts --table=X   # Restringe a uma tabela
+ *
+ * ⚠️ O DDL é idempotente (tudo sob IF NOT EXISTS), mas o backfill NÃO: ele
+ * reescreve todas as linhas das tabelas selecionadas. Ao acrescentar uma tabela
+ * nova, use --table para não reescrever à toa as que já estão indexadas.
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient({ log: ['error', 'warn'] });
+// O cliente compartilhado, não um `new PrismaClient()` próprio: desde o Prisma 7
+// o construtor exige o adapter (PrismaNeon), e lib/prisma já o monta e carrega o
+// .env.local. Com a instanciação própria este script parou de rodar na
+// atualização e falhava em PrismaClientConstructorValidationError.
+import { prisma } from '../lib/prisma';
 
 // ===========================
 // Configuration
@@ -27,6 +34,8 @@ interface SetupOptions {
   dryRun: boolean;
   backfillOnly: boolean;
   verify: boolean;
+  /** Nome da tabela quando se quer restringir a uma só (--table=X). */
+  only: string | null;
 }
 
 interface TableConfig {
@@ -87,7 +96,31 @@ const TABLES: TableConfig[] = [
     weightC: `setweight(to_tsvector('portuguese_unaccent', coalesce(NEW.keywords, '')), 'C')`,
     triggerFields: ['question', 'answer', 'keywords'],
   },
+  {
+    // `fullText` fica DE FORA de propósito. Medido em 31/08/2026: o campo está
+    // preenchido em 1.349 de 4.058 linhas, e são exatamente as 1.349 súmulas do
+    // TST — fora do tema de licitações. Nas 916 decisões aprovadas no tema a
+    // cobertura é zero. Indexá-lo custaria ~8% a mais de tsvector para
+    // enriquecer só as linhas que não deveriam pesar nesta busca.
+    // A substância está na ementa: média de 1.725 caracteres fora do TST.
+    table: 'TribunalDecision',
+    weightA: `setweight(to_tsvector('portuguese_unaccent', coalesce(NEW.title, '') || ' ' || coalesce(NEW."decisionNumber", '')), 'A')`,
+    weightB: `setweight(to_tsvector('portuguese_unaccent', coalesce(NEW.ementa, '')), 'B')`,
+    weightC: `setweight(to_tsvector('portuguese_unaccent', coalesce(NEW.summary, '')), 'C')`,
+    triggerFields: ['title', 'decisionNumber', 'ementa', 'summary'],
+  },
 ];
+
+/**
+ * Tabelas que esta execução vai tocar. É `TABLES` inteiro por padrão; `--table`
+ * reduz a uma só, para que acrescentar uma tabela nova não dispare o backfill
+ * (um UPDATE por linha) nas que já estão indexadas.
+ */
+let activeTables: TableConfig[] = TABLES;
+
+function selectTables(table: string): void {
+  activeTables = TABLES.filter((t) => t.table === table);
+}
 
 // ===========================
 // Backfill SQL per table (uses column names directly, not NEW.xxx)
@@ -142,6 +175,15 @@ function getBackfillSQL(table: string): string {
           setweight(to_tsvector('portuguese_unaccent', coalesce(answer, '')), 'B') ||
           setweight(to_tsvector('portuguese_unaccent', coalesce(keywords, '')), 'C')
       `;
+    case 'TribunalDecision':
+      // Espelha o trigger acima — `fullText` fora de propósito, ver o comentário
+      // na config da tabela.
+      return `
+        UPDATE "TribunalDecision" SET search_vector =
+          setweight(to_tsvector('portuguese_unaccent', coalesce(title, '') || ' ' || coalesce("decisionNumber", '')), 'A') ||
+          setweight(to_tsvector('portuguese_unaccent', coalesce(ementa, '')), 'B') ||
+          setweight(to_tsvector('portuguese_unaccent', coalesce(summary, '')), 'C')
+      `;
     default:
       throw new Error(`Unknown table: ${table}`);
   }
@@ -186,7 +228,7 @@ async function setupDDL(dryRun: boolean): Promise<void> {
 
   // Step 3: Add search_vector column to each table
   console.log('\n📦 Step 3: Adding search_vector columns...');
-  for (const config of TABLES) {
+  for (const config of activeTables) {
     if (!dryRun) {
       await prisma.$executeRawUnsafe(`
         DO $$
@@ -208,7 +250,7 @@ async function setupDDL(dryRun: boolean): Promise<void> {
 
   // Step 4: Create GIN indexes
   console.log('\n📦 Step 4: Creating GIN indexes...');
-  for (const config of TABLES) {
+  for (const config of activeTables) {
     const indexName = `idx_${config.table.toLowerCase()}_search_vector`;
     if (!dryRun) {
       await prisma.$executeRawUnsafe(`
@@ -223,7 +265,7 @@ async function setupDDL(dryRun: boolean): Promise<void> {
 
   // Step 5: Create trigger functions and triggers
   console.log('\n📦 Step 5: Creating triggers...');
-  for (const config of TABLES) {
+  for (const config of activeTables) {
     const funcName = `${config.table.toLowerCase()}_search_vector_update`;
     const triggerName = `trg_${config.table.toLowerCase()}_search_vector`;
 
@@ -267,7 +309,7 @@ async function setupDDL(dryRun: boolean): Promise<void> {
 async function runBackfill(dryRun: boolean): Promise<void> {
   console.log('\n📋 Backfilling search_vector for existing rows...\n');
 
-  for (const config of TABLES) {
+  for (const config of activeTables) {
     const sql = getBackfillSQL(config.table);
 
     if (!dryRun) {
@@ -296,13 +338,13 @@ async function verifySetup(): Promise<void> {
 
   // Check extension
   const extensions = await prisma.$queryRawUnsafe<{ extname: string }[]>(
-    `SELECT extname FROM pg_extension WHERE extname = 'unaccent'`
+    `SELECT extname::text FROM pg_extension WHERE extname = 'unaccent'`
   );
   console.log(`  Extension unaccent: ${extensions.length > 0 ? '✅' : '❌'}`);
 
   // Check text search config
   const configs = await prisma.$queryRawUnsafe<{ cfgname: string }[]>(
-    `SELECT cfgname FROM pg_ts_config WHERE cfgname = 'portuguese_unaccent'`
+    `SELECT cfgname::text FROM pg_ts_config WHERE cfgname = 'portuguese_unaccent'`
   );
   console.log(`  Config portuguese_unaccent: ${configs.length > 0 ? '✅' : '❌'}`);
 
@@ -312,7 +354,7 @@ async function verifySetup(): Promise<void> {
   console.log(`  ${'Table'.padEnd(20)} ${'Column'.padEnd(10)} ${'Index'.padEnd(10)} ${'Trigger'.padEnd(10)} ${'Indexed'.padEnd(10)}`);
   console.log('  ' + '-'.repeat(65));
 
-  for (const config of TABLES) {
+  for (const config of activeTables) {
     // Check column exists
     const col = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
       `SELECT count(*) FROM information_schema.columns WHERE table_name = '${config.table}' AND column_name = 'search_vector'`
@@ -374,14 +416,28 @@ async function verifySetup(): Promise<void> {
 
 async function main() {
   const args = process.argv.slice(2);
+  const tableArg = args.find((a) => a.startsWith('--table='));
   const options: SetupOptions = {
     dryRun: args.includes('--dry-run'),
     backfillOnly: args.includes('--backfill'),
     verify: args.includes('--verify'),
+    only: tableArg ? tableArg.slice('--table='.length) : null,
   };
 
   console.log('🔤 Full-Text Search Setup for PostgreSQL');
   console.log('=========================================\n');
+
+  if (options.only) {
+    const conhecidas = TABLES.map((t) => t.table);
+    if (!conhecidas.includes(options.only)) {
+      console.error(
+        `❌ --table=${options.only} não é uma tabela conhecida.\n   Opções: ${conhecidas.join(', ')}`,
+      );
+      process.exit(1);
+    }
+    selectTables(options.only);
+    console.log(`🎯 Restrito à tabela ${options.only}\n`);
+  }
 
   if (options.verify) {
     await verifySetup();
