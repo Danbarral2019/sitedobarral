@@ -100,51 +100,51 @@ function renderAcordaoBlockHtml(a: ClippingAcordao): string {
   ].filter(Boolean).join(' &middot; ');
 
   const ementaHtml = a.ementa
-    ? `<p style="margin:14px 0 6px;font-size:13px;color:#1f2937;line-height:1.5;"><strong style="color:#0f172a;">Ementa (sumário oficial):</strong></p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155;line-height:1.55;font-style:italic;">${escapeHtml(a.ementa)}</p>`
+    ? `<p style="margin:14px 0 6px;font-size:13px;color:#1a1c20;line-height:1.5;"><strong style="color:#1a1c20;">Ementa (sumário oficial):</strong></p>
+       <p style="margin:0 0 12px;font-size:14px;color:#3d4044;line-height:1.55;font-style:italic;">${escapeHtml(a.ementa)}</p>`
     : '';
 
   let dispositivosHtml = '';
   if (a.dispositivos.length > 0) {
     const items = a.dispositivos.map((d) => `
-      <li style="margin:0 0 8px;color:#1f2937;font-size:14px;line-height:1.5;">
-        <strong style="color:#0f172a;">${escapeHtml(d.numero)}.</strong> ${escapeHtml(d.texto)}
+      <li style="margin:0 0 8px;color:#1a1c20;font-size:14px;line-height:1.5;">
+        <strong style="color:#1a1c20;">${escapeHtml(d.numero)}.</strong> ${escapeHtml(d.texto)}
       </li>
     `).join('');
     dispositivosHtml = `
-      <p style="margin:14px 0 6px;font-size:13px;color:#1f2937;"><strong style="color:#0f172a;">Dispositivos:</strong></p>
+      <p style="margin:14px 0 6px;font-size:13px;color:#1a1c20;"><strong style="color:#1a1c20;">Dispositivos:</strong></p>
       <ul style="padding-left:18px;margin:0 0 12px;">${items}</ul>
     `;
   } else if (a.extractMethod === 'failed' && (!a.aiBullets || a.aiBullets.length === 0)) {
-    dispositivosHtml = `<p style="margin:8px 0;font-size:12px;color:#94a3b8;font-style:italic;">Dispositivos não pôde ser extraído automaticamente — consulte o inteiro teor.</p>`;
+    dispositivosHtml = `<p style="margin:8px 0;font-size:12px;color:#6b6e72;font-style:italic;">Dispositivos não pôde ser extraído automaticamente — consulte o inteiro teor.</p>`;
   }
 
   let bulletsHtml = '';
   if (a.aiBullets && a.aiBullets.length > 0) {
     const items = a.aiBullets
-      .map((b) => `<li style="margin:0 0 6px;color:#334155;font-size:13.5px;line-height:1.55;">${escapeHtml(b)}</li>`)
+      .map((b) => `<li style="margin:0 0 6px;color:#3d4044;font-size:13.5px;line-height:1.55;">${escapeHtml(b)}</li>`)
       .join('');
     bulletsHtml = `
-      <div style="margin:14px 0 12px;padding:12px 14px;background:#f8fafc;border-left:3px solid #6366f1;border-radius:4px;">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#4f46e5;letter-spacing:0.04em;">CONTEXTO E TESE <span style="font-weight:400;color:#94a3b8;">(síntese editorial)</span></p>
+      <div style="margin:14px 0 12px;padding:12px 14px;background:#f7f6f3;border-left:3px solid #20364e;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#20364e;letter-spacing:0.04em;">CONTEXTO E TESE <span style="font-weight:400;color:#6b6e72;">(síntese editorial)</span></p>
         <ul style="padding-left:18px;margin:0;">${items}</ul>
       </div>
     `;
   }
 
   const linkPdfHtml = a.linkPdf
-    ? `<a href="${escapeHtml(a.linkPdf)}" style="color:#1d4ed8;text-decoration:none;font-weight:600;font-size:13px;">Inteiro teor (PDF) →</a>`
+    ? `<a href="${escapeHtml(a.linkPdf)}" style="color:#20364e;text-decoration:none;font-weight:600;font-size:13px;">Inteiro teor (PDF) →</a>`
     : '';
   const linkInternalHtml = a.linkInternal
-    ? ` &middot; <a href="${escapeHtml(a.linkInternal)}" style="color:#64748b;text-decoration:none;font-size:13px;">Ver no site</a>`
+    ? ` &middot; <a href="${escapeHtml(a.linkInternal)}" style="color:#6b6e72;text-decoration:none;font-size:13px;">Ver no site</a>`
     : '';
 
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-bottom:1px solid #e2e8f0;padding-bottom:18px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border-bottom:1px solid #e8e6e1;padding-bottom:18px;">
       <tr>
         <td>
-          <h3 style="margin:0 0 4px;font-size:16px;color:#0f172a;font-weight:700;">${cabecalho}</h3>
-          <p style="margin:0;font-size:12px;color:#64748b;">${meta}</p>
+          <h3 style="margin:0 0 4px;font-size:16px;color:#1a1c20;font-weight:700;">${cabecalho}</h3>
+          <p style="margin:0;font-size:12px;color:#6b6e72;">${meta}</p>
           ${ementaHtml}
           ${dispositivosHtml}
           ${bulletsHtml}
@@ -211,14 +211,14 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
   const blocksText = acordaos.map(renderAcordaoBlockText).join('\n\n────────────────────────────\n\n');
 
   const viewInBrowserHtml = viewInBrowserUrl
-    ? `<p style="margin:0 0 12px;font-size:11px;color:#94a3b8;text-align:right;"><a href="${viewInBrowserUrl}" style="color:#94a3b8;text-decoration:underline;">Ver no navegador</a></p>`
+    ? `<p style="margin:0 0 12px;font-size:11px;color:#6b6e72;text-align:right;"><a href="${viewInBrowserUrl}" style="color:#6b6e72;text-decoration:underline;">Ver no navegador</a></p>`
     : '';
 
   const bannerHtml = showArchiveBanner
-    ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:6px;">
-         <p style="margin:0;font-size:13px;color:#1e3a8a;line-height:1.5;">
+    ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eeeae4;border-left:4px solid #20364e;border-radius:6px;">
+         <p style="margin:0;font-size:13px;color:#20364e;line-height:1.5;">
            <strong>Novidade:</strong> agora você pode reler clippings anteriores em
-           <a href="${archiveUrl}" style="color:#1d4ed8;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>,
+           <a href="${archiveUrl}" style="color:#20364e;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>,
            com busca por palavra-chave.
          </p>
        </div>`
@@ -231,41 +231,41 @@ export function renderDailyClipping(input: DailyClippingInput): RenderedEmail {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(subject)}</title>
 </head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 0;">
+<body style="margin:0;padding:0;background:#f7f6f3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;padding:24px 0;">
   <tr>
     <td align="center">
       <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.08);">
         <tr>
-          <td style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);padding:28px 32px;color:#f8fafc;">
-            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Prof. Daniel Barral</p>
+          <td style="background:#1a1c20;padding:28px 32px;color:#f7f6f3;">
+            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#6b6e72;">Prof. Daniel Barral</p>
             <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Clipping TCU</h1>
-            <p style="margin:6px 0 0;font-size:14px;color:#cbd5e1;">Decisões publicadas em ${dataRef} &middot; ${acordaos.length} ${acordaos.length === 1 ? 'destaque' : 'destaques'}</p>
+            <p style="margin:6px 0 0;font-size:14px;color:#e8e6e1;">Decisões publicadas em ${dataRef} &middot; ${acordaos.length} ${acordaos.length === 1 ? 'destaque' : 'destaques'}</p>
           </td>
         </tr>
         <tr>
           <td style="padding:28px 32px;">
             ${viewInBrowserHtml}
             ${bannerHtml}
-            <p style="margin:0 0 18px;font-size:14px;color:#334155;line-height:1.55;">
+            <p style="margin:0 0 18px;font-size:14px;color:#3d4044;line-height:1.55;">
               ${greeting} Seguem as decisões do TCU sobre licitações e contratos publicadas em <strong>${dataRef}</strong>. Os trechos abaixo vêm direto do inteiro teor do acórdão.
             </p>
             ${blocksHtml}
-            <p style="margin:24px 0 0;font-size:12px;color:#64748b;line-height:1.5;">
+            <p style="margin:24px 0 0;font-size:12px;color:#6b6e72;line-height:1.5;">
               Você recebe este clipping porque é aluno ativo. O cancelamento abaixo afeta apenas o clipping diário — não a newsletter mensal nem comunicações da plataforma.
             </p>
           </td>
         </tr>
         <tr>
-          <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e2e8f0;">
-            <p style="margin:0;font-size:12px;color:#64748b;text-align:center;">
-              <a href="${archiveUrl}" style="color:#475569;text-decoration:underline;">Ver clippings anteriores</a>
+          <td style="background:#f7f6f3;padding:18px 32px;border-top:1px solid #e8e6e1;">
+            <p style="margin:0;font-size:12px;color:#6b6e72;text-align:center;">
+              <a href="${archiveUrl}" style="color:#3d4044;text-decoration:underline;">Ver clippings anteriores</a>
               &nbsp;&middot;&nbsp;
-              <a href="${unsubscribeUrl}" style="color:#475569;text-decoration:underline;">Cancelar clipping diário</a>
+              <a href="${unsubscribeUrl}" style="color:#3d4044;text-decoration:underline;">Cancelar clipping diário</a>
               &nbsp;&middot;&nbsp;
-              <a href="${baseUrl}" style="color:#475569;text-decoration:underline;">Acessar o site</a>
+              <a href="${baseUrl}" style="color:#3d4044;text-decoration:underline;">Acessar o site</a>
             </p>
-            <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;text-align:center;">Prof. Daniel Barral &middot; profdanielbarral.com</p>
+            <p style="margin:8px 0 0;font-size:11px;color:#6b6e72;text-align:center;">Prof. Daniel Barral &middot; profdanielbarral.com</p>
           </td>
         </tr>
       </table>
@@ -388,19 +388,19 @@ function renderItemHtmlV2(rendered: ClippingItemRendered): string {
   ].filter(Boolean).join(' &middot; ');
 
   const ementaHtml = item.ementa
-    ? `<p style="margin:12px 0 6px;font-size:13px;color:#1f2937;line-height:1.5;"><strong style="color:#0f172a;">Ementa:</strong></p>
-       <p style="margin:0 0 12px;font-size:14px;color:#334155;line-height:1.55;font-style:italic;">${escapeHtml(truncateEmenta(item.ementa))}</p>`
+    ? `<p style="margin:12px 0 6px;font-size:13px;color:#1a1c20;line-height:1.5;"><strong style="color:#1a1c20;">Ementa:</strong></p>
+       <p style="margin:0 0 12px;font-size:14px;color:#3d4044;line-height:1.55;font-style:italic;">${escapeHtml(truncateEmenta(item.ementa))}</p>`
     : '';
 
   let dispositivosHtml = '';
   if (dispositivos && dispositivos.length > 0) {
     const items = dispositivos.map((d) => `
-      <li style="margin:0 0 8px;color:#1f2937;font-size:14px;line-height:1.5;">
-        <strong style="color:#0f172a;">${escapeHtml(d.numero)}.</strong> ${escapeHtml(d.texto)}
+      <li style="margin:0 0 8px;color:#1a1c20;font-size:14px;line-height:1.5;">
+        <strong style="color:#1a1c20;">${escapeHtml(d.numero)}.</strong> ${escapeHtml(d.texto)}
       </li>
     `).join('');
     dispositivosHtml = `
-      <p style="margin:12px 0 6px;font-size:13px;color:#1f2937;"><strong style="color:#0f172a;">Dispositivos:</strong></p>
+      <p style="margin:12px 0 6px;font-size:13px;color:#1a1c20;"><strong style="color:#1a1c20;">Dispositivos:</strong></p>
       <ul style="padding-left:18px;margin:0 0 12px;">${items}</ul>
     `;
   }
@@ -408,29 +408,29 @@ function renderItemHtmlV2(rendered: ClippingItemRendered): string {
   let bulletsHtml = '';
   if (aiBullets && aiBullets.length > 0) {
     const items = aiBullets
-      .map((b) => `<li style="margin:0 0 6px;color:#334155;font-size:13.5px;line-height:1.55;">${escapeHtml(b)}</li>`)
+      .map((b) => `<li style="margin:0 0 6px;color:#3d4044;font-size:13.5px;line-height:1.55;">${escapeHtml(b)}</li>`)
       .join('');
     bulletsHtml = `
-      <div style="margin:14px 0 12px;padding:12px 14px;background:#f8fafc;border-left:3px solid #6366f1;border-radius:4px;">
-        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#4f46e5;letter-spacing:0.04em;">CONTEXTO E TESE <span style="font-weight:400;color:#94a3b8;">(síntese editorial)</span></p>
+      <div style="margin:14px 0 12px;padding:12px 14px;background:#f7f6f3;border-left:3px solid #20364e;border-radius:4px;">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#20364e;letter-spacing:0.04em;">CONTEXTO E TESE <span style="font-weight:400;color:#6b6e72;">(síntese editorial)</span></p>
         <ul style="padding-left:18px;margin:0;">${items}</ul>
       </div>
     `;
   }
 
   const linkPdfHtml = item.linkPdf
-    ? `<a href="${escapeHtml(item.linkPdf)}" style="color:#1d4ed8;text-decoration:none;font-weight:600;font-size:13px;">Inteiro teor (PDF) →</a>`
+    ? `<a href="${escapeHtml(item.linkPdf)}" style="color:#20364e;text-decoration:none;font-weight:600;font-size:13px;">Inteiro teor (PDF) →</a>`
     : '';
   const linkExternalHtml = item.linkExternal
-    ? `${linkPdfHtml ? ' &middot; ' : ''}<a href="${escapeHtml(item.linkExternal)}" style="color:#64748b;text-decoration:none;font-size:13px;">Ver no site oficial</a>`
+    ? `${linkPdfHtml ? ' &middot; ' : ''}<a href="${escapeHtml(item.linkExternal)}" style="color:#6b6e72;text-decoration:none;font-size:13px;">Ver no site oficial</a>`
     : '';
 
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-bottom:1px solid #e2e8f0;padding-bottom:16px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-bottom:1px solid #e8e6e1;padding-bottom:16px;">
       <tr>
         <td>
-          <h3 style="margin:0 0 4px;font-size:15px;color:#0f172a;font-weight:700;">${cabecalho}</h3>
-          ${meta ? `<p style="margin:0;font-size:12px;color:#64748b;">${meta}</p>` : ''}
+          <h3 style="margin:0 0 4px;font-size:15px;color:#1a1c20;font-weight:700;">${cabecalho}</h3>
+          ${meta ? `<p style="margin:0;font-size:12px;color:#6b6e72;">${meta}</p>` : ''}
           ${ementaHtml}
           ${dispositivosHtml}
           ${bulletsHtml}
@@ -545,14 +545,14 @@ export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmai
   const groupsText = groups.map(renderGroupText).join('\n\n────────────────────────────\n\n');
 
   const viewInBrowserHtml = viewInBrowserUrl
-    ? `<p style="margin:0 0 12px;font-size:11px;color:#94a3b8;text-align:right;"><a href="${viewInBrowserUrl}" style="color:#94a3b8;text-decoration:underline;">Ver no navegador</a></p>`
+    ? `<p style="margin:0 0 12px;font-size:11px;color:#6b6e72;text-align:right;"><a href="${viewInBrowserUrl}" style="color:#6b6e72;text-decoration:underline;">Ver no navegador</a></p>`
     : '';
 
   const bannerHtml = showArchiveBanner
-    ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eff6ff;border-left:4px solid #2563eb;border-radius:6px;">
-         <p style="margin:0;font-size:13px;color:#1e3a8a;line-height:1.5;">
+    ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eeeae4;border-left:4px solid #20364e;border-radius:6px;">
+         <p style="margin:0;font-size:13px;color:#20364e;line-height:1.5;">
            <strong>Novidade:</strong> o clipping agora cobre múltiplos tribunais (TCU, TCEs, STJ). Arquivo em
-           <a href="${archiveUrl}" style="color:#1d4ed8;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>.
+           <a href="${archiveUrl}" style="color:#20364e;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>.
          </p>
        </div>`
     : '';
@@ -568,41 +568,41 @@ export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmai
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(subject)}</title>
 </head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 0;">
+<body style="margin:0;padding:0;background:#f7f6f3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f6f3;padding:24px 0;">
   <tr>
     <td align="center">
       <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,0.08);">
         <tr>
-          <td style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);padding:28px 32px;color:#f8fafc;">
-            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Prof. Daniel Barral</p>
+          <td style="background:#1a1c20;padding:28px 32px;color:#f7f6f3;">
+            <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#6b6e72;">Prof. Daniel Barral</p>
             <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Clipping Jurídico</h1>
-            <p style="margin:6px 0 0;font-size:14px;color:#cbd5e1;">${dataRef} &middot; ${tribunaisLabel} &middot; ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}</p>
+            <p style="margin:6px 0 0;font-size:14px;color:#e8e6e1;">${dataRef} &middot; ${tribunaisLabel} &middot; ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}</p>
           </td>
         </tr>
         <tr>
           <td style="padding:28px 32px;">
             ${viewInBrowserHtml}
             ${bannerHtml}
-            <p style="margin:0 0 4px;font-size:14px;color:#334155;line-height:1.55;">
+            <p style="margin:0 0 4px;font-size:14px;color:#3d4044;line-height:1.55;">
               ${greeting} Seguem as decisões recentes sobre licitações e contratos públicos selecionadas pelo classificador editorial.
             </p>
             ${groupsHtml}
-            <p style="margin:24px 0 0;font-size:12px;color:#64748b;line-height:1.5;">
+            <p style="margin:24px 0 0;font-size:12px;color:#6b6e72;line-height:1.5;">
               Você recebe este clipping porque é aluno ativo. O cancelamento abaixo afeta apenas o clipping diário — não a newsletter mensal nem comunicações da plataforma.
             </p>
           </td>
         </tr>
         <tr>
-          <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e2e8f0;">
-            <p style="margin:0;font-size:12px;color:#64748b;text-align:center;">
-              <a href="${archiveUrl}" style="color:#475569;text-decoration:underline;">Ver clippings anteriores</a>
+          <td style="background:#f7f6f3;padding:18px 32px;border-top:1px solid #e8e6e1;">
+            <p style="margin:0;font-size:12px;color:#6b6e72;text-align:center;">
+              <a href="${archiveUrl}" style="color:#3d4044;text-decoration:underline;">Ver clippings anteriores</a>
               &nbsp;&middot;&nbsp;
-              <a href="${unsubscribeUrl}" style="color:#475569;text-decoration:underline;">Cancelar clipping diário</a>
+              <a href="${unsubscribeUrl}" style="color:#3d4044;text-decoration:underline;">Cancelar clipping diário</a>
               &nbsp;&middot;&nbsp;
-              <a href="${baseUrl}" style="color:#475569;text-decoration:underline;">Acessar o site</a>
+              <a href="${baseUrl}" style="color:#3d4044;text-decoration:underline;">Acessar o site</a>
             </p>
-            <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;text-align:center;">Prof. Daniel Barral &middot; profdanielbarral.com</p>
+            <p style="margin:8px 0 0;font-size:11px;color:#6b6e72;text-align:center;">Prof. Daniel Barral &middot; profdanielbarral.com</p>
           </td>
         </tr>
       </table>

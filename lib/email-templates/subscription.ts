@@ -39,11 +39,11 @@ export function renderWelcomeEmail(p: WelcomeParams): RenderedEmail {
   const subject = `Bem-vindo ao plano ${planLabel} — Prof. Daniel Barral`;
 
   const contentHtml = `
-    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#1e3a5f;font-size:22px;">Seja bem-vindo${safeName ? ', ' + safeName : ''}!</h2>
+    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">Seja bem-vindo${safeName ? ', ' + safeName : ''}!</h2>
     <p style="margin:0 0 14px 0;">Sua assinatura <strong>${escapeHtml(planLabel)}</strong> (cobran&ccedil;a ${escapeHtml(cycleLabel)}) foi ativada com sucesso.</p>
     <p style="margin:0 0 8px 0;">Voc&ecirc; j&aacute; pode acessar todo o conte&uacute;do dispon&iacute;vel para o seu plano na &aacute;rea restrita.</p>
     ${renderButton('Acessar a área restrita', cta)}
-    <p style="margin:16px 0 0 0;font-size:13px;color:#64748b;">Se voc&ecirc; tiver qualquer d&uacute;vida, basta responder a este email.</p>
+    <p style="margin:16px 0 0 0;font-size:13px;color:#6b6e72;">Se voc&ecirc; tiver qualquer d&uacute;vida, basta responder a este email.</p>
   `;
 
   const html = wrapEmail({
@@ -88,17 +88,17 @@ export function renderReceiptEmail(p: ReceiptParams): RenderedEmail {
   const subject = `Pagamento recebido — ${planLabel} (${amount})`;
 
   const invoiceLinkHtml = p.invoiceUrl
-    ? `<p style="margin:8px 0 0 0;font-size:13px;"><a href="${p.invoiceUrl}" style="color:#2563eb;text-decoration:underline;">Ver a fatura detalhada</a></p>`
+    ? `<p style="margin:8px 0 0 0;font-size:13px;"><a href="${p.invoiceUrl}" style="color:#20364e;text-decoration:underline;">Ver a fatura detalhada</a></p>`
     : '';
 
   const contentHtml = `
-    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#1e3a5f;font-size:22px;">Recibo de pagamento</h2>
+    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">Recibo de pagamento</h2>
     <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. Recebemos o pagamento da sua assinatura.</p>
-    <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e2e8f0;border-radius:6px;margin:16px 0;">
-      <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Plano</td><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;"><strong>${escapeHtml(planLabel)}</strong></td></tr>
-      <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Cobran&ccedil;a</td><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;">${escapeHtml(cycleLabel)}</td></tr>
-      <tr><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:13px;">Valor pago</td><td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;"><strong>${escapeHtml(amount)}</strong></td></tr>
-      <tr><td style="padding:12px 16px;color:#64748b;font-size:13px;">Pr&oacute;xima cobran&ccedil;a</td><td style="padding:12px 16px;text-align:right;">${escapeHtml(nextDate)}</td></tr>
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border:1px solid #e8e6e1;border-radius:6px;margin:16px 0;">
+      <tr><td style="padding:12px 16px;border-bottom:1px solid #e8e6e1;color:#6b6e72;font-size:13px;">Plano</td><td style="padding:12px 16px;border-bottom:1px solid #e8e6e1;text-align:right;"><strong>${escapeHtml(planLabel)}</strong></td></tr>
+      <tr><td style="padding:12px 16px;border-bottom:1px solid #e8e6e1;color:#6b6e72;font-size:13px;">Cobran&ccedil;a</td><td style="padding:12px 16px;border-bottom:1px solid #e8e6e1;text-align:right;">${escapeHtml(cycleLabel)}</td></tr>
+      <tr><td style="padding:12px 16px;border-bottom:1px solid #e8e6e1;color:#6b6e72;font-size:13px;">Valor pago</td><td style="padding:12px 16px;border-bottom:1px solid #e8e6e1;text-align:right;"><strong>${escapeHtml(amount)}</strong></td></tr>
+      <tr><td style="padding:12px 16px;color:#6b6e72;font-size:13px;">Pr&oacute;xima cobran&ccedil;a</td><td style="padding:12px 16px;text-align:right;">${escapeHtml(nextDate)}</td></tr>
     </table>
     ${invoiceLinkHtml}
     ${renderButton('Acessar minha conta', accountCta)}
@@ -138,11 +138,11 @@ export function renderCardFailedEmail(p: CardFailedParams): RenderedEmail {
   const subject = 'Falha no pagamento da sua assinatura';
 
   const contentHtml = `
-    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#1e3a5f;font-size:22px;">N&atilde;o conseguimos processar seu pagamento</h2>
+    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">N&atilde;o conseguimos processar seu pagamento</h2>
     <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. A cobran&ccedil;a no seu cart&atilde;o n&atilde;o foi autorizada, e sua assinatura est&aacute; marcada como <strong>pendente</strong>.</p>
     <p style="margin:0 0 14px 0;">Para manter o seu acesso, atualize os dados do seu cart&atilde;o ou escolha outro meio de pagamento no portal de cobran&ccedil;a.</p>
     ${renderButton('Atualizar meio de pagamento', p.billingPortalUrl)}
-    <p style="margin:16px 0 0 0;font-size:13px;color:#64748b;">Assim que o pagamento for concluído, seu acesso ser&aacute; reativado automaticamente.</p>
+    <p style="margin:16px 0 0 0;font-size:13px;color:#6b6e72;">Assim que o pagamento for concluído, seu acesso ser&aacute; reativado automaticamente.</p>
   `;
 
   const html = wrapEmail({
@@ -176,11 +176,11 @@ export function renderPixMandateFailedEmail(p: PixMandateFailedParams): Rendered
   const subject = 'Sua autorização de Pix precisa ser renovada';
 
   const contentHtml = `
-    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#1e3a5f;font-size:22px;">Autoriza&ccedil;&atilde;o de Pix expirada</h2>
+    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">Autoriza&ccedil;&atilde;o de Pix expirada</h2>
     <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. N&atilde;o conseguimos cobrar a mensalidade porque a autoriza&ccedil;&atilde;o recorrente de Pix expirou ou foi cancelada.</p>
     <p style="margin:0 0 14px 0;">Para reativar sua assinatura, basta renovar a autoriza&ccedil;&atilde;o no portal de cobran&ccedil;a.</p>
     ${renderButton('Renovar autorização de Pix', p.billingPortalUrl)}
-    <p style="margin:16px 0 0 0;font-size:13px;color:#64748b;">Voc&ecirc; tamb&eacute;m pode trocar por outro meio de pagamento no mesmo portal.</p>
+    <p style="margin:16px 0 0 0;font-size:13px;color:#6b6e72;">Voc&ecirc; tamb&eacute;m pode trocar por outro meio de pagamento no mesmo portal.</p>
   `;
 
   const html = wrapEmail({
@@ -220,12 +220,12 @@ export function renderCanceledEmail(p: CanceledParams): RenderedEmail {
     : `Seu acesso à assinatura foi encerrado.`;
 
   const contentHtml = `
-    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#1e3a5f;font-size:22px;">Assinatura cancelada</h2>
+    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">Assinatura cancelada</h2>
     <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. Confirmamos o cancelamento da sua assinatura.</p>
     ${endsAtLine}
     <p style="margin:0 0 14px 0;">Sentiremos sua falta. Se mudar de ideia, voc&ecirc; pode reativar a qualquer momento pelo nosso site.</p>
     ${renderButton('Voltar ao site', baseUrl)}
-    <p style="margin:16px 0 0 0;font-size:13px;color:#64748b;">Se o cancelamento n&atilde;o foi solicitado por voc&ecirc;, responda este email e vamos averiguar.</p>
+    <p style="margin:16px 0 0 0;font-size:13px;color:#6b6e72;">Se o cancelamento n&atilde;o foi solicitado por voc&ecirc;, responda este email e vamos averiguar.</p>
   `;
 
   const html = wrapEmail({

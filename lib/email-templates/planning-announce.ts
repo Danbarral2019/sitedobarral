@@ -8,7 +8,7 @@ export function renderPlanningAnnounceEmail({ recipientName }: Props): string {
   const greetingName = recipientName.trim() || 'aluno(a)';
   const planningUrl = `${baseUrl}/area-restrita/planejamento`;
   const content = `
-    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#1e3a5f;font-weight:700;">
+    <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#20364e;font-weight:700;">
       Novo módulo: Planejamento da Contratação
     </h2>
 
@@ -20,7 +20,7 @@ export function renderPlanningAnnounceEmail({ recipientName }: Props): string {
       <strong>TR (Termo de Referência)</strong> com base na Lei 14.133, sem partir do zero.
     </p>
 
-    <h3 style="margin:24px 0 8px 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#1e3a5f;font-weight:700;">
+    <h3 style="margin:24px 0 8px 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#20364e;font-weight:700;">
       O que você encontra
     </h3>
     <ul style="margin:0 0 16px 0;padding-left:20px;">
@@ -40,11 +40,11 @@ export function renderPlanningAnnounceEmail({ recipientName }: Props): string {
 
     ${renderButton('Abrir o módulo', planningUrl)}
 
-    <p style="margin:24px 0 0 0;font-size:14px;color:#475569;">
+    <p style="margin:24px 0 0 0;font-size:14px;color:#3d4044;">
       Qualquer dúvida ou sugestão, responda este email.
     </p>
 
-    <p style="margin:16px 0 0 0;font-size:14px;color:#475569;">
+    <p style="margin:16px 0 0 0;font-size:14px;color:#3d4044;">
       Bons estudos,<br>
       <strong>Prof. Daniel Barral</strong>
     </p>

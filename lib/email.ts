@@ -95,13 +95,13 @@ export async function sendVerificationEmail(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .warning { background: #e9d8b8; border-left: 4px solid #b07d3a; padding: 15px; margin: 20px 0; }
         </style>
       </head>
       <body>
@@ -124,7 +124,7 @@ export async function sendVerificationEmail(
             </div>
 
             <p>Se o botão não funcionar, copie e cole este link no seu navegador:</p>
-            <p style="word-break: break-all; color: #2563eb;">${verificationUrl}</p>
+            <p style="word-break: break-all; color: #20364e;">${verificationUrl}</p>
 
             <p>Se você não se cadastrou no nosso site, por favor ignore este email.</p>
 
@@ -179,13 +179,13 @@ export async function sendPasswordResetEmail(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .warning { background: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .warning { background: #e9d8b8; border-left: 4px solid #8a6235; padding: 15px; margin: 20px 0; }
         </style>
       </head>
       <body>
@@ -208,7 +208,7 @@ export async function sendPasswordResetEmail(
             </div>
 
             <p>Se o botão não funcionar, copie e cole este link no seu navegador:</p>
-            <p style="word-break: break-all; color: #2563eb;">${resetUrl}</p>
+            <p style="word-break: break-all; color: #20364e;">${resetUrl}</p>
 
             <p><strong>Se você não solicitou esta recuperação de senha, ignore este email.</strong> Sua senha permanecerá inalterada.</p>
 
@@ -263,15 +263,15 @@ export async function sendWelcomeEmail(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .guide { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e5e7eb; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .guide { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e8e6e1; }
           .guide-item { margin: 12px 0; display: flex; align-items: flex-start; }
-          .guide-number { display: inline-block; width: 28px; height: 28px; background: linear-gradient(135deg, #2563eb, #9333ea); color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; margin-right: 12px; flex-shrink: 0; }
+          .guide-number { display: inline-block; width: 28px; height: 28px; background: #20364e; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; margin-right: 12px; flex-shrink: 0; }
           .guide-text { flex: 1; }
         </style>
       </head>
@@ -286,44 +286,44 @@ export async function sendWelcomeEmail(
             <p>É um prazer ter você conosco! Abaixo segue um guia rápido para você aproveitar ao máximo a plataforma:</p>
 
             <div class="guide">
-              <h3 style="margin-top: 0; color: #1f2937;">Guia Rápido</h3>
+              <h3 style="margin-top: 0; color: #1a1c20;">Guia Rápido</h3>
               <div class="guide-item">
                 <span class="guide-number">1</span>
                 <div class="guide-text">
                   <strong>Acesse seus cursos</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Na área restrita você encontra todos os materiais dos cursos em que está matriculado.</span>
+                  <span style="font-size: 14px; color: #6b6e72;">Na área restrita você encontra todos os materiais dos cursos em que está matriculado.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="guide-number">2</span>
                 <div class="guide-text">
                   <strong>Use o Assistente de IA</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Tire dúvidas sobre licitações e contratos diretamente com nosso assistente inteligente.</span>
+                  <span style="font-size: 14px; color: #6b6e72;">Tire dúvidas sobre licitações e contratos diretamente com nosso assistente inteligente.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="guide-number">3</span>
                 <div class="guide-text">
                   <strong>Pesquise documentos</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Acesse acórdãos do TCU, pareceres, orientações normativas e muito mais.</span>
+                  <span style="font-size: 14px; color: #6b6e72;">Acesse acórdãos do TCU, pareceres, orientações normativas e muito mais.</span>
                 </div>
               </div>
               <div class="guide-item">
                 <span class="guide-number">4</span>
                 <div class="guide-text">
                   <strong>Consulte a Lei 14.133 Comentada</strong><br>
-                  <span style="font-size: 14px; color: #6b7280;">Navegue pelos 195 artigos da Nova Lei de Licitações com comentários e documentos relacionados.</span>
+                  <span style="font-size: 14px; color: #6b6e72;">Navegue pelos 195 artigos da Nova Lei de Licitações com comentários e documentos relacionados.</span>
                 </div>
               </div>
             </div>
 
-            <p>Tem alguma dúvida? Acesse nossa <a href="${baseUrl}/faq" style="color: #2563eb; font-weight: bold;">página de perguntas frequentes</a> ou entre em contato pelo <a href="${baseUrl}/contato" style="color: #2563eb; font-weight: bold;">formulário de contato</a>.</p>
+            <p>Tem alguma dúvida? Acesse nossa <a href="${baseUrl}/faq" style="color: #20364e; font-weight: bold;">página de perguntas frequentes</a> ou entre em contato pelo <a href="${baseUrl}/contato" style="color: #20364e; font-weight: bold;">formulário de contato</a>.</p>
 
             <div style="text-align: center;">
               <a href="${baseUrl}/area-restrita" class="button">Acessar a Plataforma</a>
             </div>
 
-            <p>Bons estudos!<br><strong>Prof. Daniel Barral</strong><br><span style="font-size: 14px; color: #6b7280;">Especialista em Direito Administrativo, Licitações e Contratos</span></p>
+            <p>Bons estudos!<br><strong>Prof. Daniel Barral</strong><br><span style="font-size: 14px; color: #6b6e72;">Especialista em Direito Administrativo, Licitações e Contratos</span></p>
           </div>
           <div class="footer">
             <p>Este é um email automático, por favor não responda.</p>
@@ -395,17 +395,17 @@ export async function sendExpirationNotification(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px; }
-          .highlight { background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
-          .benefits { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e5e7eb; }
+          .header { background: #b07d3a; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .warning { background: #e9d8b8; border-left: 4px solid #b07d3a; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .highlight { background: #20364e; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .benefits { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e8e6e1; }
           .benefit-item { display: flex; align-items: start; margin: 10px 0; }
-          .check { color: #10b981; margin-right: 10px; font-weight: bold; }
+          .check { color: #20364e; margin-right: 10px; font-weight: bold; }
         </style>
       </head>
       <body>
@@ -453,13 +453,13 @@ export async function sendExpirationNotification(
               <a href="${upgradeUrl}" class="button">👑 Fazer Upgrade Agora</a>
             </div>
 
-            <p style="text-align: center; color: #666; font-size: 14px; margin-top: 20px;">
-              Ou acesse: <a href="${upgradeUrl}" style="color: #2563eb;">${upgradeUrl}</a>
+            <p style="text-align: center; color: #6b6e72; font-size: 14px; margin-top: 20px;">
+              Ou acesse: <a href="${upgradeUrl}" style="color: #20364e;">${upgradeUrl}</a>
             </p>
 
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <hr style="border: none; border-top: 1px solid #e8e6e1; margin: 30px 0;">
 
-            <p style="font-size: 14px; color: #666;">
+            <p style="font-size: 14px; color: #6b6e72;">
               <strong>Dúvidas?</strong> Entre em contato conosco através do site ou responda este email.
             </p>
 
@@ -505,7 +505,7 @@ Equipe Prof. Daniel Barral
 
   return (await sendEmail({
     to: email,
-    subject: `⏰ Seu acesso expira em ${remainingMessage} - Prof. Daniel Barral`,
+    subject: `Seu acesso expira em ${remainingMessage} - Prof. Daniel Barral`,
     html,
     text,
   })).success;
@@ -532,16 +532,16 @@ export async function sendContactNotification(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, ${isTestimonial ? '#f59e0b 0%, #ea580c' : '#2563eb 0%, #1d4ed8'} 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .field { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #2563eb; }
-          .field-label { font-weight: bold; color: #1f2937; margin-bottom: 5px; }
-          .field-value { color: #4b5563; }
-          .message-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #e5e7eb; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .badge { display: inline-block; background: ${isTestimonial ? '#f59e0b' : '#2563eb'}; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; margin: 10px 0; }
+          .header { background: ${isTestimonial ? '#b07d3a' : '#20364e'}; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .field { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #20364e; }
+          .field-label { font-weight: bold; color: #1a1c20; margin-bottom: 5px; }
+          .field-value { color: #3d4044; }
+          .message-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #e8e6e1; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .badge { display: inline-block; background: ${isTestimonial ? '#b07d3a' : '#20364e'}; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; margin: 10px 0; }
         </style>
       </head>
       <body>
@@ -581,15 +581,15 @@ export async function sendContactNotification(
               <div class="field-value" style="white-space: pre-wrap;">${contactData.message}</div>
             </div>
 
-            <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-top: 20px;">
-              <p style="margin: 0; color: #1e40af; font-size: 14px;">
+            <div style="background: #eeeae4; padding: 15px; border-radius: 8px; margin-top: 20px;">
+              <p style="margin: 0; color: #20364e; font-size: 14px;">
                 <strong>ID da Mensagem:</strong> ${contactId}<br>
                 <strong>Recebida em:</strong> ${new Date().toLocaleString('pt-BR')}
               </p>
             </div>
 
             ${isTestimonial ? `
-              <p style="margin-top: 20px; color: #f59e0b; font-weight: bold;">
+              <p style="margin-top: 20px; color: #b07d3a; font-weight: bold;">
                 Este depoimento precisa ser moderado antes de aparecer no site.<br>
                 Acesse o painel admin para aprovar ou rejeitar.
               </p>
@@ -623,7 +623,7 @@ Recebida em: ${new Date().toLocaleString('pt-BR')}
 
   return (await sendEmail({
     to: adminEmail,
-    subject: isTestimonial ? '⭐ Novo Depoimento para Moderação' : '📧 Nova Mensagem de Contato',
+    subject: isTestimonial ? 'Novo Depoimento para Moderação' : 'Nova Mensagem de Contato',
     html,
     text,
   })).success;
@@ -649,41 +649,41 @@ export async function sendTcuHighlightAlert(
   const n = highlights.length;
 
   const highlightCards = highlights.map(h => {
-    const scoreColor = h.score >= 85 ? '#16a34a' : '#ca8a04';
-    const scoreBg = h.score >= 85 ? '#dcfce7' : '#fef9c3';
+    const scoreColor = h.score >= 85 ? '#20364e' : '#8a6235';
+    const scoreBg = h.score >= 85 ? '#f7f6f3' : '#e9d8b8';
     const leiTags = h.leiConnections.length > 0
       ? h.leiConnections.map(c =>
-          `<span style="display:inline-block;background:#ede9fe;color:#6d28d9;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">Art. ${c.article}</span>`
+          `<span style="display:inline-block;background:#f7f6f3;color:#20364e;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">Art. ${c.article}</span>`
         ).join(' ')
       : '';
 
     return `
       <div style="background:white;border-radius:12px;padding:24px;margin:16px 0;border-left:4px solid ${scoreColor};box-shadow:0 1px 3px rgba(0,0,0,0.1);">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
-          <h3 style="margin:0;color:#1f2937;font-size:16px;flex:1;">${h.title}</h3>
+          <h3 style="margin:0;color:#1a1c20;font-size:16px;flex:1;">${h.title}</h3>
           <span style="background:${scoreBg};color:${scoreColor};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;margin-left:12px;">${h.score}/100</span>
         </div>
 
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
-          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Tese Principal</div>
-          <div style="color:#334155;font-size:14px;">${h.thesisSummary}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#3d4044;font-size:13px;margin-bottom:6px;">Tese Principal</div>
+          <div style="color:#3d4044;font-size:14px;">${h.thesisSummary}</div>
         </div>
 
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
-          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Por que Merece Destaque</div>
-          <div style="color:#334155;font-size:14px;">${h.whyImportant}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#3d4044;font-size:13px;margin-bottom:6px;">Por que Merece Destaque</div>
+          <div style="color:#3d4044;font-size:14px;">${h.whyImportant}</div>
         </div>
 
-        <div style="background:#faf5ff;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #e9d5ff;">
-          <div style="font-weight:600;color:#7c3aed;font-size:13px;margin-bottom:6px;">Sugestao de Artigo</div>
-          <div style="color:#4c1d95;font-size:14px;">${h.articleAngle}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #eeeae4;">
+          <div style="font-weight:600;color:#20364e;font-size:13px;margin-bottom:6px;">Sugestao de Artigo</div>
+          <div style="color:#20364e;font-size:14px;">${h.articleAngle}</div>
         </div>
 
         ${leiTags ? `<div style="margin:10px 0;">${leiTags}</div>` : ''}
 
         <div style="margin-top:14px;display:flex;gap:12px;">
-          <a href="${baseUrl}/admin/tcu-highlights" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar no Admin</a>
-          <a href="${h.documentUrl}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank">Ver Acordao Completo</a>
+          <a href="${baseUrl}/admin/tcu-highlights" style="display:inline-block;background:#20364e;color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar no Admin</a>
+          <a href="${h.documentUrl}" style="display:inline-block;background:#f7f6f3;color:#3d4044;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank">Ver Acordao Completo</a>
         </div>
       </div>
     `;
@@ -694,24 +694,24 @@ export async function sendTcuHighlightAlert(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; margin: 0; padding: 0; }
           .container { max-width: 640px; margin: 0 auto; padding: 20px; }
         </style>
       </head>
       <body>
         <div class="container">
-          <div style="background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
+          <div style="background:#20364e;color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
             <h1 style="margin:0;font-size:22px;">Destaques TCU</h1>
             <p style="margin:8px 0 0;opacity:0.9;font-size:15px;">${n} acordao(s) com potencial para artigo no blog</p>
           </div>
-          <div style="background:#f9fafb;padding:24px;border-radius:0 0 12px 12px;">
-            <p style="color:#4b5563;font-size:14px;">A IA identificou os seguintes acordaos como excepcionalmente relevantes para publicacao no blog:</p>
+          <div style="background:#f7f6f3;padding:24px;border-radius:0 0 12px 12px;">
+            <p style="color:#3d4044;font-size:14px;">A IA identificou os seguintes acordaos como excepcionalmente relevantes para publicacao no blog:</p>
             ${highlightCards}
             <div style="text-align:center;margin-top:24px;">
-              <a href="${baseUrl}/admin/tcu-highlights" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Todos os Destaques</a>
+              <a href="${baseUrl}/admin/tcu-highlights" style="display:inline-block;background:#20364e;color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Todos os Destaques</a>
             </div>
           </div>
-          <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
+          <div style="text-align:center;margin-top:20px;color:#6b6e72;font-size:12px;">
             <p>Notificacao automatica do sistema de analise TCU</p>
             <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral</p>
           </div>
@@ -783,15 +783,15 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
 
   const cards = visible
     .map((it) => {
-      const scoreColor = it.score >= 80 ? '#16a34a' : it.score >= 70 ? '#2563eb' : '#ca8a04';
-      const scoreBg = it.score >= 80 ? '#dcfce7' : it.score >= 70 ? '#dbeafe' : '#fef9c3';
+      const scoreColor = it.score >= 80 ? '#20364e' : it.score >= 70 ? '#3a5a73' : '#8a6235';
+      const scoreBg = it.score >= 80 ? '#f7f6f3' : it.score >= 70 ? '#eeeae4' : '#e9d8b8';
       const ambiguousBadge = it.ambiguous
-        ? `<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">ambíguo</span>`
+        ? `<span style="display:inline-block;background:#e9d8b8;color:#8a6235;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">ambíguo</span>`
         : '';
       const affectsTags = (it.affects || [])
         .map(
           (a) =>
-            `<span style="display:inline-block;background:#fff7ed;color:#9a3412;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">${escapeHtml(a)}</span>`,
+            `<span style="display:inline-block;background:#e9d8b8;color:#8a6235;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">${escapeHtml(a)}</span>`,
         )
         .join(' ');
 
@@ -799,27 +799,27 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
       <div style="background:white;border-radius:12px;padding:24px;margin:16px 0;border-left:4px solid ${scoreColor};box-shadow:0 1px 3px rgba(0,0,0,0.1);">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
           <div style="flex:1;">
-            <div style="font-size:11px;color:#9a3412;text-transform:uppercase;font-weight:600;margin-bottom:4px;">${escapeHtml(it.actType || 'ato')} · ${escapeHtml(it.issuer)} · ${escapeHtml(it.publishDate)}</div>
-            <h3 style="margin:0;color:#1f2937;font-size:16px;">${escapeHtml(it.title)}</h3>
+            <div style="font-size:11px;color:#8a6235;text-transform:uppercase;font-weight:600;margin-bottom:4px;">${escapeHtml(it.actType || 'ato')} · ${escapeHtml(it.issuer)} · ${escapeHtml(it.publishDate)}</div>
+            <h3 style="margin:0;color:#1a1c20;font-size:16px;">${escapeHtml(it.title)}</h3>
           </div>
           <span style="background:${scoreBg};color:${scoreColor};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;margin-left:12px;">${it.score}/100${ambiguousBadge}</span>
         </div>
 
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
-          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Resumo</div>
-          <div style="color:#334155;font-size:14px;">${escapeHtml(it.summary)}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#3d4044;font-size:13px;margin-bottom:6px;">Resumo</div>
+          <div style="color:#3d4044;font-size:14px;">${escapeHtml(it.summary)}</div>
         </div>
 
-        <div style="background:#fff7ed;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #fed7aa;">
-          <div style="font-weight:600;color:#9a3412;font-size:13px;margin-bottom:6px;">Por que está aqui</div>
-          <div style="color:#7c2d12;font-size:14px;">${escapeHtml(it.reason)}</div>
+        <div style="background:#e9d8b8;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #e9d8b8;">
+          <div style="font-weight:600;color:#8a6235;font-size:13px;margin-bottom:6px;">Por que está aqui</div>
+          <div style="color:#8a6235;font-size:14px;">${escapeHtml(it.reason)}</div>
         </div>
 
         ${affectsTags ? `<div style="margin:10px 0;">${affectsTags}</div>` : ''}
 
         <div style="margin-top:14px;display:flex;gap:12px;">
-          <a href="${queueLink}" style="display:inline-block;background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar na Fila</a>
-          <a href="${safeHttpUrl(it.douUrl)}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank" rel="noopener">Ver DOU</a>
+          <a href="${queueLink}" style="display:inline-block;background:#b07d3a;color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar na Fila</a>
+          <a href="${safeHttpUrl(it.douUrl)}" style="display:inline-block;background:#f7f6f3;color:#3d4044;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank" rel="noopener">Ver DOU</a>
         </div>
       </div>`;
     })
@@ -827,7 +827,7 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
 
   const moreFooter =
     remaining > 0
-      ? `<p style="text-align:center;color:#9a3412;font-size:13px;margin-top:16px;">...e mais ${remaining} norma(s) — <a href="${baseUrl}/admin/clipping-dou" style="color:#ea580c;">ver na fila completa</a>.</p>`
+      ? `<p style="text-align:center;color:#8a6235;font-size:13px;margin-top:16px;">...e mais ${remaining} norma(s) — <a href="${baseUrl}/admin/clipping-dou" style="color:#b07d3a;">ver na fila completa</a>.</p>`
       : '';
 
   return `
@@ -835,25 +835,25 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; margin: 0; padding: 0; }
           .container { max-width: 640px; margin: 0 auto; padding: 20px; }
         </style>
       </head>
       <body>
         <div class="container">
-          <div style="background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
+          <div style="background:#b07d3a;color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
             <h1 style="margin:0;font-size:22px;">Clipping DOU</h1>
             <p style="margin:8px 0 0;opacity:0.9;font-size:15px;">${items.length} norma(s) nova(s) pra revisar</p>
           </div>
-          <div style="background:#fff7ed;padding:24px;border-radius:0 0 12px 12px;">
-            <p style="color:#7c2d12;font-size:14px;">As normas abaixo foram identificadas pelo classificador editorial. Aprove ou rejeite na fila admin.</p>
+          <div style="background:#e9d8b8;padding:24px;border-radius:0 0 12px 12px;">
+            <p style="color:#8a6235;font-size:14px;">As normas abaixo foram identificadas pelo classificador editorial. Aprove ou rejeite na fila admin.</p>
             ${cards}
             ${moreFooter}
             <div style="text-align:center;margin-top:24px;">
-              <a href="${baseUrl}/admin/clipping-dou" style="display:inline-block;background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Fila Completa</a>
+              <a href="${baseUrl}/admin/clipping-dou" style="display:inline-block;background:#b07d3a;color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Fila Completa</a>
             </div>
           </div>
-          <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
+          <div style="text-align:center;margin-top:20px;color:#6b6e72;font-size:12px;">
             <p>Notificação automática do Clipping DOU v2</p>
           </div>
         </div>
@@ -914,11 +914,11 @@ export async function sendTribunalHighlightAlert(
   const n = highlights.length;
 
   const highlightCards = highlights.map(h => {
-    const scoreColor = h.score >= 85 ? '#16a34a' : '#ca8a04';
-    const scoreBg = h.score >= 85 ? '#dcfce7' : '#fef9c3';
+    const scoreColor = h.score >= 85 ? '#20364e' : '#8a6235';
+    const scoreBg = h.score >= 85 ? '#f7f6f3' : '#e9d8b8';
     const leiTags = h.leiConnections.length > 0
       ? h.leiConnections.map(c =>
-          `<span style="display:inline-block;background:#ccfbf1;color:#0f766e;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">Art. ${c.article}</span>`
+          `<span style="display:inline-block;background:#f7f6f3;color:#20364e;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">Art. ${c.article}</span>`
         ).join(' ')
       : '';
 
@@ -926,32 +926,32 @@ export async function sendTribunalHighlightAlert(
       <div style="background:white;border-radius:12px;padding:24px;margin:16px 0;border-left:4px solid ${scoreColor};box-shadow:0 1px 3px rgba(0,0,0,0.1);">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
           <div style="flex:1;">
-            <span style="display:inline-block;background:#ccfbf1;color:#0f766e;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:bold;margin-bottom:8px;">${h.tribunalCode}</span>
-            <h3 style="margin:0;color:#1f2937;font-size:16px;">${h.title}</h3>
+            <span style="display:inline-block;background:#f7f6f3;color:#20364e;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:bold;margin-bottom:8px;">${h.tribunalCode}</span>
+            <h3 style="margin:0;color:#1a1c20;font-size:16px;">${h.title}</h3>
           </div>
           <span style="background:${scoreBg};color:${scoreColor};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;margin-left:12px;">${h.score}/100</span>
         </div>
 
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
-          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Tese Principal</div>
-          <div style="color:#334155;font-size:14px;">${h.thesisSummary}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#3d4044;font-size:13px;margin-bottom:6px;">Tese Principal</div>
+          <div style="color:#3d4044;font-size:14px;">${h.thesisSummary}</div>
         </div>
 
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;margin:10px 0;">
-          <div style="font-weight:600;color:#475569;font-size:13px;margin-bottom:6px;">Por que Merece Destaque</div>
-          <div style="color:#334155;font-size:14px;">${h.whyImportant}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;">
+          <div style="font-weight:600;color:#3d4044;font-size:13px;margin-bottom:6px;">Por que Merece Destaque</div>
+          <div style="color:#3d4044;font-size:14px;">${h.whyImportant}</div>
         </div>
 
-        <div style="background:#f0fdfa;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #99f6e4;">
-          <div style="font-weight:600;color:#0f766e;font-size:13px;margin-bottom:6px;">Sugestao de Artigo</div>
-          <div style="color:#134e4a;font-size:14px;">${h.articleAngle}</div>
+        <div style="background:#f7f6f3;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #eeeae4;">
+          <div style="font-weight:600;color:#20364e;font-size:13px;margin-bottom:6px;">Sugestao de Artigo</div>
+          <div style="color:#20364e;font-size:14px;">${h.articleAngle}</div>
         </div>
 
         ${leiTags ? `<div style="margin:10px 0;">${leiTags}</div>` : ''}
 
         <div style="margin-top:14px;display:flex;gap:12px;">
-          <a href="${baseUrl}/admin/tribunal-highlights" style="display:inline-block;background:linear-gradient(135deg,#0d9488,#059669);color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar no Admin</a>
-          ${h.decisionUrl ? `<a href="${h.decisionUrl}" style="display:inline-block;background:#f1f5f9;color:#475569;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank">Ver Decisao Completa</a>` : ''}
+          <a href="${baseUrl}/admin/tribunal-highlights" style="display:inline-block;background:#20364e;color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">Revisar no Admin</a>
+          ${h.decisionUrl ? `<a href="${h.decisionUrl}" style="display:inline-block;background:#f7f6f3;color:#3d4044;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;" target="_blank">Ver Decisao Completa</a>` : ''}
         </div>
       </div>
     `;
@@ -962,24 +962,24 @@ export async function sendTribunalHighlightAlert(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; margin: 0; padding: 0; }
           .container { max-width: 640px; margin: 0 auto; padding: 20px; }
         </style>
       </head>
       <body>
         <div class="container">
-          <div style="background:linear-gradient(135deg,#0d9488 0%,#059669 100%);color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
+          <div style="background:#20364e;color:white;padding:30px;text-align:center;border-radius:12px 12px 0 0;">
             <h1 style="margin:0;font-size:22px;">Destaques TCE</h1>
             <p style="margin:8px 0 0;opacity:0.9;font-size:15px;">${n} decisao(oes) com potencial para artigo no blog</p>
           </div>
-          <div style="background:#f9fafb;padding:24px;border-radius:0 0 12px 12px;">
-            <p style="color:#4b5563;font-size:14px;">A IA identificou as seguintes decisoes de Tribunais de Contas Estaduais como relevantes para publicacao no blog:</p>
+          <div style="background:#f7f6f3;padding:24px;border-radius:0 0 12px 12px;">
+            <p style="color:#3d4044;font-size:14px;">A IA identificou as seguintes decisoes de Tribunais de Contas Estaduais como relevantes para publicacao no blog:</p>
             ${highlightCards}
             <div style="text-align:center;margin-top:24px;">
-              <a href="${baseUrl}/admin/tribunal-highlights" style="display:inline-block;background:linear-gradient(135deg,#0d9488,#059669);color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Todos os Destaques</a>
+              <a href="${baseUrl}/admin/tribunal-highlights" style="display:inline-block;background:#20364e;color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:bold;">Ver Todos os Destaques</a>
             </div>
           </div>
-          <div style="text-align:center;margin-top:20px;color:#9ca3af;font-size:12px;">
+          <div style="text-align:center;margin-top:20px;color:#6b6e72;font-size:12px;">
             <p>Notificacao automatica do sistema de analise TCE</p>
             <p>&copy; ${new Date().getFullYear()} Prof. Daniel Barral</p>
           </div>
@@ -1046,13 +1046,13 @@ export async function sendNewDocumentsNotification(
   Object.entries(docsByCategory).forEach(([category, docs]) => {
     const categoryLabel = categoryLabels[category] || '📄 Outros';
     documentsHtml += `
-      <div style="background: white; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #2563eb;">
-        <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px;">${categoryLabel}</h3>
+      <div style="background: white; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #20364e;">
+        <h3 style="margin: 0 0 15px 0; color: #1a1c20; font-size: 16px;">${categoryLabel}</h3>
         ${docs.map(doc => `
-          <div style="margin: 10px 0; padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
-            <div style="font-weight: bold; color: #374151; margin-bottom: 5px;">${doc.title}</div>
-            ${doc.description ? `<div style="font-size: 14px; color: #6b7280; line-height: 1.5;">${doc.description}</div>` : ''}
-            <div style="font-size: 12px; color: #9ca3af; margin-top: 5px;">
+          <div style="margin: 10px 0; padding: 10px 0; border-bottom: 1px solid #e8e6e1;">
+            <div style="font-weight: bold; color: #3d4044; margin-bottom: 5px;">${doc.title}</div>
+            ${doc.description ? `<div style="font-size: 14px; color: #6b6e72; line-height: 1.5;">${doc.description}</div>` : ''}
+            <div style="font-size: 12px; color: #6b6e72; margin-top: 5px;">
               Adicionado em: ${new Date(doc.uploadedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
             </div>
           </div>
@@ -1066,14 +1066,14 @@ export async function sendNewDocumentsNotification(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .highlight-box { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
-          .info-box { background: #dbeafe; border-left: 4px solid #2563eb; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .highlight-box { background: #20364e; color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .info-box { background: #eeeae4; border-left: 4px solid #20364e; padding: 15px; border-radius: 8px; margin: 20px 0; }
         </style>
       </head>
       <body>
@@ -1094,7 +1094,7 @@ export async function sendNewDocumentsNotification(
             ${documentsHtml}
 
             <div class="info-box">
-              <p style="margin: 0; color: #1e40af;">
+              <p style="margin: 0; color: #20364e;">
                 <strong>💡 Dica:</strong> Acesse sua área restrita para visualizar e fazer download de todos os materiais.
               </p>
             </div>
@@ -1103,13 +1103,13 @@ export async function sendNewDocumentsNotification(
               <a href="${areaRestritaUrl}" class="button">📖 Acessar Área Restrita</a>
             </div>
 
-            <p style="text-align: center; color: #666; font-size: 14px; margin-top: 20px;">
-              Ou acesse diretamente: <a href="${areaRestritaUrl}" style="color: #2563eb;">${areaRestritaUrl}</a>
+            <p style="text-align: center; color: #6b6e72; font-size: 14px; margin-top: 20px;">
+              Ou acesse diretamente: <a href="${areaRestritaUrl}" style="color: #20364e;">${areaRestritaUrl}</a>
             </p>
 
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <hr style="border: none; border-top: 1px solid #e8e6e1; margin: 30px 0;">
 
-            <p style="font-size: 14px; color: #666;">
+            <p style="font-size: 14px; color: #6b6e72;">
               Este material é de uso exclusivo dos alunos matriculados. O compartilhamento não autorizado pode resultar na suspensão do acesso.
             </p>
 
@@ -1159,7 +1159,7 @@ Você está recebendo este email porque está matriculado no curso ${courseTitle
 
   return (await sendEmail({
     to: email,
-    subject: `📚 ${documentCount} ${documentCount === 1 ? 'novo material disponível' : 'novos materiais disponíveis'} - ${courseTitle}`,
+    subject: `${documentCount} ${documentCount === 1 ? 'novo material disponível' : 'novos materiais disponíveis'} - ${courseTitle}`,
     html,
     text,
   })).success;
@@ -1181,15 +1181,15 @@ export async function sendCourseWelcomeEmail(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .tips { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e5e7eb; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .tips { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e8e6e1; }
           .tip-item { margin: 8px 0; }
-          .check { color: #10b981; margin-right: 8px; font-weight: bold; }
+          .check { color: #20364e; margin-right: 8px; font-weight: bold; }
         </style>
       </head>
       <body>
@@ -1268,13 +1268,13 @@ export async function sendModuleCompletionEmail(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .achievement { background: white; border: 2px solid #059669; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .achievement { background: white; border: 2px solid #20364e; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
         </style>
       </head>
       <body>
@@ -1286,9 +1286,9 @@ export async function sendModuleCompletionEmail(
             <p>Olá ${name},</p>
 
             <div class="achievement">
-              <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Você concluiu com sucesso:</p>
-              <h2 style="margin: 0; color: #059669;">${moduleTitle}</h2>
-              <p style="margin: 10px 0 0; font-size: 14px; color: #666;">do curso <strong>${courseTitle}</strong></p>
+              <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b6e72;">Você concluiu com sucesso:</p>
+              <h2 style="margin: 0; color: #20364e;">${moduleTitle}</h2>
+              <p style="margin: 10px 0 0; font-size: 14px; color: #6b6e72;">do curso <strong>${courseTitle}</strong></p>
             </div>
 
             <p>Continue assim! Cada módulo concluído te aproxima mais do certificado de conclusão do curso.</p>
@@ -1349,13 +1349,13 @@ export async function sendInactivityReminderEmail(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .reminder-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .header { background: #b07d3a; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #b07d3a; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .reminder-box { background: #e9d8b8; border-left: 4px solid #b07d3a; padding: 20px; margin: 20px 0; border-radius: 8px; }
         </style>
       </head>
       <body>
@@ -1430,14 +1430,14 @@ export async function sendCertificateNotification(
     <html>
       <head>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
           .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          .cert-box { background: white; border: 2px solid #059669; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
-          .cert-number { font-size: 18px; font-weight: bold; color: #059669; letter-spacing: 2px; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .cert-box { background: white; border: 2px solid #20364e; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+          .cert-number { font-size: 18px; font-weight: bold; color: #20364e; letter-spacing: 2px; }
         </style>
       </head>
       <body>
@@ -1447,10 +1447,10 @@ export async function sendCertificateNotification(
           </div>
           <div class="content">
             <p>Temos o prazer de informar que você concluiu com sucesso o curso:</p>
-            <h2 style="color: #1f2937; text-align: center;">${courseTitle}</h2>
+            <h2 style="color: #1a1c20; text-align: center;">${courseTitle}</h2>
 
             <div class="cert-box">
-              <p style="margin: 0 0 10px 0; color: #666;">Seu certificado:</p>
+              <p style="margin: 0 0 10px 0; color: #6b6e72;">Seu certificado:</p>
               <div class="cert-number">${certificateNumber}</div>
             </div>
 
@@ -1458,12 +1458,12 @@ export async function sendCertificateNotification(
               <a href="${downloadUrl}" class="button">Baixar Certificado em PDF</a>
             </div>
 
-            <p style="text-align: center; font-size: 14px; color: #666;">
+            <p style="text-align: center; font-size: 14px; color: #6b6e72;">
               Verifique a autenticidade em:<br>
-              <a href="${verificationUrl}" style="color: #059669;">${verificationUrl}</a>
+              <a href="${verificationUrl}" style="color: #20364e;">${verificationUrl}</a>
             </p>
 
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+            <hr style="border: none; border-top: 1px solid #e8e6e1; margin: 30px 0;">
 
             <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
           </div>
@@ -1508,8 +1508,8 @@ export async function sendCertificateRevocation(
   reason?: string,
 ): Promise<boolean> {
   const reasonHtml = reason
-    ? `<p style="margin:18px 0 6px;font-size:13px;color:#475569;">Motivo informado:</p>
-       <p style="margin:0;font-size:14px;color:#1f2937;font-style:italic;background:#f1f5f9;padding:12px 14px;border-radius:6px;border-left:3px solid #b91c1c;">${reason}</p>`
+    ? `<p style="margin:18px 0 6px;font-size:13px;color:#3d4044;">Motivo informado:</p>
+       <p style="margin:0;font-size:14px;color:#1a1c20;font-style:italic;background:#f7f6f3;padding:12px 14px;border-radius:6px;border-left:3px solid #8a6235;">${reason}</p>`
     : '';
   const reasonText = reason ? `\nMotivo: ${reason}\n` : '';
 
@@ -1517,11 +1517,11 @@ export async function sendCertificateRevocation(
 <html>
   <head>
     <style>
-      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
       .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-      .header { background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%); color: white; padding: 28px; text-align: center; border-radius: 10px 10px 0 0; }
-      .content { background: #fefefe; padding: 28px; border: 1px solid #e5e7eb; border-top: 0; border-radius: 0 0 10px 10px; }
-      .footer { text-align: center; margin-top: 24px; color: #94a3b8; font-size: 12px; }
+      .header { background: #8a6235; color: white; padding: 28px; text-align: center; border-radius: 10px 10px 0 0; }
+      .content { background: #f7f6f3; padding: 28px; border: 1px solid #e8e6e1; border-top: 0; border-radius: 0 0 10px 10px; }
+      .footer { text-align: center; margin-top: 24px; color: #6b6e72; font-size: 12px; }
     </style>
   </head>
   <body>
@@ -1532,13 +1532,13 @@ export async function sendCertificateRevocation(
       <div class="content">
         <p>Olá, ${name}.</p>
         <p>Informamos que o seguinte certificado foi <strong>revogado</strong>:</p>
-        <ul style="font-size:14px;color:#1f2937;">
+        <ul style="font-size:14px;color:#1a1c20;">
           <li>Curso: <strong>${courseTitle}</strong></li>
-          <li>Número: <code style="font-family:monospace;background:#f1f5f9;padding:2px 6px;border-radius:4px;">${certificateNumber}</code></li>
+          <li>Número: <code style="font-family:monospace;background:#f7f6f3;padding:2px 6px;border-radius:4px;">${certificateNumber}</code></li>
         </ul>
         ${reasonHtml}
-        <p style="margin-top:20px;font-size:13px;color:#64748b;">A página pública de verificação passa a indicar este certificado como revogado. Se você acredita que isto foi um engano, responda este email.</p>
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+        <p style="margin-top:20px;font-size:13px;color:#6b6e72;">A página pública de verificação passa a indicar este certificado como revogado. Se você acredita que isto foi um engano, responda este email.</p>
+        <hr style="border:none;border-top:1px solid #e8e6e1;margin:24px 0;">
         <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
       </div>
       <div class="footer">&copy; ${new Date().getFullYear()} Prof. Daniel Barral</div>
