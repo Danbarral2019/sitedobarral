@@ -4,6 +4,7 @@ import { BookOpen, FileText, Calendar, ExternalLink, MapPin } from 'lucide-react
 // import Link from 'next/link';
 import { Publication } from '@prisma/client';
 import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: 'Publicações Acadêmicas',
@@ -17,19 +18,19 @@ export const metadata: Metadata = {
     'pesquisa direito público',
   ],
   openGraph: {
-    title: 'Publicações Acadêmicas | Prof. Daniel Barral',
+    title: 'Publicações Acadêmicas',
     description: 'Livros, artigos científicos e notícias sobre Direito Administrativo, Licitações e Contratos',
-    url: 'https://profdanielbarral.com/publicacoes',
+    url: new URL('/publicacoes', getSiteUrl()),
     type: 'website',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Publicações Acadêmicas | Prof. Daniel Barral',
+    title: 'Publicações Acadêmicas',
     description: 'Livros, artigos científicos e notícias sobre Direito Administrativo',
   },
   alternates: {
-    canonical: '/publicacoes',
+    canonical: new URL('/publicacoes', getSiteUrl()),
   },
 };
 

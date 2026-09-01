@@ -116,7 +116,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${act.fullNumber} - ${act.title} | Prof. Daniel Barral`,
+    title: `${act.fullNumber} - ${act.title}`,
     description: act.summary || act.ementa.substring(0, 160),
   };
 }

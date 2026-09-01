@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const categoryLabel = CATEGORY_LABELS[doc.category] || 'Documento';
   return {
-    title: `${doc.title} | ${categoryLabel} | Prof. Daniel Barral`,
+    title: `${doc.title} | ${categoryLabel}`,
     description: `${categoryLabel}: ${doc.title}`,
   };
 }

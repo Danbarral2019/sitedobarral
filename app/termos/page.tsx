@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Termos de Uso | Site do Prof. Daniel Barral',
+  title: 'Termos de Uso',
   description: 'Termos e condições de uso da plataforma de cursos e serviços do Site do Prof. Daniel Barral.',
   alternates: { canonical: '/termos' },
   robots: { index: true, follow: true },

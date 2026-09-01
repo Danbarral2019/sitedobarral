@@ -2,9 +2,10 @@ import { Award, BookOpen, Users, Briefcase, GraduationCap, Scale, ArrowRight, Ch
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
-  title: 'Sobre o Prof. Daniel Barral',
+  title: 'Sobre',
   description: 'Mestre em Direito Público, Professor Especializado em Licitações e Contratos Administrativos. Conheça a trajetória profissional e acadêmica do Prof. Daniel Barral.',
   keywords: [
     'Daniel Barral',
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Sobre o Prof. Daniel Barral',
     description: 'Mestre em Direito Público, Professor Especializado em Licitações e Contratos Administrativos',
-    url: 'https://profdanielbarral.com/sobre',
+    url: new URL('/sobre', getSiteUrl()),
     type: 'profile',
     locale: 'pt_BR',
   },
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     description: 'Mestre em Direito Público, Professor Especializado em Licitações e Contratos Administrativos',
   },
   alternates: {
-    canonical: '/sobre',
+    canonical: new URL('/sobre', getSiteUrl()),
   },
 };
 

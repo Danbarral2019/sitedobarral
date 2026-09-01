@@ -10,6 +10,7 @@ import Analytics from "@/components/Analytics";
 import { LazyClientProviders } from "@/components/LazyClientProviders";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Source Serif 4 — display + reading. Substitui Cinzel.
 // Subset "latin" cobre todos os acentos do português (ã, ç, ó etc.); latin-ext só adiciona caracteres
@@ -47,6 +48,7 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: {
     template: '%s | Prof. Daniel Barral',
     default: 'Prof. Daniel Barral - Especialista em Licitações e Contratos',
@@ -98,7 +100,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Prof. Daniel Barral - Especialista em Licitações e Contratos",
     description: "Repositório especializado de materiais jurídicos em Direito Administrativo. Cursos sobre Nova Lei 14.133/2021, gestão de contratos e mais.",
-    url: "https://profdanielbarral.com",
+    url: getSiteUrl(),
     siteName: "Prof. Daniel Barral",
     locale: "pt_BR",
     type: "website",
@@ -122,7 +124,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://www.profdanielbarral.com',
+    canonical: getSiteUrl(),
   },
   verification: {
     // google: 'seu-codigo-verificacao-google',

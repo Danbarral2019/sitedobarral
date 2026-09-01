@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import NovidadesClient from './NovidadesClient';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const revalidate = 3600; // ISR: revalidar a cada 1 hora
 
@@ -18,14 +19,14 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     title: `Novidades de ${monthLabel}`,
     description: `Documentos, decisões e conteúdos adicionados em ${monthLabel} na plataforma do Prof. Daniel Barral. Acórdãos, pareceres, orientações normativas e mais.`,
     openGraph: {
-      title: `Novidades de ${monthLabel} | Prof. Daniel Barral`,
+      title: `Novidades de ${monthLabel}`,
       description: `Documentos e decisões de ${monthLabel} sobre Licitações e Contratos`,
-      url: `https://profdanielbarral.com/novidades${params.mes ? `?mes=${params.mes}` : ''}`,
+      url: new URL(`/novidades${params.mes ? `?mes=${params.mes}` : ''}`, getSiteUrl()),
       type: 'website',
       locale: 'pt_BR',
     },
     alternates: {
-      canonical: '/novidades',
+      canonical: new URL('/novidades', getSiteUrl()),
     },
   };
 }
