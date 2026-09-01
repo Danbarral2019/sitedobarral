@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { apiLogger } from "@/lib/logger";
+import { withAdminApi } from '@/lib/api/handler';
 
 /**
  * GET /api/admin/depoimentos
@@ -14,7 +15,7 @@ import { apiLogger } from "@/lib/logger";
  * - page: number (padrão: 1)
  * - pageSize: number (padrão: 50, máx: 100)
  */
-export async function GET(request: NextRequest) {
+export const GET = withAdminApi(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
@@ -58,13 +59,13 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * POST /api/admin/depoimentos
  * Cria um novo depoimento (admin)
  */
-export async function POST(request: NextRequest) {
+export const POST = withAdminApi(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, email, phone, role, text, rating, avatar, color, status } = body;
@@ -100,13 +101,13 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * PATCH /api/admin/depoimentos
  * Atualiza status de um depoimento (aprovar/rejeitar)
  */
-export async function PATCH(request: NextRequest) {
+export const PATCH = withAdminApi(async (request: NextRequest) => {
   try {
     const { id, status } = await request.json();
 
@@ -143,13 +144,13 @@ export async function PATCH(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * DELETE /api/admin/depoimentos
  * Deleta um depoimento
  */
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAdminApi(async (request: NextRequest) => {
   try {
     const { id } = await request.json();
 
@@ -178,4 +179,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

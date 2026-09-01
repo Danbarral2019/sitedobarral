@@ -7,10 +7,11 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
+import { withAdminApi } from '@/lib/api/handler';
 
-export async function GET() {
+export const GET = withAdminApi(async () => {
   try {
     // Buscar todos os documentos que têm leiArticles (foram analisados pela IA)
     const [documents, legislativeActs] = await Promise.all([
@@ -138,4 +139,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

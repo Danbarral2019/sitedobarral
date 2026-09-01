@@ -48,13 +48,15 @@
 - Modify: `app/api/admin/legislative-acts/import/template/route.ts`
 - Create: `app/api/admin/depoimentos/__tests__/authorization.test.ts`
 - Create: `app/api/admin/analytics/document-analysis/__tests__/authorization.test.ts`
-- Create: `app/api/admin/__tests__/guard-inventory.test.ts`
+- Create: `app/api/admin/legislative-acts/import/template/__tests__/authorization.test.ts`
+- Modify: `middleware.ts`
+- Create: `lib/middleware/__tests__/admin-api.test.ts`
 
 **Interfaces:**
 - Consumes: `withAdminApi<P>(handler, options?)` de `lib/api/handler.ts`.
 - Produces: todas as rotas sob `app/api/admin/**/route.ts` com uma guarda reconhecida; rotas novas devem usar `withAdminApi`.
 
-- [ ] **Step 1: Escrever testes de autorização que falham no estado atual**
+- [x] **Step 1: Escrever testes de autorização que falham no estado atual**
 
 O teste de cada rota deve usar o wrapper real, mockar `getCurrentUser` como `null`, mockar `enforceRateLimit` como resolvido e confirmar que o Prisma não é chamado:
 
@@ -96,13 +98,13 @@ describe('GET /api/admin/depoimentos', () => {
 });
 ```
 
-- [ ] **Step 2: Executar os novos testes e confirmar a regressão**
+- [x] **Step 2: Executar os novos testes e confirmar a regressão**
 
 Run: `npx vitest run app/api/admin/depoimentos/__tests__/authorization.test.ts app/api/admin/analytics/document-analysis/__tests__/authorization.test.ts`
 
 Expected: FAIL porque os handlers atuais alcançam o Prisma sem autenticação.
 
-- [ ] **Step 3: Envolver cada método administrativo com `withAdminApi`**
+- [x] **Step 3: Envolver cada método administrativo com `withAdminApi`**
 
 Em `depoimentos/route.ts`, renomear os handlers atuais para `getTestimonials`, `createTestimonial`, `updateTestimonialStatus` e `deleteTestimonial`, sem alterar seus corpos. Depois, importar o wrapper e exportar os métodos protegidos:
 
@@ -117,24 +119,24 @@ export const DELETE = withAdminApi(deleteTestimonial);
 
 Aplicar a mesma forma ao `GET` de `analytics/document-analysis` e ao `GET` do template de importação. O template permanecerá administrativo porque está sob `/api/admin`.
 
-- [ ] **Step 4: Criar inventário automático de guardas**
+- [x] **Step 4: Adicionar defesa comportamental no middleware**
 
-O teste `guard-inventory.test.ts` deve percorrer `app/api/admin/**/route.ts`, ignorar arquivos de teste e exigir pelo menos uma das guardas reconhecidas durante a migração: `withAdminApi`, `getCurrentUser`, `verifyToken` ou `isAdmin`. A allowlist pública deve ser declarada como `const PUBLIC_ADMIN_API_ALLOWLIST = new Set<string>();` e permanecer vazia. O teste também deve exigir `withAdminApi` para qualquer rota criada depois da data-base registrada no próprio teste.
+O teste `lib/middleware/__tests__/admin-api.test.ts` deve exercer requisições reais à função `middleware`: sem token retorna 401 em JSON, token inválido retorna 401, usuário autenticado sem papel administrativo retorna 403 e administrador prossegue. A implementação deve reconhecer `/api/admin` e `/api/admin/**` antes da lógica de páginas administrativas. Essa camada é defesa adicional; cada route handler continua obrigado a usar `withAdminApi`.
 
-- [ ] **Step 5: Executar testes e verificações da Task 1**
+- [x] **Step 5: Executar testes e verificações da Task 1**
 
-Run: `npx vitest run app/api/admin/depoimentos/__tests__/authorization.test.ts app/api/admin/analytics/document-analysis/__tests__/authorization.test.ts app/api/admin/__tests__/guard-inventory.test.ts`
+Run: `npx vitest run lib/middleware/__tests__/admin-api.test.ts app/api/admin/depoimentos/__tests__/authorization.test.ts app/api/admin/analytics/document-analysis/__tests__/authorization.test.ts app/api/admin/legislative-acts/import/template/__tests__/authorization.test.ts`
 
-Expected: PASS, com 401 sem usuário e nenhuma consulta ao Prisma.
+Expected: PASS, com 401 sem usuário, 403 para usuário não administrador e nenhuma consulta ao Prisma antes da autorização nos handlers.
 
-Run: `npx eslint app/api/admin/depoimentos app/api/admin/analytics/document-analysis app/api/admin/legislative-acts/import/template`
+Run: `npx eslint app/api/admin/depoimentos app/api/admin/analytics/document-analysis app/api/admin/legislative-acts/import/template lib/middleware/__tests__/admin-api.test.ts middleware.ts`
 
 Expected: código de saída 0.
 
-- [ ] **Step 6: Commit da contenção administrativa**
+- [x] **Step 6: Commit da contenção administrativa**
 
 ```bash
-git add app/api/admin/depoimentos app/api/admin/analytics/document-analysis app/api/admin/legislative-acts/import/template app/api/admin/__tests__/guard-inventory.test.ts
+git add app/api/admin/depoimentos app/api/admin/analytics/document-analysis app/api/admin/legislative-acts/import/template lib/middleware/__tests__/admin-api.test.ts middleware.ts docs/superpowers/plans/2026-08-31-site-integrity-remediation.md
 git commit -m "fix: protect all administrative api routes"
 ```
 
