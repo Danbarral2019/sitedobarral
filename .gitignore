@@ -113,3 +113,6 @@ dev.log
 
 # Superpowers brainstorm (visual companion)
 .superpowers/
+
+# Isolated implementation worktrees
+.worktrees/
