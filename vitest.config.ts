@@ -32,6 +32,7 @@ export default defineConfig({
     exclude: [
       'node_modules',
       '.next',
+      'e2e',
       'prisma',
       'scripts',
       'FUNCIONALIDADES_FUTURAS',
