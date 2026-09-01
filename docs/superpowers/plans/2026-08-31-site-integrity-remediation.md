@@ -416,7 +416,7 @@ git commit -m "fix: fail closed on sensitive infrastructure controls"
 **Interfaces:**
 - Produces: `escapeRegExp(value: string): string`; perguntas limitadas a 1.000 caracteres; consultas de busca limitadas a 300 caracteres; chat público usa somente `Document.isPublic = true`.
 
-- [ ] **Step 1: Criar testes para metacaracteres e entradas longas**
+- [x] **Step 1: Criar testes para metacaracteres e entradas longas**
 
 ```ts
 it.each(['(', '[', 'a+b', '.*', '\\'])('trata %s como texto literal', (query) => {
@@ -429,7 +429,7 @@ it('rejeita pergunta acima de 1.000 caracteres', async () => {
 });
 ```
 
-- [ ] **Step 2: Implementar escape compartilhado**
+- [x] **Step 2: Implementar escape compartilhado**
 
 ```ts
 export function escapeRegExp(value: string): string {
@@ -439,7 +439,7 @@ export function escapeRegExp(value: string): string {
 
 Usar `escapeRegExp` em todos os `new RegExp` que recebem `searchTerm` ou `normalizedTerm`.
 
-- [ ] **Step 3: Adotar Zod nas três APIs públicas**
+- [x] **Step 3: Adotar Zod nas três APIs públicas**
 
 ```ts
 const ChatBodySchema = z.object({
@@ -454,21 +454,21 @@ const AiSearchBodySchema = z.object({
 
 Para `/api/busca-integrada`, validar `q` com comprimento entre 2 e 300 e aplicar rate limit antes de `hybridSearch`.
 
-- [ ] **Step 4: Impedir uso público de resumos privados**
+- [x] **Step 4: Impedir uso público de resumos privados**
 
 Nas duas consultas de documentos de `artigos/[numero]/chat`, substituir o bloco `OR: [{ isPublic: true }, { summary: { not: null } }]` por `isPublic: true`. O resumo privado não deve entrar no prompt nem nas fontes retornadas.
 
-- [ ] **Step 5: Proteger histórico por token assinado**
+- [x] **Step 5: Proteger histórico por token assinado**
 
 Criar token JWT de curta duração com `conversationId` no `sub`, `audience: 'article-chat'` e expiração de 24 horas, usando `JWT_SECRET`. POST retorna `conversationToken`; follow-up e GET exigem token válido cujo `sub` coincida com o `conversationId`. ID isolado deixa de ser credencial suficiente.
 
-- [ ] **Step 6: Executar testes de busca, chat e quota**
+- [x] **Step 6: Executar testes de busca, chat e quota**
 
 Run: `npx vitest run lib/__tests__/search-utils.test.ts lib/search/__tests__/escape-regexp.test.ts app/api/artigos/[numero]/chat/__tests__ app/api/lei-14133/search/__tests__`
 
 Expected: PASS, sem chamada de IA nos casos inválidos.
 
-- [ ] **Step 7: Commit da proteção de entradas e conversas**
+- [x] **Step 7: Commit da proteção de entradas e conversas**
 
 ```bash
 git add data/lei-14133-artigos.ts lib/search-utils.ts lib/search app/api/artigos/[numero]/chat app/api/lei-14133/search app/api/busca-integrada

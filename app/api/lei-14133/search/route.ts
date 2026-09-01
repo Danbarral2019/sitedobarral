@@ -9,6 +9,11 @@ import { enforceGlobalAiCap } from '@/lib/cache/ai-quota';
 import { ValidationError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
+import { z } from 'zod';
+
+const AiSearchBodySchema = z.object({
+  query: z.string().trim().min(3).max(300),
+});
 
 interface SearchResult {
   articleNumber: string;
@@ -72,14 +77,11 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
     await enforceRateLimit(`lei-search:${ip}`, 5, 60, { failureMode: 'closed' });
 
-    const body = await request.json();
-    const { query } = body;
-
-    if (!query || query.trim().length < 3) {
-      throw new ValidationError('Query deve ter pelo menos 3 caracteres');
+    const parsedBody = AiSearchBodySchema.safeParse(await request.json());
+    if (!parsedBody.success) {
+      throw new ValidationError('Query inválida', parsedBody.error.issues);
     }
-
-    const searchQuery = query.trim();
+    const searchQuery = parsedBody.data.query;
 
     // Kill-switch global de custo: rota pública (sem usuário/tier). Ao estourar
     // o cap diário, não sintetiza — retorna o mesmo shape do fallback sem-IA.

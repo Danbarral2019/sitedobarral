@@ -5,6 +5,8 @@
  * Total de artigos: 208
  */
 
+import { escapeRegExp } from '@/lib/search/escape-regexp';
+
 export interface LeiArticle {
   numero: string;
   ementa: string;
@@ -3877,7 +3879,7 @@ export function extractRelevantExcerpts(text: string, searchTerm: string, contex
     let excerpt = text.substring(start, end);
     if (start > 0) excerpt = '...' + excerpt;
     if (end < text.length) excerpt = excerpt + '...';
-    const termRegex = new RegExp('(' + searchTerm + ')', 'gi');
+    const termRegex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
     excerpt = excerpt.replace(termRegex, '<mark>$1</mark>');
     excerpts.push(excerpt);
     index = lowerText.indexOf(term, index + 1);
