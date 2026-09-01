@@ -158,7 +158,7 @@ git commit -m "fix: protect all administrative api routes"
 - Consumes: `hasAccessToCourse(courseId): Promise<boolean>` e `hasAccessToDocument(doc): Promise<boolean>` de `lib/auth.ts`.
 - Produces: a mesma decisão de autorização para tela, API e download; matrícula vencida nunca autoriza conteúdo.
 
-- [ ] **Step 1: Escrever testes para matrícula vencida e acesso por assinatura**
+- [x] **Step 1: Escrever testes para matrícula vencida e acesso por assinatura**
 
 Cada rota de curso deve cobrir três casos: matrícula vencida retorna 403, matrícula vitalícia retorna 200 e assinatura Premium ativa retorna 200. O teste do download deve cobrir documento `isCommon: true` com `courseId` de origem diferente do curso do usuário.
 
@@ -188,13 +188,13 @@ it('permite documento comum a usuário com qualquer acesso ativo', async () => {
 });
 ```
 
-- [ ] **Step 2: Executar os quatro arquivos de teste e confirmar falhas**
+- [x] **Step 2: Executar os quatro arquivos de teste e confirmar falhas**
 
 Run: `npx vitest run app/api/area-restrita/lessons/[lessonId]/__tests__/access.test.ts app/api/area-restrita/courses/[courseId]/modules/__tests__/access.test.ts app/api/area-restrita/courses/[courseId]/progress/__tests__/access.test.ts app/api/documents/[id]/download/__tests__/access.test.ts`
 
 Expected: FAIL para matrícula vencida e para documento comum com `courseId` de origem.
 
-- [ ] **Step 3: Substituir consultas locais por `hasAccessToCourse`**
+- [x] **Step 3: Substituir consultas locais por `hasAccessToCourse`**
 
 Nas três rotas de curso, manter o bypass administrativo e substituir a consulta simples a `enrollment.findFirst` por:
 
@@ -209,7 +209,7 @@ if (user.role !== 'admin') {
 
 Isso preserva acesso por matrícula válida, assinatura Básico vinculada e assinatura Premium.
 
-- [ ] **Step 4: Fazer o download consumir `hasAccessToDocument`**
+- [x] **Step 4: Fazer o download consumir `hasAccessToDocument`**
 
 Depois de autenticar o token e localizar o usuário, remover `enrollmentWhere`, a seleção local da matrícula e `checkAccessStatus`. Autorizar com o helper central:
 
@@ -227,13 +227,13 @@ if (!canDownload) {
 
 Preservar o log de acesso e permitir `courseId: null` em telemetria sem coerção `as string`.
 
-- [ ] **Step 5: Executar testes de acesso e suíte de autenticação**
+- [x] **Step 5: Executar testes de acesso e suíte de autenticação**
 
 Run: `npx vitest run lib/__tests__/auth.test.ts lib/__tests__/document-access.test.ts lib/__tests__/enrollment-utils.test.ts app/api/area-restrita/lessons/[lessonId]/__tests__/access.test.ts app/api/area-restrita/courses/[courseId]/modules/__tests__/access.test.ts app/api/area-restrita/courses/[courseId]/progress/__tests__/access.test.ts app/api/documents/[id]/download/__tests__/access.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit da autorização centralizada**
+- [x] **Step 6: Commit da autorização centralizada**
 
 ```bash
 git add app/api/area-restrita app/api/documents/[id]/download
