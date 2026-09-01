@@ -1,16 +1,19 @@
 # Exceções temporárias de dependências
 
-Baseline levantado em 1º de setembro de 2026, após a atualização isolada de `next` de `15.5.15` para `15.5.25`.
+Baseline revisto em 1º de setembro de 2026. O gate final manteve `next@15.5.25`, atualizou `vitest` e `@vitest/coverage-v8` para `4.1.11` e atualizou `tailwindcss` e `@tailwindcss/postcss` para `4.3.3`. Essas atualizações retiraram as três vulnerabilidades críticas que apareciam somente na toolchain de desenvolvimento.
 
 Comandos executados:
 
 ```text
 npm install next@15.5.25 --save-exact
+npm install --save-dev --save-exact vitest@4.1.11 @vitest/coverage-v8@4.1.11
+npm install --save-dev --save-exact tailwindcss@4.3.3 @tailwindcss/postcss@4.3.3
 npm audit --omit=dev
+npm audit
 npm ls --omit=dev @babel/core @hono/node-server @opentelemetry/core @protobufjs/utf8 brace-expansion deepmerge-ts dompurify fast-uri fast-xml-builder form-data hono js-yaml lodash.pick nanoid nth-check postcss protobufjs qs sharp valibot ws xlsx
 ```
 
-O audit de produção reportou 33 vulnerabilidades: 1 baixa, 13 moderadas e 19 altas, sem vulnerabilidade crítica. Não foi executado `npm audit fix` nem `npm audit fix --force`, porque o primeiro alteraria várias famílias simultaneamente e o segundo migraria Next.js e Cheerio com mudanças incompatíveis. As exceções abaixo não representam aceitação definitiva do risco.
+O audit de produção reportou 33 vulnerabilidades: 1 baixa, 13 moderadas e 19 altas, sem vulnerabilidade crítica. O audit completo reportou 34 vulnerabilidades: 1 baixa, 13 moderadas e 20 altas, também sem vulnerabilidade crítica. Não foi executado `npm audit fix` nem `npm audit fix --force`, porque o primeiro alteraria várias famílias simultaneamente e o segundo migraria Next.js e Cheerio com mudanças incompatíveis. As exceções abaixo não representam aceitação definitiva do risco.
 
 | Dependência ou cadeia | Severidade observada | Superfície usada | Mitigação e risco residual | Revisão |
 |---|---:|---|---|---:|

@@ -119,3 +119,25 @@ Para alteração de banco, interromper a implantação e seguir a seção de rec
 - métricas de bundle: `[preencher]`;
 - resultado dos smokes: `[preencher]`;
 - observações e rollback: `[preencher]`.
+
+## Registro do gate de 1º de setembro de 2026
+
+- resultado: `não publicado`;
+- branch: `correcoes/integridade-site`;
+- `npm ci`: código 0, 1.361 pacotes instalados a partir do lockfile;
+- `npx prisma generate`: código 0, Prisma Client 7.8.0;
+- `npm run lint`: código 0, sem aviso de produto;
+- `npx tsc --noEmit --incremental false`: código 0;
+- `npm run test:run`: 219 arquivos aprovados, 1 ignorado, 2.885 testes aprovados e 2 ignorados;
+- `npm run test:coverage`: código 0, 29,66% de linhas, 29,82% de instruções, 33,62% de funções e 28,18% de ramificações;
+- `npm run build`: código 0, 304 páginas geradas, 185 kB compartilhados e 191 kB em `/glossario`;
+- `npm audit --omit=dev`: 33 vulnerabilidades, sendo 1 baixa, 13 moderadas, 19 altas e 0 críticas;
+- `npm audit`: 34 vulnerabilidades, sendo 1 baixa, 13 moderadas, 20 altas e 0 críticas;
+- Playwright: 17 cenários descobertos, incluídos 10 smokes públicos em desktop e viewport de 390 px;
+- smoke local: não concluído porque não há PostgreSQL em `127.0.0.1:5432`, nem Docker ou cliente `psql` instalados;
+- smoke no CI: obrigatório antes de promover qualquer preview ou deployment;
+- preview, observação de 30 minutos e publicação por ondas: não executados;
+- banco: nenhum `migrate resolve`, `migrate deploy`, `db push` remoto ou outra escrita foi executado;
+- produção: nenhuma variável, deployment, pagamento, e-mail, chamada paga de IA ou dado foi alterado.
+
+O aviso de múltiplos lockfiles no build decorre do worktree isolado dentro do repositório principal. Ele não impediu compilação, geração de páginas ou rastreamento do build. A publicação permanece bloqueada até o CI concluir o smoke com PostgreSQL pgvector descartável e até existir preview observado conforme este checklist.

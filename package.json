@@ -98,7 +98,7 @@
     "@inquirer/prompts": "^8.4.1",
     "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.60.0",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
@@ -108,7 +108,7 @@
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^5.1.2",
-    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/coverage-v8": "4.1.11",
     "critters": "^0.0.23",
     "dotenv": "^17.2.3",
     "dotenv-cli": "^11.0.0",
@@ -116,10 +116,10 @@
     "eslint-config-next": "15.5.9",
     "jsdom": "^27.4.0",
     "playwright": "^1.60.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "4.3.3",
     "ts-morph": "^28.0.0",
     "tsx": "^4.20.6",
     "typescript": "^5",
-    "vitest": "^4.0.17"
+    "vitest": "4.1.11"
   }
 }
