@@ -79,7 +79,8 @@ describe('lib/api/handler', () => {
       expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
         'middleware:admin:203.0.113.5',
         30,
-        60
+        60,
+        { failureMode: 'closed' }
       );
     });
 

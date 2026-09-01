@@ -13,7 +13,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
   // enforceRateLimit diretamente com chave própria em vez de depender do
   // rate-limit do handler.
   const ip = getClientIp(request);
-  await enforceRateLimit(`admin:qr:${ip}`, 3, 3600);
+  await enforceRateLimit(`admin:qr:${ip}`, 3, 3600, { failureMode: 'closed' });
 
   const { courseId, turma, validDays, maxUses } = await request.json();
 

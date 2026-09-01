@@ -61,6 +61,13 @@ describe('redis-client — modo desabilitado (redis = null)', () => {
     expect(r.limit).toBe(10);
   });
 
+  it('checkRateLimit falha fechado quando Redis está indisponível e o controle é sensível', async () => {
+    const r = await checkRateLimit('login:user', 5, 60, { failureMode: 'closed' });
+    expect(r.allowed).toBe(false);
+    expect(r.remaining).toBe(0);
+    expect(r.limit).toBe(5);
+  });
+
   it('registry degrada para no-op / vazio', async () => {
     await expect(registerCacheKey('faq', 'faq:1')).resolves.toBeUndefined();
     expect(await getRegisteredKeys('faq')).toEqual([]);

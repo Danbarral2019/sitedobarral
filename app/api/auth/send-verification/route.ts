@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 envios de código de verificação por minuto (Redis)
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:verify:${ip}`, 5, 60);
+    await enforceRateLimit(`auth:verify:${ip}`, 5, 60, { failureMode: 'closed' });
 
     const { email } = await request.json();
 

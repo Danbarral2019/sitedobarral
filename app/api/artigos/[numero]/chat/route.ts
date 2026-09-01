@@ -29,7 +29,7 @@ export async function POST(
     // Rate limiting: 5 perguntas por minuto (Redis)
     // Usa IP como identificador (userId não disponível nesta rota)
     const chatIp = getClientIp(request);
-    await enforceRateLimit(`chat:${chatIp}`, 5, 60);
+    await enforceRateLimit(`chat:${chatIp}`, 5, 60, { failureMode: 'closed' });
 
     const { numero } = await params;
     const articleNumber = numero;

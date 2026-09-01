@@ -347,7 +347,7 @@ git commit -m "fix: update framework and constrain spreadsheet imports"
 - Produces: `FailureMode = 'open' | 'closed'`; endpoints de autenticação, administração e IA usarão `closed`; cache de conteúdo não sensível poderá usar `open`.
 - Consumes: `verifyCronAuth(request)` de `lib/cron-auth.ts`.
 
-- [ ] **Step 1: Escrever testes de indisponibilidade de Redis e ausência de segredo**
+- [x] **Step 1: Escrever testes de indisponibilidade de Redis e ausência de segredo**
 
 ```ts
 it('bloqueia rota sensível quando Redis está indisponível', async () => {
@@ -362,7 +362,7 @@ it('retorna erro de configuração quando CRON_SECRET não existe', async () => 
 });
 ```
 
-- [ ] **Step 2: Estender as interfaces sem mudar o padrão de cache comum**
+- [x] **Step 2: Estender as interfaces sem mudar o padrão de cache comum**
 
 ```ts
 export type FailureMode = 'open' | 'closed';
@@ -377,21 +377,21 @@ export async function checkRateLimit(
 
 No helper, `failureMode: 'closed'` deve converter Redis ausente ou erro em `allowed: false`; o padrão permanece `open` para não derrubar leituras públicas durante a migração.
 
-- [ ] **Step 3: Aplicar modo fechado às superfícies sensíveis**
+- [x] **Step 3: Aplicar modo fechado às superfícies sensíveis**
 
 Atualizar `enforceRateLimit` para receber o mesmo `options`. Usar `failureMode: 'closed'` em login, redefinição de senha, wrappers administrativos e rotas públicas de IA. O kill switch global de IA deve retornar `degrade-search` quando o contador não puder ser incrementado.
 
-- [ ] **Step 4: Substituir autenticação opcional do cron pelo helper central**
+- [x] **Step 4: Substituir autenticação opcional do cron pelo helper central**
 
 Dentro de `withCronRoute`, chamar `verifyCronAuth(req)` antes do handler. Remover o bloco que ignora autenticação quando `CRON_SECRET` não existe.
 
-- [ ] **Step 5: Executar testes focalizados**
+- [x] **Step 5: Executar testes focalizados**
 
 Run: `npx vitest run lib/cache/__tests__/redis-client.test.ts lib/cache/__tests__/redis-client-disabled.test.ts lib/cache/__tests__/ai-quota.test.ts lib/__tests__/cron-telemetry.test.ts`
 
 Expected: PASS; falhas de infraestrutura não liberam endpoints sensíveis.
 
-- [ ] **Step 6: Commit do endurecimento de infraestrutura**
+- [x] **Step 6: Commit do endurecimento de infraestrutura**
 
 ```bash
 git add lib/cache lib/cron-telemetry.ts lib/__tests__/cron-telemetry.test.ts app/api

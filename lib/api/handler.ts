@@ -49,7 +49,16 @@ function createApiHandler<P>(
       const rl = options.rateLimit ?? ROLE_DEFAULTS[role].rateLimit;
       const ip = getClientIp(request);
       const rateLimitKeyRole = role === 'public' ? 'public' : role === 'admin' ? 'admin' : 'auth';
-      await enforceRateLimit(`middleware:${rateLimitKeyRole}:${ip}`, rl.max, rl.windowSec);
+      if (role === 'admin') {
+        await enforceRateLimit(
+          `middleware:${rateLimitKeyRole}:${ip}`,
+          rl.max,
+          rl.windowSec,
+          { failureMode: 'closed' },
+        );
+      } else {
+        await enforceRateLimit(`middleware:${rateLimitKeyRole}:${ip}`, rl.max, rl.windowSec);
+      }
 
       let user: AuthPayload | null = null;
       if (role !== 'public') {

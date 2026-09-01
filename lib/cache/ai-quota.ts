@@ -147,6 +147,22 @@ function secondsUntilEndOfUtcMonth(now: Date): number {
   return Math.max(1, Math.ceil((end - now.getTime()) / 1000));
 }
 
+async function incrementAiQuotaCounter(
+  key: string,
+  ttl: number,
+  scope: 'global' | 'daily' | 'monthly',
+): Promise<number | null> {
+  try {
+    return await incrementCache(key, ttl, { failureMode: 'closed' });
+  } catch (error) {
+    apiLogger.warn(
+      { event: 'ai.quota.unavailable', action: 'degrade-search', scope, err: error },
+      'Contador de quota de IA indisponível, síntese degradada para busca',
+    );
+    return null;
+  }
+}
+
 /**
  * Camada C — kill-switch global de custo, isolado. Conta TODA resposta de IA do
  * site (Claude + Gemini) num contador global diário; ao ultrapassar
@@ -160,7 +176,12 @@ export async function enforceGlobalAiCap(
   now: Date = new Date(),
 ): Promise<AiQuotaDecision> {
   const cap = getGlobalCap();
-  const globalCount = await incrementCache(globalKey(now), secondsUntilEndOfUtcDay(now));
+  const globalCount = await incrementAiQuotaCounter(
+    globalKey(now),
+    secondsUntilEndOfUtcDay(now),
+    'global',
+  );
+  if (globalCount === null) return { action: 'degrade-search', reason: 'global' };
   if (globalCount === Math.floor(cap * 0.8)) {
     Sentry.captureMessage('ai.quota.global.threshold_80', {
       level: 'warning',
@@ -208,7 +229,12 @@ export async function enforceAiQuota(
   // Camada B — quota diária + mensal por tier.
   const limits = AI_QUOTA_LIMITS[tier];
 
-  const dailyCount = await incrementCache(dayKey(userId, now), secondsUntilEndOfUtcDay(now));
+  const dailyCount = await incrementAiQuotaCounter(
+    dayKey(userId, now),
+    secondsUntilEndOfUtcDay(now),
+    'daily',
+  );
+  if (dailyCount === null) return { action: 'degrade-search', reason: 'global' };
   if (dailyCount > limits.daily) {
     if (dailyCount === limits.daily + 1) {
       apiLogger.info(
@@ -219,7 +245,12 @@ export async function enforceAiQuota(
     return { action: 'degrade-gemini', reason: 'daily' };
   }
 
-  const monthlyCount = await incrementCache(monthKey(userId, now), secondsUntilEndOfUtcMonth(now));
+  const monthlyCount = await incrementAiQuotaCounter(
+    monthKey(userId, now),
+    secondsUntilEndOfUtcMonth(now),
+    'monthly',
+  );
+  if (monthlyCount === null) return { action: 'degrade-search', reason: 'global' };
   if (monthlyCount > limits.monthly) {
     if (monthlyCount === limits.monthly + 1) {
       apiLogger.info(

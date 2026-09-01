@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 tentativas de login admin por minuto (Redis)
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:admin:${ip}`, 5, 60);
+    await enforceRateLimit(`auth:admin:${ip}`, 5, 60, { failureMode: 'closed' });
 
     const { email, password } = await request.json();
 

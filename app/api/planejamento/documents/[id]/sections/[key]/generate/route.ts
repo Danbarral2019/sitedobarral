@@ -14,7 +14,12 @@ export const POST = withUserApi<{ id: string; key: string }>(async (request, { p
   const userId = user.userId;
 
   // Rate-limit dedicado (10/min) para geração — mais caro que edição
-  await enforceRateLimit(`planejamento:generate:${userId}`, 10, 60);
+  await enforceRateLimit(
+    `planejamento:generate:${userId}`,
+    10,
+    60,
+    { failureMode: 'closed' },
+  );
 
   const body = await request.json().catch(() => ({}));
   const mode: "fresh" | "refine" = body.mode === "refine" ? "refine" : "fresh";

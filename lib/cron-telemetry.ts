@@ -38,6 +38,7 @@ import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from './prisma';
 import { apiLogger } from './logger';
+import { verifyCronAuth } from './cron-auth';
 
 export interface CronStats {
   /** Total de itens descobertos/processados na execução. */
@@ -157,8 +158,7 @@ export async function withCronTelemetry<T extends CronStats | void>(
 
 /**
  * Atalho para handlers de rota Next.js. Combina:
- * - Verificação do header `Authorization: Bearer ${CRON_SECRET}` se a env
- *   var existir (pula em dev local)
+ * - Verificação obrigatória do header `Authorization: Bearer ${CRON_SECRET}`
  * - `withCronTelemetry` em torno do handler
  *
  * Uso:
@@ -178,14 +178,8 @@ export function withCronRoute(
   handler: (req: NextRequest) => Promise<CronStats | void>,
 ): (req: NextRequest) => Promise<NextResponse> {
   return async (req: NextRequest) => {
-    // Auth: bearer token cron secret (skipa se var não setada — dev local)
-    const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret) {
-      const authHeader = req.headers.get('authorization');
-      if (authHeader !== `Bearer ${cronSecret}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
+    const authError = verifyCronAuth(req);
+    if (authError) return authError;
 
     try {
       const stats = await withCronTelemetry(scraperCode, () => handler(req));

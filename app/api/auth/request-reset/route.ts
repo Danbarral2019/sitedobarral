@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 solicitações de reset por minuto (Redis)
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:reset:${ip}`, 5, 60);
+    await enforceRateLimit(`auth:reset:${ip}`, 5, 60, { failureMode: 'closed' });
     const { email } = await request.json();
 
     if (!email) {

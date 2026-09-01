@@ -581,6 +581,15 @@ describe('Redis Cache Client', () => {
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(10);
     });
+
+    it('deve fail closed em caso de erro quando solicitado', async () => {
+      mockIncr.mockRejectedValue(new Error('Redis error'));
+
+      const result = await checkRateLimit('login:user-1', 5, 60, { failureMode: 'closed' });
+
+      expect(result.allowed).toBe(false);
+      expect(result.remaining).toBe(0);
+    });
   });
 
   // ===========================

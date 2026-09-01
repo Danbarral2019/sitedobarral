@@ -303,7 +303,12 @@ export const POST = withUserApi(async (request, ctx) => {
       // Anti-burst 10/min (antes desprotegido) + quota anti-abuso por tier.
       // Admin faz bypass. A decisão de quota é consumida na síntese abaixo.
       if (user.role !== 'admin') {
-        await enforceRateLimit(`juris-query:${user.userId}`, 10, 60);
+        await enforceRateLimit(
+          `juris-query:${user.userId}`,
+          10,
+          60,
+          { failureMode: 'closed' },
+        );
       }
       const quotaDecision = await enforceAiQuota(user.userId, user.role);
 

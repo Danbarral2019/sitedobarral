@@ -59,6 +59,12 @@ describe('/api/lei-14133/search — kill-switch global', () => {
 
   it('allow → sintetiza normalmente (Gemini chamado)', async () => {
     await POST(makeReq({ query: 'dispensa de licitação' }));
+    expect(mockEnforceRateLimit).toHaveBeenCalledWith(
+      'lei-search:127.0.0.1',
+      5,
+      60,
+      { failureMode: 'closed' },
+    );
     expect(mockQueryGeminiText).toHaveBeenCalledTimes(1);
   });
 });

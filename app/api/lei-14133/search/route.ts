@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const ip = getClientIp(request);
-    await enforceRateLimit(`lei-search:${ip}`, 5, 60);
+    await enforceRateLimit(`lei-search:${ip}`, 5, 60, { failureMode: 'closed' });
 
     const body = await request.json();
     const { query } = body;

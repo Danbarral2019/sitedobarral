@@ -12,7 +12,7 @@
  *   await enforceRateLimit(`auth:login:${ip}`, 5, 60);
  */
 
-import { checkRateLimit } from './redis-client';
+import { checkRateLimit, type FailureMode } from './redis-client';
 import { RateLimitError } from '@/lib/errors/api-error';
 
 /**
@@ -29,9 +29,10 @@ import { RateLimitError } from '@/lib/errors/api-error';
 export async function enforceRateLimit(
   identifier: string,
   limit: number,
-  windowSeconds: number = 60
+  windowSeconds: number = 60,
+  options: { failureMode?: FailureMode } = {},
 ): Promise<void> {
-  const result = await checkRateLimit(identifier, limit, windowSeconds);
+  const result = await checkRateLimit(identifier, limit, windowSeconds, options);
   if (!result.allowed) {
     throw new RateLimitError(
       'Muitas tentativas. Tente novamente em breve.',
