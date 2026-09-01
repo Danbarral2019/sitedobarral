@@ -252,26 +252,29 @@ git commit -m "fix: centralize course and document access checks"
 - Modify: `app/api/admin/convert-tcu/route.ts`
 - Modify: `app/api/admin/tcu-manager/validate/route.ts`
 - Modify: `app/api/admin/tcu-manager/convert/route.ts`
+- Modify: `app/api/admin/import-excel/validate/route.ts`
+- Modify: `app/api/admin/import-excel/import/route.ts`
 - Create: `lib/__tests__/excel-processor-security.test.ts`
+- Create: `app/api/admin/__tests__/workbook-upload-validation.test.ts`
 - Create: `docs/security/dependency-exceptions.md`
 
 **Interfaces:**
 - Consumes: formato atual dos uploads administrativos de `.xlsx` e `.xls`.
 - Produces: Next.js corrigido, lockfile reproduzível e limites explícitos para arquivos processados por `xlsx` enquanto a substituição é validada.
 
-- [ ] **Step 1: Atualizar Next.js dentro da linha 15.5 e aplicar correções não disruptivas**
+- [x] **Step 1: Atualizar Next.js dentro da linha 15.5 e aplicar correções não disruptivas**
 
 Run: `npm install next@15.5.25`
 
 Expected: `package.json` fixa `next` em `15.5.25`; nenhuma atualização major ou correção automática adicional é introduzida.
 
-- [ ] **Step 2: Registrar baseline do audit após a atualização**
+- [x] **Step 2: Registrar baseline do audit após a atualização**
 
 Run: `npm audit --omit=dev`
 
 Expected: os advisories corrigidos por Next.js 15.5.25 deixam de aparecer. Registrar em `docs/security/dependency-exceptions.md` somente vulnerabilidades remanescentes, pacote, superfície usada, mitigação e data de revisão.
 
-- [ ] **Step 3: Escrever testes de contenção para planilhas**
+- [x] **Step 3: Escrever testes de contenção para planilhas**
 
 Os testes devem rejeitar arquivos acima de 5 MiB, extensões diferentes de `.xlsx` e `.xls`, MIME incompatível e workbooks acima de 25 abas ou 100.000 células somadas.
 
@@ -283,7 +286,7 @@ expect(() => validateWorkbookUpload({
 })).toThrow('A planilha excede o limite de 5 MiB.');
 ```
 
-- [ ] **Step 4: Implementar validação única antes de `XLSX.read`**
+- [x] **Step 4: Implementar validação única antes de `XLSX.read`**
 
 Exportar de `lib/excel-processor.ts`:
 
@@ -301,13 +304,13 @@ export function validateWorkbookUpload(input: {
 export function validateWorkbookShape(workbook: XLSX.WorkBook): void;
 ```
 
-Todas as quatro rotas web devem chamar as duas funções antes de iterar dados. Scripts locais permanecem fora da superfície HTTP, mas devem ser listados na exceção documental.
+As quatro rotas TCU e as duas rotas `import-excel` descobertas no inventário devem validar o upload antes de `arrayBuffer()`. As rotas TCU chamam também a validação dimensional logo após `XLSX.read`; as rotas `import-excel` recebem essa proteção dentro de `processExcelFile`. Scripts locais permanecem fora da superfície HTTP, mas devem ser listados na exceção documental.
 
-- [ ] **Step 5: Abrir mudança separada para retirar `xlsx`**
+- [x] **Step 5: Abrir mudança separada para retirar `xlsx`**
 
 A decisão é objetiva: se todos os fixtures atuais forem lidos e escritos por `exceljs`, substituir `xlsx` por `exceljs`; se houver fixture `.xls` incompatível, manter o parser legado apenas em script administrativo offline e fazer as APIs aceitarem exclusivamente `.xlsx`. A aprovação exige testes de equivalência com todos os fixtures existentes e `npm audit` sem o advisory de `xlsx` na aplicação web.
 
-- [ ] **Step 6: Executar gate da Onda A**
+- [x] **Step 6: Executar gate da Onda A**
 
 Run: `npm run test:run`
 
@@ -319,7 +322,7 @@ Run: `npm run build`
 
 Expected: todos os comandos com código de saída 0.
 
-- [ ] **Step 7: Commit de dependências e contenção**
+- [x] **Step 7: Commit de dependências e contenção**
 
 ```bash
 git add package.json package-lock.json lib/excel-processor.ts app/api/admin docs/security/dependency-exceptions.md

@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
-import { processExcelFile } from '@/lib/excel-processor';
+import { processExcelFile, validateWorkbookUpload } from '@/lib/excel-processor';
 
 /**
  * POST /api/admin/import-excel/validate
@@ -15,11 +15,7 @@ export const POST = withAdminApi(async (request) => {
     throw new ValidationError('Nenhum arquivo fornecido');
   }
 
-  // Verifica se é arquivo Excel
-  const fileName = file.name.toLowerCase();
-  if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
-    throw new ValidationError('Formato de arquivo inválido. Use .xlsx ou .xls');
-  }
+  validateWorkbookUpload({ filename: file.name, mimeType: file.type, size: file.size });
 
   // Converte para buffer
   const bytes = await file.arrayBuffer();

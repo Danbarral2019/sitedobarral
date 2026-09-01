@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import * as xlsx from 'xlsx';
 import { ValidationError } from '@/lib/errors/api-error';
+import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
 
 /**
  * POST /api/admin/analyze-tcu-file
@@ -15,6 +16,8 @@ export const POST = withAdminApi(async (request: NextRequest) => {
     throw new ValidationError('Nenhum arquivo enviado');
   }
 
+  validateWorkbookUpload({ filename: file.name, mimeType: file.type, size: file.size });
+
   console.log('[Analyze TCU] Processando:', file.name);
 
   // Converte file para buffer
@@ -26,6 +29,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
     type: 'buffer',
     cellDates: true,
   });
+  validateWorkbookShape(workbook);
 
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
