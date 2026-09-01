@@ -2,7 +2,7 @@ import { Document } from './types';
 import { prisma } from './prisma';
 import { Document as PrismaDocument } from '@prisma/client';
 import { safeParseArray } from './utils';
-import { parseLeiArticles, setLeiArticles, stringifyLeiArticles, getLeiArticles } from './lei-articles';
+import { setLeiArticles, getLeiArticles } from './lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**

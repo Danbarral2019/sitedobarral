@@ -10,7 +10,7 @@ import { extractText, normalizeText } from '@/lib/text-extractor';
 import { chunkText, chunkLegalDocument, chunkTCUDocument, TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 import { selectSourceText } from './source-text';
 

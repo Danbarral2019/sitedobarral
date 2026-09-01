@@ -8,7 +8,7 @@ import { Loader2, Save, ArrowLeft, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 import LeiArticleSelector from '@/components/LeiArticleSelector';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 
 // Lazy load do editor Markdown (150KB+ economia)
 const MarkdownEditor = dynamic(() => import('@/components/MarkdownEditor'), {

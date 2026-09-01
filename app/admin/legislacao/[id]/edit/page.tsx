@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import MarkdownContent from '@/components/MarkdownContent';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import {
   Save, X, Scale, Calendar, Building, FileText,
   Link as LinkIcon, Bold, List, Heading2, Eye,

@@ -29,7 +29,6 @@ jobs:
 
       - name: Run linter
         run: npm run lint
-        continue-on-error: true
 
       - name: Run tests
         run: npm run test:run
@@ -78,4 +77,4 @@ jobs:
           # Variáveis mínimas para build passar
           DATABASE_URL: "postgresql://user:pass@localhost:5432/test"
           JWT_SECRET: "build-secret-key-for-jwt-signing-minimum-32-chars"
-          NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
+          NEXT_PUBLIC_BASE_URL: "https://profdanielbarral.com"

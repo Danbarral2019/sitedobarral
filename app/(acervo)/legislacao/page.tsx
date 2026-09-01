@@ -20,7 +20,6 @@ export default function LegislacaoPage() {
   const theme = getTabTheme(l.activeTab);
 
   const isBoasPraticas = l.activeTab === 'boas-praticas';
-  const isTic = l.activeTab === 'tic';
   const isOrientacoes = l.activeTab === 'orientacoes';
   const isBoasPraticasOrOrientacoes = isBoasPraticas || isOrientacoes;
   const showHierarchyOption = !isBoasPraticas && !isOrientacoes;

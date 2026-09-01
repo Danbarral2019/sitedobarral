@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { CertificateActions } from './CertificateActions';
@@ -182,11 +183,12 @@ export default async function CertificateVerificationPage({
             </div>
             <div className="px-8 py-6 flex flex-col items-center justify-center bg-surface-raised">
               {qrDataUrl ? (
-                <img
+                <Image
                   src={qrDataUrl}
                   alt="QR Code de verificação"
                   width={180}
                   height={180}
+                  unoptimized
                   className="rounded-md border border-border-subtle bg-white p-2"
                 />
               ) : (

@@ -218,7 +218,6 @@ export default function JurisprudenciaDetailPage() {
   // romanos com strike, timeline de resoluções, IRRs (quando houver).
   const CANONICAL_TYPES = ['sumula', 'orientacao_jurisprudencial', 'precedente_normativo'];
   const isCanonical = CANONICAL_TYPES.includes(decision.decisionType);
-  const isSumula = decision.decisionType === 'sumula'; // mantido por compatibilidade local
   const sumula = isCanonical ? parseSumulaPayload(decision.sourceRawData) : null;
   const sitBadge = sumula ? SITUACAO_BADGES[sumula.situacao] : null;
 

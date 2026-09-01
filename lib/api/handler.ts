@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { apiLogger } from '@/lib/logger';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';

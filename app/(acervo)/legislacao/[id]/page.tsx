@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
 import { normalizeTextContent } from '@/lib/utils';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { formatLegalContent } from '@/lib/format-legal-content';
 import { getRelationsForAct } from '@/lib/legislative-acts/relations';
 import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';

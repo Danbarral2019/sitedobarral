@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { safeParseArray } from '@/lib/utils';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { getImportanceBadge } from './utils';
 import MetadataGrid from './MetadataGrid';
 import DouPublicationBox from './DouPublicationBox';

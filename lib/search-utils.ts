@@ -1,5 +1,5 @@
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
-import { parseLeiArticles, getLeiArticles } from './lei-articles';
+import { getLeiArticles } from './lei-articles';
 import { escapeRegExp } from './search/escape-regexp';
 
 /**

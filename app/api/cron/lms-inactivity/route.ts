@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
       };
     });
     return NextResponse.json(responseBody);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal error' },
       { status: 500 }

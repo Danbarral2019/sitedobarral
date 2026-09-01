@@ -78,7 +78,6 @@ describe('PlanaltoScraper — pontilhados (regression Decreto 12.516/2025)', () 
 
   it('preserva "..." de 3 pontos em fim de frase (threshold 6+)', () => {
     const scraper = new PlanaltoScraper();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- privado, ok pra teste
     const cleanText = (scraper as any).cleanText.bind(scraper);
     const out = cleanText('Art. 1o Esta lei dispoe sobre licitacoes etc...');
     expect(out).toContain('etc...');

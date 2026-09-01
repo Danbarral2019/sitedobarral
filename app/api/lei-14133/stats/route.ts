@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { extractArticleNumbers } from '@/lib/article-utils';
 
 export async function GET() {
   try {

@@ -17,7 +17,7 @@ import { prisma } from '@/lib/prisma';
 import { analyzeRelevanceTCU } from '@/lib/tcu-module';
 import { sendTcuHighlightAlert } from '@/lib/email';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 const GEMINI_MODEL = PRIMARY_GEMINI_MODEL;
