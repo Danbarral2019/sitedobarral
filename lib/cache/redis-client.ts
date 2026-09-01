@@ -217,16 +217,20 @@ export const CacheKeys = {
 
   /**
    * Glossary terms cache key
-   * Format: glossary:{category}:{letter}:{offset}:{limit}
+   * Format: glossary:{category}:{letter}:{query}:{page}:{pageSize}
    */
   glossaryTerms: (params: {
     category?: string | null;
     letter?: string | null;
+    query?: string | null;
+    page?: number;
+    pageSize?: number;
     offset?: number;
     limit?: number;
   }): string => {
-    const { category, letter, offset = 0, limit = 100 } = params;
-    return `glossary:${category || 'all'}:${letter || 'all'}:${offset}:${limit}`;
+    const pageSize = params.pageSize ?? params.limit ?? 100;
+    const page = params.page ?? Math.floor((params.offset ?? 0) / pageSize) + 1;
+    return `glossary:${params.category || 'all'}:${params.letter || 'all'}:${params.query || 'all'}:${page}:${pageSize}`;
   },
 
   /**

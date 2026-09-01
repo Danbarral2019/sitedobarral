@@ -23,7 +23,7 @@
     "eval:sweep": "dotenv -e .env.local -- tsx eval/cli/sweep-fusion.ts",
     "eval:synthesis": "dotenv -e .env.local -- tsx eval/cli/run-synthesis.ts",
     "eval:planejamento:decision": "tsx eval/planejamento/run-decision.ts",
-    "analyze": "ANALYZE=true next build",
+    "analyze": "node scripts/analyze-build.mjs",
     "sync:obsidian": "tsx scripts/sync-obsidian.ts",
     "sync:obsidian:full": "tsx scripts/sync-obsidian.ts --full",
     "export:obsidian": "tsx scripts/sync-obsidian.ts --export-only",
