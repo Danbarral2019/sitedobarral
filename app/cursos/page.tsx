@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Clock, Users, FileText } from 'lucide-react';
 import { courses } from '@/data/courses';
 import { getCourseColor } from '@/lib/course-colors';
 import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: 'Cursos Especializados',
@@ -19,19 +20,19 @@ export const metadata: Metadata = {
     'AGU',
   ],
   openGraph: {
-    title: 'Cursos Especializados | Prof. Daniel Barral',
+    title: 'Cursos Especializados',
     description: 'Cursos especializados em Direito Administrativo, Licitações e Contratos com material exclusivo',
-    url: 'https://profdanielbarral.com/cursos',
+    url: new URL('/cursos', getSiteUrl()),
     type: 'website',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cursos Especializados | Prof. Daniel Barral',
+    title: 'Cursos Especializados',
     description: 'Cursos especializados em Direito Administrativo e Licitações',
   },
   alternates: {
-    canonical: '/cursos',
+    canonical: new URL('/cursos', getSiteUrl()),
   },
 };
 

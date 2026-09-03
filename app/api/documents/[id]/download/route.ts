@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { hasAccessToDocument, verifyToken } from '@/lib/auth';
 import { readFile } from 'fs/promises';
 import { join, resolve } from 'path';
-import { checkAccessStatus } from '@/lib/enrollment-utils';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
@@ -47,16 +46,8 @@ export async function GET(
     }
 
     // Verificar acesso do usuário
-    const enrollmentWhere = document.courseId
-      ? { courseId: document.courseId }
-      : { courseId: '__none__' };
     const user = await prisma.user.findUnique({
       where: { id: authPayload.userId },
-      include: {
-        enrollments: {
-          where: enrollmentWhere
-        }
-      }
     });
 
     if (!user) {
@@ -64,27 +55,18 @@ export async function GET(
       throw new NotFoundError('Usuário');
     }
 
-    // Admins têm acesso a tudo
-    if (user.role === 'admin') {
-      return await downloadFile(document);
-    }
+    const canDownload = await hasAccessToDocument({
+      isPublic: document.isPublic,
+      isCommon: document.isCommon,
+      courseId: document.courseId,
+    });
 
-    // Verificar se o usuário tem matrícula no curso do documento
-    const enrollment = user.enrollments[0];
-    if (!enrollment) {
-      apiLogger.warn({ userId: user.id, courseId: document.courseId }, 'User not enrolled in course');
-      throw new AuthorizationError('Você não está matriculado neste curso');
-    }
-
-    // Verificar se o acesso ainda está válido
-    const accessStatus = checkAccessStatus(enrollment);
-
-    if (!accessStatus.hasAccess || accessStatus.isExpired) {
+    if (!canDownload) {
       apiLogger.warn(
-        { userId: user.id, courseId: document.courseId, expiresAt: enrollment.expiresAt },
-        'User access expired'
+        { userId: user.id, documentId: document.id, courseId: document.courseId },
+        'User does not have access to document'
       );
-      throw new AuthorizationError('Seu acesso a este curso expirou');
+      throw new AuthorizationError('Você não possui acesso a este documento.');
     }
 
     // Registrar log de download
@@ -103,7 +85,7 @@ export async function GET(
     }
 
     apiLogger.info({ userId: user.id, documentId: document.id }, 'Document download successful');
-    trackServerEvent('document_download', { documentId: document.id, courseId: document.courseId as string });
+    trackServerEvent('document_download', { documentId: document.id, courseId: document.courseId });
 
     // Permitir download
     return await downloadFile(document);

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,19 +14,19 @@ export const metadata: Metadata = {
     'contato professor',
   ],
   openGraph: {
-    title: 'Contato | Prof. Daniel Barral',
+    title: 'Contato',
     description: 'Entre em contato com o Prof. Daniel Barral. Solicite informações sobre cursos ou envie seu depoimento.',
-    url: 'https://profdanielbarral.com/contato',
+    url: new URL('/contato', getSiteUrl()),
     type: 'website',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary',
-    title: 'Contato | Prof. Daniel Barral',
+    title: 'Contato',
     description: 'Entre em contato com o Prof. Daniel Barral',
   },
   alternates: {
-    canonical: '/contato',
+    canonical: new URL('/contato', getSiteUrl()),
   },
 };
 

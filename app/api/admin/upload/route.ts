@@ -8,11 +8,10 @@ import { courses } from '@/data/courses';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { ValidationError } from '@/lib/errors/api-error';
 import { parseLeiArticles } from '@/lib/lei-articles';
-import { apiLogger } from "@/lib/logger";
 
 export const POST = withAdminApi(async (request: NextRequest) => {
     const ip = getClientIp(request);
-    await enforceRateLimit(`upload:${ip}`, 10, 60);
+    await enforceRateLimit(`upload:${ip}`, 10, 60, { failureMode: 'closed' });
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

@@ -10,6 +10,7 @@
 
 import { GoogleGenAI } from '@google/genai';
 import { withGeminiKeyFallback } from '@/lib/gemini/api-key-fallback';
+import { isRateLimitError } from '@/lib/ai/error-detection';
 
 // ===========================
 // Configuration
@@ -21,6 +22,30 @@ const EMBEDDING_DIMENSION = 768; // Nosso banco usa vector(768); Matryoshka trun
 // Cliente instanciado por chamada via withGeminiKeyFallback (sem cache em
 // memória) para suportar fallback entre GEMINI_API_KEY e GEMINI_API_KEY_BACKUP.
 // Custo desprezível: SDK só abre conexão na primeira chamada de método.
+
+/**
+ * Repete a chamada em 429/RESOURCE_EXHAUSTED com backoff exponencial.
+ * Espera 4s, 16s e 45s — a quota de embeddings do Gemini e por minuto, entao
+ * a ultima tentativa cai numa janela nova. Erros que nao sao de quota sobem
+ * na hora, sem retry.
+ */
+const ESPERAS_MS = [4_000, 16_000, 45_000];
+
+async function comRetryEmRateLimit<T>(fn: () => Promise<T>): Promise<T> {
+  for (let tentativa = 0; ; tentativa++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isRateLimitError(err) || tentativa >= ESPERAS_MS.length) throw err;
+      const espera = ESPERAS_MS[tentativa];
+      console.warn(
+        `⏳ Quota de embeddings atingida (429). Aguardando ${espera / 1000}s ` +
+          `antes da tentativa ${tentativa + 2}/${ESPERAS_MS.length + 1}...`,
+      );
+      await new Promise(r => setTimeout(r, espera));
+    }
+  }
+}
 
 // ===========================
 // Types
@@ -124,14 +149,20 @@ export async function generateBatchEmbeddings(
     for (let i = 0; i < validTexts.length; i += BATCH_SIZE) {
       const batch = validTexts.slice(i, i + BATCH_SIZE);
 
-      // embedContent com contents como array retorna multiple embeddings
-      const response = await ai.models.embedContent({
-        model: EMBEDDING_MODEL,
-        contents: batch.map(text => ({ role: 'user' as const, parts: [{ text }] })),
-        config: {
-          outputDimensionality: dimension,
-        },
-      });
+      // embedContent com contents como array retorna multiple embeddings.
+      // Retry com backoff em 429: a chave de backup so cobre a chave inteira
+      // esgotada, nao o pico de quota por minuto. Sem isso, indexar documentos
+      // longos (acordaos do TCU passam de 200 chunks) derruba o lote no meio —
+      // 28 de 75 acordaos falharam assim no backfill de 09/2026.
+      const response = await comRetryEmRateLimit(() =>
+        ai.models.embedContent({
+          model: EMBEDDING_MODEL,
+          contents: batch.map(text => ({ role: 'user' as const, parts: [{ text }] })),
+          config: {
+            outputDimensionality: dimension,
+          },
+        }),
+      );
 
       if (!response.embeddings || response.embeddings.length !== batch.length) {
         throw new Error(`Expected ${batch.length} embeddings, got ${response.embeddings?.length ?? 0}`);

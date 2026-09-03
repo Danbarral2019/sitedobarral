@@ -1,75 +1,78 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteUrl = getSiteUrl();
+  const absoluteUrl = (pathname = '/') => new URL(pathname, siteUrl).toString();
+
   // Páginas estáticas
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: BASE_URL,
+      url: absoluteUrl(),
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: `${BASE_URL}/sobre`,
+      url: absoluteUrl('/sobre'),
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/cursos`,
+      url: absoluteUrl('/cursos'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/blog`,
+      url: absoluteUrl('/blog'),
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/publicacoes`,
+      url: absoluteUrl('/publicacoes'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/contato`,
+      url: absoluteUrl('/contato'),
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/lei-14133`,
+      url: absoluteUrl('/lei-14133'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/legislacao`,
+      url: absoluteUrl('/legislacao'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/glossario`,
+      url: absoluteUrl('/glossario'),
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/base-conhecimento`,
+      url: absoluteUrl('/base-conhecimento'),
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
-      url: `${BASE_URL}/jurisprudencia`,
+      url: absoluteUrl('/jurisprudencia'),
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.85,
@@ -78,7 +81,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Páginas de cursos (estáticas)
   const coursesPages: MetadataRoute.Sitemap = courses.map((course) => ({
-    url: `${BASE_URL}/cursos/${course.slug}`,
+    url: absoluteUrl(`/cursos/${course.slug}`),
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.85,
@@ -93,7 +96,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     blogPages = blogPosts.map((post) => ({
-      url: `${BASE_URL}/blog/${post.slug}`,
+      url: absoluteUrl(`/blog/${post.slug}`),
       lastModified: post.updatedAt,
       changeFrequency: 'monthly',
       priority: 0.7,
@@ -113,7 +116,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     articlePages = articles.map((article) => ({
-      url: `${BASE_URL}/artigo/${article.numero}`,
+      url: absoluteUrl(`/artigo/${article.numero}`),
       lastModified: article.updatedAt,
       changeFrequency: 'monthly',
       priority: 0.7,
@@ -134,7 +137,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     decisionPages = decisions.map((d) => ({
-      url: `${BASE_URL}/jurisprudencia/${d.id}`,
+      url: absoluteUrl(`/jurisprudencia/${d.id}`),
       lastModified: d.updatedAt,
       // Súmulas são canônicas e raramente mudam — frequência menor
       changeFrequency: d.decisionType === 'sumula' ? 'yearly' : 'monthly',

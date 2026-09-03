@@ -7,7 +7,7 @@ import DocumentWizard from '@/components/admin/DocumentWizard';
 import { DocumentFormState } from '@/components/admin/DocumentWizard/types';
 import { Loader2, ChevronDown, ChevronRight, History, CheckCircle2, AlertTriangle } from 'lucide-react';
 import DocumentVersionHistory from '@/components/admin/DocumentVersionHistory';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 
 interface DocumentFromAPI {
   id: string;

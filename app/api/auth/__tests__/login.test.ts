@@ -146,7 +146,12 @@ describe('POST /api/auth/login', () => {
       const request = createRequest(validCredentials);
       await POST(request);
 
-      expect(mockEnforceRateLimit).toHaveBeenCalledWith('auth:login:127.0.0.1', 5, 60);
+      expect(mockEnforceRateLimit).toHaveBeenCalledWith(
+        'auth:login:127.0.0.1',
+        5,
+        60,
+        { failureMode: 'closed' },
+      );
     });
 
     it('deve retornar 429 quando rate limit excedido', async () => {

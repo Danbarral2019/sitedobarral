@@ -2,6 +2,15 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
+export function markdownToPlainExcerpt(value: string): string {
+  return value
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_`>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function getRelativeDate(date: Date): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -202,7 +211,7 @@ export default async function HomeNovidadesSection() {
                       {post.excerpt && (
                         <p className={`text-ink-muted mt-2 ${
                           index === 0 ? 'text-sm line-clamp-3' : 'text-sm line-clamp-2'
-                        }`}>{post.excerpt}</p>
+                        }`}>{markdownToPlainExcerpt(post.excerpt)}</p>
                       )}
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-xs text-ink-muted">

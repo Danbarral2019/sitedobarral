@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { sendEmail } from '@/lib/email';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 
 /**

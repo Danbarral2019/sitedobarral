@@ -13,6 +13,7 @@ import {
   renderPixMandateFailedEmail,
   renderCanceledEmail,
 } from '@/lib/email-templates/subscription';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const runtime = 'nodejs';
 
@@ -67,8 +68,7 @@ async function trySendSubscriptionEmail<T>(
  * the email — fall back to the account page so the user still has somewhere to go.
  */
 async function resolveBillingPortalUrl(userId: string): Promise<string> {
-  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
-  const accountUrl = `${siteUrl}/area-restrita`;
+  const accountUrl = new URL('/area-restrita', getSiteUrl()).toString();
   try {
     const { url } = await createBillingPortalSession(userId, accountUrl);
     return url;

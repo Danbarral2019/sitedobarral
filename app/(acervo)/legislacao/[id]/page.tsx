@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import MarkdownContent from '@/components/MarkdownContent';
 import { normalizeTextContent } from '@/lib/utils';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { formatLegalContent } from '@/lib/format-legal-content';
 import { getRelationsForAct } from '@/lib/legislative-acts/relations';
 import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';
@@ -116,7 +116,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${act.fullNumber} - ${act.title} | Prof. Daniel Barral`,
+    title: `${act.fullNumber} - ${act.title}`,
     description: act.summary || act.ementa.substring(0, 160),
   };
 }

@@ -15,27 +15,23 @@ import { dedupeByDocument } from '@/lib/search/hybrid-documents';
 import { mesclarSemDuplicar, contarNovos } from '@/lib/search/mesclar-semantica';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
+import { ValidationError } from '@/lib/errors/api-error';
+import { z } from 'zod';
+
+const SearchQuerySchema = z.string().trim().min(2).max(300);
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q')?.trim();
-
-    if (!query || query.length < 2) {
-      return NextResponse.json({
-        query: query || '',
-        viewer: { hasAiAccess: false },
-        results: {
-          glossaryTerms: [],
-          articles: [],
-          acts: [],
-          documents: [],
-          decisions: [],
-          blogPosts: [],
-          faqs: [],
-        }
-      });
+    const parsedQuery = SearchQuerySchema.safeParse(searchParams.get('q'));
+    if (!parsedQuery.success) {
+      throw new ValidationError('Consulta de busca inválida', parsedQuery.error.issues);
     }
+    const query = parsedQuery.data;
+
+    const ip = getClientIp(request);
+    await enforceRateLimit(`busca-integrada:${ip}`, 30, 60);
 
     // Verificar se usuário está autenticado (opcional — busca funciona sem login)
     const authResult = await verifyAuth(request);

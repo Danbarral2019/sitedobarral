@@ -244,13 +244,6 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
       const isAmbiguous = cls.score < EDITORIAL_SCORE_THRESHOLD || cls.ambiguous;
       if (isAmbiguous) stats.ambiguos++;
 
-      // Parse data
-      let parsedDate: Date | undefined;
-      try {
-        const [d, m, y] = cand.raw.date.split('/').map(Number);
-        parsedDate = new Date(y, m - 1, d);
-      } catch { parsedDate = undefined; }
-
       if (dryRun) {
         stats.enviadosParaStaging++;
         stats.detalhes.push(`[STAGING score=${cls.score}${isAmbiguous ? ' AMB' : ''}] ${cand.cleanTitle.substring(0, 80)}`);

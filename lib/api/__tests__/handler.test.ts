@@ -79,7 +79,8 @@ describe('lib/api/handler', () => {
       expect(vi.mocked(rl.enforceRateLimit)).toHaveBeenCalledWith(
         'middleware:admin:203.0.113.5',
         30,
-        60
+        60,
+        { failureMode: 'closed' }
       );
     });
 
@@ -149,7 +150,9 @@ describe('lib/api/handler', () => {
 
     it('responde 401 quando getCurrentUser retorna null', async () => {
       const auth = await import('@/lib/auth');
+      const rl = await import('@/lib/cache/rate-limit-helper');
       vi.mocked(auth.getCurrentUser).mockResolvedValue(null);
+      vi.mocked(rl.enforceRateLimit).mockClear();
       const handlerFn = vi.fn();
 
       const handler = withAdminApi(handlerFn);
@@ -157,11 +160,14 @@ describe('lib/api/handler', () => {
 
       expect(response.status).toBe(401);
       expect(handlerFn).not.toHaveBeenCalled();
+      expect(vi.mocked(rl.enforceRateLimit)).not.toHaveBeenCalled();
     });
 
     it('responde 403 quando user.role !== "admin"', async () => {
       const auth = await import('@/lib/auth');
+      const rl = await import('@/lib/cache/rate-limit-helper');
       vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'student' });
+      vi.mocked(rl.enforceRateLimit).mockClear();
       const handlerFn = vi.fn();
 
       const handler = withAdminApi(handlerFn);
@@ -169,6 +175,7 @@ describe('lib/api/handler', () => {
 
       expect(response.status).toBe(403);
       expect(handlerFn).not.toHaveBeenCalled();
+      expect(vi.mocked(rl.enforceRateLimit)).not.toHaveBeenCalled();
     });
 
     it('invoca handler com ctx.user populado quando user é admin', async () => {

@@ -93,6 +93,14 @@ export async function catalogarAcordao(doc: AcordaoParaCatalogar): Promise<Resul
       tcuEnriquecimentoStatus: 'success',
       tcuEnriquecimentoErro: null,
       tcuEnriquecidoEm: new Date(),
+      // Recoloca o acordao na fila de embeddings: ate 09/2026 o inteiro teor
+      // era gravado aqui mas o documento continuava 'completed' com o embedding
+      // da ementa, e a busca semantica nunca via o voto. extractedText precisa
+      // ir a null junto — processDocument so recalcula o texto-fonte quando ele
+      // esta vazio (ou com forceReprocess, que o cron nao usa).
+      extractedText: null,
+      embeddingStatus: 'pending',
+      embeddingError: null,
     },
   });
 

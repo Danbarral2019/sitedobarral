@@ -4,7 +4,6 @@ import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { UpdateLessonSchema } from '@/lib/validation-schemas';
-import { stringifyLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET: Busca uma lição por ID com relacionamentos

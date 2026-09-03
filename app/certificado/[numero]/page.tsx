@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { CertificateActions } from './CertificateActions';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
-
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.profdanielbarral.com';
 
 export async function generateMetadata({
   params,
@@ -19,28 +19,31 @@ export async function generateMetadata({
   });
   if (!cert) {
     return {
-      title: `Certificado ${numero} — Prof. Daniel Barral`,
+      title: `Certificado ${numero}`,
       description: 'Verificação de autenticidade de certificado.',
     };
   }
   const title = cert.revokedAt
-    ? `Certificado ${numero} (revogado) — Prof. Daniel Barral`
+    ? `Certificado ${numero} (revogado)`
     : `Certificado de ${cert.studentName} — ${cert.courseTitle}`;
   const description = cert.revokedAt
     ? 'Este certificado foi revogado.'
     : `${cert.studentName} concluiu ${cert.courseTitle} com o Prof. Daniel Barral. Verificação de autenticidade.`;
-  const ogImage = `${baseUrl}/api/og/certificate/${numero}`;
+  const ogImage = new URL(`/api/og/certificate/${numero}`, getSiteUrl());
   return {
     title,
     description,
     openGraph: {
       title,
       description,
-      url: `${baseUrl}/certificado/${numero}`,
+      url: new URL(`/certificado/${numero}`, getSiteUrl()),
       images: [{ url: ogImage, width: 1200, height: 630 }],
       type: 'website',
     },
     twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
+    alternates: {
+      canonical: new URL(`/certificado/${numero}`, getSiteUrl()),
+    },
   };
 }
 
@@ -90,7 +93,7 @@ export default async function CertificateVerificationPage({
     })
     .catch(() => undefined);
 
-  const verificationUrl = `${baseUrl}/certificado/${numero}`;
+  const verificationUrl = new URL(`/certificado/${numero}`, getSiteUrl()).toString();
   const qrDataUrl = await generateQrDataUrl(verificationUrl);
   const revoked = Boolean(certificate.revokedAt);
   const issuedDate = new Date(certificate.issuedAt).toLocaleDateString('pt-BR', {
@@ -180,11 +183,12 @@ export default async function CertificateVerificationPage({
             </div>
             <div className="px-8 py-6 flex flex-col items-center justify-center bg-surface-raised">
               {qrDataUrl ? (
-                <img
+                <Image
                   src={qrDataUrl}
                   alt="QR Code de verificação"
                   width={180}
                   height={180}
+                  unoptimized
                   className="rounded-md border border-border-subtle bg-white p-2"
                 />
               ) : (

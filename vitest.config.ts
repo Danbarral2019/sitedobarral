@@ -15,31 +15,13 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
-      exclude: [
-        'node_modules/',
-        'test/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '.next/',
-        'prisma/',
-        'scripts/',
-        'public/',
-        // Arquivos de documentação
-        '**/*.md',
-        // Funcionalidades futuras não testadas ainda
-        'FUNCIONALIDADES_FUTURAS/',
-      ],
-      // Ratchet: thresholds calibrados ~1-2pts abaixo do nível atual do
-      // RECORTE alcançável por testes (o v8 sem coverage.include mede só o
-      // código que algum teste importa — ~69% stmts; a cobertura real de todo
-      // lib/+app/ é ~21%). Mantidos pouco abaixo para o gate voltar a ser sinal
-      // vivo (bloqueia regressão) sem quebrar pela flutuação do denominador.
-      // A cada lote de testes, SUBIR estes números. Meta de longo prazo: 80/70.
+      include: ['lib/**/*.{ts,tsx}', 'app/api/**/*.{ts,tsx}'],
+      exclude: ['**/*.d.ts', '**/__tests__/**', '**/*.test.*', '**/*.spec.*'],
       thresholds: {
-        lines: 80,
-        functions: 79,
-        branches: 70,
-        statements: 80,
+        lines: 20,
+        functions: 15,
+        branches: 15,
+        statements: 20,
       },
     },
     // Timeout maior para testes assíncronos
@@ -50,6 +32,7 @@ export default defineConfig({
     exclude: [
       'node_modules',
       '.next',
+      'e2e',
       'prisma',
       'scripts',
       'FUNCIONALIDADES_FUTURAS',

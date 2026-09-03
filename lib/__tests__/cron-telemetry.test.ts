@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
 const createMock = vi.fn();
 const captureExceptionMock = vi.fn();
@@ -17,7 +18,7 @@ vi.mock('../logger', () => ({
 
 // Import APÓS os mocks (vi.mock é hoisted, mas import precisa vir depois para
 // garantir que o módulo testado use as versões mockadas).
-import { withCronTelemetry } from '../cron-telemetry';
+import { withCronRoute, withCronTelemetry } from '../cron-telemetry';
 
 describe('withCronTelemetry', () => {
   beforeEach(() => {
@@ -116,5 +117,32 @@ describe('withCronTelemetry', () => {
 
     const call = createMock.mock.calls[0][0];
     expect(call.data.metadata).toBe('{"batchSize":500,"source":"tcu-api"}');
+  });
+});
+
+describe('withCronRoute', () => {
+  const originalCronSecret = process.env.CRON_SECRET;
+
+  beforeEach(() => {
+    createMock.mockReset();
+    createMock.mockResolvedValue({ id: 'log-1' });
+  });
+
+  afterEach(() => {
+    if (originalCronSecret === undefined) delete process.env.CRON_SECRET;
+    else process.env.CRON_SECRET = originalCronSecret;
+  });
+
+  it('retorna erro de configuração e não executa o cron quando CRON_SECRET não existe', async () => {
+    delete process.env.CRON_SECRET;
+    const handler = vi.fn().mockResolvedValue({ itemsFound: 1 });
+    const wrappedCron = withCronRoute('test-route', handler);
+
+    const response = await wrappedCron(new NextRequest('http://localhost/api/cron/test'));
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: 'CRON_SECRET não configurado' });
+    expect(handler).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
   });
 });

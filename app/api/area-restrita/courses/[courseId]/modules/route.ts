@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { hasAccessToCourse, verifyToken } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
@@ -24,10 +24,10 @@ export async function GET(
 
     // Enrollment check (admin bypasses)
     if (user.role !== 'admin') {
-      const enrollment = await prisma.enrollment.findFirst({
-        where: { userId: user.id, courseId },
-      });
-      if (!enrollment) throw new AuthorizationError('Você não está matriculado neste curso.');
+      const hasCourseAccess = await hasAccessToCourse(courseId);
+      if (!hasCourseAccess) {
+        throw new AuthorizationError('Acesso expirado ou inexistente para este curso.');
+      }
     }
 
     return await withTiming(`lms.modules.${courseId}`, async () => {

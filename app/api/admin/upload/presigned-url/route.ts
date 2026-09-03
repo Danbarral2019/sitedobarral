@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
   try {
     // Rate limiting: 10 uploads por minuto (Redis)
     const ip = getClientIp(req);
-    await enforceRateLimit(`admin:upload:${ip}`, 10, 60);
+    await enforceRateLimit(`admin:upload:${ip}`, 10, 60, { failureMode: 'closed' });
 
     // 1. Authenticate user (admin only)
     const cookieStore = await cookies();

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 10 tentativas por minuto por IP (previne brute-force de QR codes)
     const ip = getClientIp(request);
-    await enforceRateLimit(`qr:validate:${ip}`, 10, 60);
+    await enforceRateLimit(`qr:validate:${ip}`, 10, 60, { failureMode: 'closed' });
 
     const { code } = await request.json();
 

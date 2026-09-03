@@ -7,6 +7,7 @@ import {
 import { courses } from '@/data/courses';
 import { prisma } from '@/lib/prisma';
 import CourseEnrollmentInfo from '@/components/CourseEnrollmentInfo';
+import { getSiteUrl } from '@/lib/site-url';
 
 export async function generateStaticParams() {
   return courses.map((course) => ({
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${course.title} | Prof. Daniel Barral`,
+    title: course.title,
     description: course.shortDescription || course.description.substring(0, 160),
     keywords: [
       'direito administrativo',
@@ -43,6 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: 'website',
       locale: 'pt_BR',
       siteName: 'Prof. Daniel Barral - Cursos de Direito Administrativo',
+      url: new URL(`/cursos/${course.slug}`, getSiteUrl()),
     },
     twitter: {
       card: 'summary_large_image',
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: course.shortDescription || course.description.substring(0, 160),
     },
     alternates: {
-      canonical: `/cursos/${course.slug}`,
+      canonical: new URL(`/cursos/${course.slug}`, getSiteUrl()),
     },
   };
 }
@@ -197,7 +199,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     provider: {
       '@type': 'Organization',
       name: 'Prof. Daniel Barral',
-      sameAs: 'https://profbarral.com.br',
+      sameAs: getSiteUrl().toString(),
     },
     educationalLevel: 'Professional',
     inLanguage: 'pt-BR',

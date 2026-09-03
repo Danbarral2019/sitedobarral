@@ -190,7 +190,7 @@ const nextConfig: NextConfig = {
 
 // Bundle analyzer — ativar com ANALYZE=true npm run build
 const analyzedConfig = process.env.ANALYZE === 'true'
-  ? withBundleAnalyzer({ enabled: true })(nextConfig)
+  ? withBundleAnalyzer({ enabled: true, openAnalyzer: false })(nextConfig)
   : nextConfig;
 
 // Sentry configuration options

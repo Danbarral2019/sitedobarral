@@ -5,7 +5,7 @@ import { LeiIndexer } from '@/lib/lei-indexer';
 import { identifyAndAlertHighlights } from '@/lib/tcu-highlight-analyzer';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { classifyDecision } from '@/lib/tribunal-scrapers/classifier';
-import { setLeiArticles, stringifyLeiArticles } from '@/lib/lei-articles';
+import { setLeiArticles } from '@/lib/lei-articles';
 import {
   buildSummaryPrompt,
   callGemini,

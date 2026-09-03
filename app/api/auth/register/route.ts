@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 10 cadastros por minuto por IP (Redis)
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:register:${ip}`, 10, 60);
+    await enforceRateLimit(`auth:register:${ip}`, 10, 60, { failureMode: 'closed' });
 
     // ✅ Validação com Zod
     const validation = await validateRequest(request, RegisterSchema);

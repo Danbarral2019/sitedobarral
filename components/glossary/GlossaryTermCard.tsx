@@ -1,8 +1,13 @@
 'use client';
 
 import { Eye, ChevronDown, ChevronUp, BookOpen, Scale } from 'lucide-react';
-import { ArticleBadges } from '../ArticleBadges';
-import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
+
+const ArticleBadges = dynamic(
+  () => import('../ArticleBadges').then((module) => module.ArticleBadges),
+  { ssr: false },
+);
+const ReactMarkdown = dynamic(() => import('react-markdown'), { ssr: false });
 
 interface ResolvedRelatedTerm {
   id: string;
@@ -19,7 +24,8 @@ interface GlossaryTermCardProps {
     shortDef?: string | null;
     category?: string | null;
     viewCount: number;
-    leiArticles?: string | null;
+    leiArticles?: string | string[] | null;
+    leiArticlesArr?: string[];
     relatedTerms?: string | null;
     resolvedRelatedTerms?: ResolvedRelatedTerm[];
   };
@@ -114,7 +120,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
           </div>
 
           {/* Artigos da Lei Indexados */}
-          {term.leiArticles && (
+          {(term.leiArticlesArr?.length || term.leiArticles) && (
             <div className="pt-4 border-t border-border-subtle">
               <div className="flex items-center gap-2 mb-3">
                 <Scale className="w-4 h-4 text-brand-600" />
@@ -123,7 +129,7 @@ export function GlossaryTermCard({ term, isExpanded, onToggle, onTermClick, arti
                 </h4>
               </div>
               <ArticleBadges
-                leiArticles={term.leiArticles}
+                leiArticles={term.leiArticlesArr || term.leiArticles || null}
                 maxVisible={10}
                 onArticleClick={(articleNum) => {
                   window.location.href = `${articleBasePath}/${articleNum}`;
