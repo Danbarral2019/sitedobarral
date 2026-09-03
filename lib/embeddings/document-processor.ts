@@ -67,6 +67,7 @@ export async function processDocument(
         content: true,
         description: true,
         tcuEmentaCompleta: true,
+        tcuTextoCompleto: true,
         leiArticlesArr: true,
       },
     });
@@ -205,13 +206,16 @@ export async function processDocument(
 
     console.log(`📦 Created ${chunks.length} chunks`);
 
-    // 8. Remove chunks antigos
-    await prisma.$executeRaw`DELETE FROM "DocumentChunk" WHERE "documentId" = ${documentId}`;
-
-    // 9. Gera embeddings em batch
+    // 8. Gera embeddings em batch
     console.log(`🧠 Generating embeddings...`);
     const texts = chunks.map(c => c.content);
     const embeddingResult = await generateBatchEmbeddings(texts);
+
+    // 9. Remove chunks antigos — DEPOIS dos embeddings, de proposito. Ate
+    // 09/2026 o delete vinha antes, e uma falha de API (429, timeout) deixava
+    // o documento com zero chunks: invisivel na busca ate alguem reprocessar.
+    // Agora a janela de indisponibilidade e so o intervalo delete->insert.
+    await prisma.$executeRaw`DELETE FROM "DocumentChunk" WHERE "documentId" = ${documentId}`;
 
     // 10. Salva chunks com embeddings no banco
     console.log(`💾 Saving ${chunks.length} chunks to database...`);
@@ -311,6 +315,7 @@ export async function processPendingDocuments(
         { r2Key: { not: null } },
         { content: { not: null } },
         { tcuEmentaCompleta: { not: null } },
+        { tcuTextoCompleto: { not: null } },
         { description: { not: null } },
         { extractedText: { not: null } },
       ],
@@ -531,6 +536,7 @@ export async function getProcessingStats(): Promise<{
           { r2Key: { not: null } },
           { content: { not: null } },
           { tcuEmentaCompleta: { not: null } },
+          { tcuTextoCompleto: { not: null } },
           { description: { not: null } },
           { extractedText: { not: null } },
         ],

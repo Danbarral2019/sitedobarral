@@ -46,6 +46,22 @@ describe('catalogarAcordao', () => {
     expect(data.tcuEnriquecimentoStatus).toBe('success');
   });
 
+  it('sucesso: recoloca o acórdão na fila de embeddings com o texto-fonte zerado', async () => {
+    // Regressão 09/2026: o inteiro teor era gravado sem reenfileirar, e o
+    // documento seguia 'completed' com o embedding da ementa (1 chunk, ~600
+    // chars). extractedText tem que ir a null junto, senão processDocument
+    // reaproveita o texto antigo — o cron não usa forceReprocess.
+    mockFetch.mockResolvedValue({ ok: true, buf: Buffer.from('rtf') });
+    mockRtfToText.mockResolvedValue(TEXTO_COM_SECOES);
+
+    await catalogarAcordao(doc);
+
+    const data = mockUpdate.mock.calls[0][0].data;
+    expect(data.embeddingStatus).toBe('pending');
+    expect(data.extractedText).toBeNull();
+    expect(data.embeddingError).toBeNull();
+  });
+
   it('acórdão só com dispositivo: status ok-sem-secoes, debatidos vazio', async () => {
     mockFetch.mockResolvedValue({ ok: true, buf: Buffer.from('rtf') });
     mockRtfToText.mockResolvedValue('ACÓRDÃO Nº 2/2026 – TCU – Plenário\nMulta aplicada.');
