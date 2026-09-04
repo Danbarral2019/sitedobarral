@@ -21,6 +21,7 @@ import { selecionarElegiveis, persistirDestilacao } from '@/lib/tcu/persistir-te
 import { coletarTrechosDoAlvo } from '@/lib/tcu/trechos-de-citacao';
 import { montarPromptTese, parseRespostaTese } from '@/lib/tcu/destilar-tese';
 import { buscarAcordaoPorNumero, escolherCandidato } from '@/lib/tcu/buscar-acordao-tcu';
+import { registrarIdentidadeIrresolvida } from '@/lib/tcu/resolver-identidade';
 import { garantirTemaDeAlvo, naBase } from '@/lib/tcu/tema-acordao';
 import { generate } from '@/lib/ai';
 
@@ -62,6 +63,19 @@ export async function GET(request: NextRequest) {
         // depois descartar é gastar LLM à toa.
         const proprio = escolherCandidato(cands);
         if (!proprio) {
+          // Mesma discriminação de resolverIdentidade (lib/tcu/resolver-identidade.ts):
+          // ambíguo (2+ candidatos não-relação) e não encontrado (zero) são,
+          // em regra, permanentes — registra o sumidouro para o alvo não
+          // voltar ao topo da seleção todo dia (spec 2026-09-04). Erro de
+          // rede não passa por aqui: `cands` só chega vazio por candidatura
+          // real, não por falha — a falha já teria lançado em `buscarAcordaoPorNumero`
+          // e caído no catch do laço, sem gravar nada.
+          const completos = cands.filter((cd) => !cd.isRelacao);
+          if (completos.length === 0) {
+            await registrarIdentidadeIrresolvida(c.numero, c.ano, 'naoEncontrado');
+          } else {
+            await registrarIdentidadeIrresolvida(c.numero, c.ano, 'ambiguo', completos.length);
+          }
           ambiguos++;
           continue;
         }

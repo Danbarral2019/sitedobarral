@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { TeseDestilada } from './destilar-tese';
 import type { DossieUso, TrechoCitacao } from './trechos-de-citacao';
 
-const { mockAnterior, mockFindMany, mockTransaction, mockQueryRaw, mockDocs } = vi.hoisted(() => ({
+const { mockAnterior, mockFindMany, mockTransaction, mockQueryRaw, mockDocs, mockIrresolviveis } = vi.hoisted(() => ({
   mockAnterior: vi.fn(),
   mockFindMany: vi.fn(),
   mockTransaction: vi.fn(),
   mockQueryRaw: vi.fn(),
   mockDocs: vi.fn(),
+  mockIrresolviveis: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -17,12 +18,21 @@ vi.mock('@/lib/prisma', () => ({
       findMany: (...a: unknown[]) => mockFindMany(...a),
     },
     document: { findMany: (...a: unknown[]) => mockDocs(...a) },
+    alvoIdentidadeIrresolvida: { findMany: (...a: unknown[]) => mockIrresolviveis(...a) },
     $transaction: (...a: unknown[]) => mockTransaction(...a),
     $queryRaw: (...a: unknown[]) => mockQueryRaw(...a),
   },
 }));
 
-import { ehElegivel, selecionarElegiveis, persistirDestilacao, MIN_NO_VOTO, FATOR_CRESCIMENTO, DIAS_MINIMOS } from './persistir-tese';
+import {
+  ehElegivel,
+  selecionarElegiveis,
+  persistirDestilacao,
+  MIN_NO_VOTO,
+  FATOR_CRESCIMENTO,
+  DIAS_MINIMOS,
+  DIAS_REAVALIACAO_IDENTIDADE,
+} from './persistir-tese';
 
 const agora = new Date('2026-07-21T12:00:00Z');
 const diasAtras = (n: number) => new Date(agora.getTime() - n * 24 * 60 * 60 * 1000);
@@ -466,6 +476,7 @@ describe('persistirDestilacao', () => {
 describe('selecionarElegiveis', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIrresolviveis.mockResolvedValue([]); // nenhum sumidouro registrado, por padrão
   });
 
   it('(g) respeita o limite mesmo com mais candidatos elegiveis que o pedido', async () => {
@@ -526,6 +537,40 @@ describe('selecionarElegiveis', () => {
     const out = await selecionarElegiveis(10, 10);
 
     expect(out.map((c) => c.numero)).toEqual([1]);
+  });
+
+  // Sumidouro do cron (spec 2026-09-04): um alvo cuja identidade não resolve
+  // nunca ganha `TeseDestilacao.atual`, então nunca sairia sozinho desta
+  // seleção — sem a exclusão abaixo ele voltaria ao topo todo dia, para sempre.
+  it('pula alvo com identidade irresolvida dentro da janela de reavaliação', async () => {
+    mockQueryRaw.mockResolvedValue([
+      { numero: 1, ano: 2026, no_voto: 50 },
+      { numero: 2, ano: 2026, no_voto: 40 },
+    ]);
+    mockFindMany.mockResolvedValue([]);
+    mockIrresolviveis.mockResolvedValue([{ chave: '1/2026' }]);
+
+    const out = await selecionarElegiveis(10);
+
+    expect(out.map((c) => c.numero)).toEqual([2]);
+  });
+
+  it('volta a considerar o alvo depois que a janela de reavaliação expira', async () => {
+    mockQueryRaw.mockResolvedValue([{ numero: 1, ano: 2026, no_voto: 50 }]);
+    mockFindMany.mockResolvedValue([]);
+    // O próprio filtro é feito no banco (`verificadoEm >= janela`), então uma
+    // linha fora da janela nem chega no resultado do findMany — simulamos
+    // isso devolvendo lista vazia, como o Prisma real devolveria.
+    mockIrresolviveis.mockResolvedValue([]);
+
+    const out = await selecionarElegiveis(10);
+
+    expect(out.map((c) => c.numero)).toEqual([1]);
+    const where = mockIrresolviveis.mock.calls[0][0].where;
+    expect(where.verificadoEm.gte).toBeInstanceOf(Date);
+    const diasNaJanela =
+      (Date.now() - where.verificadoEm.gte.getTime()) / (24 * 60 * 60 * 1000);
+    expect(Math.round(diasNaJanela)).toBe(DIAS_REAVALIACAO_IDENTIDADE);
   });
 });
 

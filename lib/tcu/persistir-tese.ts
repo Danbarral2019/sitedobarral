@@ -70,6 +70,9 @@ export const FATOR_CRESCIMENTO = 1.5;
 export const DIAS_MINIMOS = 7;
 /** Sobe quando prompt ou modelo do motor mudarem, forçando redestilação. */
 export const VERSAO_MOTOR = 1;
+/** Janela de reavaliação: a ambiguidade só some se o TCU mudar os próprios
+ *  dados, o que é raro. 90 dias derruba ~109 requisições/dia para ~1,2. */
+export const DIAS_REAVALIACAO_IDENTIDADE = 90;
 
 export interface Candidato {
   numero: number;
@@ -135,11 +138,27 @@ export async function selecionarElegiveis(
       )
     : null;
 
+  // Sumidouro do cron (2026-09-04): um alvo cuja identidade não resolve
+  // (ambíguo ou não encontrado) nunca é destilado, então nunca ganha versão
+  // `atual` — sem essa exclusão ele voltaria ao topo todo dia, para sempre.
+  // A janela é reavaliada porque o TCU pode publicar o que faltava ou
+  // desambiguar o que existe hoje, ainda que raramente.
+  const janelaReavaliacao = new Date(agora.getTime() - DIAS_REAVALIACAO_IDENTIDADE * 24 * 60 * 60 * 1000);
+  const irresolviveis = new Set(
+    (
+      await prisma.alvoIdentidadeIrresolvida.findMany({
+        where: { verificadoEm: { gte: janelaReavaliacao } },
+        select: { chave: true },
+      })
+    ).map((a) => a.chave)
+  );
+
   const out: Candidato[] = [];
   for (const alvo of alvos) {
     if (out.length >= limite) break;
     const chave = `${alvo.numero}/${alvo.ano}`;
     if (noTema && !noTema.has(chave)) continue;
+    if (irresolviveis.has(chave)) continue;
     const atual = porChave.get(chave) ?? null;
     // Versão de motor antiga força redestilação, independente do crescimento.
     const motorDesatualizado = atual !== null && atual.versaoMotor < VERSAO_MOTOR;

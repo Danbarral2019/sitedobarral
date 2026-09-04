@@ -15,7 +15,7 @@ dotenv.config({ path: '.env.local' });
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { resolverIdentidade } from '../lib/tcu/resolver-identidade';
+import { resolverIdentidade, registrarIdentidadeIrresolvida } from '../lib/tcu/resolver-identidade';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL as string });
 const prisma = new PrismaClient({ adapter, log: ['error'] });
@@ -60,11 +60,15 @@ async function main() {
     if (r.tipo === 'naoEncontrado') {
       naoEncontrados++;
       console.log(`  x  ${a.numeroAlvo}/${a.anoAlvo} — não encontrado`);
+      // Registra o sumidouro para `selecionarElegiveis` parar de oferecer
+      // este alvo por DIAS_REAVALIACAO_IDENTIDADE (spec 2026-09-04).
+      if (executar) await registrarIdentidadeIrresolvida(a.numeroAlvo, a.anoAlvo, 'naoEncontrado');
       continue;
     }
     if (r.tipo === 'ambiguo') {
       ambiguos++;
       console.log(`  ?  ${a.numeroAlvo}/${a.anoAlvo} — ambíguo (${r.candidatos} candidatos)`);
+      if (executar) await registrarIdentidadeIrresolvida(a.numeroAlvo, a.anoAlvo, 'ambiguo', r.candidatos);
       continue;
     }
     errosTransitorios++;

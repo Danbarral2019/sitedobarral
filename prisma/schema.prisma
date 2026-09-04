@@ -2266,3 +2266,32 @@ model AcordaoTema {
   @@index([tema])
   @@index([chave])
 }
+
+/// Sumidouro do cron `destilar-teses-tcu`: um alvo cuja identidade oficial o
+/// TCU não resolve (ambíguo entre colegiados, ou não encontrado) nunca é
+/// destilado, então nunca ganha `TeseDestilacao.atual` — sem este registro ele
+/// voltaria ao topo de `selecionarElegiveis` todo dia, para sempre, gastando
+/// uma requisição ao TCU e 1s de espera por execução. Um dry-run em
+/// 2026-09-04 mediu 103 alvos permanentemente ambíguos + 6 não encontrados,
+/// contra `CANDIDATOS_POR_RODADA` de apenas 40 — 109 sumidouros disputando 40
+/// vagas teria feito o cron produzir pouco ou nada, em silêncio.
+///
+/// Falha de rede (`erroTransitorio` em `ResultadoIdentidade`) NUNCA entra
+/// aqui: é passageira, e o alvo deve voltar à fila na próxima passada.
+model AlvoIdentidadeIrresolvida {
+  id         String @id @default(cuid())
+  numeroAlvo Int
+  anoAlvo    Int
+  chave      String
+
+  /// 'ambiguo' (o TCU devolve mais de um candidato para o mesmo número e ano)
+  /// ou 'naoEncontrado'. Falha de rede NÃO entra aqui — ela deve ser retentada.
+  resultado    String
+  candidatos   Int?
+  verificadoEm DateTime @updatedAt
+  tentativas   Int      @default(1)
+
+  @@unique([numeroAlvo, anoAlvo])
+  @@index([chave])
+  @@index([verificadoEm])
+}

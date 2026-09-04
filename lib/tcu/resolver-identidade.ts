@@ -7,6 +7,7 @@
  */
 import { buscarAcordaoPorNumero, escolherCandidato } from './buscar-acordao-tcu';
 import type { IdentidadeAlvo } from './persistir-tese';
+import { prisma } from '../prisma';
 
 export type { IdentidadeAlvo };
 
@@ -51,4 +52,30 @@ export async function resolverIdentidade(numero: number, ano: number): Promise<R
   const completos = candidatos.filter((c) => !c.isRelacao);
   if (completos.length === 0) return { tipo: 'naoEncontrado' };
   return { tipo: 'ambiguo', candidatos: completos.length };
+}
+
+/**
+ * Registra um alvo cuja identidade oficial o TCU não resolve, para
+ * `selecionarElegiveis` parar de oferecê-lo (spec de correção do sumidouro,
+ * 2026-09-04 — ver `AlvoIdentidadeIrresolvida` no schema).
+ *
+ * Upsert por (numeroAlvo, anoAlvo): no create grava `tentativas: 1`; no
+ * update atualiza `resultado`/`candidatos` e incrementa `tentativas` — o
+ * `verificadoEm` é `@updatedAt`, o Prisma cuida sozinho.
+ *
+ * NUNCA chamar para `erroTransitorio` — falha de rede é passageira e o alvo
+ * deve voltar à fila na próxima passada, não ficar de fora por 90 dias.
+ */
+export async function registrarIdentidadeIrresolvida(
+  numero: number,
+  ano: number,
+  resultado: 'ambiguo' | 'naoEncontrado',
+  candidatos?: number
+): Promise<void> {
+  const chave = `${numero}/${ano}`;
+  await prisma.alvoIdentidadeIrresolvida.upsert({
+    where: { numeroAlvo_anoAlvo: { numeroAlvo: numero, anoAlvo: ano } },
+    create: { numeroAlvo: numero, anoAlvo: ano, chave, resultado, candidatos: candidatos ?? null, tentativas: 1 },
+    update: { resultado, candidatos: candidatos ?? null, tentativas: { increment: 1 } },
+  });
 }
