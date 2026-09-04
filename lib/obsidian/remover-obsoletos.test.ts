@@ -9,6 +9,7 @@ vi.mock('fs/promises', async () => {
 });
 
 import { removerObsoletos } from './export';
+import { caminhoTese, type DestilacaoParaExport } from './tese-md';
 
 describe('removerObsoletos', () => {
   beforeEach(() => {
@@ -79,5 +80,41 @@ describe('removerObsoletos', () => {
     //    nem `{ force: true }`, que alcançariam diretórios inteiros ou
     //    silenciariam erro de apagar algo que não deveria.
     expect(mockRm.mock.calls[0]).toEqual([join('/destino', 'teses', 'b.md')]);
+  });
+
+  // ---------------------------------------------------------------------
+  // Acoplamento do separador de caminho entre os dois lados.
+  //
+  // `caminhoTese` monta `teses/x.md` com barra literal e `removerObsoletos`
+  // compara com `${subdiretorio}/${nome}`, também literal. Os dois lados
+  // nunca se encontram através de `path`: é uma convenção de string
+  // acordada entre dois arquivos. Cada um era travado por uma string
+  // literal em um arquivo de teste SEPARADO, e nenhum teste alimentava a
+  // saída de um na entrada do outro.
+  //
+  // Trocar qualquer um dos dois por `path.join()` passa verde no CI
+  // (`ubuntu-latest`, onde `join('teses','x.md') === 'teses/x.md'`) e só
+  // quebra no Windows — que é onde o script roda, e onde o efeito seria
+  // as chaves não casarem e a remoção apagar TODOS os arquivos que a
+  // exportação acabou de escrever.
+  //
+  // Este teste falha nas duas direções da divergência, em qualquer
+  // plataforma, porque usa a saída real de `caminhoTese` como esperado.
+  // ---------------------------------------------------------------------
+  it('o caminho gerado por caminhoTese é reconhecido por removerObsoletos', async () => {
+    const caminho = caminhoTese({
+      numeroAlvo: 1441,
+      anoAlvo: 2016,
+      colegiadoAlvo: 'Plenário',
+    } as DestilacaoParaExport);
+    // O basename como o `readdir` do subdiretório o devolveria — separador
+    // qualquer que seja, é sempre o último componente.
+    const nome = caminho.slice(Math.max(caminho.lastIndexOf('/'), caminho.lastIndexOf('\\')) + 1);
+    mockReaddir.mockResolvedValue([nome]);
+
+    const removidos = await removerObsoletos('/destino', 'teses', new Set([caminho]), false);
+
+    expect(removidos).toEqual([]);
+    expect(mockRm).not.toHaveBeenCalled();
   });
 });
