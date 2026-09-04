@@ -9,7 +9,7 @@
 
 O cron `destilar-teses-tcu` produz teses desde julho: **265 destilações atuais, 512 enunciados, 110 divergências**, sobre um grafo de **100.016 arestas** de citação. Nada disso chega ao usuário — nenhuma rota do site lê `TeseDestilacao`, as teses não têm embeddings e não são exportadas. O único consumo é a folha de calibração (`scripts/build-folha-teses-tcu.ts`), gerada sob demanda.
 
-Em 03/09/2026, 87 enunciados foram aprovados em lote (confiança alta, posteriores ao filtro de matéria), somando **95 com veredito `fiel`** junto dos 8 julgados individualmente.
+Em 03/09/2026, 87 enunciados foram aprovados em lote (confiança alta, posteriores ao filtro de matéria), somando 95 com veredito `fiel` junto dos 8 julgados individualmente. Desde então duas versões foram superadas por redestilação: em 04/09 são **93 em destilações atuais** — o número que este spec usa em todas as contas — e 14 outros em versões já superadas.
 
 As teses são o ativo mais diferenciado da base: o TCU não publica "teses". Elas são inferidas de como votos posteriores invocam cada precedente.
 
@@ -73,7 +73,17 @@ document         Document? @relation(fields: [documentId], references: [id], onD
 
 O slug da rota deriva da identidade oficial: `/teses/1441-2016-plenario`.
 
-`destilar-teses-tcu` passa a chamar `escolherCandidato(cands)` e a **gravar** a identidade do candidato escolhido, recusando-se a destilar quando houver ambiguidade — destilar para depois descartar é gastar LLM à toa.
+**Contrato de `escolherCandidato` — alteração explícita.** O helper hoje termina em `return (completos[0] ?? cands[0]) || null` (`buscar-acordao-tcu.ts:62-63`): com vários candidatos, devolve o primeiro. Essa queda é exatamente a inferência que a §4.1 descarta, e ela precisa sair do caminho da identidade. O contrato passa a ser:
+
+| Candidatos não-relação | Retorno |
+|---|---|
+| zero | `null` |
+| exatamente um | o candidato |
+| dois ou mais | `null` — ambiguidade |
+
+Sem queda para `cands[0]` em nenhum caso. Se o helper for mantido como está para outros usos, a cardinalidade é validada **antes** da chamada e o caminho da identidade não usa o retorno dele — mas a preferência é alterar o helper, porque um contrato que devolve "algum candidato" é uma armadilha para o próximo chamador.
+
+`destilar-teses-tcu` grava a identidade do candidato assim resolvido e **recusa-se a destilar** quando o retorno for `null` — destilar para depois descartar é gastar LLM à toa.
 
 **Backfill:** varrer as 265 destilações atuais consultando o TCU a 1 req/s (~5 min). Isso recupera boa parte dos 39 alvos ausentes da nossa base, porque o TCU os conhece mesmo quando não os ingerimos.
 
@@ -113,8 +123,17 @@ ELEGIVEL_BASE(e) :=
   AND e.retiradoEm IS NULL
   AND e.destilacao.atual = true
   AND e.destilacao.acordaoKey IS NOT NULL      -- identidade inequívoca (§4)
-  AND EXISTS (TeseTrechoFonte WHERE enunciadoId = e.id)
+  AND EVIDENCIA_INTEGRAL(e)
 ```
+
+```
+EVIDENCIA_INTEGRAL(e) :=
+      count(TeseTrechoFonte WHERE enunciadoId = e.id)
+        = count(índices distintos declarados em e.trechosFonte)
+  AND todo trecho persistido tem caminho para o inteiro teor (§7.1)
+```
+
+**Alguma evidência não basta.** Se o enunciado declara três índices em `trechosFonte` e só um foi resolvido, a tese continuaria elegível com a fundamentação pela metade — e o leitor veria "os trechos que sustentam esta tese" sem saber que faltam dois. Faltando qualquer índice declarado, **o enunciado inteiro fica inelegível**. É a mesma lógica da §7.2: perder a tese é preferível a exibi-la mal sustentada.
 
 Por consumidor:
 
@@ -139,14 +158,16 @@ const trechosConfiaveis = dossie.trechos.length === d.dossieTrechos;
 
 `montarDossie` ordena por citação-no-voto e **corta em 40** (`trechos-de-citacao.ts:74,85,96`). Para um alvo saturado no teto, um citante novo entra no top-40 e desloca outro: a contagem continua 40, a verificação passa, e os índices apontam para trechos diferentes.
 
-**Medição em 03/09/2026**, sobre os 95 enunciados `fiel`:
+**Medição em 04/09/2026**, sobre os **93** enunciados `fiel` em destilações **atuais**:
 
 | Estado do dossiê | Destilações | Enunciados |
 |---|---|---|
 | Abaixo do teto de 40 | 39 | 52 |
-| Saturado (=40) | 28 | **43** |
+| Saturado (=40) | 27 | **41** |
 
-Os 43 sob risco são os mais citados — as melhores teses do acervo.
+Os 41 sob risco são os mais citados — as melhores teses do acervo.
+
+(Outros 14 enunciados `fiel` vivem em versões já superadas e não são consumidos por ninguém, por `atual = false`. A contagem de 95 que circulou em 03/09 é histórica: incluía duas versões superadas desde então.)
 
 **Fragilidade adicional:** a consulta de arestas em `coletarTrechosDoAlvo` não tem `orderBy`. Como `dedup.sort` empata por `noVoto` e comprimento, empates são desfeitos pela ordem de retorno do banco, indefinida. Dois runs podem produzir índices diferentes sobre o mesmo grafo.
 
@@ -174,6 +195,7 @@ model TeseTrechoFonte {
   noVoto      Boolean
   capturadoEm DateTime @default(now())
 
+  @@unique([enunciadoId, ordem])
   @@index([enunciadoId])
   @@index([origemDocumentId])
 }
@@ -195,8 +217,13 @@ Invariante: **todo `TeseTrechoFonte` consumível tem pelo menos um caminho para 
 2. A consulta de arestas ganha `orderBy` determinístico e `montarDossie` ganha desempate por `origemChave`. Sem isso a reconstrução não é reproduzível.
 3. Para cada destilação `atual` com enunciado `fiel`: reconstruir o dossiê com `td.criadoEm`, conferir `dossie.trechos.length === td.dossieTrechos`, e só então resolver os índices e gravar.
 4. Onde a contagem não casar, **não grava**. O enunciado fica sem evidência e, por §6, fora de todos os consumidores.
+5. Resolver **todos** os índices declarados em `trechosFonte` antes de gravar qualquer um. Índice fora do intervalo do dossiê, ou trecho sem caminho para o inteiro teor, invalida o enunciado inteiro — não se grava evidência parcial.
 
-Consequência aceita: parte dos 43 saturados pode ficar de fora. Perder teses é preferível a exibir evidência trocada.
+**Gravação transacional e idempotente.** Os trechos de um enunciado são gravados numa transação: ou entram todos, ou nenhum. Uma falha no meio não pode deixar dois de três persistidos, porque `EVIDENCIA_INTEGRAL` mediria a diferença como perda permanente.
+
+A idempotência vem de `@@unique([enunciadoId, ordem])` (§7.1) com upsert por essa chave: reexecutar o backfill sobre um enunciado já resolvido reescreve as mesmas linhas, sem duplicar nem reordenar. Índices repetidos no `trechosFonte` colapsam na mesma `ordem` em vez de gerar linha extra. Isso importa porque o backfill vai ser reexecutado — por lote interrompido, por retentativa de rede no TCU, ou depois de corrigir a resolução de identidade.
+
+Consequência aceita: parte dos 41 saturados pode ficar de fora. Perder teses é preferível a exibir evidência trocada.
 
 ### 7.3 Daqui para frente
 
@@ -258,8 +285,12 @@ publicado: true
 vitrine: false
 destilacaoId: "..."
 atualizadoEm: 2026-09-04T12:00:00Z
-fonte: https://profbarral.com.br/teses/1441-2016-plenario
+acordaoKey: ACORDAO-COMPLETO-1234567
+fonteOficial: https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-1234567
+fonteSite: https://profbarral.com.br/teses/1441-2016-plenario   # ausente quando não publicada
 ```
+
+`acordaoKey` e `fonteOficial` são obrigatórios; `fonteSite` é condicional. O ELIC exporta também teses ainda **não publicadas** (§6), e para essas a página do site não existe — se a URL do site fosse a única fonte no frontmatter, o RAG teria registro de procedência apontando para um 404. A rastreabilidade tem de repousar no identificador oficial, que independe do nosso estado editorial.
 
 O corpo traz cada enunciado, sua `inovacao`, e os trechos-fonte com o acórdão citante identificado e um wikilink para a nota dele quando existir no acervo — mantendo a procedência também no RAG.
 
@@ -301,7 +332,7 @@ A regra é a mesma nas duas superfícies, e depende do usuário, não da rota: q
 - **Texto embeddado:** o enunciado, precedido do assunto da destilação e da identificação do acórdão-líder (`Acórdão 1441/2016 — Plenário`). Um chunk por enunciado. Sem esse prefixo, a súmula flutua sem o precedente e o retrieval perde o vínculo que a §9 quer preservar.
 - **Entra na fila** (`embeddingStatus = 'pending'`) quando o enunciado passa a satisfazer `ELEGIVEL_BASE`: ao ganhar veredito `fiel`, ao ganhar evidência no backfill, ao ter a identidade resolvida, ou ao ser criado já elegível numa redestilação com herança.
 - **Sai do índice** quando deixa de satisfazer `ELEGIVEL_BASE`: retirada, veredito alterado para `imprecisa`/`errada`, perda de `atual` numa redestilação, ou identidade que virou ambígua. Nesses casos o chunk é **apagado**, não apenas despriorizado — chunk órfão continua sendo recuperado e citado.
-- **Quem apaga:** os scripts que causam a transição (retirada, publicação, promoção, backfill) marcam o enunciado; `process-index-jobs` faz a reconciliação, apagando os chunks de enunciados inelegíveis e indexando os pendentes. A reconciliação é uma consulta pelo predicado, não uma lista de eventos — assim uma transição feita por SQL direto no banco também é capturada.
+- **Quem apaga:** os scripts que causam transição de **elegibilidade** (retirada, backfill de evidência, backfill de identidade, redestilação) marcam o enunciado; `process-index-jobs` faz a reconciliação, apagando os chunks de enunciados inelegíveis e indexando os pendentes. Publicação e promoção **não** entram nessa lista — elas não mudam elegibilidade. A reconciliação é uma consulta pelo predicado, não uma lista de eventos — assim uma transição feita por SQL direto no banco também é capturada.
 - **`publicado` e `vitrinePublica` não afetam o índice.** Eles são filtro de leitura (§6, via `JOIN`), não critério de indexação: um mesmo chunk serve vitrine e acervo, e é a consulta que decide o que enxerga. Indexar duas vezes seria duplicar o vetor para variar só o predicado.
 
 **Opt-in, não default.** `includeTeses?: boolean` (default `false`) em `SearchOptions` e `HybridSearchOptions`, no mesmo desenho de `includeTribunalDecisions` (`hybrid-search.ts:28`). Nenhum chamador existente muda de comportamento ao subir esta feature; cada superfície liga explicitamente. Junto vai `tesesVisibilidade: 'vitrine' | 'acervo'`, que seleciona o predicado.
@@ -315,7 +346,18 @@ A regra é a mesma nas duas superfícies, e depende do usuário, não da rota: q
 - `app/busca/page.tsx`: `TabType` ganha `'teses'`, com contador na aba e no total.
 - Cartão novo em `components/busca/`, exibindo enunciado, precedente e trecho-fonte — a mesma invariante de procedência da §7.
 
-**Canibalização (risco principal).** A tese é curta, abstrata e escrita em linguagem de súmula, portanto formalmente muito parecida com uma pergunta de usuário. Tende a pontuar alto e expulsar os acórdãos do contexto, fazendo a IA responder pela síntese sem a fonte — o oposto da decisão de procedência. Mitigação: quando uma tese entra no contexto, **o acórdão-líder entra junto**, por recuperação complementar, reaproveitando o mecanismo que `answerContext.ts:170` já usa para enunciados, ONs e apostilas. A eficácia é medida (§11), não presumida.
+**Canibalização (risco principal).** A tese é curta, abstrata e escrita em linguagem de súmula, portanto formalmente muito parecida com uma pergunta de usuário. Tende a pontuar alto e expulsar os acórdãos do contexto, fazendo a IA responder pela síntese sem a fonte — o oposto da decisão de procedência.
+
+**A companhia obrigatória da tese é a sua evidência, não o acórdão-líder.** Fazer o líder acompanhar a tese seria impossível em **39 das 93** teses, cujo acórdão-líder não existe como `Document` (§4.1). E seria conceitualmente errado mesmo quando possível: a tese não foi extraída do líder — foi extraída das manifestações posteriores que o citaram. Quem sustenta a afirmação é o acórdão **citante**, que é justamente o que `TeseTrechoFonte` guarda.
+
+Regra de recuperação complementar, reaproveitando o mecanismo de `answerContext.ts:170`:
+
+1. Tese recuperada → **pelo menos um `TeseTrechoFonte` entra no contexto**, sempre. Ele já está persistido, então não depende de recuperação nem de o citante existir na base.
+2. Quando `origemDocumentId` estiver resolvido, o `Document` do **acórdão citante** entra junto, dando ao modelo o inteiro teor de onde o trecho saiu.
+3. Quando `destilacao.documentId` estiver resolvido, o `Document` do **acórdão-líder** entra **adicionalmente**, como complemento.
+4. A ausência do `Document` do líder **não bloqueia** a tese — preserva-se as 93.
+
+A eficácia é medida (§11), não presumida.
 
 **Citação:** `sourceType: 'tese'` apontando para `/teses/[chave]` com âncora do enunciado, com o trecho-fonte viajando junto na resposta.
 
@@ -366,13 +408,18 @@ Colisões de identidade não precisam de critério aqui: `ELEGIVEL_BASE` já as 
 - Enunciado sem `TeseTrechoFonte` não aparece em nenhum consumidor.
 - `acordaoKey IS NULL` (identidade ambígua ou não resolvida) exclui de **todos** os consumidores, inclusive do ELIC.
 - Retirada é herdada em redestilação de texto idêntico — a tese não ressuscita.
-- Resolução de identidade: um candidato não-relação resolve; dois ou mais deixam `acordaoKey` nulo; falha de rede não grava identidade errada.
+- Resolução de identidade por cardinalidade: zero candidatos não-relação → `null`; exatamente um → resolvido; dois ou mais → `null` por ambiguidade, **sem** queda para `cands[0]`; falha de rede não grava identidade errada.
 - `documentId` ausente não bloqueia nada — identidade vem do TCU, não da nossa base.
 
-**Evidência e acesso ao inteiro teor**
+**Evidência: integralidade, idempotência e acesso ao inteiro teor**
 - Todo `TeseTrechoFonte` gravado tem `origemDocumentId` **ou** `origemUrl`/`origemLinkPDF`.
 - Perder a relação com `Document` (`SetNull`) preserva o caminho externo até o inteiro teor.
 - Trecho sem nenhum caminho não é gravado, e o enunciado sai dos consumidores.
+- **Perda parcial:** enunciado que declara 3 índices e tem 2 persistidos é inelegível em todos os consumidores.
+- **Índice inexistente:** índice fora do intervalo do dossiê invalida o enunciado inteiro; nada é gravado.
+- **Índices repetidos** em `trechosFonte` colapsam numa única `ordem`, sem linha duplicada.
+- **Reexecução do backfill** sobre enunciado já resolvido não duplica, não reordena e não altera contagem (`@@unique([enunciadoId, ordem])` + upsert).
+- **Transação:** falha no meio da gravação não deixa evidência parcial persistida.
 
 **Publicação**
 - `publicar-acervo-teses` publica só o que satisfaz `ELEGIVEL_BASE`; dry-run não escreve.
@@ -391,6 +438,12 @@ Colisões de identidade não precisam de critério aqui: `ELEGIVEL_BASE` já as 
 - Matrícula válida por QR code (sem assinatura) recebe o acervo — a regra é `hasAnyActiveAccess`, não assinatura.
 - Assinatura ativa recebe o acervo; admin idem.
 - `/api/documents/query` sem token continua 401.
+
+**Fonte probatória na busca**
+- Tese recuperada sempre traz ao menos um `TeseTrechoFonte` ao contexto.
+- `Document` do citante entra quando `origemDocumentId` está resolvido.
+- Tese cujo acórdão-líder não existe como `Document` **é recuperável** e vem acompanhada da evidência — as 39 não são bloqueadas.
+- `Document` do líder entra adicionalmente quando `destilacao.documentId` está resolvido.
 
 **Cache**
 - Chaves de `vitrine` e `acervo` são distintas para a mesma pergunta.
@@ -420,20 +473,32 @@ O golden set atual (`eval/golden-set.json`) associa pergunta → documentos espe
 ```json
 {
   "query": "...",
-  "tesePar": { "enunciadoId": "...", "acordaoKey": "ACORDAO-COMPLETO-...",
-               "acordaoLiderDocumentId": "..." }
+  "tesePar": {
+    "enunciadoId": "...",
+    "acordaoKey": "ACORDAO-COMPLETO-...",
+    "evidenciaDocumentIds": ["..."],
+    "acordaoLiderDocumentId": "..."
+  }
 }
 ```
 
-O par é o que permite as três métricas:
+`evidenciaDocumentIds` são os `Document` dos acórdãos **citantes** ligados aos `TeseTrechoFonte` do enunciado. `acordaoLiderDocumentId` é **opcional** — ausente nas 39 teses cujo líder não está na base, e a entrada continua válida sem ele.
 
-- **Co-recuperação:** em quantas queries a tese **e** o acórdão-líder aparecem no top-5. É o alvo — a síntese acompanhada da fonte.
-- **Deslocamento:** em quantas queries o acórdão-líder estava no top-5 antes de ligar `includeTeses` e saiu depois. Mede a canibalização diretamente, coisa que o recall agregado esconde: trocar o acórdão pela tese dele mantém o recall e piora a resposta.
+As três métricas:
+
+- **Fonte probatória no contexto:** em quantas queries a tese veio acompanhada de pelo menos um trecho-fonte e, quando existente, do `Document` do citante. É o alvo — a síntese nunca sozinha.
+- **Deslocamento do líder:** entre as queries cujo `acordaoLiderDocumentId` está preenchido **e** aparecia no top-5 antes de ligar `includeTeses`, em quantas ele saiu depois. Medido só onde faz sentido medir; as 39 sem líder na base não entram nesta métrica.
 - **Não-regressão:** recall@5 do golden set existente, comparado ao baseline do `ROADMAP_BUSCA_QUALIDADE.md`, para garantir que as teses não empurraram para fora matéria alheia a elas.
 
 Como as queries do conjunto pareado derivam das próprias teses, elas medem o caminho feliz; a não-regressão no golden set independente é o contrapeso. Ambas rodam antes e depois de ligar `includeTeses`.
 
-**Critério de aceite:** nenhuma query perde o acórdão-líder do top-5 (deslocamento zero), e o recall@5 do golden set não regride. Se falhar, a recuperação complementar não está cumprindo o papel e a feature não sobe para o assistente — a vitrine e o acervo podem subir antes, são independentes da busca.
+**Critério de aceite**, em três condições independentes:
+
+1. **Fonte probatória em 100% das queries** em que uma tese entra no contexto — sem exceção, porque é a invariante de procedência (§7) aplicada ao assistente.
+2. **Deslocamento zero** do acórdão-líder, apurado apenas nas queries em que ele existe na base e já era recuperado antes.
+3. **Recall@5 do golden set sem regressão** contra o baseline.
+
+Falhar em (1) bloqueia a feature no assistente. Falhar em (2) ou (3) indica que a recuperação complementar não está compensando a canibalização, e também bloqueia. A vitrine e o acervo podem subir antes — são independentes da busca.
 
 ## 12. Riscos
 
@@ -446,7 +511,8 @@ Como as queries do conjunto pareado derivam das próprias teses, elas medem o ca
 | Arquivo do ELIC parcialmente desatualizado | Regeneração integral de `teses/` a cada exportação |
 | Chunk órfão citado após retirada | Reconciliação por predicado apaga o chunk |
 | Evidência sem caminho para a fonte | `origemUrl`/`origemLinkPDF` copiados no snapshot |
-| Teses expulsam acórdãos do contexto | Recuperação complementar + critério de aceite medido (§11) |
+| Teses expulsam acórdãos do contexto | Evidência obrigatória no contexto + deslocamento medido (§11) |
+| Tese citada sem fonte por líder ausente | A companhia obrigatória é o trecho-fonte, não o líder |
 | Vazamento do acervo por cache | Visibilidade na chave de cache |
 | Vazamento por default | `includeTeses` é opt-in |
 | URL pública virar 404 | `noindex` + saída do sitemap, nunca 404 |
@@ -483,4 +549,4 @@ A exigência de conferência individual para a vitrine (§10) transforma esse d�
 12. `TeseEnunciadoChunk`, `tese-processor` e o ciclo no `process-index-jobs`.
 13. Quarto ramo opt-in e visibilidade na chave de cache.
 14. Adaptações de `/busca` (tipos, API, aba, cartão).
-15. Conjunto de avaliação pareado, recuperação complementar do acórdão-líder e medição de deslocamento antes de ligar no assistente.
+15. Conjunto de avaliação pareado, recuperação complementar da evidência e medição de deslocamento antes de ligar no assistente.
