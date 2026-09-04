@@ -79,6 +79,9 @@ model Document {
   /// (acórdãos que ele cita).
   citacoesDeAcordao AcordaoCitacao[] @relation("CitacoesDeAcordao")
 
+  trechosDeTese      TeseTrechoFonte[] @relation("TeseTrechoOrigem")
+  teseDestilacoes    TeseDestilacao[]  @relation("TeseDestilacaoAcordaoLider")
+
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -2098,6 +2101,17 @@ model TeseDestilacao {
   assunto       String   @db.Text
   confianca     String
   versaoMotor   Int
+  /// Identidade oficial do acórdão-líder, vinda do TCU (spec §4.2). Nulo =
+  /// ambíguo ou não resolvido, e nesse caso a destilação fica fora de TODOS os
+  /// consumidores — número e ano não identificam um acórdão do TCU.
+  acordaoKey    String?
+  colegiadoAlvo String?
+  relatorAlvo   String?
+  urlAlvo       String?
+  /// Enriquecimento opcional: o acórdão-líder na nossa base, quando existe.
+  /// NÃO é a identidade — em 39 das 93 teses o líder não está aqui.
+  documentId    String?
+  document      Document? @relation("TeseDestilacaoAcordaoLider", fields: [documentId], references: [id], onDelete: SetNull)
   /// Retrato do dossiê que gerou esta versão. Sem ele não há como saber depois
   /// se o dossiê cresceu o bastante para justificar redestilar.
   dossieTrechos Int
@@ -2111,6 +2125,8 @@ model TeseDestilacao {
 
   @@index([numeroAlvo, anoAlvo, atual])
   @@index([chave])
+  @@index([acordaoKey])
+  @@index([documentId])
 }
 
 /// Uma tese dentro de uma destilacao. O veredito do Daniel vive aqui, colado
@@ -2129,9 +2145,58 @@ model TeseEnunciado {
   /// Id do enunciado da versão anterior de onde o veredito foi herdado por
   /// texto idêntico. Null = julgado diretamente nesta versão.
   herdadoDe    String?
+  /// Estado editorial, independente da versão da destilação (spec §5).
+  publicado      Boolean   @default(false)
+  vitrinePublica Boolean   @default(false)
+  retiradoEm     DateTime?
+  retiradoMotivo String?
+  /// Sinal de mudança para o relatório do export incremental (spec §8.2).
+  atualizadoEm   DateTime  @updatedAt
+  /// Ciclo do embedding, no desenho de Document e TribunalDecision (spec §9).
+  embeddingStatus String?
+
+  trechos TeseTrechoFonte[]
 
   @@index([destilacaoId])
   @@index([veredito])
+  @@index([publicado])
+  @@index([vitrinePublica])
+  @@index([embeddingStatus])
+}
+
+/// A evidência literal de uma tese, copiada no momento da destilação.
+///
+/// Existe porque `TeseEnunciado.trechosFonte` guarda ÍNDICES para um dossiê que
+/// não é persistido e que é recomposto do grafo a cada uso. Como o grafo cresce
+/// todo dia, os índices apodrecem — e para os alvos saturados no teto de 40 a
+/// verificação por contagem nem detecta (spec §7).
+model TeseTrechoFonte {
+  id          String   @id @default(cuid())
+  enunciadoId String
+  enunciado   TeseEnunciado @relation(fields: [enunciadoId], references: [id], onDelete: Cascade)
+  ordem       Int
+  trecho      String   @db.Text
+
+  /// O acórdão CITANTE — quem escreveu o trecho. Não confundir com o
+  /// acórdão-líder, que é o alvo da destilação.
+  origemNumero     Int
+  origemAno        Int
+  origemColegiado  String?
+  /// Caminhos para o inteiro teor, copiados no snapshot. Sobrevivem à perda da
+  /// relação com Document: evidência que não se pode conferir não é evidência.
+  origemUrl        String?
+  origemLinkPDF    String?
+  origemDocumentId String?
+  origemDocument   Document? @relation("TeseTrechoOrigem", fields: [origemDocumentId], references: [id], onDelete: SetNull)
+
+  noVoto      Boolean
+  capturadoEm DateTime @default(now())
+
+  /// Torna a gravação idempotente: reexecutar o backfill reescreve as mesmas
+  /// linhas em vez de duplicar.
+  @@unique([enunciadoId, ordem])
+  @@index([enunciadoId])
+  @@index([origemDocumentId])
 }
 
 /// Uma divergencia apontada nos votos: outro precedente indicado como o de
