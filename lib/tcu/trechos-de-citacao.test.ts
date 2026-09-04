@@ -1,5 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { recortarTrechos, montarDossie } from './trechos-de-citacao';
+
+const { mockArestas, mockDocs } = vi.hoisted(() => ({
+  mockArestas: vi.fn(),
+  mockDocs: vi.fn(),
+}));
+
+vi.mock('../prisma', () => ({
+  prisma: {
+    acordaoCitacao: { findMany: (...a: unknown[]) => mockArestas(...a) },
+    document: { findMany: (...a: unknown[]) => mockDocs(...a) },
+  },
+}));
 
 const VOTO = 'VOTO';
 // Texto sintético com relatório + voto. A citação ao alvo 1441/2016 cai no voto.
@@ -62,5 +74,61 @@ describe('montarDossie', () => {
     const muitos = Array.from({ length: 60 }, (_, i) => t(`${i}/2020`, true, `trecho único número ${i} com conteúdo`));
     const d = montarDossie({ numero: 1441, ano: 2016 }, muitos, 40);
     expect(d.trechos).toHaveLength(40);
+  });
+});
+
+describe('montarDossie — determinismo', () => {
+  // Três trechos que empatam em noVoto E em comprimento. Sem desempate
+  // explícito, a ordem final é a ordem de entrada — e a ordem de entrada
+  // vem de um findMany sem orderBy, ou seja, indefinida.
+  const empatados = [
+    { origemChave: '300/2020', secao: 'voto' as const, noVoto: true, trecho: 'AAA', offset: 0 },
+    { origemChave: '100/2020', secao: 'voto' as const, noVoto: true, trecho: 'BBB', offset: 0 },
+    { origemChave: '200/2020', secao: 'voto' as const, noVoto: true, trecho: 'CCC', offset: 0 },
+  ];
+
+  it('desempata por origemChave, independente da ordem de entrada', () => {
+    const alvo = { numero: 1441, ano: 2016 };
+    const direta = montarDossie(alvo, empatados).trechos.map((t) => t.trecho);
+    const invertida = montarDossie(alvo, [...empatados].reverse()).trechos.map((t) => t.trecho);
+    expect(direta).toEqual(invertida);
+    // 100/2020 < 200/2020 < 300/2020 → BBB, CCC, AAA
+    expect(direta).toEqual(['BBB', 'CCC', 'AAA']);
+  });
+
+  it('mantém voto antes de não-voto e mais longo antes de mais curto', () => {
+    const d = montarDossie({ numero: 1441, ano: 2016 }, [
+      { origemChave: '100/2020', secao: 'relatorio' as const, noVoto: false, trecho: 'nao-voto', offset: 0 },
+      { origemChave: '900/2020', secao: 'voto' as const, noVoto: true, trecho: 'curto', offset: 0 },
+      { origemChave: '800/2020', secao: 'voto' as const, noVoto: true, trecho: 'trecho bem mais longo', offset: 0 },
+    ]);
+    expect(d.trechos.map((t) => t.trecho)).toEqual(['trecho bem mais longo', 'curto', 'nao-voto']);
+  });
+});
+
+describe('coletarTrechosDoAlvo — corte temporal', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockArestas.mockResolvedValue([]);
+    mockDocs.mockResolvedValue([]);
+  });
+
+  it('sem ateData, não filtra por criadoEm', async () => {
+    const { coletarTrechosDoAlvo } = await import('./trechos-de-citacao');
+    await coletarTrechosDoAlvo({ numero: 1441, ano: 2016 });
+    expect(mockArestas.mock.calls[0][0].where.criadoEm).toBeUndefined();
+  });
+
+  it('com ateData, filtra arestas anteriores à data', async () => {
+    const { coletarTrechosDoAlvo } = await import('./trechos-de-citacao');
+    const corte = new Date('2026-08-01T00:00:00Z');
+    await coletarTrechosDoAlvo({ numero: 1441, ano: 2016 }, { ateData: corte });
+    expect(mockArestas.mock.calls[0][0].where.criadoEm).toEqual({ lt: corte });
+  });
+
+  it('ordena as arestas para não depender da ordem do banco', async () => {
+    const { coletarTrechosDoAlvo } = await import('./trechos-de-citacao');
+    await coletarTrechosDoAlvo({ numero: 1441, ano: 2016 });
+    expect(mockArestas.mock.calls[0][0].orderBy).toEqual({ origemId: 'asc' });
   });
 });
