@@ -26,17 +26,26 @@ const prisma = new PrismaClient({ adapter, log: ['error'] });
 async function main() {
   const executar = process.argv.includes('--executar');
 
+  // TODO enunciado de TODA destilação atual — sem o recorte por `veredito:
+  // 'fiel'` que a spec §7.2 item 3 sugeria. A reconstrução é perecível e
+  // irreversível: restringi-la aos 93 já julgados condenaria os ~419 ainda não
+  // julgados a nascerem inelegíveis para sempre, sem sinal nenhum do porquê
+  // quando alguém os julgasse `fiel` meses depois. Ampliar custa quase nada —
+  // a reconstrução é só banco (sem LLM, sem rede) e, para as destilações que já
+  // entram na varredura, o dossiê e o lookup de citantes já foram montados, de
+  // modo que os enunciados irmãos saem de graça.
   const destilacoes = await prisma.teseDestilacao.findMany({
-    where: { atual: true, enunciados: { some: { veredito: 'fiel' } } },
+    where: { atual: true },
     select: {
       id: true, numeroAlvo: true, anoAlvo: true, criadoEm: true, dossieTrechos: true,
-      enunciados: { where: { veredito: 'fiel' }, select: { id: true, trechosFonte: true } },
+      enunciados: { select: { id: true, trechosFonte: true } },
     },
     orderBy: { criadoEm: 'asc' },
   });
 
   console.log(`\n=== EVIDÊNCIA DAS TESES ===\n`);
-  console.log(`Destilações com tese fiel: ${destilacoes.length}`);
+  const totalEnunciados = destilacoes.reduce((s, d) => s + d.enunciados.length, 0);
+  console.log(`Destilações atuais: ${destilacoes.length} (${totalEnunciados} enunciados, independentemente de veredito)`);
   console.log(executar ? 'Modo: EXECUTAR\n' : 'Modo: dry-run (nada será gravado)\n');
 
   let comEvidencia = 0, semEvidencia = 0, divergentes = 0, linhas = 0;
@@ -45,7 +54,11 @@ async function main() {
     const r = await reconstruirEvidencia(d, d.enunciados);
     if (r.status === 'contagem-divergente') {
       divergentes++;
-      console.log(`  !  ${d.numeroAlvo}/${d.anoAlvo} — dossiê mudou desde a destilação`);
+      // `descartados` é o que a reconstrução perdeu aqui — sem somá-lo, quem
+      // roda o script termina sem saber quantos enunciados ficaram sem
+      // evidência, porque o contador de destilações não diz quantos há dentro.
+      semEvidencia += r.descartados;
+      console.log(`  !  ${d.numeroAlvo}/${d.anoAlvo} — dossiê mudou desde a destilação (${r.descartados} enunciados sem evidência)`);
       continue;
     }
     for (const e of d.enunciados) {
@@ -68,7 +81,8 @@ async function main() {
   }
 
   console.log(`\nEnunciados com evidência: ${comEvidencia} (${linhas} trechos)`);
-  console.log(`Sem evidência: ${semEvidencia} · destilações com dossiê divergente: ${divergentes}`);
+  console.log(`Enunciados sem evidência: ${semEvidencia} (inclui os de destilação divergente)`);
+  console.log(`Destilações com dossiê divergente: ${divergentes}`);
   if (!executar) console.log('\nPara aplicar: --executar\n');
 }
 
