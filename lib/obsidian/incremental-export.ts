@@ -303,6 +303,19 @@ export async function runIncrementalExport(
           .reduce((a, b) => (a > b ? a : b));
         const dados = { ...d, atualizadoEm, enunciados: elegiveis };
         const caminho = caminhoTese(dados);
+        // Duas destilações `atual: true` com mesmo número, ano e colegiado
+        // colidiriam no mesmo arquivo: a segunda sobrescreveria a primeira em
+        // `writeVault`, e contar as duas mentiria no total do README. Isso
+        // não é esperado — só acontece se duas versões ficaram `atual` para
+        // o mesmo alvo, uma inconsistência de dado — por isso é aviso, não
+        // silêncio: alguém precisa investigar qual das duas é a válida.
+        if (caminhosDeTese.has(caminho)) {
+          console.warn(
+            `  [AVISO] Duas destilações atuais geram o mesmo arquivo ${caminho}: ` +
+              `${d.id} colide com uma anterior. Pulando ${d.id}.`,
+          );
+          continue;
+        }
         caminhosDeTese.add(caminho);
         files.push({ path: caminho, content: gerarTeseMd(dados) });
         totalTeses++;

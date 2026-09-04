@@ -107,8 +107,8 @@ async function main() {
     // acordaos do grafo entram. O cofre do Obsidian mantem o default e
     // continua sem eles.
     incluirCombustivelDoGrafo: true,
-    // Idem para as teses destiladas do TCU: o cofre do professor nao as
-    // recebe, mas aqui o destino e indice de RAG.
+    // Idem para as teses destiladas do TCU: o cofre do professor não as
+    // recebe, mas aqui o destino é índice de RAG.
     incluirTeses: true,
   });
 
