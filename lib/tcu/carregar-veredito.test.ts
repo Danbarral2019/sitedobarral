@@ -9,7 +9,13 @@ const anterior = (enunciado: string, veredito: string | null, id = 'a1') => ({
 describe('carregarVeredito', () => {
   it('herda o veredito quando o texto e IDENTICO', () => {
     const r = carregarVeredito('A prescricao e de dez anos.', [anterior('A prescricao e de dez anos.', 'fiel')]);
-    expect(r).toEqual({ veredito: 'fiel', herdadoDe: 'a1', julgadoEm: em, julgadoPor: 'daniel' });
+    // Shape completo de propósito: o fixture `anterior` não traz estado editorial,
+    // então herdar o veredito também herda os defaults (publicado/vitrinePublica
+    // false, sem retirada) — não só o veredito em si.
+    expect(r).toEqual({
+      veredito: 'fiel', herdadoDe: 'a1', julgadoEm: em, julgadoPor: 'daniel',
+      publicado: false, vitrinePublica: false, retiradoEm: null, retiradoMotivo: null,
+    });
   });
 
   it('NAO herda quando muda a pontuacao — redacao diferente e julgamento novo', () => {
@@ -35,7 +41,12 @@ describe('carregarVeredito', () => {
 
   it('nao herda de um anterior que nunca foi julgado', () => {
     const r = carregarVeredito('Tese X.', [anterior('Tese X.', null)]);
-    expect(r).toEqual({ veredito: null, herdadoDe: null, julgadoEm: null, julgadoPor: null });
+    // Shape completo de propósito: sem par, o retorno é exatamente SEM_VEREDITO
+    // — inclusive os quatro campos editoriais, todos em seu estado neutro.
+    expect(r).toEqual({
+      veredito: null, herdadoDe: null, julgadoEm: null, julgadoPor: null,
+      publicado: false, vitrinePublica: false, retiradoEm: null, retiradoMotivo: null,
+    });
   });
 
   it('acha o par correto entre varios anteriores', () => {
