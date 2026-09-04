@@ -49,6 +49,20 @@ export interface DestilacaoParaExport {
   enunciados: EnunciadoParaExport[];
 }
 
+/**
+ * Colapsa espaço em branco para uma linha só.
+ *
+ * `assunto`, `enunciado` e `inovacao` vêm crus do JSON do modelo
+ * (`lib/tcu/destilar-tese.ts`), sem normalização. Um `\n` em `assunto` quebra o
+ * YAML do frontmatter — `yamlStr` escapa `\` e `"`, não newline — e derruba a
+ * ingestão daquele arquivo no RAG; um `\n` em `enunciado` quebra o `##`. Os
+ * trechos já chegam seguros, porque `aparar()` normaliza na captura
+ * (`lib/tcu/trechos-de-citacao.ts`).
+ */
+function umaLinha(s: string): string {
+  return s.replace(/\s+/g, ' ').trim();
+}
+
 /** Slug do colegiado para nome de arquivo: "Segunda Câmara" -> "segunda-camara". */
 function slugColegiado(colegiado: string): string {
   return sanitizeFilename(
@@ -75,7 +89,7 @@ export function gerarTeseMd(d: DestilacaoParaExport): string {
     `ano: ${d.anoAlvo}`,
   ];
   if (d.relatorAlvo) fm.push(`relator: ${yamlStr(d.relatorAlvo)}`);
-  fm.push(`assunto: ${yamlStr(d.assunto)}`);
+  fm.push(`assunto: ${yamlStr(umaLinha(d.assunto))}`);
   fm.push(`teses: ${d.enunciados.length}`);
   fm.push(`citacoesNoVoto: ${d.dossieNoVoto}`);
   fm.push(`confianca: ${d.confianca}`);
@@ -93,12 +107,12 @@ export function gerarTeseMd(d: DestilacaoParaExport): string {
     const comColegiado = d.colegiadoAlvo ? `${slug}-${slugColegiado(d.colegiadoAlvo)}` : slug;
     fm.push(`fonteSite: https://profbarral.com.br/teses/${comColegiado}`);
   }
-  fm.push('---', '');
+  fm.push('---', '', '');
 
   const corpo: string[] = [
     `# Acórdão ${d.numeroAlvo}/${d.anoAlvo}${d.colegiadoAlvo ? ` — ${d.colegiadoAlvo}` : ''}`,
     '',
-    d.assunto,
+    umaLinha(d.assunto),
     '',
   ];
 
@@ -113,8 +127,8 @@ export function gerarTeseMd(d: DestilacaoParaExport): string {
   }
 
   for (const e of d.enunciados) {
-    corpo.push(`## ${e.enunciado}`, '');
-    if (e.inovacao) corpo.push(`**Inovação:** ${e.inovacao}`, '');
+    corpo.push(`## ${umaLinha(e.enunciado)}`, '');
+    if (e.inovacao) corpo.push(`**Inovação:** ${umaLinha(e.inovacao)}`, '');
     corpo.push('**Trechos que sustentam a tese:**', '');
     for (const t of e.trechos) {
       const origem = `Acórdão ${t.origemNumero}/${t.origemAno}${t.origemColegiado ? ` — ${t.origemColegiado}` : ''}`;

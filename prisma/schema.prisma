@@ -2102,8 +2102,11 @@ model TeseDestilacao {
   confianca     String
   versaoMotor   Int
   /// Identidade oficial do acórdão-líder, vinda do TCU (spec §4.2). Nulo =
-  /// ambíguo ou não resolvido, e nesse caso a destilação fica fora de TODOS os
-  /// consumidores — número e ano não identificam um acórdão do TCU.
+  /// ambíguo ou não resolvido: NÃO exclui a destilação dos consumidores desde
+  /// a §4.3, que substituiu o portão binário por três níveis de procedência
+  /// (ver `origemIdentidade` abaixo). Só a VITRINE pública exige `acordaoKey`
+  /// não nulo — acervo restrito, busca por IA e `export:elic` aceitam os três
+  /// níveis, qualificando ou omitindo o colegiado.
   acordaoKey    String?
   colegiadoAlvo String?
   relatorAlvo   String?

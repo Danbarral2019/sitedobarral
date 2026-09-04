@@ -888,8 +888,13 @@ export async function removerObsoletos(
   let entradas: string[];
   try {
     entradas = await readdir(dir);
-  } catch {
-    return []; // diretório ainda não existe: nada a remover
+  } catch (e) {
+    // Só "ainda não existe" é esperado. Engolir qualquer erro desligaria a
+    // remoção em silêncio: uma pasta travada pelo OneDrive (EPERM/EBUSY) ou
+    // sem permissão devolveria `[]`, e o relatório diria "0 removidos",
+    // indistinguível de "nada a remover".
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw e;
   }
 
   const removidos: string[] = [];
