@@ -21,28 +21,36 @@ describe('resolverIdentidade', () => {
     mockBuscar.mockResolvedValue([cand('ACORDAO-COMPLETO-1', 'Plenário')]);
     const r = await resolverIdentidade(56, 2024);
     expect(r).toEqual({
-      acordaoKey: 'ACORDAO-COMPLETO-1',
-      colegiadoAlvo: 'Plenário',
-      relatorAlvo: 'Rel X',
-      urlAlvo: 'https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-1',
+      tipo: 'resolvido',
+      identidade: {
+        acordaoKey: 'ACORDAO-COMPLETO-1',
+        colegiadoAlvo: 'Plenário',
+        relatorAlvo: 'Rel X',
+        urlAlvo: 'https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-1',
+      },
     });
   });
 
-  it('dois candidatos não-relação → null por ambiguidade', async () => {
+  it('dois candidatos não-relação → ambíguo, com a contagem de candidatos', async () => {
     mockBuscar.mockResolvedValue([
       cand('ACORDAO-COMPLETO-1', 'Plenário'),
       cand('ACORDAO-COMPLETO-2', 'Primeira Câmara'),
     ]);
-    expect(await resolverIdentidade(56, 2024)).toBeNull();
+    expect(await resolverIdentidade(56, 2024)).toEqual({ tipo: 'ambiguo', candidatos: 2 });
   });
 
-  it('nenhum candidato → null', async () => {
+  it('nenhum candidato → não encontrado', async () => {
     mockBuscar.mockResolvedValue([]);
-    expect(await resolverIdentidade(56, 2024)).toBeNull();
+    expect(await resolverIdentidade(56, 2024)).toEqual({ tipo: 'naoEncontrado' });
   });
 
-  it('falha de rede → null, sem lançar e sem gravar identidade errada', async () => {
+  it('só candidatos de relação (sem acórdão completo) → não encontrado', async () => {
+    mockBuscar.mockResolvedValue([cand('ACORDAO-COMPLETO-1', 'Plenário', true)]);
+    expect(await resolverIdentidade(56, 2024)).toEqual({ tipo: 'naoEncontrado' });
+  });
+
+  it('falha de rede → erro transitório, sem lançar e sem gravar identidade errada', async () => {
     mockBuscar.mockRejectedValue(new Error('ETIMEDOUT'));
-    expect(await resolverIdentidade(56, 2024)).toBeNull();
+    expect(await resolverIdentidade(56, 2024)).toEqual({ tipo: 'erroTransitorio', erro: 'ETIMEDOUT' });
   });
 });

@@ -40,23 +40,41 @@ async function main() {
   console.log(`Destilações sem identidade: ${alvos.length}`);
   console.log(executar ? 'Modo: EXECUTAR\n' : 'Modo: dry-run (nada será gravado)\n');
 
-  let resolvidos = 0, ambiguos = 0;
+  // Contadores separados por tipo (spec de correção pós-merge): "ambíguo" e
+  // "não encontrado" são (em regra) permanentes — só mudam se o TCU publicar
+  // o que falta ou desambiguar o que existe. "Erro transitório" é passageiro
+  // e vale a pena repassar numa nova execução; misturá-los com os permanentes
+  // tornava a saída do script inútil para essa decisão.
+  let resolvidos = 0, naoEncontrados = 0, ambiguos = 0, errosTransitorios = 0;
   for (const a of alvos) {
-    const ident = await resolverIdentidade(a.numeroAlvo, a.anoAlvo);
+    const r = await resolverIdentidade(a.numeroAlvo, a.anoAlvo);
     await dorme(DELAY_MS);
-    if (!ident) {
-      ambiguos++;
-      console.log(`  ?  ${a.numeroAlvo}/${a.anoAlvo} — ambíguo ou não encontrado`);
+    if (r.tipo === 'resolvido') {
+      resolvidos++;
+      console.log(`  ok ${a.numeroAlvo}/${a.anoAlvo} — ${r.identidade.colegiadoAlvo} (${r.identidade.acordaoKey})`);
+      if (executar) {
+        await prisma.teseDestilacao.update({ where: { id: a.id }, data: r.identidade });
+      }
       continue;
     }
-    resolvidos++;
-    console.log(`  ok ${a.numeroAlvo}/${a.anoAlvo} — ${ident.colegiadoAlvo} (${ident.acordaoKey})`);
-    if (executar) {
-      await prisma.teseDestilacao.update({ where: { id: a.id }, data: ident });
+    if (r.tipo === 'naoEncontrado') {
+      naoEncontrados++;
+      console.log(`  x  ${a.numeroAlvo}/${a.anoAlvo} — não encontrado`);
+      continue;
     }
+    if (r.tipo === 'ambiguo') {
+      ambiguos++;
+      console.log(`  ?  ${a.numeroAlvo}/${a.anoAlvo} — ambíguo (${r.candidatos} candidatos)`);
+      continue;
+    }
+    errosTransitorios++;
+    console.log(`  !  ${a.numeroAlvo}/${a.anoAlvo} — erro transitório: ${r.erro}`);
   }
 
-  console.log(`\nResolvidos: ${resolvidos} · sem identidade: ${ambiguos}`);
+  console.log(`\nResolvidos: ${resolvidos}`);
+  console.log(`Não encontrados (permanente, salvo publicação futura do TCU): ${naoEncontrados}`);
+  console.log(`Ambíguos (permanente, salvo o TCU desambiguar): ${ambiguos}`);
+  console.log(`Erro transitório (vale repetir a execução): ${errosTransitorios}`);
   if (!executar) console.log('\nPara aplicar: --executar\n');
 }
 
