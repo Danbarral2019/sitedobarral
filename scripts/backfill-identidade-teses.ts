@@ -16,6 +16,7 @@ dotenv.config({ path: '.env.local' });
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 import { resolverIdentidade, registrarIdentidadeIrresolvida } from '../lib/tcu/resolver-identidade';
+import { colegiadoPorConvergencia } from '../lib/tcu/colegiado-por-convergencia';
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL as string });
 const prisma = new PrismaClient({ adapter, log: ['error'] });
@@ -45,7 +46,10 @@ async function main() {
   // o que falta ou desambiguar o que existe. "Erro transitório" é passageiro
   // e vale a pena repassar numa nova execução; misturá-los com os permanentes
   // tornava a saída do script inútil para essa decisão.
-  let resolvidos = 0, naoEncontrados = 0, ambiguos = 0, errosTransitorios = 0;
+  //
+  // "Convergência" (nível 2, spec §4.3) e "sem colegiado" (nível 3) só
+  // aparecem quando a identidade oficial (nível 1) falha — ver o bloco abaixo.
+  let resolvidos = 0, convergencia = 0, semColegiado = 0, errosTransitorios = 0;
   for (const a of alvos) {
     const r = await resolverIdentidade(a.numeroAlvo, a.anoAlvo);
     await dorme(DELAY_MS);
@@ -53,31 +57,57 @@ async function main() {
       resolvidos++;
       console.log(`  ok ${a.numeroAlvo}/${a.anoAlvo} — ${r.identidade.colegiadoAlvo} (${r.identidade.acordaoKey})`);
       if (executar) {
-        await prisma.teseDestilacao.update({ where: { id: a.id }, data: r.identidade });
+        await prisma.teseDestilacao.update({
+          where: { id: a.id },
+          data: { ...r.identidade, origemIdentidade: 'tcu-oficial', citantesConcordantes: null },
+        });
       }
       continue;
     }
-    if (r.tipo === 'naoEncontrado') {
-      naoEncontrados++;
-      console.log(`  x  ${a.numeroAlvo}/${a.anoAlvo} — não encontrado`);
-      // Registra o sumidouro para `selecionarElegiveis` parar de oferecer
-      // este alvo por DIAS_REAVALIACAO_IDENTIDADE (spec 2026-09-04).
-      if (executar) await registrarIdentidadeIrresolvida(a.numeroAlvo, a.anoAlvo, 'naoEncontrado');
+    if (r.tipo === 'erroTransitorio') {
+      errosTransitorios++;
+      console.log(`  !  ${a.numeroAlvo}/${a.anoAlvo} — erro transitório: ${r.erro}`);
       continue;
     }
-    if (r.tipo === 'ambiguo') {
-      ambiguos++;
-      console.log(`  ?  ${a.numeroAlvo}/${a.anoAlvo} — ambíguo (${r.candidatos} candidatos)`);
-      if (executar) await registrarIdentidadeIrresolvida(a.numeroAlvo, a.anoAlvo, 'ambiguo', r.candidatos);
+
+    // Identidade oficial ambígua ou não encontrada: tenta convergência dos
+    // citantes (nível 2, spec §4.3) ANTES de registrar como irresolvido —
+    // `registrarIdentidadeIrresolvida` só entra quando as duas falharem.
+    const conv = await colegiadoPorConvergencia(a.numeroAlvo, a.anoAlvo);
+    if (conv) {
+      convergencia++;
+      console.log(`  ~  ${a.numeroAlvo}/${a.anoAlvo} — convergência: ${conv.colegiado} (${conv.citantes} citantes)`);
+      if (executar) {
+        await prisma.teseDestilacao.update({
+          where: { id: a.id },
+          data: {
+            colegiadoAlvo: conv.colegiado,
+            origemIdentidade: 'convergencia-citantes',
+            citantesConcordantes: conv.citantes,
+          },
+        });
+      }
       continue;
     }
-    errosTransitorios++;
-    console.log(`  !  ${a.numeroAlvo}/${a.anoAlvo} — erro transitório: ${r.erro}`);
+
+    // Nível 3: nem o TCU nem os citantes resolvem o colegiado. A tese
+    // continua elegível (spec §4.3), mas o alvo entra no sumidouro para
+    // `selecionarElegiveis` parar de reofertá-lo — nenhuma das duas fontes de
+    // identidade muda sem o TCU publicar/desambiguar.
+    semColegiado++;
+    console.log(`  x  ${a.numeroAlvo}/${a.anoAlvo} — sem colegiado (nível 3)`);
+    if (executar) {
+      if (r.tipo === 'naoEncontrado') {
+        await registrarIdentidadeIrresolvida(a.numeroAlvo, a.anoAlvo, 'naoEncontrado');
+      } else {
+        await registrarIdentidadeIrresolvida(a.numeroAlvo, a.anoAlvo, 'ambiguo', r.candidatos);
+      }
+    }
   }
 
-  console.log(`\nResolvidos: ${resolvidos}`);
-  console.log(`Não encontrados (permanente, salvo publicação futura do TCU): ${naoEncontrados}`);
-  console.log(`Ambíguos (permanente, salvo o TCU desambiguar): ${ambiguos}`);
+  console.log(`\nResolvidos (nível 1, identidade oficial): ${resolvidos}`);
+  console.log(`Convergência (nível 2, citantes unânimes): ${convergencia}`);
+  console.log(`Sem colegiado (nível 3, permanente salvo o TCU/citantes mudarem): ${semColegiado}`);
   console.log(`Erro transitório (vale repetir a execução): ${errosTransitorios}`);
   if (!executar) console.log('\nPara aplicar: --executar\n');
 }

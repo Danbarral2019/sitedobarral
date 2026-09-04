@@ -10,11 +10,50 @@ vi.mock('../prisma', () => ({
   prisma: { alvoIdentidadeIrresolvida: { upsert: (...a: unknown[]) => mockUpsert(...a) } },
 }));
 
-import { resolverIdentidade, registrarIdentidadeIrresolvida } from './resolver-identidade';
+import { resolverIdentidade, registrarIdentidadeIrresolvida, classificarCandidatos } from './resolver-identidade';
 
 const cand = (key: string, colegiado: string, isRelacao = false) => ({
   numero: 56, ano: 2024, colegiado, relator: 'Rel X', ementa: '', key,
   link: `https://pesquisa.apps.tcu.gov.br/documento/${key.toLowerCase()}`, isRelacao,
+});
+
+// ── classificarCandidatos — pura, sem rede (spec 2026-09-04 §4.3) ──
+//
+// Mesma regra que `resolverIdentidade` aplicava depois do fetch; extraída
+// para o cron reusar sobre candidatos que já buscou, sem requisição a mais.
+
+describe('classificarCandidatos', () => {
+  it('zero candidatos → naoEncontrado', () => {
+    expect(classificarCandidatos([])).toEqual({ tipo: 'naoEncontrado' });
+  });
+
+  it('um candidato não-relação → resolvido', () => {
+    expect(classificarCandidatos([cand('ACORDAO-COMPLETO-1', 'Plenário')])).toEqual({
+      tipo: 'resolvido',
+      identidade: {
+        acordaoKey: 'ACORDAO-COMPLETO-1',
+        colegiadoAlvo: 'Plenário',
+        relatorAlvo: 'Rel X',
+        urlAlvo: 'https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-1',
+      },
+    });
+  });
+
+  it('dois ou mais candidatos não-relação → ambiguo, com a contagem', () => {
+    expect(
+      classificarCandidatos([
+        cand('ACORDAO-COMPLETO-1', 'Plenário'),
+        cand('ACORDAO-COMPLETO-2', 'Primeira Câmara'),
+        cand('ACORDAO-COMPLETO-3', 'Segunda Câmara'),
+      ]),
+    ).toEqual({ tipo: 'ambiguo', candidatos: 3 });
+  });
+
+  it('só candidatos de relação → naoEncontrado (não conta como candidato completo)', () => {
+    expect(classificarCandidatos([cand('ACORDAO-COMPLETO-1', 'Plenário', true)])).toEqual({
+      tipo: 'naoEncontrado',
+    });
+  });
 });
 
 describe('resolverIdentidade', () => {

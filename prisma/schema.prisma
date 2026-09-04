@@ -2108,6 +2108,13 @@ model TeseDestilacao {
   colegiadoAlvo String?
   relatorAlvo   String?
   urlAlvo       String?
+  /// Como o colegiado foi determinado: 'tcu-oficial' (registro do TCU),
+  /// 'convergencia-citantes' (todos os votos citantes que informam colegiado
+  /// concordam) ou null (não determinado). Ver spec §4.3 — o nível governa
+  /// em quais superfícies a tese pode aparecer.
+  origemIdentidade     String?
+  /// Quantos votos citantes sustentam o colegiado, no nível de convergência.
+  citantesConcordantes Int?
   /// Enriquecimento opcional: o acórdão-líder na nossa base, quando existe.
   /// NÃO é a identidade — em 39 das 93 teses o líder não está aqui.
   /// Reservado para a onda seguinte: nem o campo nem o índice abaixo são

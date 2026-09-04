@@ -14,6 +14,7 @@ const {
   mockGenerate,
   mockRegistrar,
   mockCount,
+  mockConvergencia,
 } = vi.hoisted(() => ({
   mockVerifyAuth: vi.fn(),
   mockSelecionarElegiveis: vi.fn(),
@@ -27,6 +28,7 @@ const {
   mockGenerate: vi.fn(),
   mockRegistrar: vi.fn(),
   mockCount: vi.fn(),
+  mockConvergencia: vi.fn(),
 }));
 
 vi.mock('@/lib/cron-auth', () => ({ verifyCronAuth: (...a: unknown[]) => mockVerifyAuth(...a) }));
@@ -58,8 +60,16 @@ vi.mock('@/lib/tcu/tema-acordao', () => ({
   naBase: (...a: unknown[]) => mockNaBase(...a),
 }));
 vi.mock('@/lib/ai', () => ({ generate: (...a: unknown[]) => mockGenerate(...a) }));
-vi.mock('@/lib/tcu/resolver-identidade', () => ({
-  registrarIdentidadeIrresolvida: (...a: unknown[]) => mockRegistrar(...a),
+// `classificarCandidatos` fica REAL pelo mesmo motivo de `escolherCandidato`
+// acima — é o que estes testes verificam. Só o registro (I/O) é mockado.
+vi.mock('@/lib/tcu/resolver-identidade', async () => {
+  const real = await vi.importActual<typeof import('@/lib/tcu/resolver-identidade')>(
+    '@/lib/tcu/resolver-identidade'
+  );
+  return { ...real, registrarIdentidadeIrresolvida: (...a: unknown[]) => mockRegistrar(...a) };
+});
+vi.mock('@/lib/tcu/colegiado-por-convergencia', () => ({
+  colegiadoPorConvergencia: (...a: unknown[]) => mockConvergencia(...a),
 }));
 vi.mock('@/lib/prisma', () => ({
   prisma: { teseDestilacao: { count: (...a: unknown[]) => mockCount(...a) } },
@@ -89,13 +99,15 @@ describe('cron destilar-teses-tcu — registro de identidade irresolvida', () =>
     vi.useFakeTimers();
     mockVerifyAuth.mockReturnValue(null);
     mockCount.mockResolvedValue(0);
+    // Sem convergência por padrão — os testes que a querem sobrescrevem.
+    mockConvergencia.mockResolvedValue(null);
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it('não encontrado (zero candidatos completos): registra "naoEncontrado" e não destila', async () => {
+  it('não encontrado (zero candidatos completos), sem convergência: registra "naoEncontrado" e não destila (nível 3)', async () => {
     mockSelecionarElegiveis.mockResolvedValue([{ numero: 56, ano: 2024, chave: '56/2024', noVoto: 10 }]);
     mockBuscar.mockResolvedValue([]); // nenhum candidato devolvido pelo TCU
 
@@ -104,12 +116,15 @@ describe('cron destilar-teses-tcu — registro de identidade irresolvida', () =>
     const r = await p;
     const body = await r.json();
 
+    expect(mockConvergencia).toHaveBeenCalledWith(56, 2024);
     expect(mockRegistrar).toHaveBeenCalledWith(56, 2024, 'naoEncontrado');
-    expect(body.ambiguos).toBe(1);
+    expect(body.semColegiado).toBe(1);
+    expect(body.nivel1).toBe(0);
+    expect(body.nivel2).toBe(0);
     expect(mockColetarTrechos).not.toHaveBeenCalled(); // não chegou a destilar
   });
 
-  it('ambíguo (2+ candidatos completos): registra "ambiguo" com a contagem de candidatos', async () => {
+  it('ambíguo (2+ candidatos completos), sem convergência: registra "ambiguo" com a contagem (nível 3)', async () => {
     mockSelecionarElegiveis.mockResolvedValue([{ numero: 56, ano: 2024, chave: '56/2024', noVoto: 10 }]);
     mockBuscar.mockResolvedValue([cand('K1', 'Plenário'), cand('K2', 'Primeira Câmara')]);
 
@@ -119,7 +134,7 @@ describe('cron destilar-teses-tcu — registro de identidade irresolvida', () =>
     const body = await r.json();
 
     expect(mockRegistrar).toHaveBeenCalledWith(56, 2024, 'ambiguo', 2);
-    expect(body.ambiguos).toBe(1);
+    expect(body.semColegiado).toBe(1);
     expect(mockColetarTrechos).not.toHaveBeenCalled();
   });
 
@@ -134,5 +149,76 @@ describe('cron destilar-teses-tcu — registro de identidade irresolvida', () =>
 
     expect(mockRegistrar).not.toHaveBeenCalled();
     expect(body.erros).toBe(1);
+  });
+});
+
+// Nível 2 de procedência (spec §4.3): identidade oficial ambígua/não
+// encontrada, mas os citantes convergem — o cron passa a destilar em vez de
+// desistir, escolhendo entre os candidatos o de colegiado convergido.
+describe('cron destilar-teses-tcu — destilação por convergência (nível 2)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    mockVerifyAuth.mockReturnValue(null);
+    mockCount.mockResolvedValue(0);
+    mockGarantirTema.mockResolvedValue('licitacoes-contratos');
+    mockNaBase.mockReturnValue(true);
+    mockColetarTrechos.mockResolvedValue({ trechos: [], contagem: { noVoto: 10, citantesDistintos: 10 } });
+    mockMontarPrompt.mockReturnValue({ systemPrompt: 's', userContent: 'u' });
+    mockGenerate.mockResolvedValue({ text: '{}' });
+    mockParseResposta.mockReturnValue({ chave: '56/2024', assunto: 'a', confianca: 'alta', teses: [{ enunciado: 'e', inovacao: 'i', trechosFonte: [] }] });
+    mockPersistirDestilacao.mockResolvedValue({ destilacaoId: 'd1', herdados: 0, novos: 1 });
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('ambíguo na identidade oficial, mas citantes convergem: destila com o candidato do colegiado convergido, sem registrar irresolvido', async () => {
+    mockSelecionarElegiveis.mockResolvedValue([{ numero: 56, ano: 2024, chave: '56/2024', noVoto: 10 }]);
+    mockBuscar.mockResolvedValue([
+      cand('K-PLENARIO', 'Plenário'),
+      cand('K-1CAMARA', 'Primeira Câmara'),
+    ]);
+    mockConvergencia.mockResolvedValue({ colegiado: 'Plenário', citantes: 7 });
+
+    const p = GET(req());
+    await vi.runAllTimersAsync();
+    const r = await p;
+    const body = await r.json();
+
+    expect(mockRegistrar).not.toHaveBeenCalled();
+    expect(body.nivel2).toBe(1);
+    expect(body.nivel1).toBe(0);
+    expect(body.semColegiado).toBe(0);
+    expect(mockColetarTrechos).toHaveBeenCalled(); // desta vez destilou
+
+    // A ementa/colegiado usados no prompt são do candidato Plenário (o que
+    // convergiu), não do primeiro da lista.
+    expect(mockMontarPrompt).toHaveBeenCalledWith(expect.objectContaining({ colegiado: 'Plenário' }));
+
+    // acordaoKey continua nulo — convergência não é identidade oficial.
+    const identidadePassada = mockPersistirDestilacao.mock.calls[0][3];
+    expect(identidadePassada).toEqual({
+      acordaoKey: null,
+      colegiadoAlvo: 'Plenário',
+      relatorAlvo: 'Rel',
+      urlAlvo: 'https://x/K-PLENARIO',
+      origemIdentidade: 'convergencia-citantes',
+      citantesConcordantes: 7,
+    });
+  });
+
+  it('convergência resolve um colegiado que não está entre os candidatos buscados: sem ementa confiável, não destila e registra irresolvido', async () => {
+    mockSelecionarElegiveis.mockResolvedValue([{ numero: 56, ano: 2024, chave: '56/2024', noVoto: 10 }]);
+    mockBuscar.mockResolvedValue([cand('K-1CAMARA', 'Primeira Câmara'), cand('K-2CAMARA', 'Segunda Câmara')]);
+    mockConvergencia.mockResolvedValue({ colegiado: 'Plenário', citantes: 5 }); // não bate com nenhum candidato
+
+    const p = GET(req());
+    await vi.runAllTimersAsync();
+    const r = await p;
+    const body = await r.json();
+
+    expect(mockRegistrar).toHaveBeenCalledWith(56, 2024, 'ambiguo', 2);
+    expect(body.semColegiado).toBe(1);
+    expect(mockColetarTrechos).not.toHaveBeenCalled();
   });
 });

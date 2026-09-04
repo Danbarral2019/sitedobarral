@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { indicesDeclarados, evidenciaIntegral, WHERE_ELEGIVEL_BASE } from './elegibilidade-tese';
+import { indicesDeclarados, evidenciaIntegral, WHERE_ELEGIVEL_BASE, WHERE_ELEGIVEL_VITRINE } from './elegibilidade-tese';
 
 describe('indicesDeclarados', () => {
   it('extrai índices distintos e ordenados', () => {
@@ -77,15 +77,31 @@ describe('WHERE_ELEGIVEL_BASE', () => {
     expect(WHERE_ELEGIVEL_BASE.veredito).toBe('fiel');
   });
 
-  it('exige ausência de retirada, versão atual e identidade resolvida', () => {
+  it('exige ausência de retirada e versão atual — NÃO exige identidade resolvida (spec §4.3)', () => {
+    // Identidade não resolvida vira nível de procedência (2 ou 3), não mais
+    // motivo de exclusão da base: excluir por acordaoKey ausente descartava
+    // 34 das 93 teses aprovadas.
     expect(WHERE_ELEGIVEL_BASE.retiradoEm).toBeNull();
-    expect(WHERE_ELEGIVEL_BASE.destilacao).toEqual({
-      atual: true,
-      acordaoKey: { not: null },
-    });
+    expect(WHERE_ELEGIVEL_BASE.destilacao).toEqual({ atual: true });
+    expect(WHERE_ELEGIVEL_BASE.destilacao).not.toHaveProperty('acordaoKey');
   });
 
   it('exige ao menos um trecho persistido', () => {
     expect(WHERE_ELEGIVEL_BASE.trechos).toEqual({ some: {} });
+  });
+});
+
+describe('WHERE_ELEGIVEL_VITRINE', () => {
+  it('herda o predicado base e acrescenta a exigência de identidade oficial (nível 1)', () => {
+    expect(WHERE_ELEGIVEL_VITRINE.veredito).toBe('fiel');
+    expect(WHERE_ELEGIVEL_VITRINE.retiradoEm).toBeNull();
+    expect(WHERE_ELEGIVEL_VITRINE.trechos).toEqual({ some: {} });
+    expect(WHERE_ELEGIVEL_VITRINE.destilacao).toEqual({ atual: true, acordaoKey: { not: null } });
+  });
+
+  it('um enunciado sem acordaoKey mas com evidência é elegível na base e NÃO na vitrine', () => {
+    // A distinção que a spec §4.3 exige: a vitrine (nível 1) barra o que o
+    // acervo/busca/ELIC (base) aceitam.
+    expect(WHERE_ELEGIVEL_BASE.destilacao).not.toEqual(WHERE_ELEGIVEL_VITRINE.destilacao);
   });
 });

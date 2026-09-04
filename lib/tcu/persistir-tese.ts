@@ -174,10 +174,19 @@ export async function selecionarElegiveis(
  * com `atual: true` para o mesmo caso quebrariam a exibição.
  */
 export interface IdentidadeAlvo {
-  acordaoKey: string;
+  /** Nulo no nível 2 (convergência) — não há identidade oficial nesse nível. */
+  acordaoKey: string | null;
   colegiadoAlvo: string | null;
   relatorAlvo: string | null;
   urlAlvo: string | null;
+  /**
+   * Nível 2 de procedência (spec §4.3): passado pelo chamador quando a
+   * identidade vem de convergência dos citantes, não do TCU. `persistirDestilacao`
+   * NÃO confia nisso quando `acordaoKey` está presente — ver comentário abaixo.
+   */
+  origemIdentidade?: 'convergencia-citantes' | null;
+  /** Quantos citantes sustentam o colegiado, no nível de convergência. */
+  citantesConcordantes?: number | null;
 }
 
 export async function persistirDestilacao(
@@ -275,6 +284,14 @@ export async function persistirDestilacao(
         colegiadoAlvo: identidade?.colegiadoAlvo ?? null,
         relatorAlvo: identidade?.relatorAlvo ?? null,
         urlAlvo: identidade?.urlAlvo ?? null,
+        // A origem é derivada aqui, não confiada ao chamador: `acordaoKey`
+        // gravado SEMPRE significa nível 1 (spec §4.3), mesmo que o chamador
+        // tenha esquecido de anotar `origemIdentidade`. Sem `acordaoKey`, cai
+        // no que o chamador passou (nível 2) ou null (nível 3).
+        origemIdentidade: identidade?.acordaoKey
+          ? 'tcu-oficial'
+          : identidade?.origemIdentidade ?? null,
+        citantesConcordantes: identidade?.acordaoKey ? null : identidade?.citantesConcordantes ?? null,
         sinais: (tese.sinaisQualitativos ?? []) as unknown as object,
         atual: true,
         enunciados: { create: enunciados },

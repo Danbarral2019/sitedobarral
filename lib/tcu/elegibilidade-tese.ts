@@ -16,12 +16,32 @@ import type { Prisma } from '@prisma/client';
  * um campo Json, o que Prisma não expressa. O `some: {}` barra o caso grosseiro
  * (zero trechos); a integralidade é conferida em memória por
  * `evidenciaIntegral`, e todo consumidor precisa aplicar as duas.
+ *
+ * NÃO exige `acordaoKey` (identidade oficial). A tese não depende do
+ * acórdão-líder para existir — ela é extraída dos votos citantes, todos
+ * identificados por `TeseTrechoFonte` (spec §7.1). Identidade não resolvida
+ * deixa em aberto só QUAL colegiado julgou o precedente, não se a tese é
+ * verdadeira; excluir por isso descartava 34 das 93 teses aprovadas (spec
+ * §4.3, medido em 04/09/2026). O nível de procedência (`origemIdentidade`)
+ * é o que diferencia os consumidores — só a vitrine exige nível 1, abaixo.
  */
 export const WHERE_ELEGIVEL_BASE = {
   veredito: 'fiel',
   retiradoEm: null,
-  destilacao: { atual: true, acordaoKey: { not: null } },
+  destilacao: { atual: true },
   trechos: { some: {} },
+} satisfies Prisma.TeseEnunciadoWhereInput;
+
+/**
+ * Cláusula adicional exclusiva da vitrine (nível 1 de procedência, spec
+ * §4.3): a URL pública (`/teses/2298-2025-plenario`) afirmaria o colegiado
+ * no próprio endereço, então a vitrine exige identidade oficial confirmada
+ * pelo TCU — convergência dos citantes (nível 2) e "sem colegiado" (nível 3)
+ * valem para acervo, busca e ELIC, mas não aqui.
+ */
+export const WHERE_ELEGIVEL_VITRINE = {
+  ...WHERE_ELEGIVEL_BASE,
+  destilacao: { atual: true, acordaoKey: { not: null } },
 } satisfies Prisma.TeseEnunciadoWhereInput;
 
 /** Índices distintos e ordenados declarados em `trechosFonte`. */

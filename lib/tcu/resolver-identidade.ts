@@ -5,7 +5,7 @@
  * extraído por regex do texto de quem cita e discorda da base em casos reais,
  * e em 39 das 93 teses o acórdão-líder sequer existe como Document.
  */
-import { buscarAcordaoPorNumero, escolherCandidato } from './buscar-acordao-tcu';
+import { buscarAcordaoPorNumero, escolherCandidato, type CandidatoAcordao } from './buscar-acordao-tcu';
 import type { IdentidadeAlvo } from './persistir-tese';
 import { prisma } from '../prisma';
 
@@ -25,15 +25,15 @@ export type ResultadoIdentidade =
   | { tipo: 'ambiguo'; candidatos: number }
   | { tipo: 'erroTransitorio'; erro: string };
 
-export async function resolverIdentidade(numero: number, ano: number): Promise<ResultadoIdentidade> {
-  let candidatos;
-  try {
-    candidatos = await buscarAcordaoPorNumero(numero, ano);
-  } catch (e) {
-    // Falha de rede não é ambiguidade: o alvo continua na fila para a
-    // próxima passada, sem gravar identidade errada.
-    return { tipo: 'erroTransitorio', erro: e instanceof Error ? e.message : String(e) };
-  }
+/**
+ * Classifica candidatos JÁ EM MÃOS pela cardinalidade estrita da spec §4.2 —
+ * pura, sem rede. Extraída porque a regra "zero → não encontrado; um →
+ * resolvido; dois ou mais → ambíguo" estava copiada aqui e em
+ * `destilar-teses-tcu` (spec 2026-09-04 §4.3) — este módulo a usa depois do
+ * fetch, e o cron a usa direto sobre os candidatos que já buscou para achar a
+ * ementa, sem requisição de rede a mais.
+ */
+export function classificarCandidatos(candidatos: CandidatoAcordao[]): ResultadoIdentidade {
   const escolhido = escolherCandidato(candidatos);
   if (escolhido) {
     return {
@@ -52,6 +52,18 @@ export async function resolverIdentidade(numero: number, ano: number): Promise<R
   const completos = candidatos.filter((c) => !c.isRelacao);
   if (completos.length === 0) return { tipo: 'naoEncontrado' };
   return { tipo: 'ambiguo', candidatos: completos.length };
+}
+
+export async function resolverIdentidade(numero: number, ano: number): Promise<ResultadoIdentidade> {
+  let candidatos;
+  try {
+    candidatos = await buscarAcordaoPorNumero(numero, ano);
+  } catch (e) {
+    // Falha de rede não é ambiguidade: o alvo continua na fila para a
+    // próxima passada, sem gravar identidade errada.
+    return { tipo: 'erroTransitorio', erro: e instanceof Error ? e.message : String(e) };
+  }
+  return classificarCandidatos(candidatos);
 }
 
 /**
