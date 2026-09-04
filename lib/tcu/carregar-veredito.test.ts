@@ -66,6 +66,33 @@ describe('carregarVeredito', () => {
     expect(r.herdadoDe).toBe('a1');
   });
 
+  it('com duplicatas em que só o segundo foi julgado, herda o veredito dele', () => {
+    // Se os dois `find` fossem colapsados num só (procurar por texto e parar
+    // no primeiro match), este caso quebraria em silêncio: o primeiro
+    // anterior (não julgado) venceria e o veredito do segundo se perderia.
+    const r = carregarVeredito('Tese Y.', [
+      anterior('Tese Y.', null, 'a1'),
+      anterior('Tese Y.', 'fiel', 'a2'),
+    ]);
+    expect(r.veredito).toBe('fiel');
+    expect(r.herdadoDe).toBe('a2');
+  });
+
+  it('com duplicatas em que só o segundo foi julgado, o estado editorial vem do primeiro', () => {
+    // Companheiro do teste acima: mostra que o veredito e o estado editorial
+    // podem vir de anteriores DIFERENTES no mesmo cenário — o veredito segue
+    // o julgado (a2), mas publicado/vitrinePublica seguem o primeiro que
+    // casar por texto (a1), julgado ou não.
+    const r = carregarVeredito('Tese Y.', [
+      { ...anterior('Tese Y.', null, 'a1'), publicado: true, vitrinePublica: true },
+      { ...anterior('Tese Y.', 'fiel', 'a2'), publicado: false, vitrinePublica: false },
+    ]);
+    expect(r.publicado).toBe(true);
+    expect(r.vitrinePublica).toBe(true);
+    expect(r.veredito).toBe('fiel');
+    expect(r.herdadoDe).toBe('a2');
+  });
+
   it('enunciado retirado SEM veredito não ressuscita na redestilacao', () => {
     // `retirar-teses.ts` retira todos os enunciados da chave, tenham veredito
     // ou não. Se a herança editorial dependesse do veredito, o par não seria

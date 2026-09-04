@@ -59,10 +59,20 @@ export function carregarVeredito(
   // SEM_VEREDITO, que ZERA `retiradoEm` — e a redestilação do alvo ressuscitava
   // a tese retirada, exatamente o que a §5 declara impossível.
   //
-  // O veredito continua exigindo um anterior JULGADO. Os dois `find` são
-  // separados (em vez de checar o veredito do par editorial) para preservar o
-  // pareamento existente quando há dois anteriores com o mesmo texto e só o
-  // segundo foi julgado: o veredito ainda é herdado dele.
+  // O veredito (e herdadoDe/julgadoEm/julgadoPor) continua exigindo um
+  // anterior JULGADO. Os dois `find` são separados — em vez de checar o
+  // veredito do par editorial — para não perder esse veredito quando há dois
+  // anteriores com o mesmo texto e só o segundo foi julgado: nesse caso o
+  // veredito ainda é herdado do segundo.
+  //
+  // Essa garantia é só do veredito. Os quatro campos editoriais
+  // (publicado/vitrinePublica/retiradoEm/retiradoMotivo) sempre vêm de
+  // `parEditorial` — o PRIMEIRO anterior que casar por texto, julgado ou não
+  // — mesmo quando é o segundo que carrega o veredito. Havendo duplicatas com
+  // o mesmo texto, qual delas é "o primeiro" é indefinido: a consulta que
+  // monta `anteriores` (`persistir-tese.ts`, por volta da linha 172) não tem
+  // `orderBy`, então o estado editorial herdado nesse caso depende da ordem
+  // em que o Postgres devolver as linhas.
   const parEditorial = anteriores.find((a) => a.enunciado === enunciadoNovo);
   if (!parEditorial) return { ...SEM_VEREDITO };
   const par = anteriores.find((a) => a.veredito !== null && a.enunciado === enunciadoNovo);
