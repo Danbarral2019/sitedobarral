@@ -59,7 +59,10 @@ export interface ExportResult {
   documents: number;
   acts: number;
   decisions: number;
+  /** Enunciados elegíveis exportados — teses, não arquivos. */
   teses: number;
+  /** Arquivos escritos em `teses/`: um por acórdão-líder, com 1..N teses cada. */
+  arquivosDeTese: number;
   filesRemoved: number;
   mode: 'full' | 'incremental';
   durationMs: number;
@@ -270,6 +273,10 @@ export async function runIncrementalExport(
     if (opts.incluirTeses) {
       const destilacoes = await prisma.teseDestilacao.findMany({
         where: { atual: true, enunciados: { some: WHERE_ELEGIVEL_BASE } },
+        // Ordem estável entre execuções: sem `ORDER BY` o Postgres não a
+        // garante, e qual das duas destilações colidentes é pulada pelo aviso
+        // abaixo passaria a variar de uma exportação para outra.
+        orderBy: [{ numeroAlvo: 'asc' }, { anoAlvo: 'asc' }, { id: 'asc' }],
         select: {
           id: true, numeroAlvo: true, anoAlvo: true, colegiadoAlvo: true,
           relatorAlvo: true, acordaoKey: true, urlAlvo: true,
@@ -277,6 +284,14 @@ export async function runIncrementalExport(
           assunto: true, confianca: true, dossieNoVoto: true,
           enunciados: {
             where: WHERE_ELEGIVEL_BASE,
+            // `TeseEnunciado.ordem` existe para isto. Sem `ORDER BY` o
+            // Postgres não garante ordem, e como `atualizadoEm` é `@updatedAt`
+            // qualquer mudança de veredito reescreve a linha e pode movê-la: o
+            // mesmo dado geraria arquivos com as seções e o `vereditos: [...]`
+            // em ordens diferentes entre execuções, reescrevendo sem motivo
+            // uma pasta sincronizada por OneDrive e embaralhando o chunking do
+            // RAG entre reindexações.
+            orderBy: { ordem: 'asc' },
             select: {
               id: true, enunciado: true, inovacao: true, veredito: true,
               publicado: true, trechosFonte: true, atualizadoEm: true,
@@ -318,7 +333,10 @@ export async function runIncrementalExport(
         }
         caminhosDeTese.add(caminho);
         files.push({ path: caminho, content: gerarTeseMd(dados) });
-        totalTeses++;
+        // Conta ENUNCIADOS, não arquivos: o rótulo do README e do console diz
+        // "Teses", e as linhas vizinhas (documentos, atos, jurisprudência)
+        // contam registros. O número de arquivos é `caminhosDeTese.size`.
+        totalTeses += elegiveis.length;
       }
     }
 
@@ -360,6 +378,7 @@ export async function runIncrementalExport(
       acts: allActs.length,
       decisions: allDecisions.length,
       teses: totalTeses,
+      arquivosDeTese: caminhosDeTese.size,
       filesRemoved: removidos.length,
       mode: (opts.full || !lastExportAt) ? 'full' : 'incremental',
       durationMs: Date.now() - startTime,

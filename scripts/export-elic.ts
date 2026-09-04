@@ -32,7 +32,13 @@ export const VAULT_ELIC =
   'C:/Users/User/OneDrive - AGU/Elic - uniformização/20-Referencia - Base do Site do Barral';
 
 function readme(
-  stats: { documents: number; acts: number; decisions: number; teses: number },
+  stats: {
+    documents: number;
+    acts: number;
+    decisions: number;
+    teses: number;
+    arquivosDeTese: number;
+  },
   quando: string,
 ): string {
   return `# Base de conhecimento — Site do Prof. Daniel Barral
@@ -47,7 +53,7 @@ cada exportação, e não há caminho de volta para o banco.
 - **Documentos:** ${stats.documents}
 - **Atos legislativos:** ${stats.acts}
 - **Jurisprudência:** ${stats.decisions}
-- **Teses do TCU:** ${stats.teses}
+- **Teses do TCU:** ${stats.teses} (em ${stats.arquivosDeTese} arquivos, um por acórdão-líder)
 
 ## O que está aqui
 
@@ -115,9 +121,9 @@ async function main() {
   console.log(`\n  Documentos      : ${stats.documents}`);
   console.log(`  Atos            : ${stats.acts}`);
   console.log(`  Jurisprudência  : ${stats.decisions}`);
-  console.log(`  Teses           : ${stats.teses}`);
+  console.log(`  Teses           : ${stats.teses} (em ${stats.arquivosDeTese} arquivos)`);
   console.log(`  Arquivos escritos: ${stats.filesWritten}`);
-  console.log(`  Arquivos removidos: ${stats.filesRemoved}`);
+  console.log(`  Arquivos removidos: ${dryRun ? '(dry-run) ' : ''}${stats.filesRemoved}`);
   console.log(`  Tempo           : ${((Date.now() - inicio) / 1000).toFixed(1)}s`);
 
   if (!dryRun) {
