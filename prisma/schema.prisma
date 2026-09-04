@@ -2110,6 +2110,8 @@ model TeseDestilacao {
   urlAlvo       String?
   /// Enriquecimento opcional: o acórdão-líder na nossa base, quando existe.
   /// NÃO é a identidade — em 39 das 93 teses o líder não está aqui.
+  /// Reservado para a onda seguinte: nem o campo nem o índice abaixo são
+  /// preenchidos por código algum hoje (nem cron, nem backfill) — não é bug.
   documentId    String?
   document      Document? @relation("TeseDestilacaoAcordaoLider", fields: [documentId], references: [id], onDelete: SetNull)
   /// Retrato do dossiê que gerou esta versão. Sem ele não há como saber depois
@@ -2194,6 +2196,12 @@ model TeseTrechoFonte {
   origemDocument   Document? @relation("TeseTrechoOrigem", fields: [origemDocumentId], references: [id], onDelete: SetNull)
 
   noVoto      Boolean
+  /// Momento da PRIMEIRA captura, não da última reconstrução: `@default(now())`
+  /// só se aplica na criação da linha, e o upsert do backfill de evidência
+  /// preserva o valor antigo (grava só `update: { ...l }`, que não inclui este
+  /// campo). É deliberado — permite distinguir depois uma linha gravada pelo
+  /// cron diário (capturadoEm ~= TeseDestilacao.criadoEm) de uma reconstruída
+  /// pelo backfill (capturadoEm muito posterior ao criadoEm da destilação).
   capturadoEm DateTime @default(now())
 
   /// Torna a gravação idempotente: reexecutar o backfill reescreve as mesmas
