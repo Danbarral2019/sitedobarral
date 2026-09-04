@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidade | Site do Prof. Daniel Barral',
+  title: 'Política de Privacidade',
   description: 'Como tratamos seus dados pessoais em conformidade com a LGPD (Lei nº 13.709/2018).',
-  alternates: { canonical: '/privacidade' },
+  alternates: { canonical: new URL('/privacidade', getSiteUrl()) },
   robots: { index: true, follow: true },
 };
 
@@ -12,6 +13,8 @@ const LAST_UPDATED = '25 de abril de 2026';
 const DPO_EMAIL = 'dpo@profdanielbarral.com';
 
 export default function PrivacidadePage() {
+  const siteUrl = getSiteUrl();
+
   return (
     <main className="py-12">
       <div className="container mx-auto px-4">
@@ -42,8 +45,8 @@ export default function PrivacidadePage() {
                 Endereço: Rua 15, Lote 27, Setor Leste, Padre Bernardo-GO, CEP 73700-000
                 <br />
                 Site:{' '}
-                <a href="https://www.profdanielbarral.com" className="text-brand-600 hover:underline">
-                  www.profdanielbarral.com
+                <a href={siteUrl.toString()} className="text-brand-600 hover:underline">
+                  {siteUrl.host}
                 </a>
               </p>
             </Section>
@@ -241,7 +244,7 @@ export default function PrivacidadePage() {
                 comunicadas por e-mail aos titulares com pelo menos <strong>30 dias de
                 antecedência</strong>. A versão mais recente está sempre disponível em{' '}
                 <Link href="/privacidade" className="text-brand-600 hover:underline">
-                  www.profdanielbarral.com/privacidade
+                  {siteUrl.host}/privacidade
                 </Link>
                 .
               </p>

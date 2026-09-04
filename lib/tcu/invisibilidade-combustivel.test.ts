@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { CATEGORIA_GRAFO } from './backfill-retroativo';
 
 /**
  * Guarda de regressão da invisibilidade do combustível do grafo.

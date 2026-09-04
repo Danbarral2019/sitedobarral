@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Busca Integrada | Prof. Daniel Barral',
+  title: 'Busca Integrada',
   description:
     'Pesquise em artigos da Lei 14.133/2021, atos normativos, glossário, documentos, blog e perguntas frequentes sobre licitações e contratos administrativos.',
   openGraph: {

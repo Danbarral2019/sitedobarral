@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: SharedSearchPageProps): Promi
   }
 
   return {
-    title: `${data.query} - Prof. Daniel Barral`,
+    title: data.query,
     description: data.aiAnswer?.slice(0, 160) || 'Resposta do assistente de IA sobre licitacoes e contratos.',
     openGraph: {
       title: data.query,

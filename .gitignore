@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -113,3 +115,6 @@ dev.log
 
 # Superpowers brainstorm (visual companion)
 .superpowers/
+
+# Isolated implementation worktrees
+.worktrees/

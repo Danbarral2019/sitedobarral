@@ -9,16 +9,17 @@ import {
   getCachedTstOjCount,
   getCachedTstPnCount,
 } from '@/lib/cached-queries';
+import { getSiteUrl } from '@/lib/site-url';
 
 // 60s: contadores mudam quando admin classifica/sync roda — atualiza rápido
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Base de Conhecimento | Prof. Daniel Barral',
+  title: 'Base de Conhecimento',
   description:
     'Centro de conhecimento em Direito Administrativo, Licitações e Contratos: acórdãos do TCU, pareceres uniformizantes, orientações normativas, enunciados, Lei 14.133 comentada e jurisprudência consolidada.',
   alternates: {
-    canonical: '/base-conhecimento',
+    canonical: new URL('/base-conhecimento', getSiteUrl()),
   },
 };
 

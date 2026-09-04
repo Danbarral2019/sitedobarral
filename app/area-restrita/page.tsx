@@ -30,6 +30,9 @@ const LegislativeActsPanel = dynamic(() => import('@/components/LegislativeActsP
 const GlossaryPanel = dynamic(() => import('@/components/glossary/GlossaryPanel').then(mod => ({ default: mod.GlossaryPanel })));
 import type { DocumentResult } from '@/lib/types/global-search';
 
+const SNAPSHOT_KEY = 'area-restrita:last-search';
+const SNAPSHOT_TTL_MS = 30 * 60 * 1000;
+
 interface DocumentType {
   id: string;
   title: string;
@@ -87,8 +90,6 @@ function AreaRestritaContent() {
   // não existir ou estiver stale (>30 min), cai pra setQuery normal que
   // dispara busca debounced.
   const didRestoreRef = useRef(false);
-  const SNAPSHOT_KEY = 'area-restrita:last-search';
-  const SNAPSHOT_TTL_MS = 30 * 60 * 1000; // 30 min
 
   useEffect(() => {
     if (didRestoreRef.current) return;

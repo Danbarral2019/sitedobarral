@@ -9,7 +9,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { courses } from '@/data/courses';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 
 // Types
 export interface DocumentData {

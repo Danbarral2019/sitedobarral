@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
-import { stringifyLeiArticles } from '@/lib/lei-articles';
 
 /**
  * GET /api/admin/legislative-acts/[id]

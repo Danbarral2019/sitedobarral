@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
-import { parseLeiArticles, setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export const DELETE = withAdminApi<{ numero: string; actId: string }>(async (_request, { params }) => {

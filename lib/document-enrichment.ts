@@ -10,7 +10,7 @@
  */
 
 import { safeParseArray } from './utils';
-import { parseLeiArticles, getLeiArticles } from './lei-articles';
+import { getLeiArticles } from './lei-articles';
 import { PRIMARY_GEMINI_MODEL } from './gemini/config';
 
 export const ENRICHMENT_DELAY_MS = 50;

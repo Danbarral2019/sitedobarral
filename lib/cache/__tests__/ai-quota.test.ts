@@ -167,6 +167,27 @@ describe('enforceAiQuota', () => {
     expect(decision).toEqual({ action: 'degrade-gemini', reason: 'monthly' });
   });
 
+  it('falha do contador diário degrada para busca sem liberar IA', async () => {
+    mockIncrementCache
+      .mockResolvedValueOnce(1)
+      .mockRejectedValueOnce(new Error('Redis unavailable'));
+
+    const decision = await enforceAiQuota('u1', 'student', NOW);
+
+    expect(decision).toEqual({ action: 'degrade-search', reason: 'global' });
+  });
+
+  it('falha do contador mensal degrada para busca sem liberar IA', async () => {
+    mockIncrementCache
+      .mockResolvedValueOnce(1)
+      .mockResolvedValueOnce(1)
+      .mockRejectedValueOnce(new Error('Redis unavailable'));
+
+    const decision = await enforceAiQuota('u1', 'student', NOW);
+
+    expect(decision).toEqual({ action: 'degrade-search', reason: 'global' });
+  });
+
   it('admin → allow sem incrementar contador', async () => {
     const decision = await enforceAiQuota('u1', 'admin', NOW);
     expect(decision).toEqual({ action: 'allow' });
@@ -281,6 +302,14 @@ describe('enforceGlobalAiCap (rotas públicas — só Camada C)', () => {
     process.env.AI_DAILY_GLOBAL_CAP = '5';
     counters.set(GLOBAL, 5);
     const decision = await enforceGlobalAiCap(NOW);
+    expect(decision).toEqual({ action: 'degrade-search', reason: 'global' });
+  });
+
+  it('degrada para busca quando o contador global não pode ser incrementado', async () => {
+    mockIncrementCache.mockRejectedValueOnce(new Error('Redis unavailable'));
+
+    const decision = await enforceGlobalAiCap(NOW);
+
     expect(decision).toEqual({ action: 'degrade-search', reason: 'global' });
   });
 });

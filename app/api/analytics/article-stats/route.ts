@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 
 // GET /api/analytics/article-stats - Estatísticas de documentos por artigo
 export async function GET() {

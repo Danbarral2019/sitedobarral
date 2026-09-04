@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     };
     });
     return NextResponse.json(responseBody, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Erro ao verificar expirações' },
       { status: 500 }

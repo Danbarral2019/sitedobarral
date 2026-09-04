@@ -200,7 +200,7 @@ async function fetchFromDadosAbertosCSV(limit: number): Promise<ScrapeResult> {
 
     const items: InformativoItem[] = [];
     for (const line of lines) {
-      const [key, titulo, colegiado, textoAcordao, enunciado] = parseCsvLine(line);
+      const [key, titulo, , textoAcordao, enunciado] = parseCsvLine(line);
       const m = (titulo || '').match(/Contratos\s+(\d+)\/(\d{4})/i);
       const tese = (enunciado || '').trim();
       if (!m || !tese) continue;

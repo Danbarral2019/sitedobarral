@@ -3,6 +3,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import * as xlsx from 'xlsx';
 import { apiLogger } from "@/lib/logger";
+import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
 
 // Mapeamento inteligente de Area/Tema para Cursos
 const CURSO_MAPPING: Record<string, string> = {
@@ -197,6 +198,8 @@ export const POST = withAdminApi(async (request) => {
     throw new ValidationError('Nenhum arquivo enviado');
   }
 
+  validateWorkbookUpload({ filename: file.name, mimeType: file.type, size: file.size });
+
   console.log('[Convert TCU] Processando arquivo:', file.name);
 
   // Converte file para buffer
@@ -213,7 +216,9 @@ export const POST = withAdminApi(async (request) => {
       cellNF: false,
       cellText: false,
     });
+    validateWorkbookShape(workbook);
   } catch (error) {
+    if (error instanceof ValidationError) throw error;
     apiLogger.error({ err: error }, '[Convert TCU] Erro ao ler arquivo:');
     throw new ValidationError(
       'Erro ao ler arquivo. Por favor, converta o arquivo .xls para .xlsx no Excel/LibreOffice antes de importar.',

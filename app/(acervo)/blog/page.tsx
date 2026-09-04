@@ -5,6 +5,7 @@ import { getCachedPublishedBlogPosts } from '@/lib/cached-queries';
 import { getBlogPostBorderColor, getBlogPostTagColor } from '@/lib/course-colors';
 import { safeParseArray } from '@/lib/utils';
 import NewsletterForm from '@/components/NewsletterForm';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: 'Blog Jurídico',
@@ -20,19 +21,19 @@ export const metadata: Metadata = {
     'direito público',
   ],
   openGraph: {
-    title: 'Blog Jurídico | Prof. Daniel Barral',
+    title: 'Blog Jurídico',
     description: 'Artigos e análises sobre Direito Administrativo, Licitações e Contratos Públicos',
-    url: 'https://profdanielbarral.com/blog',
+    url: new URL('/blog', getSiteUrl()),
     type: 'website',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Blog Jurídico | Prof. Daniel Barral',
+    title: 'Blog Jurídico',
     description: 'Artigos sobre Direito Administrativo e Licitações',
   },
   alternates: {
-    canonical: '/blog',
+    canonical: new URL('/blog', getSiteUrl()),
   },
 };
 

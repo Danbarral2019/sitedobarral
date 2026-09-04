@@ -6,7 +6,7 @@ import { FAQAccordionItem } from '@/components/faq/FAQAccordionItem';
 import { FAQSearch } from '@/components/faq/FAQSearch';
 
 export const metadata: Metadata = {
-  title: 'Perguntas Frequentes — Prof. Daniel Barral',
+  title: 'Perguntas Frequentes',
   description:
     'Tire suas dúvidas sobre cursos, certificados, acesso ao site e Lei 14.133/2021.',
 };

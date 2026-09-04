@@ -217,16 +217,20 @@ export const CacheKeys = {
 
   /**
    * Glossary terms cache key
-   * Format: glossary:{category}:{letter}:{offset}:{limit}
+   * Format: glossary:{category}:{letter}:{query}:{page}:{pageSize}
    */
   glossaryTerms: (params: {
     category?: string | null;
     letter?: string | null;
+    query?: string | null;
+    page?: number;
+    pageSize?: number;
     offset?: number;
     limit?: number;
   }): string => {
-    const { category, letter, offset = 0, limit = 100 } = params;
-    return `glossary:${category || 'all'}:${letter || 'all'}:${offset}:${limit}`;
+    const pageSize = params.pageSize ?? params.limit ?? 100;
+    const page = params.page ?? Math.floor((params.offset ?? 0) / pageSize) + 1;
+    return `glossary:${params.category || 'all'}:${params.letter || 'all'}:${params.query || 'all'}:${page}:${pageSize}`;
   },
 
   /**
@@ -523,9 +527,15 @@ export async function existsCache(key: string): Promise<boolean> {
  */
 export async function incrementCache(
   key: string,
-  ttl: number = CACHE_TTL.RATE_LIMIT
+  ttl: number = CACHE_TTL.RATE_LIMIT,
+  options: { failureMode?: FailureMode } = {},
 ): Promise<number> {
-  if (!redis) return 0;
+  if (!redis) {
+    if (options.failureMode === 'closed') {
+      throw new Error('Redis indisponível para controle sensível');
+    }
+    return 0;
+  }
 
   try {
     const count = await redis.incr(key);
@@ -538,6 +548,7 @@ export async function incrementCache(
     return count;
   } catch (error) {
     apiLogger.error({ err: error }, 'Cache increment error:');
+    if (options.failureMode === 'closed') throw error;
     return 0;
   }
 }
@@ -553,26 +564,40 @@ export interface RateLimitResult {
   reset: number; // Unix timestamp
 }
 
+export type FailureMode = 'open' | 'closed';
+
+function unavailableRateLimitResult(
+  limit: number,
+  window: number,
+  failureMode: FailureMode,
+): RateLimitResult {
+  const allowed = failureMode === 'open';
+  return {
+    allowed,
+    limit,
+    remaining: allowed ? limit : 0,
+    reset: Date.now() + window * 1000,
+  };
+}
+
 /**
  * Check rate limit
  */
 export async function checkRateLimit(
   identifier: string,
   limit: number = 10,
-  window: number = 60 // seconds
+  window: number = 60,
+  options: { failureMode?: FailureMode } = {},
 ): Promise<RateLimitResult> {
+  const failureMode = options.failureMode ?? 'open';
+
   if (!redis) {
-    return {
-      allowed: true,
-      limit,
-      remaining: limit,
-      reset: Date.now() + window * 1000,
-    };
+    return unavailableRateLimitResult(limit, window, failureMode);
   }
 
   try {
     const key = CacheKeys.rateLimit(identifier);
-    const count = await incrementCache(key, window);
+    const count = await incrementCache(key, window, { failureMode });
 
     const remaining = Math.max(0, limit - count);
     const reset = Date.now() + window * 1000;
@@ -585,13 +610,7 @@ export async function checkRateLimit(
     };
   } catch (error) {
     apiLogger.error({ err: error }, 'Rate limit check error:');
-    // Fail open on error
-    return {
-      allowed: true,
-      limit,
-      remaining: limit,
-      reset: Date.now() + window * 1000,
-    };
+    return unavailableRateLimitResult(limit, window, failureMode);
   }
 }
 

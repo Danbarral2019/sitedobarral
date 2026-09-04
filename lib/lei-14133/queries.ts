@@ -8,7 +8,7 @@
 
 import { cache } from 'react';
 import { prisma } from '../prisma';
-import { parseLeiArticles, getLeiArticles } from '../lei-articles';
+import { getLeiArticles } from '../lei-articles';
 import { LEI_14133_CAPITULOS, LEI_14133_STRUCTURE_STATS } from '../../data/lei-14133-capitulos';
 
 // Categorias de Document que contam como "jurisprudência relacionada"

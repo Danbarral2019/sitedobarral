@@ -60,6 +60,12 @@ describe('/api/artigos/[numero]/chat — kill-switch global', () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
+    expect(mockEnforceRateLimit).toHaveBeenCalledWith(
+      'chat:127.0.0.1',
+      5,
+      60,
+      { failureMode: 'closed' },
+    );
     expect(mockQueryGeminiText).not.toHaveBeenCalled();
     expect(body.answer).toMatch(/alta demanda/i);
     expect(body.degraded).toBe(true);

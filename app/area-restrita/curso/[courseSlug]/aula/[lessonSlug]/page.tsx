@@ -129,7 +129,6 @@ export default function LessonPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const courseId = useMemo(() => getIdFromSlug(courseSlug), [courseSlug]);
   const course = useMemo(() => getCourseBySlug(courseSlug), [courseSlug]);
@@ -193,12 +192,6 @@ export default function LessonPage({
         setProgress(lessonData.progress);
         setNavigation(lessonData.navigation);
         setCourseStatus(lessonData.courseStatus || null);
-
-        // Check if admin
-        fetch('/api/auth/verify')
-          .then(r => r.ok ? r.json() : null)
-          .then(d => { if (d?.user?.role === 'admin') setIsAdmin(true); })
-          .catch(() => {});
 
         // Mark as in_progress if not started
         if (!lessonData.progress || lessonData.progress.status === 'not_started') {

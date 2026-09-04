@@ -7,6 +7,7 @@ import ShareButtons from '@/components/ShareButtons';
 import NewsletterForm from '@/components/NewsletterForm';
 import { safeParseArray } from '@/lib/utils';
 import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -34,11 +35,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       publishedTime: post.publishedAt.toISOString(),
       authors: [post.author],
       tags: tags,
+      url: new URL(`/blog/${post.slug}`, getSiteUrl()),
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.excerpt,
+    },
+    alternates: {
+      canonical: new URL(`/blog/${post.slug}`, getSiteUrl()),
     },
   };
 }
@@ -138,18 +143,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 author: {
                   '@type': 'Person',
                   name: post.author,
-                  url: 'https://profbarral.com.br/sobre',
+                  url: new URL('/sobre', getSiteUrl()).toString(),
                 },
                 datePublished: post.publishedAt.toISOString(),
                 dateModified: post.updatedAt?.toISOString() || post.publishedAt.toISOString(),
                 publisher: {
                   '@type': 'Person',
                   name: 'Prof. Daniel Barral',
-                  url: 'https://profbarral.com.br',
+                  url: getSiteUrl().toString(),
                 },
                 mainEntityOfPage: {
                   '@type': 'WebPage',
-                  '@id': `https://profbarral.com.br/blog/${post.slug}`,
+                  '@id': new URL(`/blog/${post.slug}`, getSiteUrl()).toString(),
                 },
                 keywords: post.tags.join(', '),
                 inLanguage: 'pt-BR',

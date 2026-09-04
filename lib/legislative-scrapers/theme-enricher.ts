@@ -11,7 +11,7 @@
  */
 
 import { generate } from '@/lib/ai';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { CANONICAL_THEMES, validateThemes } from './theme-validator';
 
 /**

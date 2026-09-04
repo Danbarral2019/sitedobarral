@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { apiLogger } from '@/lib/logger';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
@@ -39,18 +39,6 @@ function createApiHandler<P>(
     try {
       const params = await nextCtx.params;
 
-      // Rate-limit key intencionalmente compartilhada com `lib/api-middleware.ts`
-      // antigo (prefixo `middleware:`) durante a janela de migração da Onda 4.
-      // Sem isso, o mesmo IP bate em dois buckets Redis distintos enquanto
-      // metade das rotas usa o helper novo e metade o middleware antigo,
-      // efetivamente dobrando o limite. PR 4.2.final (após remover
-      // api-middleware.ts) muda o prefixo para `api:` e revisita granularidade
-      // por-rota.
-      const rl = options.rateLimit ?? ROLE_DEFAULTS[role].rateLimit;
-      const ip = getClientIp(request);
-      const rateLimitKeyRole = role === 'public' ? 'public' : role === 'admin' ? 'admin' : 'auth';
-      await enforceRateLimit(`middleware:${rateLimitKeyRole}:${ip}`, rl.max, rl.windowSec);
-
       let user: AuthPayload | null = null;
       if (role !== 'public') {
         const { getCurrentUser } = await import('@/lib/auth');
@@ -62,6 +50,28 @@ function createApiHandler<P>(
           throw new AuthorizationError();
         }
         Sentry.setUser({ id: user.userId, email: user.email, role: user.role });
+      }
+
+      // Rate-limit key intencionalmente compartilhada com `lib/api-middleware.ts`
+      // antigo (prefixo `middleware:`) durante a janela de migração da Onda 4.
+      // Sem isso, o mesmo IP bate em dois buckets Redis distintos enquanto
+      // metade das rotas usa o helper novo e metade o middleware antigo,
+      // efetivamente dobrando o limite. PR 4.2.final (após remover
+      // api-middleware.ts) muda o prefixo para `api:` e revisita granularidade
+      // por-rota. Rotas autenticadas validam identidade e papel antes de
+      // consultar infraestrutura externa, preservando respostas 401 e 403.
+      const rl = options.rateLimit ?? ROLE_DEFAULTS[role].rateLimit;
+      const ip = getClientIp(request);
+      const rateLimitKeyRole = role === 'public' ? 'public' : role === 'admin' ? 'admin' : 'auth';
+      if (role === 'admin') {
+        await enforceRateLimit(
+          `middleware:${rateLimitKeyRole}:${ip}`,
+          rl.max,
+          rl.windowSec,
+          { failureMode: 'closed' },
+        );
+      } else {
+        await enforceRateLimit(`middleware:${rateLimitKeyRole}:${ip}`, rl.max, rl.windowSec);
       }
 
       const useTelemetry = options.telemetry !== false;

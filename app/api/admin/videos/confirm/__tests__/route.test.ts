@@ -70,7 +70,7 @@ describe('POST /api/admin/videos/confirm', () => {
   });
 
   it('400 quando falta campo obrigatório', async () => {
-    const { title, ...noTitle } = okBody;
+    const { title: _title, ...noTitle } = okBody;
     const res = await POST(req(noTitle), ctx);
     expect(res.status).toBe(400);
     expect(mockCreate).not.toHaveBeenCalled();

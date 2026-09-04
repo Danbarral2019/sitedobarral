@@ -75,7 +75,12 @@ export async function POST(req: NextRequest) {
     // 2. Rate limiting (10 queries per minute for non-admins)
     if (authResult.user.role !== 'admin') {
       const rateLimitKey = `query-rate-limit:${userId}`;
-      const rateLimitResult = await checkRateLimit(rateLimitKey, 10, 60);
+      const rateLimitResult = await checkRateLimit(
+        rateLimitKey,
+        10,
+        60,
+        { failureMode: 'closed' },
+      );
 
       if (!rateLimitResult.allowed) {
         return NextResponse.json(

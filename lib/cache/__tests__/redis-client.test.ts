@@ -227,17 +227,18 @@ describe('Redis Cache Client', () => {
     describe('glossaryTerms', () => {
       it('deve gerar chave com valores padrao', () => {
         const key = CacheKeys.glossaryTerms({});
-        expect(key).toBe('glossary:all:all:0:100');
+        expect(key).toBe('glossary:all:all:all:1:100');
       });
 
       it('deve gerar chave com todos os parametros', () => {
         const key = CacheKeys.glossaryTerms({
           category: 'juridico',
           letter: 'A',
-          offset: 10,
-          limit: 50,
+          query: 'pregao',
+          page: 2,
+          pageSize: 30,
         });
-        expect(key).toBe('glossary:juridico:A:10:50');
+        expect(key).toBe('glossary:juridico:A:pregao:2:30');
       });
     });
 
@@ -580,6 +581,15 @@ describe('Redis Cache Client', () => {
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(10);
+    });
+
+    it('deve fail closed em caso de erro quando solicitado', async () => {
+      mockIncr.mockRejectedValue(new Error('Redis error'));
+
+      const result = await checkRateLimit('login:user-1', 5, 60, { failureMode: 'closed' });
+
+      expect(result.allowed).toBe(false);
+      expect(result.remaining).toBe(0);
     });
   });
 
