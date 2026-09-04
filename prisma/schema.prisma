@@ -2151,7 +2151,11 @@ model TeseEnunciado {
   retiradoEm     DateTime?
   retiradoMotivo String?
   /// Sinal de mudança para o relatório do export incremental (spec §8.2).
-  atualizadoEm   DateTime  @updatedAt
+  /// @default(now()) é necessário porque @updatedAt sozinho é resolvido no
+  /// client do Prisma, não no banco — sem default, o db push não teria como
+  /// preencher as linhas já existentes na tabela e pediria reset, não apenas
+  /// --accept-data-loss (achado da revisão, jamais reintroduzir sem default).
+  atualizadoEm   DateTime  @default(now()) @updatedAt
   /// Ciclo do embedding, no desenho de Document e TribunalDecision (spec §9).
   embeddingStatus String?
 
