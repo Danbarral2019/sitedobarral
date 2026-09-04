@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { join } from 'path';
 
 const { mockReaddir, mockRm } = vi.hoisted(() => ({ mockReaddir: vi.fn(), mockRm: vi.fn() }));
 vi.mock('fs/promises', async () => {
@@ -17,34 +18,66 @@ describe('removerObsoletos', () => {
 
   it('remove o que não está no conjunto esperado', async () => {
     mockReaddir.mockResolvedValue(['a.md', 'b.md', 'c.md']);
-    const n = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md', 'teses/c.md']), false);
-    expect(n).toBe(1);
+    const removidos = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md', 'teses/c.md']), false);
+    expect(removidos).toEqual(['b.md']);
     expect(mockRm).toHaveBeenCalledTimes(1);
     expect(String(mockRm.mock.calls[0][0])).toContain('b.md');
   });
 
   it('não remove nada quando tudo é esperado', async () => {
     mockReaddir.mockResolvedValue(['a.md']);
-    const n = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md']), false);
-    expect(n).toBe(0);
+    const removidos = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md']), false);
+    expect(removidos).toEqual([]);
     expect(mockRm).not.toHaveBeenCalled();
   });
 
-  it('dry-run conta mas não remove', async () => {
+  it('dry-run lista o que seria removido, sem remover', async () => {
     mockReaddir.mockResolvedValue(['a.md', 'b.md']);
-    const n = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md']), true);
-    expect(n).toBe(1);
+    const removidos = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md']), true);
+    // A §8.2 exige que o dry-run LISTE, não só conte: o usuário confere aqui
+    // antes de deixar apagar de verdade, e um número não diz quais arquivos.
+    expect(removidos).toEqual(['b.md']);
     expect(mockRm).not.toHaveBeenCalled();
   });
 
   it('diretório inexistente não é erro', async () => {
     mockReaddir.mockRejectedValue(Object.assign(new Error('nope'), { code: 'ENOENT' }));
-    await expect(removerObsoletos('/destino', 'teses', new Set(), false)).resolves.toBe(0);
+    await expect(removerObsoletos('/destino', 'teses', new Set(), false)).resolves.toEqual([]);
   });
 
   it('ignora arquivo que não termina em .md', async () => {
     mockReaddir.mockResolvedValue(['a.md', 'leia-me.txt']);
-    const n = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md']), false);
-    expect(n).toBe(0);
+    const removidos = await removerObsoletos('/destino', 'teses', new Set(['teses/a.md']), false);
+    expect(removidos).toEqual([]);
+  });
+
+  // ---------------------------------------------------------------------
+  // Segurança de escopo — a razão de existir desta função.
+  //
+  // O destino é uma pasta do OneDrive de trabalho com material de outras
+  // origens: escapar do subdiretório recebido destruiria arquivo de
+  // terceiro, sem desfazer. As três asserções abaixo travam, uma a uma, as
+  // três formas óbvias de uma implementação escapar — cada uma delas foi
+  // injetada manualmente e confirmada como capaz de derrubar este teste
+  // (ver task-3-report.md, seção "Confirmação por injeção de bug").
+  // ---------------------------------------------------------------------
+  it('não escapa do subdiretório: readdir sem recursão, rm com caminho exato e sem opções perigosas', async () => {
+    mockReaddir.mockResolvedValue(['b.md']);
+    await removerObsoletos('/destino', 'teses', new Set(), false);
+
+    // 1. readdir lê SÓ o subdiretório recebido, sem varrer recursivamente.
+    //    `toHaveBeenCalledWith` de um único argumento falha se a chamada
+    //    real também passou `{ recursive: true }` como segundo argumento.
+    expect(mockReaddir).toHaveBeenCalledWith(join('/destino', 'teses'));
+
+    // 2. rm recebe o caminho EXATO dentro do subdiretório — não
+    //    `outputDir` direto (que apagaria fora de `teses/`) e não um
+    //    caminho livre montado por fora.
+    expect(mockRm).toHaveBeenCalledWith(join('/destino', 'teses', 'b.md'));
+
+    // 3. rm é chamado com um único argumento: sem `{ recursive: true }`
+    //    nem `{ force: true }`, que alcançariam diretórios inteiros ou
+    //    silenciariam erro de apagar algo que não deveria.
+    expect(mockRm.mock.calls[0]).toEqual([join('/destino', 'teses', 'b.md')]);
   });
 });

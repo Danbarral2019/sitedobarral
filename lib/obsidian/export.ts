@@ -863,6 +863,9 @@ export interface FileEntry {
 
 /**
  * Remove, de UM subdiretório, os arquivos que não estão no conjunto esperado.
+ * Devolve os nomes removidos (ou que seriam removidos, em dry-run) — a §8.2
+ * exige que o dry-run LISTE o que seria removido, não só conte, porque é a
+ * superfície em que o usuário confere antes de deixar apagar de verdade.
  *
  * O motor nunca apagou nada. Sem isto, uma tese retirada, reprovada numa
  * redestilação ou que perdeu a evidência continuaria no acervo de RAG do ELIC
@@ -871,28 +874,30 @@ export interface FileEntry {
  * O escopo é ESTRITAMENTE o subdiretório recebido: o destino é uma pasta do
  * OneDrive de trabalho com material de outras origens, e apagar fora dele
  * destruiria arquivo de terceiro. Por isso a função não recebe um caminho
- * livre nem varre recursivamente.
+ * livre nem varre recursivamente — um único `readdir` do subdiretório, sem
+ * `{ recursive: true }` — e o `rm` sempre recebe `join(dir, nome)` com `nome`
+ * saído desse `readdir`, nunca uma string livre montada por fora.
  */
 export async function removerObsoletos(
   outputDir: string,
   subdiretorio: string,
   esperados: Set<string>,
   dryRun: boolean,
-): Promise<number> {
+): Promise<string[]> {
   const dir = join(outputDir, subdiretorio);
   let entradas: string[];
   try {
     entradas = await readdir(dir);
   } catch {
-    return 0; // diretório ainda não existe: nada a remover
+    return []; // diretório ainda não existe: nada a remover
   }
 
-  let removidos = 0;
+  const removidos: string[] = [];
   for (const nome of entradas) {
     if (!nome.endsWith('.md')) continue;
     const relativo = `${subdiretorio}/${nome}`;
     if (esperados.has(relativo)) continue;
-    removidos++;
+    removidos.push(nome);
     if (!dryRun) await rm(join(dir, nome));
   }
   return removidos;

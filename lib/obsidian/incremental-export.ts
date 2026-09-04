@@ -312,12 +312,15 @@ export async function runIncrementalExport(
     // -----------------------------------------------------------------------
     // Write files
     // -----------------------------------------------------------------------
-    let removidos = 0;
+    let removidos: string[] = [];
     if (opts.dryRun) {
       console.log(`  [DRY RUN] ${files.length} arquivos seriam escritos`);
       if (opts.incluirTeses) {
         removidos = await removerObsoletos(opts.outputDir, 'teses', caminhosDeTese, true);
-        console.log(`  [DRY RUN] ${removidos} arquivos obsoletos seriam removidos de teses/`);
+        console.log(`  [DRY RUN] ${removidos.length} arquivos obsoletos seriam removidos de teses/`);
+        for (const nome of removidos) {
+          console.log(`  [DRY RUN]   - teses/${nome}`);
+        }
       }
     } else {
       await writeVault(opts.outputDir, files);
@@ -344,7 +347,7 @@ export async function runIncrementalExport(
       acts: allActs.length,
       decisions: allDecisions.length,
       teses: totalTeses,
-      filesRemoved: removidos,
+      filesRemoved: removidos.length,
       mode: (opts.full || !lastExportAt) ? 'full' : 'incremental',
       durationMs: Date.now() - startTime,
     };
