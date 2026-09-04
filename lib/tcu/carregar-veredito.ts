@@ -49,19 +49,31 @@ export function carregarVeredito(
     retiradoMotivo?: string | null;
   }>
 ): VeredictoHerdado {
+  // DOIS pareamentos, porque os dois eixos da spec §5 têm condições diferentes.
+  //
+  // O estado editorial (publicado/vitrine/retirada) é preso ao TEXTO IDÊNTICO,
+  // e só a ele: a retirada é um ato de quem tirou a tese do ar, e vale enquanto
+  // o texto for o mesmo — julgada ou não. Acoplá-la à existência de veredito
+  // deixava um buraco real: `retirar-teses.ts` retira todo enunciado da chave,
+  // inclusive os que ainda não têm veredito; sem par, o retorno era
+  // SEM_VEREDITO, que ZERA `retiradoEm` — e a redestilação do alvo ressuscitava
+  // a tese retirada, exatamente o que a §5 declara impossível.
+  //
+  // O veredito continua exigindo um anterior JULGADO. Os dois `find` são
+  // separados (em vez de checar o veredito do par editorial) para preservar o
+  // pareamento existente quando há dois anteriores com o mesmo texto e só o
+  // segundo foi julgado: o veredito ainda é herdado dele.
+  const parEditorial = anteriores.find((a) => a.enunciado === enunciadoNovo);
+  if (!parEditorial) return { ...SEM_VEREDITO };
   const par = anteriores.find((a) => a.veredito !== null && a.enunciado === enunciadoNovo);
-  if (!par) return { ...SEM_VEREDITO };
   return {
-    veredito: par.veredito,
-    herdadoDe: par.id,
-    julgadoEm: par.julgadoEm,
-    julgadoPor: par.julgadoPor,
-    // O estado editorial acompanha o veredito quando o TEXTO é idêntico.
-    // A retirada em especial: sem herdá-la, redestilar ressuscitaria uma tese
-    // que alguém tirou do ar de propósito (spec §5).
-    publicado: par.publicado ?? false,
-    vitrinePublica: par.vitrinePublica ?? false,
-    retiradoEm: par.retiradoEm ?? null,
-    retiradoMotivo: par.retiradoMotivo ?? null,
+    veredito: par?.veredito ?? null,
+    herdadoDe: par?.id ?? null,
+    julgadoEm: par?.julgadoEm ?? null,
+    julgadoPor: par?.julgadoPor ?? null,
+    publicado: parEditorial.publicado ?? false,
+    vitrinePublica: parEditorial.vitrinePublica ?? false,
+    retiradoEm: parEditorial.retiradoEm ?? null,
+    retiradoMotivo: parEditorial.retiradoMotivo ?? null,
   };
 }

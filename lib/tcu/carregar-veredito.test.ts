@@ -65,4 +65,42 @@ describe('carregarVeredito', () => {
     const r = carregarVeredito('Tese.', [anterior('Tese.', 'fiel', 'a1'), anterior('Tese.', 'errada', 'a2')]);
     expect(r.herdadoDe).toBe('a1');
   });
+
+  it('enunciado retirado SEM veredito não ressuscita na redestilacao', () => {
+    // `retirar-teses.ts` retira todos os enunciados da chave, tenham veredito
+    // ou não. Se a herança editorial dependesse do veredito, o par não seria
+    // encontrado, `retiradoEm` seria zerado e a tese voltaria ao ar (spec §5).
+    const retiradoEm = new Date('2026-09-01T10:00:00Z');
+    const r = carregarVeredito('Tese fora de escopo.', [
+      {
+        ...anterior('Tese fora de escopo.', null, 'a1'),
+        retiradoEm,
+        retiradoMotivo: 'materia estranha ao escopo do site',
+      },
+    ]);
+    expect(r.retiradoEm).toEqual(retiradoEm);
+    expect(r.retiradoMotivo).toBe('materia estranha ao escopo do site');
+    // O veredito continua exigindo anterior julgado — só o estado editorial vem.
+    expect(r.veredito).toBeNull();
+    expect(r.herdadoDe).toBeNull();
+  });
+
+  it('estado editorial de enunciado publicado sem veredito também é herdado', () => {
+    const r = carregarVeredito('Tese X.', [
+      { ...anterior('Tese X.', null, 'a1'), publicado: true, vitrinePublica: true },
+    ]);
+    expect(r).toMatchObject({ publicado: true, vitrinePublica: true, veredito: null });
+  });
+
+  it('texto diferente não herda retirada — enunciado novo volta a fila', () => {
+    const r = carregarVeredito('Tese reescrita.', [
+      {
+        ...anterior('Tese fora de escopo.', null, 'a1'),
+        retiradoEm: new Date('2026-09-01T10:00:00Z'),
+        retiradoMotivo: 'materia estranha',
+      },
+    ]);
+    expect(r.retiradoEm).toBeNull();
+    expect(r.retiradoMotivo).toBeNull();
+  });
 });
