@@ -31,7 +31,10 @@ import { runIncrementalExport } from '../lib/obsidian/incremental-export';
 export const VAULT_ELIC =
   'C:/Users/User/OneDrive - AGU/Elic - uniformização/20-Referencia - Base do Site do Barral';
 
-function readme(stats: { documents: number; acts: number; decisions: number }, quando: string): string {
+function readme(
+  stats: { documents: number; acts: number; decisions: number; teses: number },
+  quando: string,
+): string {
   return `# Base de conhecimento — Site do Prof. Daniel Barral
 
 Acervo exportado automaticamente do banco do \`sitedobarral\` para servir de
@@ -44,6 +47,7 @@ cada exportação, e não há caminho de volta para o banco.
 - **Documentos:** ${stats.documents}
 - **Atos legislativos:** ${stats.acts}
 - **Jurisprudência:** ${stats.decisions}
+- **Teses do TCU:** ${stats.teses}
 
 ## O que está aqui
 
@@ -103,12 +107,17 @@ async function main() {
     // acordaos do grafo entram. O cofre do Obsidian mantem o default e
     // continua sem eles.
     incluirCombustivelDoGrafo: true,
+    // Idem para as teses destiladas do TCU: o cofre do professor nao as
+    // recebe, mas aqui o destino e indice de RAG.
+    incluirTeses: true,
   });
 
   console.log(`\n  Documentos      : ${stats.documents}`);
   console.log(`  Atos            : ${stats.acts}`);
   console.log(`  Jurisprudência  : ${stats.decisions}`);
+  console.log(`  Teses           : ${stats.teses}`);
   console.log(`  Arquivos escritos: ${stats.filesWritten}`);
+  console.log(`  Arquivos removidos: ${stats.filesRemoved}`);
   console.log(`  Tempo           : ${((Date.now() - inicio) / 1000).toFixed(1)}s`);
 
   if (!dryRun) {
