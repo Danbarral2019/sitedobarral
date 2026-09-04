@@ -14,6 +14,19 @@ const JANELA = 400;
 export interface TrechoCitacao {
   /** Chave "numero/ano" do acórdão CITANTE (origem). */
   origemChave: string;
+  /**
+   * Id do `Document` do acórdão CITANTE — a identidade inequívoca da origem.
+   *
+   * `origemChave` NÃO identifica um acórdão: o schema declara a unicidade em
+   * `(acordaoNumero, acordaoAno, tcuOrgaoJulgador)`, ou seja, o mesmo par
+   * número+ano existe em colegiados diferentes. Resolver o citante pela chave
+   * escolheria um deles arbitrariamente, e a evidência apontaria para o
+   * inteiro teor de um acórdão onde o trecho não existe (spec §4 e §7.1).
+   *
+   * Opcional porque nem todo produtor de `TrechoCitacao` tem o `Document` em
+   * mãos (`recortarTrechos` é puro); quem coleta do grafo sempre preenche.
+   */
+  origemDocumentId?: string;
   secao: 'relatorio' | 'voto' | 'acordao' | null;
   noVoto: boolean;
   /** Janela de texto ao redor da citação, aparada em fronteira de palavra. */
@@ -41,7 +54,8 @@ function aparar(bruto: string, cortadoInicio: boolean, cortadoFim: boolean): str
 export function recortarTrechos(
   texto: string,
   alvo: { numero: number; ano: number },
-  origemChave: string
+  origemChave: string,
+  origemDocumentId?: string
 ): TrechoCitacao[] {
   if (!texto) return [];
   const secoes = seccionarAcordao(texto);
@@ -52,7 +66,7 @@ export function recortarTrechos(
     const fim = Math.min(texto.length, c.index + c.raw.length + JANELA);
     const trecho = aparar(texto.slice(ini, fim), ini > 0, fim < texto.length);
     const secao = secaoDe(secoes, c.index);
-    out.push({ origemChave, secao, noVoto: secao === 'voto', trecho, offset: c.index });
+    out.push({ origemChave, origemDocumentId, secao, noVoto: secao === 'voto', trecho, offset: c.index });
   }
   return out;
 }
@@ -148,7 +162,9 @@ export async function coletarTrechosDoAlvo(
     const d = porId.get(a.origemId);
     if (!d?.tcuTextoCompleto) continue;
     const origemChave = d.acordaoNumero && d.acordaoAno ? `${d.acordaoNumero}/${d.acordaoAno}` : d.id;
-    trechos.push(...recortarTrechos(d.tcuTextoCompleto, alvo, origemChave));
+    // O id vai junto da chave: é ele, e não o par número+ano, que identifica
+    // sem ambiguidade o citante cujo texto produziu estes trechos (spec §7.1).
+    trechos.push(...recortarTrechos(d.tcuTextoCompleto, alvo, origemChave, d.id));
   }
   const dossie = montarDossie(alvo, trechos);
   // Contagem fidedigna = arestas do grafo (não os trechos recasados).

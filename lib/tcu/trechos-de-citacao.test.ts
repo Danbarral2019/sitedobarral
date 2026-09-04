@@ -131,4 +131,17 @@ describe('coletarTrechosDoAlvo — corte temporal', () => {
     await coletarTrechosDoAlvo({ numero: 1441, ano: 2016 });
     expect(mockArestas.mock.calls[0][0].orderBy).toEqual({ origemId: 'asc' });
   });
+
+  it('carrega o id do Document citante em cada trecho, não só a chave', async () => {
+    // A chave "numero/ano" não identifica um acórdão do TCU; o id sim. Sem
+    // propagá-lo, a evidência resolveria o citante por um par ambíguo (C1).
+    mockArestas.mockResolvedValue([{ origemId: 'doc-x', noVoto: true, ocorrencias: 1 }]);
+    mockDocs.mockResolvedValue([
+      { id: 'doc-x', acordaoNumero: 900, acordaoAno: 2022, tcuTextoCompleto: texto },
+    ]);
+    const { coletarTrechosDoAlvo } = await import('./trechos-de-citacao');
+    const d = await coletarTrechosDoAlvo({ numero: 1441, ano: 2016 });
+    expect(d.trechos).toHaveLength(1);
+    expect(d.trechos[0]).toMatchObject({ origemChave: '900/2022', origemDocumentId: 'doc-x' });
+  });
 });

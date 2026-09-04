@@ -357,6 +357,40 @@ describe('persistirDestilacao', () => {
     });
   });
 
+  it('resolve o citante pelo id do trecho quando dois Document dividem número e ano', async () => {
+    // C1: `(acordaoNumero, acordaoAno)` não identifica um acórdão do TCU — o
+    // schema declara a unicidade em (numero, ano, tcuOrgaoJulgador). Resolver
+    // pela chave gravaria a procedência de um colegiado arbitrário, e de forma
+    // não-determinística (o último de um findMany). O trecho carrega o id do
+    // Document cujo texto o produziu, e é ele que decide.
+    mockDocs.mockResolvedValue([
+      { id: 'doc-plenario', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Plenário', url: 'https://u/plenario', tcuLinkPDF: 'https://p/plenario' },
+      { id: 'doc-camara', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Primeira Câmara', url: 'https://u/camara', tcuLinkPDF: 'https://p/camara' },
+    ]);
+    const dossie = {
+      alvo: { numero: 1441, ano: 2016 },
+      contagem: { citantesDistintos: 1, noVoto: 1, ocorrenciasTotal: 1 },
+      trechos: [{
+        origemChave: '100/2020', origemDocumentId: 'doc-camara',
+        secao: 'voto' as const, noVoto: true, trecho: 'unico', offset: 0,
+      }],
+    };
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
+      dossie,
+    );
+    // A consulta é por id, e não pelo par número+ano.
+    expect(mockDocs.mock.calls[0][0].where.OR).toContainEqual({ id: { in: ['doc-camara'] } });
+    const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(criados[0].trechos.create[0]).toMatchObject({
+      origemDocumentId: 'doc-camara',
+      origemColegiado: 'Primeira Câmara',
+      origemUrl: 'https://u/camara',
+      origemLinkPDF: 'https://p/camara',
+    });
+  });
+
   it('citante ausente da base zera os trechos — evidência sem caminho não é gravada', async () => {
     mockDocs.mockResolvedValue([]);
     const dossie = {

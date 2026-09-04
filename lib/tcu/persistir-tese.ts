@@ -12,7 +12,7 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { carregarVeredito } from './carregar-veredito';
 import { indicesDeclarados } from './elegibilidade-tese';
-import { citantesDoDossie, type DocCitante } from './citantes-do-dossie';
+import { citantesDoDossie, citanteDoTrecho, type LookupCitantes } from './citantes-do-dossie';
 import type { TeseDestilada } from './destilar-tese';
 import type { DossieUso } from './trechos-de-citacao';
 
@@ -28,7 +28,7 @@ import type { DossieUso } from './trechos-de-citacao';
 function trechosParaGravar(
   trechosFonte: unknown,
   dossie: DossieUso,
-  porChave: Map<string, DocCitante>,
+  citantes: LookupCitantes,
 ): Prisma.TeseTrechoFonteUncheckedCreateWithoutEnunciadoInput[] {
   // Unchecked, não Checked: gravamos `origemDocumentId` como escalar solto
   // (pode ser null quando o citante não está na base), não como
@@ -43,7 +43,7 @@ function trechosParaGravar(
     const origemNumero = parseInt(num, 10);
     const origemAno = parseInt(ano, 10);
     if (!Number.isFinite(origemNumero) || !Number.isFinite(origemAno)) return [];
-    const doc = porChave.get(t.origemChave) ?? null;
+    const doc = citanteDoTrecho(citantes, t);
     // Invariante da spec §7.1: todo trecho consumível tem ao menos um caminho
     // para o inteiro teor. Sem nenhum, o enunciado inteiro fica sem evidência.
     if (!doc?.id && !doc?.url && !doc?.tcuLinkPDF) return [];
@@ -191,7 +191,7 @@ export async function persistirDestilacao(
     julgadoPor: d.julgadoPor,
   }));
 
-  const porChave = await citantesDoDossie(dossie);
+  const citantes = await citantesDoDossie(dossie);
 
   let herdados = 0;
   const enunciados = (tese.teses ?? []).map((t, i) => {
@@ -203,7 +203,7 @@ export async function persistirDestilacao(
       inovacao: t.inovacao,
       trechosFonte: t.trechosFonte as unknown as object,
       ...h,
-      trechos: { create: trechosParaGravar(t.trechosFonte, dossie, porChave) },
+      trechos: { create: trechosParaGravar(t.trechosFonte, dossie, citantes) },
     };
   });
 

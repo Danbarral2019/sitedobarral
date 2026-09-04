@@ -14,7 +14,7 @@
  */
 import { coletarTrechosDoAlvo } from './trechos-de-citacao';
 import { indicesDeclarados } from './elegibilidade-tese';
-import { citantesDoDossie } from './citantes-do-dossie';
+import { citantesDoDossie, citanteDoTrecho } from './citantes-do-dossie';
 
 export interface LinhaTrecho {
   ordem: number;
@@ -43,15 +43,37 @@ export async function reconstruirEvidencia(
     { ateData: destilacao.criadoEm },
   );
 
-  // A guarda que impede exibir evidência trocada. Não protege os alvos
-  // saturados no teto de 40 — lá a contagem continua batendo enquanto o
-  // conteúdo muda — mas é o sinal disponível, e o corte por criadoEm é o que
-  // efetivamente reconstrói o conjunto certo.
+  // A guarda que impede exibir evidência trocada. É o sinal disponível — e o
+  // corte por criadoEm é o que efetivamente reconstrói o conjunto certo — mas
+  // ela cobre MENOS do que "a evidência reconstruída é a original". São três
+  // furos conhecidos, todos com a contagem intacta:
+  //
+  // 1. Teto de 40. Num alvo saturado, um citante novo entra no top-40 e
+  //    desloca outro: a contagem continua 40 e os índices apontam para
+  //    trechos diferentes (spec §7).
+  // 2. Dedup. `montarDossie` deduplica ANTES de ordenar e mantém a primeira
+  //    ocorrência na ordem de entrada; na destilação original essa ordem vinha
+  //    de um findMany sem orderBy, indefinida. Citações a precedente com
+  //    redação idêntica entre acórdãos são comuns no TCU (o parágrafo padrão
+  //    copiado de voto em voto), então o representante que sobrevive à dedup
+  //    pode ser outro citante com o mesmo texto — origem trocada, contagem
+  //    inalterada. Vale para alvos ABAIXO do teto.
+  // 3. Empates. Empate em (noVoto, comprimento) era desfeito pela ordem de
+  //    chegada e hoje é desfeito por origemChave: reordenação silenciosa,
+  //    contagem inalterada. Também vale abaixo do teto.
+  //
+  // Nenhum dos três é corrigível — a informação original não existe. Ficam
+  // registrados porque a decisão da spec §7.2 ("perder teses é preferível a
+  // exibir evidência trocada") está sendo tomada com uma guarda mais fraca do
+  // que o texto supõe.
+  //
+  // Auditoria posterior: linha reconstruída tem `capturadoEm` muito posterior
+  // a `destilacao.criadoEm`; linha gravada pelo cron tem os dois quase iguais.
   if (dossie.trechos.length !== destilacao.dossieTrechos) {
     return { status: 'contagem-divergente', linhasPorEnunciado: {}, descartados: enunciados.length };
   }
 
-  const porChave = await citantesDoDossie(dossie);
+  const citantes = await citantesDoDossie(dossie);
 
   const linhasPorEnunciado: Record<string, LinhaTrecho[]> = {};
   let descartados = 0;
@@ -69,7 +91,7 @@ export async function reconstruirEvidencia(
       const origemNumero = parseInt(n, 10);
       const origemAno = parseInt(a, 10);
       if (!Number.isFinite(origemNumero) || !Number.isFinite(origemAno)) { invalido = true; break; }
-      const doc = porChave.get(t.origemChave) ?? null;
+      const doc = citanteDoTrecho(citantes, t);
       // Invariante da spec §7.1: todo trecho consumível tem ao menos um
       // caminho para o inteiro teor. Sem nenhum, não se grava.
       if (!doc?.id && !doc?.url && !doc?.tcuLinkPDF) { invalido = true; break; }
