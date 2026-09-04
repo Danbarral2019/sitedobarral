@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     const candidatos = await selecionarElegiveis(CANDIDATOS_POR_RODADA);
 
     let ok = 0, semTese = 0, erros = 0, herdadosTotal = 0;
-    let foraDaBase = 0, semTema = 0;
+    let foraDaBase = 0, semTema = 0, ambiguos = 0;
     const processados: string[] = [];
 
     for (const c of candidatos) {
@@ -56,7 +56,21 @@ export async function GET(request: NextRequest) {
       try {
         const cands = await buscarAcordaoPorNumero(c.numero, c.ano);
         await dorme(1000); // rate limit de 1 req/s contra o TCU
+
+        // Identidade oficial ANTES de gastar a destilação: sem ela a tese
+        // ficaria fora de todos os consumidores (spec §6), e destilar para
+        // depois descartar é gastar LLM à toa.
         const proprio = escolherCandidato(cands);
+        if (!proprio) {
+          ambiguos++;
+          continue;
+        }
+        const identidade = {
+          acordaoKey: proprio.key,
+          colegiadoAlvo: proprio.colegiado || null,
+          relatorAlvo: proprio.relator,
+          urlAlvo: proprio.link || null,
+        };
 
         // Antes de gastar a destilação: a matéria interessa à base?
         const tema = await garantirTemaDeAlvo(c, proprio?.ementa ?? null);
@@ -90,7 +104,7 @@ export async function GET(request: NextRequest) {
         });
 
         const tese = parseRespostaTese(c.chave, text);
-        const r = await persistirDestilacao({ numero: c.numero, ano: c.ano }, tese, dossie);
+        const r = await persistirDestilacao({ numero: c.numero, ano: c.ano }, tese, dossie, identidade);
         herdadosTotal += r.herdados;
         processados.push(c.chave);
         if ((tese.teses ?? []).length === 0) semTese++;
@@ -105,7 +119,7 @@ export async function GET(request: NextRequest) {
     const restam = await prisma.teseDestilacao.count({ where: { atual: true } });
     corpo = {
       candidatos: candidatos.length,
-      ok, semTese, erros, herdadosTotal, foraDaBase, semTema, processados,
+      ok, semTese, erros, herdadosTotal, foraDaBase, semTema, ambiguos, processados,
       totalComTeseAtual: restam,
     };
 
@@ -113,9 +127,10 @@ export async function GET(request: NextRequest) {
       itemsFound: candidatos.length,
       itemsNew: ok,
       itemsError: erros,
-      // `foraDaBase`/`semTema` na telemetria: se um dia o cron parar de produzir,
-      // é aqui que se vê se acabou o material ou se o filtro está barrando tudo.
-      metadata: { semTese, herdadosTotal, foraDaBase, semTema, totalComTeseAtual: restam },
+      // `foraDaBase`/`semTema`/`ambiguos` na telemetria: se um dia o cron parar
+      // de produzir, é aqui que se vê se acabou o material ou se o filtro está
+      // barrando tudo.
+      metadata: { semTese, herdadosTotal, foraDaBase, semTema, ambiguos, totalComTeseAtual: restam },
     };
   });
 
