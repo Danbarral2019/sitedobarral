@@ -79,12 +79,16 @@ import { GET } from '../route';
 import { NextRequest } from 'next/server';
 
 const req = () => new NextRequest('http://localhost/api/cron/destilar-teses-tcu');
+// `ementa`/`relator` variam por candidato (não um valor fixo repetido) para
+// que uma asserção sobre qual candidato foi escolhido seja diagnóstica —
+// com valor fixo, comparar "ementa" com "ementa" passaria mesmo pegando o
+// candidato errado.
 const cand = (key: string, colegiado: string, isRelacao = false) => ({
   numero: 56,
   ano: 2024,
   colegiado,
-  relator: 'Rel',
-  ementa: 'ementa',
+  relator: `Rel-${key}`,
+  ementa: `ementa-${key}`,
   key,
   link: `https://x/${key}`,
   isRelacao,
@@ -174,9 +178,12 @@ describe('cron destilar-teses-tcu — destilação por convergência (nível 2)'
 
   it('ambíguo na identidade oficial, mas citantes convergem: destila com o candidato do colegiado convergido, sem registrar irresolvido', async () => {
     mockSelecionarElegiveis.mockResolvedValue([{ numero: 56, ano: 2024, chave: '56/2024', noVoto: 10 }]);
+    // Candidato convergido ('Plenário') NÃO é o primeiro da lista — se a
+    // implementação caísse em `cands[0]` (em vez de escolher pelo colegiado
+    // convergido), este teste pegaria: o primeiro é Primeira Câmara.
     mockBuscar.mockResolvedValue([
-      cand('K-PLENARIO', 'Plenário'),
       cand('K-1CAMARA', 'Primeira Câmara'),
+      cand('K-PLENARIO', 'Plenário'),
     ]);
     mockConvergencia.mockResolvedValue({ colegiado: 'Plenário', citantes: 7 });
 
@@ -191,16 +198,22 @@ describe('cron destilar-teses-tcu — destilação por convergência (nível 2)'
     expect(body.semColegiado).toBe(0);
     expect(mockColetarTrechos).toHaveBeenCalled(); // desta vez destilou
 
-    // A ementa/colegiado usados no prompt são do candidato Plenário (o que
-    // convergiu), não do primeiro da lista.
-    expect(mockMontarPrompt).toHaveBeenCalledWith(expect.objectContaining({ colegiado: 'Plenário' }));
+    // A ementa usada no prompt é a do candidato Plenário (o que convergiu),
+    // não a do primeiro da lista (Primeira Câmara) — como `ementa` varia por
+    // candidato, esta comparação falharia se o candidato errado tivesse sido
+    // escolhido.
+    expect(mockMontarPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ colegiado: 'Plenário', ementaPropria: 'ementa-K-PLENARIO' })
+    );
 
     // acordaoKey continua nulo — convergência não é identidade oficial.
+    // relatorAlvo/urlAlvo também identificam o candidato Plenário, não o
+    // primeiro da lista.
     const identidadePassada = mockPersistirDestilacao.mock.calls[0][3];
     expect(identidadePassada).toEqual({
       acordaoKey: null,
       colegiadoAlvo: 'Plenário',
-      relatorAlvo: 'Rel',
+      relatorAlvo: 'Rel-K-PLENARIO',
       urlAlvo: 'https://x/K-PLENARIO',
       origemIdentidade: 'convergencia-citantes',
       citantesConcordantes: 7,
@@ -218,6 +231,26 @@ describe('cron destilar-teses-tcu — destilação por convergência (nível 2)'
     const body = await r.json();
 
     expect(mockRegistrar).toHaveBeenCalledWith(56, 2024, 'ambiguo', 2);
+    expect(body.semColegiado).toBe(1);
+    expect(mockColetarTrechos).not.toHaveBeenCalled();
+  });
+
+  it('convergência aponta um colegiado com DOIS candidatos completos (mesmo colegiado): não escolhe no chute, cai para nível 3', async () => {
+    mockSelecionarElegiveis.mockResolvedValue([{ numero: 56, ano: 2024, chave: '56/2024', noVoto: 10 }]);
+    // Dois candidatos completos do MESMO colegiado — mesmo convergindo para
+    // 'Plenário', não há como saber qual dos dois é o certo. `escolherCandidato`
+    // exige exatamente um candidato daquele colegiado; com dois, devolve null
+    // e o cron cai para nível 3 em vez de pegar o primeiro no chute.
+    mockBuscar.mockResolvedValue([cand('K-PLENARIO-A', 'Plenário'), cand('K-PLENARIO-B', 'Plenário')]);
+    mockConvergencia.mockResolvedValue({ colegiado: 'Plenário', citantes: 7 });
+
+    const p = GET(req());
+    await vi.runAllTimersAsync();
+    const r = await p;
+    const body = await r.json();
+
+    expect(mockRegistrar).toHaveBeenCalledWith(56, 2024, 'ambiguo', 2);
+    expect(body.nivel2).toBe(0);
     expect(body.semColegiado).toBe(1);
     expect(mockColetarTrechos).not.toHaveBeenCalled();
   });

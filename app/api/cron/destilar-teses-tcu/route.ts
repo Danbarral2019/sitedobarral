@@ -20,7 +20,7 @@ import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { selecionarElegiveis, persistirDestilacao, type IdentidadeAlvo } from '@/lib/tcu/persistir-tese';
 import { coletarTrechosDoAlvo } from '@/lib/tcu/trechos-de-citacao';
 import { montarPromptTese, parseRespostaTese } from '@/lib/tcu/destilar-tese';
-import { buscarAcordaoPorNumero } from '@/lib/tcu/buscar-acordao-tcu';
+import { buscarAcordaoPorNumero, escolherCandidato } from '@/lib/tcu/buscar-acordao-tcu';
 import { classificarCandidatos, registrarIdentidadeIrresolvida } from '@/lib/tcu/resolver-identidade';
 import { colegiadoPorConvergencia } from '@/lib/tcu/colegiado-por-convergencia';
 import { garantirTemaDeAlvo, naBase } from '@/lib/tcu/tema-acordao';
@@ -84,9 +84,11 @@ export async function GET(request: NextRequest) {
           // Convergência exige UNANIMIDADE — um só citante discordante já
           // derruba para "sem colegiado" (nível 3).
           const conv = await colegiadoPorConvergencia(c.numero, c.ano);
-          const match = conv
-            ? cands.filter((cd) => !cd.isRelacao).find((cd) => cd.colegiado === conv.colegiado)
-            : undefined;
+          // `escolherCandidato` (mesmo helper da identidade oficial) exige
+          // exatamente UM candidato completo do colegiado convergido — se
+          // houver dois, não sabemos qual é o certo, e cai para nível 3 em
+          // vez de escolher no chute.
+          const match = conv ? escolherCandidato(cands, conv.colegiado) : null;
           if (conv && match) {
             ementaEscolhida = match.ementa;
             colegiadoEscolhido = conv.colegiado;
