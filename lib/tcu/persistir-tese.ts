@@ -10,8 +10,53 @@
  */
 import { prisma } from '../prisma';
 import { carregarVeredito } from './carregar-veredito';
+import { indicesDeclarados } from './elegibilidade-tese';
+import { citantesDoDossie, type DocCitante } from './citantes-do-dossie';
 import type { TeseDestilada } from './destilar-tese';
 import type { DossieUso } from './trechos-de-citacao';
+
+/**
+ * Resolve os índices declarados contra o dossiê EM MÃOS — aqui não há
+ * reconstrução nem verificação a fazer: o cron acabou de montar este dossiê,
+ * então os índices casam por construção.
+ *
+ * Tudo ou nada: se qualquer índice declarado estiver fora do dossiê, devolve
+ * lista vazia. Evidência parcial faria a tese parecer fundamentada pela metade
+ * (spec §6, EVIDENCIA_INTEGRAL).
+ */
+function trechosParaGravar(
+  trechosFonte: unknown,
+  dossie: DossieUso,
+  porChave: Map<string, DocCitante>,
+): Array<Record<string, unknown>> {
+  const indices = indicesDeclarados(trechosFonte);
+  if (indices.length === 0) return [];
+  const linhas: Array<Record<string, unknown>> = [];
+  for (const i of indices) {
+    const t = dossie.trechos[i];
+    if (!t) return []; // índice fora do dossiê invalida o enunciado inteiro
+    const [num, ano] = t.origemChave.split('/');
+    const origemNumero = parseInt(num, 10);
+    const origemAno = parseInt(ano, 10);
+    if (!Number.isFinite(origemNumero) || !Number.isFinite(origemAno)) return [];
+    const doc = porChave.get(t.origemChave) ?? null;
+    // Invariante da spec §7.1: todo trecho consumível tem ao menos um caminho
+    // para o inteiro teor. Sem nenhum, o enunciado inteiro fica sem evidência.
+    if (!doc?.id && !doc?.url && !doc?.tcuLinkPDF) return [];
+    linhas.push({
+      ordem: i,
+      trecho: t.trecho,
+      origemNumero,
+      origemAno,
+      origemColegiado: doc?.tcuOrgaoJulgador ?? null,
+      origemUrl: doc?.url ?? null,
+      origemLinkPDF: doc?.tcuLinkPDF ?? null,
+      origemDocumentId: doc?.id ?? null,
+      noVoto: t.noVoto,
+    });
+  }
+  return linhas;
+}
 
 /** Faixa medida em que o motor produz tese em vez de se calar. */
 export const MIN_NO_VOTO = 5;
@@ -105,17 +150,30 @@ export async function selecionarElegiveis(
  * Grava uma versão nova e desmarca a anterior, numa transação — duas versões
  * com `atual: true` para o mesmo caso quebrariam a exibição.
  */
+export interface IdentidadeAlvo {
+  acordaoKey: string;
+  colegiadoAlvo: string | null;
+  relatorAlvo: string | null;
+  urlAlvo: string | null;
+}
+
 export async function persistirDestilacao(
   alvo: { numero: number; ano: number },
   tese: TeseDestilada,
-  dossie: DossieUso
+  dossie: DossieUso,
+  identidade?: IdentidadeAlvo | null,
 ): Promise<{ destilacaoId: string; herdados: number; novos: number }> {
   const chave = `${alvo.numero}/${alvo.ano}`;
 
   const anterior = await prisma.teseDestilacao.findFirst({
     where: { numeroAlvo: alvo.numero, anoAlvo: alvo.ano, atual: true },
     include: {
-      enunciados: { select: { id: true, enunciado: true, veredito: true, julgadoEm: true, julgadoPor: true } },
+      enunciados: {
+        select: {
+          id: true, enunciado: true, veredito: true, julgadoEm: true, julgadoPor: true,
+          publicado: true, vitrinePublica: true, retiradoEm: true, retiradoMotivo: true,
+        },
+      },
       divergencias: { select: { id: true, trecho: true, veredito: true, julgadoEm: true, julgadoPor: true } },
     },
   });
@@ -129,6 +187,8 @@ export async function persistirDestilacao(
     julgadoPor: d.julgadoPor,
   }));
 
+  const porChave = await citantesDoDossie(dossie);
+
   let herdados = 0;
   const enunciados = (tese.teses ?? []).map((t, i) => {
     const h = carregarVeredito(t.enunciado, anterioresEnunciados);
@@ -139,6 +199,7 @@ export async function persistirDestilacao(
       inovacao: t.inovacao,
       trechosFonte: t.trechosFonte as unknown as object,
       ...h,
+      trechos: { create: trechosParaGravar(t.trechosFonte, dossie, porChave) },
     };
   });
 
@@ -181,6 +242,10 @@ export async function persistirDestilacao(
         versaoMotor: VERSAO_MOTOR,
         dossieTrechos: dossie.trechos.length,
         dossieNoVoto: dossie.contagem.noVoto,
+        acordaoKey: identidade?.acordaoKey ?? null,
+        colegiadoAlvo: identidade?.colegiadoAlvo ?? null,
+        relatorAlvo: identidade?.relatorAlvo ?? null,
+        urlAlvo: identidade?.urlAlvo ?? null,
         sinais: (tese.sinaisQualitativos ?? []) as unknown as object,
         atual: true,
         enunciados: { create: enunciados },

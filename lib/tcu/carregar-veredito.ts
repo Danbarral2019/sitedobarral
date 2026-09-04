@@ -21,6 +21,10 @@ export interface VeredictoHerdado {
   herdadoDe: string | null;
   julgadoEm: Date | null;
   julgadoPor: string | null;
+  publicado: boolean;
+  vitrinePublica: boolean;
+  retiradoEm: Date | null;
+  retiradoMotivo: string | null;
 }
 
 const SEM_VEREDITO: VeredictoHerdado = {
@@ -28,11 +32,22 @@ const SEM_VEREDITO: VeredictoHerdado = {
   herdadoDe: null,
   julgadoEm: null,
   julgadoPor: null,
+  publicado: false,
+  vitrinePublica: false,
+  retiradoEm: null,
+  retiradoMotivo: null,
 };
 
 export function carregarVeredito(
   enunciadoNovo: string,
-  anteriores: Array<EnunciadoJulgavel & { julgadoEm: Date | null; julgadoPor: string | null }>
+  anteriores: Array<EnunciadoJulgavel & {
+    julgadoEm: Date | null;
+    julgadoPor: string | null;
+    publicado?: boolean;
+    vitrinePublica?: boolean;
+    retiradoEm?: Date | null;
+    retiradoMotivo?: string | null;
+  }>
 ): VeredictoHerdado {
   const par = anteriores.find((a) => a.veredito !== null && a.enunciado === enunciadoNovo);
   if (!par) return { ...SEM_VEREDITO };
@@ -41,5 +56,12 @@ export function carregarVeredito(
     herdadoDe: par.id,
     julgadoEm: par.julgadoEm,
     julgadoPor: par.julgadoPor,
+    // O estado editorial acompanha o veredito quando o TEXTO é idêntico.
+    // A retirada em especial: sem herdá-la, redestilar ressuscitaria uma tese
+    // que alguém tirou do ar de propósito (spec §5).
+    publicado: par.publicado ?? false,
+    vitrinePublica: par.vitrinePublica ?? false,
+    retiradoEm: par.retiradoEm ?? null,
+    retiradoMotivo: par.retiradoMotivo ?? null,
   };
 }
