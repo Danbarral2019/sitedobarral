@@ -69,7 +69,39 @@ document         Document? @relation(fields: [documentId], references: [id], onD
 4. Nenhum candidato, ou falha de rede → **não resolvido**: `null`, e tenta de novo na próxima passada.
 5. `documentId` é resolvido à parte, pela tripla `(acordaoNumero, acordaoAno, tcuOrgaoJulgador)` contra o `Document`, e serve só para enriquecer a página com o inteiro teor que já temos. Sua ausência não afeta a identidade.
 
-**`acordaoKey IS NULL` exclui de TODOS os consumidores** — vitrine, acervo restrito, busca por IA e `export:elic`. Uma tese cuja autoria não sabemos afirmar não é publicável em lugar nenhum, nem em acervo interno: no RAG do ELIC ela seria recuperada e citada como se a autoria fosse certa. É perda de alcance aceita em favor de não atribuir tese a acórdão errado.
+### 4.3 Três níveis de procedência, não um portão binário
+
+A primeira versão desta seção excluía de TODOS os consumidores a destilação sem `acordaoKey`. **Medido em 04/09/2026, isso custava 34 das 93 teses aprovadas** — mais de um terço — e a decisão foi revista.
+
+O erro do enquadramento anterior: a tese **não depende do acórdão-líder para existir**. Ela é extraída dos votos citantes, e esses estão todos identificados — cada `TeseTrechoFonte` aponta para o `Document` exato de quem escreveu o trecho (§7.1). O que a ambiguidade deixa em aberto é apenas **qual colegiado** julgou o precedente: sabe-se que é o "2298/2025", não se é do Plenário ou de uma Câmara. Suprimir a tese inteira por uma imprecisão de rótulo descarta conteúdo bom e provado.
+
+**Os próprios votos citantes costumam dizer o colegiado.** Medição sobre os 109 alvos sem identidade oficial:
+
+| Situação | Alvos |
+|---|---|
+| Votos citantes **concordam** num colegiado | 70 |
+| Citantes discordam entre si | 29 |
+| Nenhum citante informa colegiado | 10 |
+
+Em 70 casos a resposta está no nosso próprio grafo, escrita pelos ministros ao invocar o precedente — a mesma fonte de onde a tese foi extraída.
+
+> Nota sobre a §4.1: aquela seção descarta "colegiado majoritário das arestas", e isso continua valendo. **Convergência não é maioria:** a regra aqui exige que TODOS os citantes que informam colegiado digam o mesmo, e cai fora com um único discordante. A §4.1 também invocava casos em que o grafo discorda do `Document`; esse argumento era fraco, porque o `Document` comparado pode ser justamente o outro acórdão homônimo — ele não é árbitro num caso de homonímia.
+
+**Os três níveis:**
+
+| Nível | Origem do colegiado | Consumidores |
+|---|---|---|
+| 1. Identidade oficial | registro do TCU (`acordaoKey`) | todos, inclusive vitrine |
+| 2. Convergência dos citantes | unanimidade entre os votos que informam | acervo, busca, ELIC |
+| 3. Sem colegiado | não afirmado | acervo, busca, ELIC — exibido como "Acórdão N/ANO", sem afirmar colegiado |
+
+**Ganho medido:** de 59 para **90** enunciados publicáveis (59 oficiais + 24 por convergência + 7 sem colegiado).
+
+**A vitrine exige nível 1.** Ela é a superfície pública sob a marca, e uma URL como `/teses/2298-2025-plenario` afirmaria o colegiado no próprio endereço. Sem confirmação oficial, não se afirma. Os níveis 2 e 3 aparecem no acervo e na busca, onde o rótulo pode ser qualificado na própria tela. (Decisão revisitável na Onda 3, quando a vitrine for construída — se o corpo de nível 1 se mostrar pequeno demais, admitir o nível 2 é mudança de uma linha no predicado.)
+
+**Campos:** `TeseDestilacao` ganha `origemIdentidade String?` — `'tcu-oficial'`, `'convergencia-citantes'` ou `null` — e `citantesConcordantes Int?`, a contagem de votos que sustentam o colegiado no nível 2. O nível é derivado desses campos, não gravado por extenso.
+
+**Invariante que permanece:** nunca afirmar colegiado que não se sabe. O nível 2 afirma o que os votos citantes afirmam, com a contagem à vista; o nível 3 não afirma nada. Nenhum dos dois inventa.
 
 O slug da rota deriva da identidade oficial: `/teses/1441-2016-plenario`.
 
@@ -122,7 +154,7 @@ ELEGIVEL_BASE(e) :=
       e.veredito = 'fiel'
   AND e.retiradoEm IS NULL
   AND e.destilacao.atual = true
-  AND e.destilacao.acordaoKey IS NOT NULL      -- identidade inequívoca (§4)
+  AND e.destilacao.numeroAlvo IS NOT NULL      -- o acórdão é conhecido; o colegiado pode não ser (§4.3)
   AND EVIDENCIA_INTEGRAL(e)
 ```
 
@@ -143,11 +175,11 @@ Por consumidor:
 | Consumidor | Predicado |
 |---|---|
 | Acervo restrito (`/area-restrita/teses`) | `ELEGIVEL_BASE AND publicado` |
-| Vitrine (`/teses`) | `ELEGIVEL_BASE AND publicado AND vitrinePublica` |
+| Vitrine (`/teses`) | `ELEGIVEL_BASE AND publicado AND vitrinePublica AND acordaoKey IS NOT NULL` (nível 1, §4.3) |
 | Busca por IA | o predicado do consumidor, conforme a visibilidade (§9) |
 | `export:elic` | `ELEGIVEL_BASE` — **sem** `publicado` |
 
-A diferença do ELIC é deliberada: aquele destino é acervo de RAG interno, não superfície editorial. Uma tese aprovada e ainda não promovida é útil lá e não estaria exposta a ninguém de fora. O que o ELIC **não** recebe é tese não aprovada, retirada, de versão superada, sem evidência ou sem identidade resolvida.
+A diferença do ELIC é deliberada: aquele destino é acervo de RAG interno, não superfície editorial. Uma tese aprovada e ainda não promovida é útil lá e não estaria exposta a ninguém de fora. O que o ELIC **não** recebe é tese não aprovada, retirada, de versão superada ou sem evidência. Identidade não resolvida **não** exclui (§4.3): o frontmatter registra o nível de procedência, e o RAG cita a tese com o colegiado qualificado ou omitido.
 
 ## 7. A evidência é volátil
 
