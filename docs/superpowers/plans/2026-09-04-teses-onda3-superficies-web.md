@@ -44,7 +44,7 @@ Uma só porta de leitura. Sem isto, cada uma das três rotas montaria seu própr
   - `buscarPorChave(chave: string, comAcessoAtivo: boolean): Promise<DetalheAcordao | null>`
   - `interface TeseCard`, `interface DetalheAcordao`
 
-- [ ] **Step 1: Escrever os testes das funções puras**
+- [x] **Step 1: Escrever os testes das funções puras**
 
 Criar `lib/teses/consultas.test.ts`:
 
@@ -88,12 +88,12 @@ describe('chaveUrl', () => {
 });
 ```
 
-- [ ] **Step 2: Rodar para confirmar que falha**
+- [x] **Step 2: Rodar para confirmar que falha**
 
 Run: `npx vitest run lib/teses/consultas.test.ts`
 Expected: FAIL — módulo não existe.
 
-- [ ] **Step 3: Implementar as funções puras e os tipos**
+- [x] **Step 3: Implementar as funções puras e os tipos**
 
 Criar `lib/teses/consultas.ts`:
 
@@ -182,12 +182,12 @@ export function chaveUrl(d: { numeroAlvo: number; anoAlvo: number; colegiadoAlvo
 }
 ```
 
-- [ ] **Step 4: Rodar os testes das funções puras**
+- [x] **Step 4: Rodar os testes das funções puras**
 
 Run: `npx vitest run lib/teses/consultas.test.ts`
 Expected: PASS nos 7.
 
-- [ ] **Step 5: Escrever o teste das consultas**
+- [x] **Step 5: Escrever o teste das consultas**
 
 Acrescentar em `lib/teses/consultas.test.ts`, no topo do arquivo, o mock do Prisma (substitua a primeira linha de import, não acrescente uma segunda):
 
@@ -318,12 +318,12 @@ describe('buscarPorChave', () => {
 });
 ```
 
-- [ ] **Step 6: Rodar para confirmar que falha**
+- [x] **Step 6: Rodar para confirmar que falha**
 
 Run: `npx vitest run lib/teses/consultas.test.ts`
 Expected: FAIL — as três funções de consulta não existem.
 
-- [ ] **Step 7: Implementar as consultas**
+- [x] **Step 7: Implementar as consultas**
 
 Acrescentar a `lib/teses/consultas.ts`:
 
@@ -434,17 +434,17 @@ export async function buscarPorChave(chave: string, comAcessoAtivo: boolean): Pr
 }
 ```
 
-- [ ] **Step 8: Rodar os testes**
+- [x] **Step 8: Rodar os testes**
 
 Run: `npx vitest run lib/teses/consultas.test.ts`
 Expected: PASS nos 14.
 
-- [ ] **Step 9: Verificar tipos e suíte**
+- [x] **Step 9: Verificar tipos e suíte**
 
 Run: `npx tsc --noEmit -p tsconfig.json` e `npx vitest run`
 Expected: zero erros; suíte verde.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add lib/teses/consultas.ts lib/teses/consultas.test.ts
@@ -475,7 +475,7 @@ O componente que aparece nas três telas. Separado porque é onde mora a regra d
 - Consumes: `TeseCard`, `NivelProcedencia` de `lib/teses/consultas.ts`.
 - Produces: `<CartaoTese tese={...} />`.
 
-- [ ] **Step 1: Escrever os testes**
+- [x] **Step 1: Escrever os testes**
 
 Criar `components/teses/__tests__/CartaoTese.test.tsx`:
 
@@ -547,12 +547,12 @@ describe('CartaoTese', () => {
 });
 ```
 
-- [ ] **Step 2: Rodar para confirmar que falha**
+- [x] **Step 2: Rodar para confirmar que falha**
 
 Run: `npx vitest run components/teses`
 Expected: FAIL — componente não existe.
 
-- [ ] **Step 3: Implementar o componente**
+- [x] **Step 3: Implementar o componente**
 
 Leia antes um componente de cartão já existente no projeto (por exemplo em `components/busca/` ou `components/area-restrita/search-results/`) e siga o mesmo vocabulário de Tailwind e a mesma densidade visual. Crie `components/teses/CartaoTese.tsx` com:
 
@@ -565,17 +565,17 @@ Leia antes um componente de cartão já existente no projeto (por exemplo em `co
 - os demais trechos em `<details>`, fechado por padrão, rotulado com quantos são;
 - link para `/teses/${tese.chaveUrl}`.
 
-- [ ] **Step 4: Rodar os testes**
+- [x] **Step 4: Rodar os testes**
 
 Run: `npx vitest run components/teses`
 Expected: PASS nos 6.
 
-- [ ] **Step 5: Verificar tipos e suíte**
+- [x] **Step 5: Verificar tipos e suíte**
 
 Run: `npx tsc --noEmit -p tsconfig.json` e `npx vitest run`
 Expected: zero erros; suíte verde.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add components/teses/CartaoTese.tsx components/teses/__tests__/CartaoTese.test.tsx
@@ -605,7 +605,7 @@ uma afirmação sem prova."
 - Consumes: `listarVitrine`, `listarAcervo`, `buscarPorChave`, `TeseCard`, `DetalheAcordao` de `lib/teses/consultas.ts`; `CartaoTese` de `components/teses/CartaoTese.tsx`.
 - Produces: as rotas `/teses`, `/teses/[chave]` e `/area-restrita/teses`.
 
-- [ ] **Step 1: Escrever o teste da regra de acesso**
+- [x] **Step 1: Escrever o teste da regra de acesso**
 
 O que importa testar aqui é a decisão de acesso, não o HTML. Criar `app/(acervo)/teses/__tests__/acesso.test.ts`:
 
@@ -654,12 +654,12 @@ describe('resolverAcessoDoDetalhe', () => {
 });
 ```
 
-- [ ] **Step 2: Rodar para confirmar que falha**
+- [x] **Step 2: Rodar para confirmar que falha**
 
 Run: `npx vitest run app/(acervo)/teses`
 Expected: FAIL — `resolverAcessoDoDetalhe` não existe.
 
-- [ ] **Step 3: Implementar a resolução de acesso**
+- [x] **Step 3: Implementar a resolução de acesso**
 
 Criar `app/(acervo)/teses/[chave]/acesso.ts`:
 
@@ -682,12 +682,12 @@ export async function resolverAcessoDoDetalhe(): Promise<boolean> {
 }
 ```
 
-- [ ] **Step 4: Rodar os testes de acesso**
+- [x] **Step 4: Rodar os testes de acesso**
 
 Run: `npx vitest run app/(acervo)/teses`
 Expected: PASS nos 4.
 
-- [ ] **Step 5: Criar a vitrine pública**
+- [x] **Step 5: Criar a vitrine pública**
 
 `app/(acervo)/teses/page.tsx` — siga o padrão de `app/(acervo)/jurisprudencia/page.tsx` (leia-o antes): `metadata` com `title`, `description`, `openGraph` e `alternates.canonical`; `export const revalidate = 1800`; o componente busca com `listarVitrine()` e passa para o `TesesClient`.
 
@@ -695,7 +695,7 @@ O texto da página deve dizer o que as teses são, porque o leitor não tem como
 
 `TesesClient.tsx` renderiza a lista de `CartaoTese`. Sem filtro nem busca nesta onda (YAGNI — a vitrine tem 20 itens).
 
-- [ ] **Step 6: Criar a página do acórdão-líder**
+- [x] **Step 6: Criar a página do acórdão-líder**
 
 `app/(acervo)/teses/[chave]/page.tsx`:
 
@@ -706,19 +706,19 @@ O texto da página deve dizer o que as teses são, porque o leitor não tem como
 - quando `tesesReservadas > 0`, renderiza um bloco de chamada dizendo quantas teses deste precedente estão no acervo restrito, com link para `/planos`;
 - **`noindex` quando não houver tese visível.** Use `robots: { index: false }` no `generateMetadata` nesse caso. É a regra do spec §5: uma URL que perdeu elegibilidade não pode dar 404 nem continuar indexada.
 
-- [ ] **Step 7: Criar o acervo restrito**
+- [x] **Step 7: Criar o acervo restrito**
 
 `app/area-restrita/teses/page.tsx` — siga o padrão de `app/area-restrita/jurisprudencia/page.tsx` (leia-o antes): `cookies()`, `verifyToken`, `redirect('/login')` se não houver sessão. **Acrescente o gate de acesso ativo**, que aquela página não tem: se `resolverAcessoDoDetalhe()` for falso, redirecione para `/planos`. Busca com `listarAcervo()`.
 
 `AcervoTesesClient.tsx` renderiza a lista com um campo de filtro por texto sobre o enunciado e o assunto — aqui são 90 itens e crescendo, então filtrar se justifica.
 
-- [ ] **Step 8: Acrescentar ao menu**
+- [x] **Step 8: Acrescentar ao menu**
 
 Em `components/layout/Header.tsx`, acrescente um item "Teses" entre Jurisprudência e Blog, copiando exatamente a estrutura dos vizinhos (mesmo `className`, mesmo padrão de `aria-current`, um ícone do `lucide-react` coerente — `Quote` ou `ScrollText`). Faça o mesmo no `components/layout/Footer.tsx`, na seção onde estão Jurisprudência e Glossário.
 
 **Se o oitavo item quebrar o layout do menu no desktop**, pare e reporte em vez de reorganizar o Header — o agrupamento do menu é decisão de produto, não desta tarefa.
 
-- [ ] **Step 9: Acrescentar ao sitemap**
+- [x] **Step 9: Acrescentar ao sitemap**
 
 Em `app/sitemap.ts`, acrescente `/teses` às páginas estáticas (`changeFrequency: 'weekly'`, `priority: 0.8`) e, no padrão do bloco do blog (com `try/catch`), as páginas de detalhe dos acórdãos-líderes que tenham ao menos uma tese na vitrine:
 
@@ -742,12 +742,12 @@ Em `app/sitemap.ts`, acrescente `/teses` às páginas estáticas (`changeFrequen
 
 Não esqueça de incluir `tesesPages` no array retornado, junto de `blogPages`.
 
-- [ ] **Step 10: Verificar tipos, suíte e build**
+- [x] **Step 10: Verificar tipos, suíte e build**
 
 Run: `npx tsc --noEmit -p tsconfig.json`, `npx vitest run` e `npm run build`
 Expected: zero erros; suíte verde; build completo. O `build` importa aqui porque é o único passo que exercita a compilação das rotas novas e a geração estática.
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add "app/(acervo)/teses" app/area-restrita/teses components/layout/Header.tsx components/layout/Footer.tsx app/sitemap.ts
