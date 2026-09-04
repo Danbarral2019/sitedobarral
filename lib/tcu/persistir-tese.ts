@@ -8,6 +8,7 @@
  * então "a tese 2 do acórdão" não é uma identidade estável. O que existe é
  * "este enunciado, nesta versão".
  */
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { carregarVeredito } from './carregar-veredito';
 import { indicesDeclarados } from './elegibilidade-tese';
@@ -28,10 +29,13 @@ function trechosParaGravar(
   trechosFonte: unknown,
   dossie: DossieUso,
   porChave: Map<string, DocCitante>,
-): Array<Record<string, unknown>> {
+): Prisma.TeseTrechoFonteUncheckedCreateWithoutEnunciadoInput[] {
+  // Unchecked, não Checked: gravamos `origemDocumentId` como escalar solto
+  // (pode ser null quando o citante não está na base), não como
+  // `origemDocument: { connect: ... } `— a variante Checked exige a relação.
   const indices = indicesDeclarados(trechosFonte);
   if (indices.length === 0) return [];
-  const linhas: Array<Record<string, unknown>> = [];
+  const linhas: Prisma.TeseTrechoFonteUncheckedCreateWithoutEnunciadoInput[] = [];
   for (const i of indices) {
     const t = dossie.trechos[i];
     if (!t) return []; // índice fora do dossiê invalida o enunciado inteiro
@@ -212,7 +216,13 @@ export async function persistirDestilacao(
       precedenteApontado: d.precedenteApontado,
       trecho: d.trecho,
       natureza: d.natureza,
-      ...h,
+      // Espalhar `h` inteiro quebraria: TeseDivergencia não tem os campos
+      // editoriais (publicado/vitrinePublica/retiradoEm/retiradoMotivo) que
+      // carregarVeredito devolve desde o Step 4 — só TeseEnunciado tem.
+      veredito: h.veredito,
+      herdadoDe: h.herdadoDe,
+      julgadoEm: h.julgadoEm,
+      julgadoPor: h.julgadoPor,
     };
   });
 

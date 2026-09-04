@@ -303,7 +303,7 @@ describe('persistirDestilacao', () => {
     };
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [1] }], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [1] }], divergencias: [], sinaisQualitativos: [] },
       dossie,
     );
     const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
@@ -316,6 +316,13 @@ describe('persistirDestilacao', () => {
   });
 
   it('não grava evidência parcial: índice fora do dossiê zera os trechos do enunciado', async () => {
+    // Documento casando com o trecho 0: se faltasse, a invariante de caminho
+    // para o inteiro teor já zeraria o resultado ali, e o teste passaria por
+    // acaso sem nunca avaliar o índice 7 (fora de alcance), que é o que ele
+    // se propõe a provar.
+    mockDocs.mockResolvedValue([
+      { id: 'doc-100', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Plenário', url: 'https://u/100', tcuLinkPDF: 'https://p/100' },
+    ]);
     const dossie = {
       alvo: { numero: 1441, ano: 2016 },
       contagem: { citantesDistintos: 1, noVoto: 1, ocorrenciasTotal: 1 },
@@ -323,7 +330,7 @@ describe('persistirDestilacao', () => {
     };
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0, 7] }], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0, 7] }], divergencias: [], sinaisQualitativos: [] },
       dossie,
     );
     const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
@@ -341,7 +348,7 @@ describe('persistirDestilacao', () => {
     };
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
       dossie,
     );
     const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
@@ -359,7 +366,7 @@ describe('persistirDestilacao', () => {
     };
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
       dossie,
     );
     const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
@@ -369,7 +376,7 @@ describe('persistirDestilacao', () => {
   it('grava a identidade oficial quando fornecida', async () => {
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [], divergencias: [], sinaisQualitativos: [] },
       { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
       { acordaoKey: 'ACORDAO-COMPLETO-9', colegiadoAlvo: 'Plenário', relatorAlvo: 'Rel', urlAlvo: 'https://x' },
     );
@@ -390,7 +397,7 @@ describe('persistirDestilacao', () => {
     });
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [] }], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [] }], divergencias: [], sinaisQualitativos: [] },
       { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
     );
     const criado = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create[0];
@@ -411,7 +418,7 @@ describe('persistirDestilacao', () => {
     });
     await persistirDestilacao(
       { numero: 1441, ano: 2016 },
-      { assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'TEXTO NOVO', inovacao: 'i', trechosFonte: [] }], divergencias: [], sinaisQualitativos: [] },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'TEXTO NOVO', inovacao: 'i', trechosFonte: [] }], divergencias: [], sinaisQualitativos: [] },
       { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
     );
     const criado = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create[0];
