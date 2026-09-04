@@ -26,7 +26,7 @@ const prisma = new PrismaClient({ adapter, log: ['error'] });
 async function main() {
   const executar = process.argv.includes('--executar');
 
-  // TODO enunciado de TODA destilação atual — sem o recorte por `veredito:
+  // Cobre o enunciado de TODA destilação atual — sem o recorte por `veredito:
   // 'fiel'` que a spec §7.2 item 3 sugeria. A reconstrução é perecível e
   // irreversível: restringi-la aos 93 já julgados condenaria os ~419 ainda não
   // julgados a nascerem inelegíveis para sempre, sem sinal nenhum do porquê
