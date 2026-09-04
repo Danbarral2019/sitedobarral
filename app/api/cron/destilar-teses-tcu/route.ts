@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         };
 
         // Antes de gastar a destilação: a matéria interessa à base?
-        const tema = await garantirTemaDeAlvo(c, proprio?.ementa ?? null);
+        const tema = await garantirTemaDeAlvo(c, proprio.ementa);
         if (tema === null) {
           // Sem ementa não há como decidir a matéria. Não destila — deixar
           // passar seria voltar a encher a base do que o Daniel tirou dela.
@@ -89,9 +89,9 @@ export async function GET(request: NextRequest) {
 
         const { systemPrompt, userContent } = montarPromptTese({
           chave: c.chave,
-          ementaPropria: proprio?.ementa ?? null,
-          colegiado: proprio?.colegiado ?? null,
-          relator: proprio?.relator ?? null,
+          ementaPropria: proprio.ementa,
+          colegiado: proprio.colegiado,
+          relator: proprio.relator,
           dossie,
         });
 
