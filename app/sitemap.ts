@@ -77,6 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.85,
     },
+    {
+      url: absoluteUrl('/teses'),
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
   ];
 
   // Páginas de cursos (estáticas)
@@ -147,5 +153,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Erro ao gerar sitemap das decisões:', error);
   }
 
-  return [...staticPages, ...coursesPages, ...blogPages, ...articlePages, ...decisionPages];
+  // Páginas de acórdãos-líderes com tese na vitrine
+  let tesesPages: MetadataRoute.Sitemap = [];
+  try {
+    const { listarVitrine } = await import('@/lib/teses/consultas');
+    const vitrine = await listarVitrine();
+    const chaves = [...new Set(vitrine.map(t => t.chaveUrl))];
+    tesesPages = chaves.map((chave) => ({
+      url: absoluteUrl(`/teses/${chave}`),
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.error('Erro ao gerar sitemap das teses:', error);
+  }
+
+  return [...staticPages, ...coursesPages, ...blogPages, ...articlePages, ...decisionPages, ...tesesPages];
 }
