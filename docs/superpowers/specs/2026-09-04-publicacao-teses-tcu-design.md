@@ -299,8 +299,11 @@ Padrão de `/jurisprudencia`: `page.tsx` servidor com `metadata` + `revalidate`,
 **Formato.** Markdown com frontmatter e wikilinks, como o resto do acervo. **Um arquivo por acórdão-líder**, não por tese: um enunciado isolado é uma frase de súmula sem contexto, e a recuperação melhora quando as teses do mesmo precedente, sua evidência e o relator chegam juntas. Caminho `teses/`, nome via `sanitizeFilename` no padrão de `lib/obsidian/export.ts`, incluindo o colegiado para não colidir (§4):
 
 ```
-teses/acordao-1441-2016-plenario.md
+teses/acordao-1441-2016-plenario.md   # níveis 1 e 2 (colegiado conhecido)
+teses/acordao-2298-2025.md            # nível 3 (colegiado não afirmado)
 ```
+
+O colegiado entra no nome **apenas quando conhecido** (§4.3). No nível 3 o arquivo não o carrega — nomear `acordao-2298-2025-plenario.md` sem saber afirmaria no próprio caminho do arquivo o que a tese não afirma no corpo.
 
 **Frontmatter:**
 
@@ -309,7 +312,6 @@ tipo: tese-tcu
 acordao: "1441/2016"
 numero: 1441
 ano: 2016
-colegiado: Plenário
 relator: "..."
 assunto: "..."
 teses: 2
@@ -318,14 +320,28 @@ confianca: alta
 vereditos: [fiel, fiel]
 destilacaoId: "..."
 atualizadoEm: 2026-09-04T12:00:00Z
+
+# Procedência (§4.3) — obrigatório, um dos três valores
+origemIdentidade: tcu-oficial          # | convergencia-citantes | (ausente no nível 3)
+
+# Nível 1 apenas
+colegiado: Plenário
 acordaoKey: ACORDAO-COMPLETO-1234567
 fonteOficial: https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-1234567
-fonteSite: https://profbarral.com.br/teses/1441-2016-plenario   # ausente quando não publicada
+
+# Nível 2 apenas
+# colegiado: Segunda Câmara
+# citantesConcordantes: 23
+
+# Condicional em qualquer nível: ausente quando a tese não está publicada
+fonteSite: https://profbarral.com.br/teses/1441-2016-plenario
 ```
 
 **Sem `publicado` nem `vitrine` no frontmatter.** O arquivo agrupa todas as teses elegíveis de um acórdão-líder, e elas podem ter estados editoriais diferentes — uma promovida à vitrine ao lado de outra ainda não publicada. Um escalar no cabeçalho teria de significar "alguma" ou "todas", e qualquer das duas leituras seria falsa para parte do conteúdo. Como esses campos não participam da elegibilidade do ELIC (§6), a saída é não exportá-los: o destino é acervo de RAG, não espelho do estado editorial do site.
 
-`acordaoKey` e `fonteOficial` são obrigatórios; `fonteSite` é condicional. O ELIC exporta também teses ainda **não publicadas** (§6), e para essas a página do site não existe — se a URL do site fosse a única fonte no frontmatter, o RAG teria registro de procedência apontando para um 404. A rastreabilidade tem de repousar no identificador oficial, que independe do nosso estado editorial.
+**Campos por nível.** `origemIdentidade` é obrigatório e diz ao RAG com que autoridade o colegiado é afirmado. `acordaoKey`, `fonteOficial` e `colegiado` existem só no nível 1; no nível 2 há `colegiado` e `citantesConcordantes`, sem chave oficial; no nível 3 não há colegiado algum. **Medido em 04/09/2026: 156 destilações no nível 1, 70 no nível 2 e 39 no nível 3** — exigir `acordaoKey` no frontmatter, como esta seção fazia antes da §4.3, deixaria 109 arquivos inválidos.
+
+`fonteSite` é condicional em qualquer nível: o ELIC exporta também teses ainda **não publicadas** (§6), e para essas a página do site não existe — se a URL do site fosse a única fonte de rastreabilidade, o RAG apontaria para um 404. Daí a fonte oficial ser preferida onde existe; onde não existe, a rastreabilidade repousa no par número/ano mais os acórdãos citantes, que estão no corpo.
 
 O corpo traz cada enunciado, sua `inovacao`, e os trechos-fonte com o acórdão citante identificado e um wikilink para a nota dele quando existir no acervo — mantendo a procedência também no RAG.
 
