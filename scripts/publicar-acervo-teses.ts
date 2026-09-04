@@ -7,10 +7,11 @@
  *   npx tsx scripts/publicar-acervo-teses.ts --executar --limit 20
  *   npx tsx scripts/publicar-acervo-teses.ts --despublicar --executar
  *
- * `--despublicar` desfaz apenas o que este script fez: enunciados com
- * `publicado = true` e `vitrinePublica = false`. Não toca no que já foi
- * promovido à vitrine — despublicar por baixo de uma promoção editorial seria
- * desfazer decisão de outra pessoa.
+ * `--despublicar` despublica tudo que está no acervo e não na vitrine
+ * (`publicado = true AND vitrinePublica = false`) — inclusive publicação feita
+ * por outra via, como a tela de admin. O predicado não distingue a origem; o
+ * que ele garante é que a vitrine nunca é tocada: despublicar por baixo de uma
+ * promoção editorial seria desfazer decisão de outra pessoa.
  */
 import 'dotenv/config';
 import * as dotenv from 'dotenv';
@@ -44,10 +45,25 @@ async function despublicar(executar: boolean) {
 async function main() {
   const args = process.argv.slice(2);
   const executar = args.includes('--executar');
+  // `parseInt('abc', 10)` devolve NaN, que é falsy — e um `--limit` inválido
+  // acabaria publicando o conjunto INTEIRO, o oposto do que foi pedido.
   const i = args.indexOf('--limit');
-  const limite = i >= 0 && args[i + 1] ? parseInt(args[i + 1], 10) : undefined;
+  let limite: number | undefined;
+  if (i >= 0) {
+    limite = Number(args[i + 1]);
+    if (!Number.isInteger(limite) || limite <= 0) {
+      console.error(`--limit exige um inteiro positivo (recebido: ${args[i + 1] ?? '<nada>'})`);
+      process.exit(1);
+    }
+  }
 
   if (args.includes('--despublicar')) {
+    // `--limit` não se aplica à despublicação: aceitar em silêncio faria o
+    // operador crer num lote parcial que não existe.
+    if (limite !== undefined) {
+      console.error('--limit não vale com --despublicar: a despublicação é sempre integral.');
+      process.exit(1);
+    }
     await despublicar(executar);
     return;
   }
