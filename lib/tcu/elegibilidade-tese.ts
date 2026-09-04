@@ -34,19 +34,35 @@ export function indicesDeclarados(trechosFonte: unknown): number[] {
 }
 
 /**
- * Evidência íntegra: TODOS os índices declarados estão persistidos.
+ * Evidência íntegra: as TRÊS conjunções da spec §6.
  *
- * A checagem de "> 0" não é redundante com a igualdade: um enunciado que não
- * declara índice nenhum satisfaria `0 === 0` e passaria como se tivesse
- * fundamentação completa, quando não tem evidência alguma.
+ * 1. Ao menos um índice declarado. Não é redundante com a igualdade: um
+ *    enunciado que não declara índice nenhum satisfaria `0 === 0` e passaria
+ *    como se tivesse fundamentação completa, quando não tem evidência alguma.
+ * 2. Todos os índices declarados estão persistidos.
+ * 3. Todo trecho persistido tem caminho para o inteiro teor (§7.1).
+ *
+ * A terceira NÃO é redundante com a guarda da gravação, que roda uma vez e
+ * sobre o dado daquele instante. `origemDocument` é `onDelete: SetNull`: um
+ * trecho gravado só com `origemDocumentId` — permitido, porque o id sozinho já
+ * é um caminho — perde TODOS os caminhos quando o `Document` do citante é
+ * apagado. Sem esta cláusula a tese seguiria elegível com evidência que
+ * ninguém consegue conferir, e nada detectaria, porque a contagem de índices
+ * não mudou. A invariante da §7.1 é de leitura, não só de escrita.
  */
 export function evidenciaIntegral(enunciado: {
   trechosFonte: unknown;
-  trechos: Array<{ ordem: number }>;
+  trechos: Array<{
+    ordem: number;
+    origemDocumentId: string | null;
+    origemUrl: string | null;
+    origemLinkPDF: string | null;
+  }>;
 }): boolean {
   const declarados = indicesDeclarados(enunciado.trechosFonte);
   if (declarados.length === 0) return false;
   const persistidos = new Set(enunciado.trechos.map((t) => t.ordem));
   if (persistidos.size !== declarados.length) return false;
-  return declarados.every((i) => persistidos.has(i));
+  if (!declarados.every((i) => persistidos.has(i))) return false;
+  return enunciado.trechos.every((t) => !!(t.origemDocumentId || t.origemUrl || t.origemLinkPDF));
 }

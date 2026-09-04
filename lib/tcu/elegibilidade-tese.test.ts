@@ -18,7 +18,10 @@ describe('indicesDeclarados', () => {
 });
 
 describe('evidenciaIntegral', () => {
-  const trecho = (ordem: number) => ({ ordem });
+  /** Trecho com caminho interno para o inteiro teor (o caso comum). */
+  const trecho = (ordem: number) => ({
+    ordem, origemDocumentId: `doc-${ordem}`, origemUrl: null, origemLinkPDF: null,
+  });
 
   it('exige ao menos um índice declarado — zero e zero não passa', () => {
     // Sem esta condição, 0 === 0 aprovaria uma tese sem nenhuma evidência.
@@ -39,6 +42,33 @@ describe('evidenciaIntegral', () => {
 
   it('reprova quando há trecho a mais que o declarado', () => {
     expect(evidenciaIntegral({ trechosFonte: [0], trechos: [trecho(0), trecho(1)] })).toBe(false);
+  });
+
+  it('reprova quando um trecho persistido ficou sem caminho para o inteiro teor', () => {
+    // O caso real: gravado só com origemDocumentId e o Document do citante foi
+    // apagado depois (onDelete: SetNull). A contagem não muda — só a terceira
+    // cláusula da spec §6 detecta.
+    expect(
+      evidenciaIntegral({
+        trechosFonte: [0, 1],
+        trechos: [
+          trecho(0),
+          { ordem: 1, origemDocumentId: null, origemUrl: null, origemLinkPDF: null },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it('aceita trecho que só tem o caminho externo — url ou pdf bastam', () => {
+    expect(
+      evidenciaIntegral({
+        trechosFonte: [0, 1],
+        trechos: [
+          { ordem: 0, origemDocumentId: null, origemUrl: 'https://tcu/0', origemLinkPDF: null },
+          { ordem: 1, origemDocumentId: null, origemUrl: null, origemLinkPDF: 'https://tcu/1.pdf' },
+        ],
+      }),
+    ).toBe(true);
   });
 });
 
