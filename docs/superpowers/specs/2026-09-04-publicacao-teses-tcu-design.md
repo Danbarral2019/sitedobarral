@@ -1,7 +1,7 @@
 # Design — Publicação das teses destiladas do TCU
 
 **Data:** 2026-09-04
-**Status:** em revisão pelo usuário
+**Status:** aprovado pelo usuário — pronto para o plano de implementação
 **Depende de:** `2026-07-21-persistencia-teses-tcu-design.md` (persistência das teses, em produção desde julho)
 **Relacionado:** PR #207 (aprovação em lote de 87 enunciados), PR #206 (índice HNSW pendente)
 
@@ -128,10 +128,13 @@ ELEGIVEL_BASE(e) :=
 
 ```
 EVIDENCIA_INTEGRAL(e) :=
-      count(TeseTrechoFonte WHERE enunciadoId = e.id)
+      count(índices distintos declarados em e.trechosFonte) > 0
+  AND count(TeseTrechoFonte WHERE enunciadoId = e.id)
         = count(índices distintos declarados em e.trechosFonte)
   AND todo trecho persistido tem caminho para o inteiro teor (§7.1)
 ```
+
+A primeira condição não é redundante: sem ela, um enunciado que **não declara nenhum** índice satisfaria a igualdade por `0 = 0` e passaria como se tivesse evidência integral, quando na verdade não tem evidência alguma. É o caso de uma destilação em que o modelo devolveu `trechosFonte` vazio — exatamente a tese que menos deveria ser publicada.
 
 **Alguma evidência não basta.** Se o enunciado declara três índices em `trechosFonte` e só um foi resolvido, a tese continuaria elegível com a fundamentação pela metade — e o leitor veria "os trechos que sustentam esta tese" sem saber que faltam dois. Faltando qualquer índice declarado, **o enunciado inteiro fica inelegível**. É a mesma lógica da §7.2: perder a tese é preferível a exibi-la mal sustentada.
 
@@ -281,14 +284,14 @@ teses: 2
 citacoesNoVoto: 262
 confianca: alta
 vereditos: [fiel, fiel]
-publicado: true
-vitrine: false
 destilacaoId: "..."
 atualizadoEm: 2026-09-04T12:00:00Z
 acordaoKey: ACORDAO-COMPLETO-1234567
 fonteOficial: https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-1234567
 fonteSite: https://profbarral.com.br/teses/1441-2016-plenario   # ausente quando não publicada
 ```
+
+**Sem `publicado` nem `vitrine` no frontmatter.** O arquivo agrupa todas as teses elegíveis de um acórdão-líder, e elas podem ter estados editoriais diferentes — uma promovida à vitrine ao lado de outra ainda não publicada. Um escalar no cabeçalho teria de significar "alguma" ou "todas", e qualquer das duas leituras seria falsa para parte do conteúdo. Como esses campos não participam da elegibilidade do ELIC (§6), a saída é não exportá-los: o destino é acervo de RAG, não espelho do estado editorial do site.
 
 `acordaoKey` e `fonteOficial` são obrigatórios; `fonteSite` é condicional. O ELIC exporta também teses ainda **não publicadas** (§6), e para essas a página do site não existe — se a URL do site fosse a única fonte no frontmatter, o RAG teria registro de procedência apontando para um 404. A rastreabilidade tem de repousar no identificador oficial, que independe do nosso estado editorial.
 
@@ -504,7 +507,7 @@ Falhar em (1) bloqueia a feature no assistente. Falhar em (2) ou (3) indica que 
 
 | Risco | Mitigação |
 |---|---|
-| Evidência trocada nos 43 saturados | Reconstrução por `criadoEm` + verificação por contagem; não grava se não casar |
+| Evidência trocada nos 41 saturados | Reconstrução por `criadoEm` + verificação por contagem; não grava se não casar |
 | Reconstrução não reproduzível | `orderBy` determinístico + desempate por `origemChave` |
 | Tese atribuída ao acórdão errado | Identidade pelo identificador oficial do TCU; ambíguo fica fora de todos os consumidores |
 | Tese retirada volta numa redestilação | Retirada herdada em texto idêntico |
