@@ -63,7 +63,10 @@ async function descobrirParConcorrente(): Promise<Array<{ numero: number; ano: n
 async function montarCaso(alvo: { numero: number; ano: number }): Promise<{ caso: CasoDestilacao; dossie: DossieUso }> {
   const dossie = await coletarTrechosDoAlvo(alvo);
   const cands = await buscarAcordaoPorNumero(alvo.numero, alvo.ano).catch(() => []);
-  const escolhido = escolherCandidato(cands); // sem colegiado preferido: usa não-relação / 1º relevante
+  // Cardinalidade estrita, sem colegiado preferido: só resolve com EXATAMENTE
+  // um candidato não-relação; zero ou dois ou mais devolvem null (spec §4.2).
+  // O probe segue mesmo assim — a ementa própria é opcional aqui.
+  const escolhido = escolherCandidato(cands);
   const caso: CasoDestilacao = {
     chave: `${alvo.numero}/${alvo.ano}`,
     ementaPropria: escolhido?.ementa ?? null,

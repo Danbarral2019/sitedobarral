@@ -161,6 +161,12 @@ async function main() {
 
       const cands = await buscarAcordaoPorNumero(c.numero, c.ano).catch(() => []);
       await dorme(PAUSA_TCU_MS);
+      // Divergência DELIBERADA em relação ao cron: lá, alvo ambíguo (`proprio`
+      // nulo) é pulado antes da destilação; aqui ele é destilado assim mesmo,
+      // com ementa/colegiado/relator nulos e sem gravar identidade. A
+      // destilação nasce sem `acordaoKey` e o predicado da spec §6 já a exclui
+      // de todos os consumidores, então o único custo é uma chamada de LLM num
+      // script raro — enquanto no cron o mesmo alvo voltaria todo dia.
       const proprio = escolherCandidato(cands);
 
       const { systemPrompt, userContent } = montarPromptTese({

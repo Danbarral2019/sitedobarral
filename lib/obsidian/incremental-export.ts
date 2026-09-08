@@ -13,6 +13,7 @@
 import { join } from 'path';
 
 import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+import { WHERE_ELEGIVEL_BASE, evidenciaIntegral } from '@/lib/tcu/elegibilidade-tese';
 
 import {
   type DbDocument,
@@ -40,10 +41,12 @@ import {
   enunciadoSlug,
   temaSlug,
   writeVault,
+  removerObsoletos,
   LEI_14133_ARTIGOS,
   ENUNCIADOS,
   TEMAS_LICITACOES,
 } from './export';
+import { caminhoTese, gerarTeseMd } from './tese-md';
 
 import { readSyncState, writeSyncState } from './sync-state';
 
@@ -56,6 +59,11 @@ export interface ExportResult {
   documents: number;
   acts: number;
   decisions: number;
+  /** Enunciados elegíveis exportados — teses, não arquivos. */
+  teses: number;
+  /** Arquivos escritos em `teses/`: um por acórdão-líder, com 1..N teses cada. */
+  arquivosDeTese: number;
+  filesRemoved: number;
   mode: 'full' | 'incremental';
   durationMs: number;
 }
@@ -83,6 +91,14 @@ export interface IncrementalExportOptions {
    * lib/tcu/invisibilidade-combustivel.test.ts.
    */
   incluirCombustivelDoGrafo?: boolean;
+
+  /**
+   * Inclui as teses destiladas do TCU (subdiretório `teses/`).
+   *
+   * Default `false`: o cofre do Obsidian do professor não as recebe. O ELIC
+   * liga, porque lá o destino é índice de RAG.
+   */
+  incluirTeses?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -242,12 +258,106 @@ export async function runIncrementalExport(
     }
 
     // -----------------------------------------------------------------------
+    // Teses do TCU (spec §8.2)
+    //
+    // O subdiretório `teses/` é regenerado POR INTEIRO a cada exportação, não
+    // por delta. A regra por delta tem um furo: quando uma tese DEIXA de ser
+    // elegível, ela some do conjunto consultado e nada marca o arquivo como
+    // desatualizado — o arquivo fica com a tese que já não vale ao lado das
+    // que valem. Detectar isso exigiria consultar as quatro formas de sair;
+    // como são algumas dezenas de arquivos pequenos, regenerar é mais barato
+    // e correto por construção.
+    // -----------------------------------------------------------------------
+    let totalTeses = 0;
+    const caminhosDeTese = new Set<string>();
+    if (opts.incluirTeses) {
+      const destilacoes = await prisma.teseDestilacao.findMany({
+        where: { atual: true, enunciados: { some: WHERE_ELEGIVEL_BASE } },
+        // Ordem estável entre execuções: sem `ORDER BY` o Postgres não a
+        // garante, e qual das duas destilações colidentes é pulada pelo aviso
+        // abaixo passaria a variar de uma exportação para outra.
+        orderBy: [{ numeroAlvo: 'asc' }, { anoAlvo: 'asc' }, { id: 'asc' }],
+        select: {
+          id: true, numeroAlvo: true, anoAlvo: true, colegiadoAlvo: true,
+          relatorAlvo: true, acordaoKey: true, urlAlvo: true,
+          origemIdentidade: true, citantesConcordantes: true,
+          assunto: true, confianca: true, dossieNoVoto: true,
+          enunciados: {
+            where: WHERE_ELEGIVEL_BASE,
+            // `TeseEnunciado.ordem` existe para isto. Sem `ORDER BY` o
+            // Postgres não garante ordem, e como `atualizadoEm` é `@updatedAt`
+            // qualquer mudança de veredito reescreve a linha e pode movê-la: o
+            // mesmo dado geraria arquivos com as seções e o `vereditos: [...]`
+            // em ordens diferentes entre execuções, reescrevendo sem motivo
+            // uma pasta sincronizada por OneDrive e embaralhando o chunking do
+            // RAG entre reindexações.
+            orderBy: { ordem: 'asc' },
+            select: {
+              id: true, enunciado: true, inovacao: true, veredito: true,
+              publicado: true, trechosFonte: true, atualizadoEm: true,
+              trechos: {
+                orderBy: { ordem: 'asc' },
+                select: {
+                  ordem: true, trecho: true, origemNumero: true, origemAno: true,
+                  origemColegiado: true, origemUrl: true, origemLinkPDF: true,
+                  origemDocumentId: true, noVoto: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      for (const d of destilacoes) {
+        // A integralidade da evidência não cabe no filtro SQL (compara contagem
+        // contra um campo Json), então é conferida aqui, enunciado a enunciado.
+        const elegiveis = d.enunciados.filter(e => evidenciaIntegral(e));
+        if (elegiveis.length === 0) continue;
+        const atualizadoEm = elegiveis
+          .map(e => e.atualizadoEm)
+          .reduce((a, b) => (a > b ? a : b));
+        const dados = { ...d, atualizadoEm, enunciados: elegiveis };
+        const caminho = caminhoTese(dados);
+        // Duas destilações `atual: true` com mesmo número, ano e colegiado
+        // colidiriam no mesmo arquivo: a segunda sobrescreveria a primeira em
+        // `writeVault`, e contar as duas mentiria no total do README. Isso
+        // não é esperado — só acontece se duas versões ficaram `atual` para
+        // o mesmo alvo, uma inconsistência de dado — por isso é aviso, não
+        // silêncio: alguém precisa investigar qual das duas é a válida.
+        if (caminhosDeTese.has(caminho)) {
+          console.warn(
+            `  [AVISO] Duas destilações atuais geram o mesmo arquivo ${caminho}: ` +
+              `${d.id} colide com uma anterior. Pulando ${d.id}.`,
+          );
+          continue;
+        }
+        caminhosDeTese.add(caminho);
+        files.push({ path: caminho, content: gerarTeseMd(dados) });
+        // Conta ENUNCIADOS, não arquivos: o rótulo do README e do console diz
+        // "Teses", e as linhas vizinhas (documentos, atos, jurisprudência)
+        // contam registros. O número de arquivos é `caminhosDeTese.size`.
+        totalTeses += elegiveis.length;
+      }
+    }
+
+    // -----------------------------------------------------------------------
     // Write files
     // -----------------------------------------------------------------------
+    let removidos: string[] = [];
     if (opts.dryRun) {
       console.log(`  [DRY RUN] ${files.length} arquivos seriam escritos`);
+      if (opts.incluirTeses) {
+        removidos = await removerObsoletos(opts.outputDir, 'teses', caminhosDeTese, true);
+        console.log(`  [DRY RUN] ${removidos.length} arquivos obsoletos seriam removidos de teses/`);
+        for (const nome of removidos) {
+          console.log(`  [DRY RUN]   - teses/${nome}`);
+        }
+      }
     } else {
       await writeVault(opts.outputDir, files);
+      if (opts.incluirTeses) {
+        removidos = await removerObsoletos(opts.outputDir, 'teses', caminhosDeTese, false);
+      }
     }
 
     // Update sync state
@@ -267,6 +377,9 @@ export async function runIncrementalExport(
       documents: allDocuments.length,
       acts: allActs.length,
       decisions: allDecisions.length,
+      teses: totalTeses,
+      arquivosDeTese: caminhosDeTese.size,
+      filesRemoved: removidos.length,
       mode: (opts.full || !lastExportAt) ? 'full' : 'incremental',
       durationMs: Date.now() - startTime,
     };

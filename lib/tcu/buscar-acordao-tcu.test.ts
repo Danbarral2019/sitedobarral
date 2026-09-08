@@ -61,3 +61,40 @@ describe('escolherCandidato', () => {
     expect(c.link).toBe('https://pesquisa.apps.tcu.gov.br/documento/acordao-completo-3');
   });
 });
+
+describe('escolherCandidato — cardinalidade estrita', () => {
+  const base = {
+    ano: 2024, relator: null, ementa: '', link: '', isRelacao: false,
+  };
+  const plenario = { ...base, numero: 56, colegiado: 'Plenário', key: 'ACORDAO-COMPLETO-1' };
+  const primeira = { ...base, numero: 56, colegiado: 'Primeira Câmara', key: 'ACORDAO-COMPLETO-2' };
+  const relacao = { ...base, numero: 56, colegiado: 'Segunda Câmara', key: 'ACORDAO-COMPLETO-3', isRelacao: true };
+
+  it('zero candidatos → null', () => {
+    expect(escolherCandidato([])).toBeNull();
+  });
+
+  it('exatamente um não-relação → o candidato', () => {
+    expect(escolherCandidato([plenario])?.key).toBe('ACORDAO-COMPLETO-1');
+  });
+
+  it('um não-relação entre relações → o não-relação', () => {
+    expect(escolherCandidato([relacao, plenario])?.key).toBe('ACORDAO-COMPLETO-1');
+  });
+
+  it('dois ou mais não-relação → null por ambiguidade, sem escolher o primeiro', () => {
+    expect(escolherCandidato([plenario, primeira])).toBeNull();
+  });
+
+  it('só relações → null, sem queda para cands[0]', () => {
+    expect(escolherCandidato([relacao])).toBeNull();
+  });
+
+  it('colegiadoPreferido resolve a ambiguidade quando casa com exatamente um', () => {
+    expect(escolherCandidato([plenario, primeira], 'Plenário')?.key).toBe('ACORDAO-COMPLETO-1');
+  });
+
+  it('colegiadoPreferido que não casa não reabre a queda para o primeiro', () => {
+    expect(escolherCandidato([plenario, primeira], 'Segunda Câmara')).toBeNull();
+  });
+});

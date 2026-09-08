@@ -79,6 +79,9 @@ model Document {
   /// (acórdãos que ele cita).
   citacoesDeAcordao AcordaoCitacao[] @relation("CitacoesDeAcordao")
 
+  trechosDeTese      TeseTrechoFonte[] @relation("TeseTrechoOrigem")
+  teseDestilacoes    TeseDestilacao[]  @relation("TeseDestilacaoAcordaoLider")
+
   content         String?   @db.Text // Conteúdo/trechos relevantes do documento para busca textual
   size            Int?
   onNumber        Int? // Número da ON (para ordenação numérica de Orientações Normativas)
@@ -2098,6 +2101,29 @@ model TeseDestilacao {
   assunto       String   @db.Text
   confianca     String
   versaoMotor   Int
+  /// Identidade oficial do acórdão-líder, vinda do TCU (spec §4.2). Nulo =
+  /// ambíguo ou não resolvido: NÃO exclui a destilação dos consumidores desde
+  /// a §4.3, que substituiu o portão binário por três níveis de procedência
+  /// (ver `origemIdentidade` abaixo). Só a VITRINE pública exige `acordaoKey`
+  /// não nulo — acervo restrito, busca por IA e `export:elic` aceitam os três
+  /// níveis, qualificando ou omitindo o colegiado.
+  acordaoKey    String?
+  colegiadoAlvo String?
+  relatorAlvo   String?
+  urlAlvo       String?
+  /// Como o colegiado foi determinado: 'tcu-oficial' (registro do TCU),
+  /// 'convergencia-citantes' (todos os votos citantes que informam colegiado
+  /// concordam) ou null (não determinado). Ver spec §4.3 — o nível governa
+  /// em quais superfícies a tese pode aparecer.
+  origemIdentidade     String?
+  /// Quantos votos citantes sustentam o colegiado, no nível de convergência.
+  citantesConcordantes Int?
+  /// Enriquecimento opcional: o acórdão-líder na nossa base, quando existe.
+  /// NÃO é a identidade — em 39 das 93 teses o líder não está aqui.
+  /// Reservado para a onda seguinte: nem o campo nem o índice abaixo são
+  /// preenchidos por código algum hoje (nem cron, nem backfill) — não é bug.
+  documentId    String?
+  document      Document? @relation("TeseDestilacaoAcordaoLider", fields: [documentId], references: [id], onDelete: SetNull)
   /// Retrato do dossiê que gerou esta versão. Sem ele não há como saber depois
   /// se o dossiê cresceu o bastante para justificar redestilar.
   dossieTrechos Int
@@ -2111,6 +2137,8 @@ model TeseDestilacao {
 
   @@index([numeroAlvo, anoAlvo, atual])
   @@index([chave])
+  @@index([acordaoKey])
+  @@index([documentId])
 }
 
 /// Uma tese dentro de uma destilacao. O veredito do Daniel vive aqui, colado
@@ -2129,9 +2157,68 @@ model TeseEnunciado {
   /// Id do enunciado da versão anterior de onde o veredito foi herdado por
   /// texto idêntico. Null = julgado diretamente nesta versão.
   herdadoDe    String?
+  /// Estado editorial, independente da versão da destilação (spec §5).
+  publicado      Boolean   @default(false)
+  vitrinePublica Boolean   @default(false)
+  retiradoEm     DateTime?
+  retiradoMotivo String?
+  /// Sinal de mudança para o relatório do export incremental (spec §8.2).
+  /// @default(now()) é necessário porque @updatedAt sozinho é resolvido no
+  /// client do Prisma, não no banco — sem default, o db push não teria como
+  /// preencher as linhas já existentes na tabela e pediria reset, não apenas
+  /// --accept-data-loss (achado da revisão, jamais reintroduzir sem default).
+  atualizadoEm   DateTime  @default(now()) @updatedAt
+  /// Ciclo do embedding, no desenho de Document e TribunalDecision (spec §9).
+  embeddingStatus String?
+
+  trechos TeseTrechoFonte[]
 
   @@index([destilacaoId])
   @@index([veredito])
+  @@index([publicado])
+  @@index([vitrinePublica])
+  @@index([embeddingStatus])
+}
+
+/// A evidência literal de uma tese, copiada no momento da destilação.
+///
+/// Existe porque `TeseEnunciado.trechosFonte` guarda ÍNDICES para um dossiê que
+/// não é persistido e que é recomposto do grafo a cada uso. Como o grafo cresce
+/// todo dia, os índices apodrecem — e para os alvos saturados no teto de 40 a
+/// verificação por contagem nem detecta (spec §7).
+model TeseTrechoFonte {
+  id          String   @id @default(cuid())
+  enunciadoId String
+  enunciado   TeseEnunciado @relation(fields: [enunciadoId], references: [id], onDelete: Cascade)
+  ordem       Int
+  trecho      String   @db.Text
+
+  /// O acórdão CITANTE — quem escreveu o trecho. Não confundir com o
+  /// acórdão-líder, que é o alvo da destilação.
+  origemNumero     Int
+  origemAno        Int
+  origemColegiado  String?
+  /// Caminhos para o inteiro teor, copiados no snapshot. Sobrevivem à perda da
+  /// relação com Document: evidência que não se pode conferir não é evidência.
+  origemUrl        String?
+  origemLinkPDF    String?
+  origemDocumentId String?
+  origemDocument   Document? @relation("TeseTrechoOrigem", fields: [origemDocumentId], references: [id], onDelete: SetNull)
+
+  noVoto      Boolean
+  /// Momento da PRIMEIRA captura, não da última reconstrução: `@default(now())`
+  /// só se aplica na criação da linha, e o upsert do backfill de evidência
+  /// preserva o valor antigo (grava só `update: { ...l }`, que não inclui este
+  /// campo). É deliberado — permite distinguir depois uma linha gravada pelo
+  /// cron diário (capturadoEm ~= TeseDestilacao.criadoEm) de uma reconstruída
+  /// pelo backfill (capturadoEm muito posterior ao criadoEm da destilação).
+  capturadoEm DateTime @default(now())
+
+  /// Torna a gravação idempotente: reexecutar o backfill reescreve as mesmas
+  /// linhas em vez de duplicar.
+  @@unique([enunciadoId, ordem])
+  @@index([enunciadoId])
+  @@index([origemDocumentId])
 }
 
 /// Uma divergencia apontada nos votos: outro precedente indicado como o de
@@ -2188,4 +2275,33 @@ model AcordaoTema {
   @@unique([numeroAlvo, anoAlvo])
   @@index([tema])
   @@index([chave])
+}
+
+/// Sumidouro do cron `destilar-teses-tcu`: um alvo cuja identidade oficial o
+/// TCU não resolve (ambíguo entre colegiados, ou não encontrado) nunca é
+/// destilado, então nunca ganha `TeseDestilacao.atual` — sem este registro ele
+/// voltaria ao topo de `selecionarElegiveis` todo dia, para sempre, gastando
+/// uma requisição ao TCU e 1s de espera por execução. Um dry-run em
+/// 2026-09-04 mediu 103 alvos permanentemente ambíguos + 6 não encontrados,
+/// contra `CANDIDATOS_POR_RODADA` de apenas 40 — 109 sumidouros disputando 40
+/// vagas teria feito o cron produzir pouco ou nada, em silêncio.
+///
+/// Falha de rede (`erroTransitorio` em `ResultadoIdentidade`) NUNCA entra
+/// aqui: é passageira, e o alvo deve voltar à fila na próxima passada.
+model AlvoIdentidadeIrresolvida {
+  id         String @id @default(cuid())
+  numeroAlvo Int
+  anoAlvo    Int
+  chave      String
+
+  /// 'ambiguo' (o TCU devolve mais de um candidato para o mesmo número e ano)
+  /// ou 'naoEncontrado'. Falha de rede NÃO entra aqui — ela deve ser retentada.
+  resultado    String
+  candidatos   Int?
+  verificadoEm DateTime @updatedAt
+  tentativas   Int      @default(1)
+
+  @@unique([numeroAlvo, anoAlvo])
+  @@index([chave])
+  @@index([verificadoEm])
 }
