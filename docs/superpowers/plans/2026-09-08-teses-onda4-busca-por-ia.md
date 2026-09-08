@@ -1156,10 +1156,15 @@ const TOP = 5;
 const media = (ns: number[]) => (ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : 0);
 
 async function main() {
-  const golden = JSON.parse(readFileSync('eval/golden-set.json', 'utf8')) as Array<{ query: string }>;
+  // O golden set é um objeto com metadados, não um array: as perguntas estão
+  // em `queries`. Iterar o objeto direto devolve zero medições em silêncio.
+  const golden = JSON.parse(readFileSync('eval/golden-set.json', 'utf8')) as {
+    version: number;
+    queries: Array<{ id: string; query: string }>;
+  };
   const medidas: Medida[] = [];
 
-  for (const { query } of golden) {
+  for (const { query } of golden.queries) {
     // Tudo idêntico entre as duas execuções, exceto o ramo das teses — é o que
     // torna a comparação pareada, e não duas medições soltas.
     const base = { query, limit: 20, useCache: false as const };
