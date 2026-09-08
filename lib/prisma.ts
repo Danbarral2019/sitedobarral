@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { usaDriverLocal } from './prisma-adapter';
 
 // Auto-load .env.local when running scripts outside Next.js
 if (!process.env.DATABASE_URL && !process.env.NEXT_RUNTIME) {
@@ -18,9 +20,10 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 if (!globalForPrisma.prisma) {
-  const adapter = new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  });
+  const connectionString = process.env.DATABASE_URL!;
+  const adapter = usaDriverLocal(connectionString)
+    ? new PrismaPg({ connectionString })
+    : new PrismaNeon({ connectionString });
 
   globalForPrisma.prisma = new PrismaClient({
     adapter,
