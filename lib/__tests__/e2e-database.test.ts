@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { resolveE2EDatabaseUrl } from '../../e2e/fixtures/database';
 
+// As URLs abaixo não levam usuário nem senha de propósito: a função decide
+// apenas pelo hostname, e credencial em URI de teste é lida por scanner de
+// segredo como vazamento. Não "complete" estas URLs para deixá-las realistas.
 describe('resolveE2EDatabaseUrl', () => {
   it('aceita banco remoto somente pela variável explícita de teste', () => {
-    const url = 'postgresql://test:secret@example.neon.tech/neondb';
+    const url = 'postgresql://example.neon.tech/neondb';
 
     expect(resolveE2EDatabaseUrl({ TEST_DATABASE_URL: url })).toBe(url);
   });
@@ -15,7 +18,7 @@ describe('resolveE2EDatabaseUrl', () => {
   });
 
   it('recusa DATABASE_URL remota para evitar uso acidental de produção', () => {
-    const url = 'postgresql://user:secret@database.example.com/site';
+    const url = 'postgresql://database.example.com/site';
 
     expect(() => resolveE2EDatabaseUrl({ DATABASE_URL: url })).toThrow(
       'banco remoto deve ser informado exclusivamente por TEST_DATABASE_URL',
