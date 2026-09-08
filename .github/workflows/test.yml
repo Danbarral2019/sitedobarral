@@ -117,6 +117,14 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      # O schema tem colunas vector(768) do pgvector. A imagem do serviço traz a
+      # extensão disponível, mas ela ainda precisa ser criada no banco, senão o
+      # db push falha com `type "vector" does not exist`.
+      - name: Enable pgvector extension
+        run: psql "$DATABASE_URL" -c 'CREATE EXTENSION IF NOT EXISTS vector;'
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/barral_e2e"
+
       - name: Prepare local smoke database
         run: npx prisma db push
         env:
