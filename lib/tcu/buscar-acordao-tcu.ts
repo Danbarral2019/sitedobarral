@@ -53,14 +53,29 @@ export function parseEntidade(e: { titulo: string; subtitulo?: string; texto?: s
   };
 }
 
+/**
+ * Resolve os candidatos a UM acórdão, ou a nenhum.
+ *
+ * Cardinalidade estrita, sem queda para `cands[0]`: número e ano NÃO
+ * identificam um acórdão do TCU — o 56/2024 existe em Plenário, Primeira e
+ * Segunda Câmara. Devolver "algum" candidato atribuiria a tese a um colegiado
+ * arbitrário. Ambiguidade é resultado legítimo, e quem chama decide o que
+ * fazer com ela (spec §4.2).
+ *
+ * | não-relação | retorno |
+ * |---|---|
+ * | zero        | null    |
+ * | um          | ele     |
+ * | dois ou +   | null    |
+ */
 export function escolherCandidato(cands: CandidatoAcordao[], colegiadoPreferido?: string): CandidatoAcordao | null {
-  if (!cands.length) return null;
-  if (colegiadoPreferido) {
-    const c = cands.find((x) => x.colegiado === colegiadoPreferido && !x.isRelacao);
-    if (c) return c;
-  }
   const completos = cands.filter((c) => !c.isRelacao);
-  return (completos[0] ?? cands[0]) || null;
+  if (completos.length === 1) return completos[0];
+  if (colegiadoPreferido) {
+    const doColegiado = completos.filter((x) => x.colegiado === colegiadoPreferido);
+    if (doColegiado.length === 1) return doColegiado[0];
+  }
+  return null;
 }
 
 export async function buscarAcordaoPorNumero(numero: number, ano: number): Promise<CandidatoAcordao[]> {

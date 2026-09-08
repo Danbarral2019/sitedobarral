@@ -14,6 +14,19 @@ const JANELA = 400;
 export interface TrechoCitacao {
   /** Chave "numero/ano" do acórdão CITANTE (origem). */
   origemChave: string;
+  /**
+   * Id do `Document` do acórdão CITANTE — a identidade inequívoca da origem.
+   *
+   * `origemChave` NÃO identifica um acórdão: o schema declara a unicidade em
+   * `(acordaoNumero, acordaoAno, tcuOrgaoJulgador)`, ou seja, o mesmo par
+   * número+ano existe em colegiados diferentes. Resolver o citante pela chave
+   * escolheria um deles arbitrariamente, e a evidência apontaria para o
+   * inteiro teor de um acórdão onde o trecho não existe (spec §4 e §7.1).
+   *
+   * Opcional porque nem todo produtor de `TrechoCitacao` tem o `Document` em
+   * mãos (`recortarTrechos` é puro); quem coleta do grafo sempre preenche.
+   */
+  origemDocumentId?: string;
   secao: 'relatorio' | 'voto' | 'acordao' | null;
   noVoto: boolean;
   /** Janela de texto ao redor da citação, aparada em fronteira de palavra. */
@@ -41,7 +54,8 @@ function aparar(bruto: string, cortadoInicio: boolean, cortadoFim: boolean): str
 export function recortarTrechos(
   texto: string,
   alvo: { numero: number; ano: number },
-  origemChave: string
+  origemChave: string,
+  origemDocumentId?: string
 ): TrechoCitacao[] {
   if (!texto) return [];
   const secoes = seccionarAcordao(texto);
@@ -52,7 +66,7 @@ export function recortarTrechos(
     const fim = Math.min(texto.length, c.index + c.raw.length + JANELA);
     const trecho = aparar(texto.slice(ini, fim), ini > 0, fim < texto.length);
     const secao = secaoDe(secoes, c.index);
-    out.push({ origemChave, secao, noVoto: secao === 'voto', trecho, offset: c.index });
+    out.push({ origemChave, origemDocumentId, secao, noVoto: secao === 'voto', trecho, offset: c.index });
   }
   return out;
 }
@@ -81,8 +95,19 @@ export function montarDossie(
     vistos.add(k);
     dedup.push(t);
   }
-  // Voto primeiro; dentro de cada grupo, trechos mais longos (mais informativos).
-  dedup.sort((a, b) => Number(b.noVoto) - Number(a.noVoto) || b.trecho.length - a.trecho.length);
+  // Voto primeiro; dentro de cada grupo, trechos mais longos (mais
+  // informativos); por fim origemChave, que fecha a ordenação.
+  //
+  // O desempate por origemChave não é cosmético: a evidência de cada tese é
+  // resolvida por ÍNDICE nesta lista (TeseTrechoFonte, spec §7). Empate
+  // desfeito pela ordem de chegada — que vem de um findMany sem orderBy —
+  // faria dois runs produzirem trechos diferentes para o mesmo índice.
+  dedup.sort(
+    (a, b) =>
+      Number(b.noVoto) - Number(a.noVoto) ||
+      b.trecho.length - a.trecho.length ||
+      a.origemChave.localeCompare(b.origemChave),
+  );
 
   const citantes = new Set(trechos.map((t) => t.origemChave));
   const citantesVoto = new Set(trechos.filter((t) => t.noVoto).map((t) => t.origemChave));
@@ -102,10 +127,30 @@ export function montarDossie(
  * inteiro teor dos citantes. A CONTAGEM vem das arestas (fonte da verdade da
  * Fase 1), não dos trechos recortados. Toca banco — não é puro.
  */
-export async function coletarTrechosDoAlvo(alvo: { numero: number; ano: number }): Promise<DossieUso> {
+export interface OpcoesDossie {
+  /**
+   * Reconstrói o dossiê como ele era nesta data, ignorando arestas criadas
+   * depois. Uma aresta só existe se o inteiro teor do citante já existia
+   * quando ela foi extraída, então o corte por criadoEm devolve fielmente o
+   * universo de candidatos daquele momento (spec §7).
+   */
+  ateData?: Date;
+}
+
+export async function coletarTrechosDoAlvo(
+  alvo: { numero: number; ano: number },
+  opcoes: OpcoesDossie = {},
+): Promise<DossieUso> {
   const arestas = await prisma.acordaoCitacao.findMany({
-    where: { numeroAlvo: alvo.numero, anoAlvo: alvo.ano },
+    where: {
+      numeroAlvo: alvo.numero,
+      anoAlvo: alvo.ano,
+      ...(opcoes.ateData ? { criadoEm: { lt: opcoes.ateData } } : {}),
+    },
     select: { origemId: true, noVoto: true, ocorrencias: true },
+    // Ordem estável: o desempate de montarDossie é por origemChave, mas a
+    // deduplicação vê os trechos na ordem de chegada.
+    orderBy: { origemId: 'asc' },
   });
   const docs = await prisma.document.findMany({
     where: { id: { in: arestas.map((a) => a.origemId) } },
@@ -117,7 +162,9 @@ export async function coletarTrechosDoAlvo(alvo: { numero: number; ano: number }
     const d = porId.get(a.origemId);
     if (!d?.tcuTextoCompleto) continue;
     const origemChave = d.acordaoNumero && d.acordaoAno ? `${d.acordaoNumero}/${d.acordaoAno}` : d.id;
-    trechos.push(...recortarTrechos(d.tcuTextoCompleto, alvo, origemChave));
+    // O id vai junto da chave: é ele, e não o par número+ano, que identifica
+    // sem ambiguidade o citante cujo texto produziu estes trechos (spec §7.1).
+    trechos.push(...recortarTrechos(d.tcuTextoCompleto, alvo, origemChave, d.id));
   }
   const dossie = montarDossie(alvo, trechos);
   // Contagem fidedigna = arestas do grafo (não os trechos recasados).

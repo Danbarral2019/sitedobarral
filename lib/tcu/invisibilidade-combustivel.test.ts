@@ -70,4 +70,21 @@ describe('invisibilidade do combustível do grafo', () => {
   it('o export do ELIC liga a opção de propósito', () => {
     expect(ler('scripts/export-elic.ts')).toMatch(/incluirCombustivelDoGrafo:\s*true/);
   });
+
+  // As teses do TCU seguem o mesmo desenho: filtro por destino, default
+  // seguro. A diferença é que aqui o default também governa a REMOÇÃO de
+  // arquivos — `removerObsoletos` só é alcançável dentro de
+  // `if (opts.incluirTeses)`. É a única superfície em que a capacidade nova
+  // de apagar poderia alcançar a pasta errada.
+  it('o cofre do Obsidian NÃO recebe teses', () => {
+    expect(ler('scripts/sync-obsidian.ts')).not.toMatch(/incluirTeses/);
+  });
+
+  it('o export do ELIC liga as teses de propósito', () => {
+    expect(ler('scripts/export-elic.ts')).toMatch(/incluirTeses:\s*true/);
+  });
+
+  it('incluirTeses é opcional, para que todo chamador existente siga protegido', () => {
+    expect(ler('lib/obsidian/incremental-export.ts')).toMatch(/incluirTeses\?:\s*boolean/);
+  });
 });

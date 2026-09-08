@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, memo, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked, Library, HelpCircle } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked, Library, HelpCircle, ScrollText } from 'lucide-react';
 import { courses } from '@/data/courses';
 
 export const Header = memo(function Header() {
@@ -147,6 +147,15 @@ export const Header = memo(function Header() {
             </Link>
 
             <Link
+              href="/teses"
+              aria-current={isActive('/teses') ? 'page' : undefined}
+              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/teses') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+            >
+              <ScrollText className="w-4 h-4" />
+              <span>Teses</span>
+            </Link>
+
+            <Link
               href="/blog"
               aria-current={isActive('/blog') ? 'page' : undefined}
               className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
@@ -219,6 +228,7 @@ export const Header = memo(function Header() {
               { href: '/base-conhecimento', label: 'Base de Conhecimento' },
               { href: '/legislacao', label: 'Legislação' },
               { href: '/jurisprudencia', label: 'Jurisprudência' },
+              { href: '/teses', label: 'Teses' },
               { href: '/blog', label: 'Blog' },
               { href: '/glossario', label: 'Glossário' },
               { href: '/faq', label: 'FAQ' },

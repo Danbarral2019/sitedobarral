@@ -5,7 +5,7 @@
  * Contains all types, utilities, generators, and write logic.
  */
 
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, readdir, rm } from 'fs/promises';
 import { join, resolve } from 'path';
 
 import { LEI_14133_ARTIGOS, type LeiArticle } from '../../data/lei-14133-artigos';
@@ -859,6 +859,53 @@ export function generateMOC(
 export interface FileEntry {
   path: string;
   content: string;
+}
+
+/**
+ * Remove, de UM subdiretório, os arquivos que não estão no conjunto esperado.
+ * Devolve os nomes removidos (ou que seriam removidos, em dry-run) — a §8.2
+ * exige que o dry-run LISTE o que seria removido, não só conte, porque é a
+ * superfície em que o usuário confere antes de deixar apagar de verdade.
+ *
+ * O motor nunca apagou nada. Sem isto, uma tese retirada, reprovada numa
+ * redestilação ou que perdeu a evidência continuaria no acervo de RAG do ELIC
+ * para sempre, sendo recuperada como se valesse (spec §8.2).
+ *
+ * O escopo é ESTRITAMENTE o subdiretório recebido: o destino é uma pasta do
+ * OneDrive de trabalho com material de outras origens, e apagar fora dele
+ * destruiria arquivo de terceiro. Por isso a função não recebe um caminho
+ * livre nem varre recursivamente — um único `readdir` do subdiretório, sem
+ * `{ recursive: true }` — e o `rm` sempre recebe `join(dir, nome)` com `nome`
+ * saído desse `readdir`, nunca uma string livre montada por fora.
+ */
+export async function removerObsoletos(
+  outputDir: string,
+  subdiretorio: string,
+  esperados: Set<string>,
+  dryRun: boolean,
+): Promise<string[]> {
+  const dir = join(outputDir, subdiretorio);
+  let entradas: string[];
+  try {
+    entradas = await readdir(dir);
+  } catch (e) {
+    // Só "ainda não existe" é esperado. Engolir qualquer erro desligaria a
+    // remoção em silêncio: uma pasta travada pelo OneDrive (EPERM/EBUSY) ou
+    // sem permissão devolveria `[]`, e o relatório diria "0 removidos",
+    // indistinguível de "nada a remover".
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw e;
+  }
+
+  const removidos: string[] = [];
+  for (const nome of entradas) {
+    if (!nome.endsWith('.md')) continue;
+    const relativo = `${subdiretorio}/${nome}`;
+    if (esperados.has(relativo)) continue;
+    removidos.push(nome);
+    if (!dryRun) await rm(join(dir, nome));
+  }
+  return removidos;
 }
 
 export async function writeVault(outputDir: string, files: FileEntry[]): Promise<void> {

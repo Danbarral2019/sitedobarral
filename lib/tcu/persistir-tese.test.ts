@@ -2,25 +2,37 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { TeseDestilada } from './destilar-tese';
 import type { DossieUso, TrechoCitacao } from './trechos-de-citacao';
 
-const { mockFindFirst, mockFindMany, mockTransaction, mockQueryRaw } = vi.hoisted(() => ({
-  mockFindFirst: vi.fn(),
+const { mockAnterior, mockFindMany, mockTransaction, mockQueryRaw, mockDocs, mockIrresolviveis } = vi.hoisted(() => ({
+  mockAnterior: vi.fn(),
   mockFindMany: vi.fn(),
   mockTransaction: vi.fn(),
   mockQueryRaw: vi.fn(),
+  mockDocs: vi.fn(),
+  mockIrresolviveis: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     teseDestilacao: {
-      findFirst: (...a: unknown[]) => mockFindFirst(...a),
+      findFirst: (...a: unknown[]) => mockAnterior(...a),
       findMany: (...a: unknown[]) => mockFindMany(...a),
     },
+    document: { findMany: (...a: unknown[]) => mockDocs(...a) },
+    alvoIdentidadeIrresolvida: { findMany: (...a: unknown[]) => mockIrresolviveis(...a) },
     $transaction: (...a: unknown[]) => mockTransaction(...a),
     $queryRaw: (...a: unknown[]) => mockQueryRaw(...a),
   },
 }));
 
-import { ehElegivel, selecionarElegiveis, persistirDestilacao, MIN_NO_VOTO, FATOR_CRESCIMENTO, DIAS_MINIMOS } from './persistir-tese';
+import {
+  ehElegivel,
+  selecionarElegiveis,
+  persistirDestilacao,
+  MIN_NO_VOTO,
+  FATOR_CRESCIMENTO,
+  DIAS_MINIMOS,
+  DIAS_REAVALIACAO_IDENTIDADE,
+} from './persistir-tese';
 
 const agora = new Date('2026-07-21T12:00:00Z');
 const diasAtras = (n: number) => new Date(agora.getTime() - n * 24 * 60 * 60 * 1000);
@@ -85,6 +97,7 @@ describe('persistirDestilacao', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockDocs.mockResolvedValue([]);
     // A transacao real so expoe `updateMany`/`create` (nao `update` por id) —
     // se o codigo regredir para `update(anterior.id)` o mock nao tem esse
     // metodo e o teste quebra com um erro claro, em vez de passar por acaso.
@@ -102,7 +115,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(a) sem versao anterior: tudo conta como novo, nada herdado', async () => {
-    mockFindFirst.mockResolvedValue(null);
+    mockAnterior.mockResolvedValue(null);
     const tese: TeseDestilada = {
       chave: '1/2026',
       assunto: 'Assunto X',
@@ -125,7 +138,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(b) enunciado identico herda o veredito; enunciado alterado NAO herda', async () => {
-    mockFindFirst.mockResolvedValue({
+    mockAnterior.mockResolvedValue({
       id: 'anterior-id',
       enunciados: [
         { id: 'e1', enunciado: 'Texto A', veredito: 'aprovada', julgadoEm: diasAtras(10), julgadoPor: 'daniel' },
@@ -156,7 +169,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(c) divergencia e pareada pelo trecho de apoio, nao por origemChave/natureza', async () => {
-    mockFindFirst.mockResolvedValue({
+    mockAnterior.mockResolvedValue({
       id: 'anterior-id',
       enunciados: [],
       divergencias: [
@@ -195,7 +208,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(d) aritmetica de herdados/novos com mistura de enunciados e divergencias', async () => {
-    mockFindFirst.mockResolvedValue({
+    mockAnterior.mockResolvedValue({
       id: 'anterior-id',
       enunciados: [{ id: 'e1', enunciado: 'A', veredito: 'aprovada', julgadoEm: diasAtras(1), julgadoPor: 'd' }],
       divergencias: [{ id: 'd1', trecho: 'X', veredito: 'procedente', julgadoEm: diasAtras(1), julgadoPor: 'd' }],
@@ -223,7 +236,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(d) com enunciados e divergencias vazios, herdados e novos ficam zerados', async () => {
-    mockFindFirst.mockResolvedValue({ id: 'anterior-id', enunciados: [], divergencias: [] });
+    mockAnterior.mockResolvedValue({ id: 'anterior-id', enunciados: [], divergencias: [] });
     const tese: TeseDestilada = {
       chave: '1/2026',
       assunto: '',
@@ -240,7 +253,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(e) usa defaults quando assunto, confianca e sinaisQualitativos vem ausentes do parser', async () => {
-    mockFindFirst.mockResolvedValue(null);
+    mockAnterior.mockResolvedValue(null);
     // O parser (destilar-tese.ts) normalmente preenche esses defaults antes de
     // chegar aqui, mas persistirDestilacao nao deve confiar nisso.
     const teseIncompleta = { chave: '1/2026', teses: [], divergencias: [] } as unknown as TeseDestilada;
@@ -254,7 +267,7 @@ describe('persistirDestilacao', () => {
   });
 
   it('(f) desmarca a anterior DENTRO da transacao, condicional por (numeroAlvo, anoAlvo, atual) — nao por id fixo', async () => {
-    mockFindFirst.mockResolvedValue({ id: 'anterior-id', enunciados: [], divergencias: [] });
+    mockAnterior.mockResolvedValue({ id: 'anterior-id', enunciados: [], divergencias: [] });
     const tese: TeseDestilada = {
       chave: '7/2024',
       assunto: '',
@@ -282,11 +295,188 @@ describe('persistirDestilacao', () => {
     expect(ordemUpdate).toBeLessThan(ordemCreate);
     expect(mockTransaction).toHaveBeenCalledTimes(1);
   });
+
+  it('grava os trechos citados junto da destilação, resolvidos pelo dossiê em mãos', async () => {
+    // Precisa de um caminho para o inteiro teor (invariante da spec §7.1) —
+    // sem isso o trecho referenciado (índice 1) seria zerado, e este teste
+    // deixaria de testar só a resolução de índice, que é seu objetivo aqui.
+    mockDocs.mockResolvedValue([
+      { id: 'doc-200', acordaoNumero: 200, acordaoAno: 2021, tcuOrgaoJulgador: 'Plenário', url: 'https://u/200', tcuLinkPDF: 'https://p/200' },
+    ]);
+    const dossie = {
+      alvo: { numero: 1441, ano: 2016 },
+      contagem: { citantesDistintos: 2, noVoto: 2, ocorrenciasTotal: 2 },
+      trechos: [
+        { origemChave: '100/2020', secao: 'voto' as const, noVoto: true, trecho: 'primeiro', offset: 0 },
+        { origemChave: '200/2021', secao: 'voto' as const, noVoto: true, trecho: 'segundo', offset: 0 },
+      ],
+    };
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [1] }], divergencias: [], sinaisQualitativos: [] },
+      dossie,
+    );
+    const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    const trechos = criados[0].trechos.create;
+    expect(trechos).toHaveLength(1);
+    // trechosFonte: [1] → o SEGUNDO trecho do dossiê
+    expect(trechos[0]).toMatchObject({
+      ordem: 1, trecho: 'segundo', origemNumero: 200, origemAno: 2021, noVoto: true,
+    });
+  });
+
+  it('não grava evidência parcial: índice fora do dossiê zera os trechos do enunciado', async () => {
+    // Documento casando com o trecho 0: se faltasse, a invariante de caminho
+    // para o inteiro teor já zeraria o resultado ali, e o teste passaria por
+    // acaso sem nunca avaliar o índice 7 (fora de alcance), que é o que ele
+    // se propõe a provar.
+    mockDocs.mockResolvedValue([
+      { id: 'doc-100', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Plenário', url: 'https://u/100', tcuLinkPDF: 'https://p/100' },
+    ]);
+    const dossie = {
+      alvo: { numero: 1441, ano: 2016 },
+      contagem: { citantesDistintos: 1, noVoto: 1, ocorrenciasTotal: 1 },
+      trechos: [{ origemChave: '100/2020', secao: 'voto' as const, noVoto: true, trecho: 'unico', offset: 0 }],
+    };
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0, 7] }], divergencias: [], sinaisQualitativos: [] },
+      dossie,
+    );
+    const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(criados[0].trechos.create).toEqual([]);
+  });
+
+  it('copia o caminho para o inteiro teor do citante', async () => {
+    mockDocs.mockResolvedValue([
+      { id: 'doc-100', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Plenário', url: 'https://u/100', tcuLinkPDF: 'https://p/100' },
+    ]);
+    const dossie = {
+      alvo: { numero: 1441, ano: 2016 },
+      contagem: { citantesDistintos: 1, noVoto: 1, ocorrenciasTotal: 1 },
+      trechos: [{ origemChave: '100/2020', secao: 'voto' as const, noVoto: true, trecho: 'unico', offset: 0 }],
+    };
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
+      dossie,
+    );
+    const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(criados[0].trechos.create[0]).toMatchObject({
+      origemDocumentId: 'doc-100', origemUrl: 'https://u/100', origemLinkPDF: 'https://p/100',
+    });
+  });
+
+  it('resolve o citante pelo id do trecho quando dois Document dividem número e ano', async () => {
+    // C1: `(acordaoNumero, acordaoAno)` não identifica um acórdão do TCU — o
+    // schema declara a unicidade em (numero, ano, tcuOrgaoJulgador). Resolver
+    // pela chave gravaria a procedência de um colegiado arbitrário, e de forma
+    // não-determinística (o último de um findMany). O trecho carrega o id do
+    // Document cujo texto o produziu, e é ele que decide.
+    mockDocs.mockResolvedValue([
+      { id: 'doc-plenario', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Plenário', url: 'https://u/plenario', tcuLinkPDF: 'https://p/plenario' },
+      { id: 'doc-camara', acordaoNumero: 100, acordaoAno: 2020, tcuOrgaoJulgador: 'Primeira Câmara', url: 'https://u/camara', tcuLinkPDF: 'https://p/camara' },
+    ]);
+    const dossie = {
+      alvo: { numero: 1441, ano: 2016 },
+      contagem: { citantesDistintos: 1, noVoto: 1, ocorrenciasTotal: 1 },
+      trechos: [{
+        origemChave: '100/2020', origemDocumentId: 'doc-camara',
+        secao: 'voto' as const, noVoto: true, trecho: 'unico', offset: 0,
+      }],
+    };
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
+      dossie,
+    );
+    // A consulta é por id, e não pelo par número+ano.
+    expect(mockDocs.mock.calls[0][0].where.OR).toContainEqual({ id: { in: ['doc-camara'] } });
+    const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(criados[0].trechos.create[0]).toMatchObject({
+      origemDocumentId: 'doc-camara',
+      origemColegiado: 'Primeira Câmara',
+      origemUrl: 'https://u/camara',
+      origemLinkPDF: 'https://p/camara',
+    });
+  });
+
+  it('citante ausente da base zera os trechos — evidência sem caminho não é gravada', async () => {
+    mockDocs.mockResolvedValue([]);
+    const dossie = {
+      alvo: { numero: 1441, ano: 2016 },
+      contagem: { citantesDistintos: 1, noVoto: 1, ocorrenciasTotal: 1 },
+      trechos: [{ origemChave: '100/2020', secao: 'voto' as const, noVoto: true, trecho: 'unico', offset: 0 }],
+    };
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [0] }], divergencias: [], sinaisQualitativos: [] },
+      dossie,
+    );
+    const criados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(criados[0].trechos.create).toEqual([]);
+  });
+
+  it('grava a identidade oficial quando fornecida', async () => {
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [], divergencias: [], sinaisQualitativos: [] },
+      { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
+      { acordaoKey: 'ACORDAO-COMPLETO-9', colegiadoAlvo: 'Plenário', relatorAlvo: 'Rel', urlAlvo: 'https://x' },
+    );
+    const data = ultimoTx.teseDestilacao.create.mock.calls[0][0].data;
+    expect(data.acordaoKey).toBe('ACORDAO-COMPLETO-9');
+    expect(data.colegiadoAlvo).toBe('Plenário');
+  });
+
+  it('herda a retirada em texto idêntico — tese retirada não ressuscita', async () => {
+    mockAnterior.mockResolvedValue({
+      id: 'ant', enunciados: [{
+        id: 'e-ant', enunciado: 'E1', veredito: 'fiel',
+        julgadoEm: new Date('2026-08-01'), julgadoPor: 'daniel',
+        publicado: true, vitrinePublica: true,
+        retiradoEm: new Date('2026-08-20'), retiradoMotivo: 'matéria de pessoal',
+      }],
+      divergencias: [],
+    });
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'E1', inovacao: 'i', trechosFonte: [] }], divergencias: [], sinaisQualitativos: [] },
+      { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
+    );
+    const criado = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create[0];
+    expect(criado.retiradoEm).toEqual(new Date('2026-08-20'));
+    expect(criado.retiradoMotivo).toBe('matéria de pessoal');
+    expect(criado.publicado).toBe(true);
+    expect(criado.vitrinePublica).toBe(true);
+  });
+
+  it('texto alterado não herda nada — volta à fila de julgamento', async () => {
+    mockAnterior.mockResolvedValue({
+      id: 'ant', enunciados: [{
+        id: 'e-ant', enunciado: 'TEXTO ANTIGO', veredito: 'fiel',
+        julgadoEm: new Date('2026-08-01'), julgadoPor: 'daniel',
+        publicado: true, vitrinePublica: true, retiradoEm: null, retiradoMotivo: null,
+      }],
+      divergencias: [],
+    });
+    await persistirDestilacao(
+      { numero: 1441, ano: 2016 },
+      { chave: '1441/2016', assunto: 'x', confianca: 'alta', teses: [{ enunciado: 'TEXTO NOVO', inovacao: 'i', trechosFonte: [] }], divergencias: [], sinaisQualitativos: [] },
+      { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
+    );
+    const criado = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create[0];
+    expect(criado.veredito).toBeNull();
+    expect(criado.publicado).toBe(false);
+    expect(criado.vitrinePublica).toBe(false);
+    expect(criado.retiradoEm).toBeNull();
+  });
 });
 
 describe('selecionarElegiveis', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIrresolviveis.mockResolvedValue([]); // nenhum sumidouro registrado, por padrão
   });
 
   it('(g) respeita o limite mesmo com mais candidatos elegiveis que o pedido', async () => {
@@ -347,6 +537,40 @@ describe('selecionarElegiveis', () => {
     const out = await selecionarElegiveis(10, 10);
 
     expect(out.map((c) => c.numero)).toEqual([1]);
+  });
+
+  // Sumidouro do cron (spec 2026-09-04): um alvo cuja identidade não resolve
+  // nunca ganha `TeseDestilacao.atual`, então nunca sairia sozinho desta
+  // seleção — sem a exclusão abaixo ele voltaria ao topo todo dia, para sempre.
+  it('pula alvo com identidade irresolvida dentro da janela de reavaliação', async () => {
+    mockQueryRaw.mockResolvedValue([
+      { numero: 1, ano: 2026, no_voto: 50 },
+      { numero: 2, ano: 2026, no_voto: 40 },
+    ]);
+    mockFindMany.mockResolvedValue([]);
+    mockIrresolviveis.mockResolvedValue([{ chave: '1/2026' }]);
+
+    const out = await selecionarElegiveis(10);
+
+    expect(out.map((c) => c.numero)).toEqual([2]);
+  });
+
+  it('volta a considerar o alvo depois que a janela de reavaliação expira', async () => {
+    mockQueryRaw.mockResolvedValue([{ numero: 1, ano: 2026, no_voto: 50 }]);
+    mockFindMany.mockResolvedValue([]);
+    // O próprio filtro é feito no banco (`verificadoEm >= janela`), então uma
+    // linha fora da janela nem chega no resultado do findMany — simulamos
+    // isso devolvendo lista vazia, como o Prisma real devolveria.
+    mockIrresolviveis.mockResolvedValue([]);
+
+    const out = await selecionarElegiveis(10);
+
+    expect(out.map((c) => c.numero)).toEqual([1]);
+    const where = mockIrresolviveis.mock.calls[0][0].where;
+    expect(where.verificadoEm.gte).toBeInstanceOf(Date);
+    const diasNaJanela =
+      (Date.now() - where.verificadoEm.gte.getTime()) / (24 * 60 * 60 * 1000);
+    expect(Math.round(diasNaJanela)).toBe(DIAS_REAVALIACAO_IDENTIDADE);
   });
 });
 
