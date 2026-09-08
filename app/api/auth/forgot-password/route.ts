@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 3 tentativas por minuto por IP (previne spam de emails de reset)
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:forgot-password:${ip}`, 3, 60);
+    await enforceRateLimit(`auth:forgot-password:${ip}`, 3, 60, { failureMode: 'closed' });
 
     const body = await request.json();
     const { email } = body;

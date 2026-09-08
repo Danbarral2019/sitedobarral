@@ -52,7 +52,7 @@ vi.mock('@/lib/errors/error-handler', () => ({
 import { GET } from '@/app/api/conta/portal/route';
 
 function makeRequest(): Request {
-  return new Request('https://profdanielbarral.com/api/conta/portal', { method: 'GET' });
+  return new Request('https://www.exemplo.com/api/conta/portal', { method: 'GET' });
 }
 
 const routeCtx = { params: Promise.resolve({}) };
@@ -60,7 +60,7 @@ const routeCtx = { params: Promise.resolve({}) };
 describe('GET /api/conta/portal', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_BASE_URL = 'https://profdanielbarral.com';
+    process.env.NEXT_PUBLIC_BASE_URL = 'https://www.exemplo.com';
   });
 
   it('redireciona para /planos quando usuário não tem subscription', async () => {
@@ -69,7 +69,7 @@ describe('GET /api/conta/portal', () => {
     const res = await GET(makeRequest() as any, routeCtx);
 
     expect(res.status).toBe(303);
-    expect(res.headers.get('location')).toBe('https://profdanielbarral.com/planos');
+    expect(res.headers.get('location')).toBe('https://www.exemplo.com/planos');
     expect(mockCreateBillingPortalSession).not.toHaveBeenCalled();
   });
 
@@ -85,7 +85,7 @@ describe('GET /api/conta/portal', () => {
     expect(res.headers.get('location')).toBe('https://billing.stripe.com/session/abc');
     expect(mockCreateBillingPortalSession).toHaveBeenCalledWith(
       'user-1',
-      'https://profdanielbarral.com/area-restrita',
+      'https://www.exemplo.com/area-restrita',
     );
   });
 

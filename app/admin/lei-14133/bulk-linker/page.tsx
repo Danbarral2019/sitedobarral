@@ -34,7 +34,7 @@ const CATEGORIES = [
   { value: 'outro', label: 'Outro' },
 ];
 
-import { parseLeiArticles, stringifyLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { stringifyLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 
 export default function BulkLinkerPage() {
   const router = useRouter();

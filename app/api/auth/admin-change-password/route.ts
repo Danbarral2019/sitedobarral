@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting: 5 tentativas por minuto por IP
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:change-password:${ip}`, 5, 60);
+    await enforceRateLimit(`auth:change-password:${ip}`, 5, 60, { failureMode: 'closed' });
 
     const body = await request.json();
     const { currentPassword, newPassword } = body;

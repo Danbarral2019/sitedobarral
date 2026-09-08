@@ -61,6 +61,27 @@ export async function middleware(request: NextRequest) {
 
   // ========== LÓGICA EXISTENTE (preservada integralmente) ==========
 
+  // APIs administrativas devem falhar com JSON, sem depender apenas da
+  // autenticação implementada por cada route handler.
+  const isAdminApiRoute = pathname === '/api/admin' || pathname.startsWith('/api/admin/');
+  if (isAdminApiRoute) {
+    const token = request.cookies.get('auth-token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+    }
+
+    const payload = await verifyAuth(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+    }
+
+    if (payload.role !== 'admin') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+    }
+
+    return NextResponse.next();
+  }
+
   // Verifica se é rota pública de admin
   const isPublicAdminRoute = publicAdminRoutes.some(route =>
     pathname.startsWith(route)

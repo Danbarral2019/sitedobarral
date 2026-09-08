@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import * as xlsx from 'xlsx';
+import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
 
 // Reutiliza a lógica do conversor TCU existente
 const CURSO_MAPPING: Record<string, string> = {
@@ -149,6 +150,8 @@ export const POST = withAdminApi(async (request) => {
     throw new ValidationError('Nenhum arquivo enviado');
   }
 
+  validateWorkbookUpload({ filename: file.name, mimeType: file.type, size: file.size });
+
   console.log('[TCU Manager Convert] Processando arquivo:', file.name);
 
   const arrayBuffer = await file.arrayBuffer();
@@ -158,6 +161,7 @@ export const POST = withAdminApi(async (request) => {
     type: 'buffer',
     cellDates: true,
   });
+  validateWorkbookShape(workbook);
 
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];

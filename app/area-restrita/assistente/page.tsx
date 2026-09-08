@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { ArrowLeft, Sparkles, BookOpen, MessageSquare, Zap } from 'lucide-react';
 
 export const metadata = {
-  title: 'Assistente Inteligente - Prof. Daniel Barral',
+  title: 'Assistente Inteligente',
   description:
     'Faça perguntas sobre documentos e materiais do curso usando inteligência artificial',
 };

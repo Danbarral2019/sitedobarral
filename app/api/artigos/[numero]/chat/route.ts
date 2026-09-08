@@ -11,13 +11,52 @@ import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { enforceGlobalAiCap } from '@/lib/cache/ai-quota';
-import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { AuthenticationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
+import { jwtVerify, SignJWT } from 'jose';
+import { z } from 'zod';
 
-interface ChatRequest {
-  question: string;
-  conversationId?: string;
+const ChatBodySchema = z.object({
+  question: z.string().trim().min(1).max(1000),
+  conversationId: z.string().uuid().optional(),
+});
+
+const ConversationQuerySchema = z.string().uuid();
+const CONVERSATION_AUDIENCE = 'article-chat';
+
+function conversationSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET não configurado');
+  return new TextEncoder().encode(secret);
+}
+
+async function signConversationToken(conversationId: string): Promise<string> {
+  return new SignJWT({})
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(conversationId)
+    .setAudience(CONVERSATION_AUDIENCE)
+    .setIssuedAt()
+    .setExpirationTime('24h')
+    .sign(conversationSecret());
+}
+
+async function verifyConversationToken(request: NextRequest, conversationId: string): Promise<void> {
+  const authorization = request.headers.get('authorization');
+  const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : null;
+  if (!token) throw new AuthenticationError('Token de conversa obrigatório');
+
+  try {
+    const { payload } = await jwtVerify(token, conversationSecret(), {
+      audience: CONVERSATION_AUDIENCE,
+    });
+    if (payload.sub !== conversationId) {
+      throw new AuthenticationError('Token de conversa inválido');
+    }
+  } catch (error) {
+    if (error instanceof AuthenticationError) throw error;
+    throw new AuthenticationError('Token de conversa inválido');
+  }
 }
 
 // POST /api/artigos/[numero]/chat - IA Assistente
@@ -29,27 +68,32 @@ export async function POST(
     // Rate limiting: 5 perguntas por minuto (Redis)
     // Usa IP como identificador (userId não disponível nesta rota)
     const chatIp = getClientIp(request);
-    await enforceRateLimit(`chat:${chatIp}`, 5, 60);
+    await enforceRateLimit(`chat:${chatIp}`, 5, 60, { failureMode: 'closed' });
 
     const { numero } = await params;
     const articleNumber = numero;
     apiLogger.info({ articleNumber }, 'Chat API processing started');
-    const body = await request.json() as ChatRequest;
+    const parsedBody = ChatBodySchema.safeParse(await request.json());
+    if (!parsedBody.success) {
+      throw new ValidationError('Dados da conversa inválidos', parsedBody.error.issues);
+    }
+    const body = parsedBody.data;
 
     if (!articleNumber) {
       throw new ValidationError('Numero do artigo e obrigatorio');
     }
 
-    if (!body.question || body.question.trim().length === 0) {
-      throw new ValidationError('Pergunta e obrigatoria');
-    }
+    const conversationId = body.conversationId || randomUUID();
+    if (body.conversationId) await verifyConversationToken(request, body.conversationId);
+    const conversationToken = await signConversationToken(conversationId);
 
     // Kill-switch global de custo: rota pública (sem usuário/tier). Ao estourar
     // o cap diário, não sintetiza — responde com mensagem amigável e sem DB/LLM.
     const globalCap = await enforceGlobalAiCap();
     if (globalCap.action === 'degrade-search') {
       return NextResponse.json({
-        conversationId: body.conversationId || randomUUID(),
+        conversationId,
+        conversationToken,
         answer:
           'O Assistente IA está em alta demanda no momento e não consegui responder agora. Tente novamente em alguns minutos — o conteúdo do artigo segue disponível na página.',
         sources: [],
@@ -57,15 +101,13 @@ export async function POST(
       });
     }
 
-    // Gerar ou usar conversationId existente
-    const conversationId = body.conversationId || randomUUID();
-
     // Buscar histórico da conversa se existir (para follow-up)
     let conversationHistory: { question: string; answer: string }[] = [];
     if (body.conversationId) {
       const previousMessages = await prisma.articleQuestion.findMany({
         where: {
           conversationId: body.conversationId,
+          articleNumber,
           isPlaceholder: false, // Apenas mensagens já respondidas
         },
         orderBy: { createdAt: 'desc' },
@@ -90,12 +132,7 @@ export async function POST(
                 has: articleNumber,
               },
             },
-            {
-              OR: [
-                { isPublic: true },
-                { summary: { not: null } },
-              ],
-            },
+            { isPublic: true },
           ],
         },
         select: {
@@ -155,12 +192,7 @@ export async function POST(
                   leiArticlesArr: { has: num }, // Onda 4.5.5: usa GIN — antes era contains: num que fazia LIKE buggy ("75" casava "175")
                 })),
               },
-              {
-                OR: [
-                  { isPublic: true },
-                  { summary: { not: null } },
-                ],
-              },
+              { isPublic: true },
             ],
           },
           select: {
@@ -417,6 +449,7 @@ Responda agora:`;
 
     return NextResponse.json({
       conversationId,
+      conversationToken,
       questionId: questionRecord.id,
       answer,
       sources,
@@ -456,11 +489,14 @@ export async function GET(
     const { numero } = await params;
     const articleNumber = numero;
     const searchParams = request.nextUrl.searchParams;
-    const conversationId = searchParams.get('conversationId');
-
-    if (!conversationId) {
-      throw new ValidationError('conversationId e obrigatorio');
+    const parsedConversationId = ConversationQuerySchema.safeParse(
+      searchParams.get('conversationId'),
+    );
+    if (!parsedConversationId.success) {
+      throw new ValidationError('conversationId inválido', parsedConversationId.error.issues);
     }
+    const conversationId = parsedConversationId.data;
+    await verifyConversationToken(request, conversationId);
 
     // Buscar todas as perguntas desta conversa
     const questions = await prisma.articleQuestion.findMany({
@@ -483,6 +519,7 @@ export async function GET(
 
     return NextResponse.json({
       conversationId,
+      conversationToken: await signConversationToken(conversationId),
       articleNumber,
       messages: questions.map(q => ({
         id: q.id,

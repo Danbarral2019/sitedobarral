@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 /**

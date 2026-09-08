@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 tentativas de login por minuto (Redis)
     const ip = getClientIp(request);
-    await enforceRateLimit(`auth:login:${ip}`, 5, 60);
+    await enforceRateLimit(`auth:login:${ip}`, 5, 60, { failureMode: 'closed' });
 
     // ✅ Validação com Zod
     const validation = await validateRequest(request, LoginSchema);

@@ -152,7 +152,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const cfg = CATEGORY_CONFIG[categoria];
   if (!cfg) return { title: 'Categoria não encontrada' };
   return {
-    title: `${cfg.label} | Base de Conhecimento | Prof. Daniel Barral`,
+    title: `${cfg.label} | Base de Conhecimento`,
     description: cfg.description,
     alternates: {
       canonical: `/base-conhecimento/${categoria}`,

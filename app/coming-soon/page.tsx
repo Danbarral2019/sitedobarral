@@ -3,7 +3,7 @@ import Link from 'next/link';
 import NewsletterForm from '@/components/NewsletterForm';
 
 export const metadata: Metadata = {
-  title: 'Em breve | Prof. Daniel Barral',
+  title: 'Em breve',
   description: 'Novidades chegando em breve. Cadastre seu email para ser avisado.',
   // Decisão consciente: NÃO setar noindex. Coming-soon é servida com HTTP 200
   // na URL real (rewrite), Google continua indexando a URL como sempre.

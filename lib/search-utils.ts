@@ -1,5 +1,6 @@
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
-import { parseLeiArticles, getLeiArticles } from './lei-articles';
+import { getLeiArticles } from './lei-articles';
+import { escapeRegExp } from './search/escape-regexp';
 
 /**
  * Tipos compartilhados de busca. Originalmente em hooks/use-search.ts (hook
@@ -179,27 +180,28 @@ export function calculateRelevanceScore(doc: DocumentType, searchTerm: string): 
   if (!searchTerm.trim()) return 0;
 
   const normalizedTerm = normalizeText(searchTerm);
+  const escapedTerm = escapeRegExp(normalizedTerm);
   let score = 0;
 
   // Pontuação por match no título (peso maior)
-  const titleMatches = (normalizeText(doc.title).match(new RegExp(normalizedTerm, 'g')) || []).length;
+  const titleMatches = (normalizeText(doc.title).match(new RegExp(escapedTerm, 'g')) || []).length;
   score += titleMatches * 10;
 
   // Pontuação por match na descrição
   if (doc.description) {
-    const descMatches = (normalizeText(doc.description).match(new RegExp(normalizedTerm, 'g')) || []).length;
+    const descMatches = (normalizeText(doc.description).match(new RegExp(escapedTerm, 'g')) || []).length;
     score += descMatches * 3;
   }
 
   // Pontuação por match no conteúdo (NOVO! - peso médio)
   if (doc.content) {
-    const contentMatches = (normalizeText(doc.content).match(new RegExp(normalizedTerm, 'g')) || []).length;
+    const contentMatches = (normalizeText(doc.content).match(new RegExp(escapedTerm, 'g')) || []).length;
     score += contentMatches * 4;
   }
 
   // Pontuação por match nas tags
   if (doc.tags) {
-    const tagsMatches = (normalizeText(doc.tags).match(new RegExp(normalizedTerm, 'g')) || []).length;
+    const tagsMatches = (normalizeText(doc.tags).match(new RegExp(escapedTerm, 'g')) || []).length;
     score += tagsMatches * 5;
   }
 
@@ -305,7 +307,7 @@ export function highlightSearchTerms(text: string, searchTerm: string): string {
   if (!searchTerm.trim()) return text;
 
   const normalizedTerm = normalizeText(searchTerm);
-  const regex = new RegExp(`(${normalizedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const regex = new RegExp(`(${escapeRegExp(normalizedTerm)})`, 'gi');
 
   // Retorna o texto com marcações para highlight
   return text.replace(regex, '<mark>$1</mark>');

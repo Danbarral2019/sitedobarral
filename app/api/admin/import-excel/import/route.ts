@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
-import { processExcelFile } from '@/lib/excel-processor';
+import { processExcelFile, validateWorkbookUpload } from '@/lib/excel-processor';
 import { addDocument } from '@/lib/documents';
 import { apiLogger } from "@/lib/logger";
 
@@ -16,6 +16,8 @@ export const POST = withAdminApi(async (request: NextRequest) => {
     if (!file) {
       throw new ValidationError('Nenhum arquivo fornecido');
     }
+
+    validateWorkbookUpload({ filename: file.name, mimeType: file.type, size: file.size });
 
     // Converte para buffer
     const bytes = await file.arrayBuffer();

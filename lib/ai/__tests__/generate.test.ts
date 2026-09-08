@@ -3,7 +3,7 @@
  * Mocka providers e cache pra isolar a logica de orquestracao.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mocks de providers — vi.hoisted pra subir antes dos imports.
 const { mockGeminiGenerate, mockAnthropicGenerate } = vi.hoisted(() => ({

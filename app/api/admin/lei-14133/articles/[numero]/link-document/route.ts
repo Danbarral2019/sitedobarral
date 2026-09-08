@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, NotFoundError } from '@/lib/errors/api-error';
-import { parseLeiArticles, setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 
 export const POST = withAdminApi<{ numero: string }>(async (request, { params }) => {

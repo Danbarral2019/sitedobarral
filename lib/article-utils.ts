@@ -17,7 +17,7 @@ import { parseLeiArticles } from './lei-articles';
  * Wrapper sobre `parseLeiArticles` mantido por retrocompatibilidade.
  * @deprecated Use `parseLeiArticles` de `@/lib/lei-articles` diretamente.
  */
-export function extractArticleNumbers(leiArticlesJson: string | null): string[] {
+export function extractArticleNumbers(leiArticlesJson: string | string[] | null): string[] {
   return parseLeiArticles(leiArticlesJson);
 }
 

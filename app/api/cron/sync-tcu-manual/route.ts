@@ -8,7 +8,6 @@ import {
 } from '@/lib/tcu-manual-scraper';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
-import { stringifyLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from '@/lib/logger';
 
 /**

@@ -5,6 +5,63 @@
 import * as XLSX from 'xlsx';
 import { autoClassifyDocument, suggestCategory, extractTags } from './auto-classifier';
 import { apiLogger } from "@/lib/logger";
+import { ValidationError } from '@/lib/errors/api-error';
+
+export const MAX_WORKBOOK_BYTES = 5 * 1024 * 1024;
+export const MAX_WORKBOOK_SHEETS = 25;
+export const MAX_WORKBOOK_CELLS = 100_000;
+
+const WORKBOOK_MIME_BY_EXTENSION: Record<string, string> = {
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.xls': 'application/vnd.ms-excel',
+};
+
+export function validateWorkbookUpload(input: {
+  filename: string;
+  mimeType: string;
+  size: number;
+}): void {
+  if (input.size > MAX_WORKBOOK_BYTES) {
+    throw new ValidationError('A planilha excede o limite de 5 MiB.');
+  }
+
+  const extension = input.filename.toLowerCase().match(/\.[^.]+$/)?.[0];
+  if (!extension || !(extension in WORKBOOK_MIME_BY_EXTENSION)) {
+    throw new ValidationError('Formato de planilha não permitido. Use .xlsx ou .xls.');
+  }
+
+  if (input.mimeType.toLowerCase() !== WORKBOOK_MIME_BY_EXTENSION[extension]) {
+    throw new ValidationError(`O tipo do arquivo não corresponde à extensão ${extension}.`);
+  }
+}
+
+export function validateWorkbookShape(workbook: XLSX.WorkBook): void {
+  if (workbook.SheetNames.length > MAX_WORKBOOK_SHEETS) {
+    throw new ValidationError('A planilha excede o limite de 25 abas.');
+  }
+
+  let totalCells = 0;
+  for (const sheetName of workbook.SheetNames) {
+    const reference = workbook.Sheets[sheetName]?.['!ref'];
+    if (!reference) continue;
+
+    let range: XLSX.Range;
+    try {
+      range = XLSX.utils.decode_range(reference);
+    } catch {
+      throw new ValidationError('A planilha contém intervalo de células inválido.');
+    }
+
+    const rows = range.e.r - range.s.r + 1;
+    const columns = range.e.c - range.s.c + 1;
+    const remainingCells = MAX_WORKBOOK_CELLS - totalCells;
+    if (rows > Math.floor(remainingCells / columns)) {
+      throw new ValidationError('A planilha excede o limite de 100.000 células.');
+    }
+
+    totalCells += rows * columns;
+  }
+}
 
 export interface ExcelDocumentRow {
   titulo: string;
@@ -317,6 +374,7 @@ export async function processExcelFile(
   try {
     // Lê o arquivo Excel
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+    validateWorkbookShape(workbook);
 
     // Pega a primeira planilha
     const sheetName = workbook.SheetNames[0];
@@ -384,6 +442,7 @@ export async function processExcelFile(
       errors: globalErrors
     };
   } catch (error) {
+    if (error instanceof ValidationError) throw error;
     apiLogger.error({ err: error }, 'Erro ao processar Excel:');
     return {
       isValid: false,

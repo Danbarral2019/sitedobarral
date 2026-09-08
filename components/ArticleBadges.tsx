@@ -8,7 +8,7 @@ import {
 import { useLeiArticles } from '@/hooks/useLeiArticles';
 
 interface ArticleBadgesProps {
-  leiArticles: string | null;
+  leiArticles: string | string[] | null;
   maxVisible?: number;
   primaryArticle?: string; // Artigo principal (mais destacado)
   onArticleClick?: (articleNumber: string) => void;

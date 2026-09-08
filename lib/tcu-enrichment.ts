@@ -8,8 +8,7 @@
  * Parâmetros ajustados para tier pago Gemini — ver `docs/ROADMAP_GEMINI_PAGO.md`.
  */
 
-import { safeParseArray } from './utils';
-import { parseLeiArticles, getLeiArticles } from './lei-articles';
+import { getLeiArticles } from './lei-articles';
 
 // Família 3.x cobre billing pago (3-flash-preview é sucessor direto de 2.5-flash).
 // gemini-2.5-flash continua até 17/jun/2026 como fallback (ver lib/gemini/config.ts).

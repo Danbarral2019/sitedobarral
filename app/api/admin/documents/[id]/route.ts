@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
 import { safeParseArray } from '@/lib/utils';
-import { parseLeiArticles, setLeiArticles, stringifyLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { setLeiArticles, getLeiArticles } from '@/lib/lei-articles';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CacheInvalidation } from '@/lib/cache/redis-client';

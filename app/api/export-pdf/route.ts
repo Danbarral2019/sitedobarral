@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
 import jsPDF from 'jspdf';
+import { getSiteUrl } from '@/lib/site-url';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
 
@@ -393,7 +394,7 @@ export async function POST(request: NextRequest) {
 
 Para acessar o conteúdo completo dos documentos, links externos e materiais complementares, acesse a Área Restrita em:
 
-https://www.profdanielbarral.com.br/area-restrita
+${new URL('/area-restrita', getSiteUrl()).toString()}
 
 Dúvidas ou suporte:
 Email: contato@profdanielbarral.com.br

@@ -18,7 +18,7 @@ import {
 import { useFavorites } from '@/hooks/use-favorites';
 import { useLegislativeActFavorites } from '@/hooks/use-legislative-act-favorites';
 import { safeParseArray, normalizeTextContent } from '@/lib/utils';
-import { parseLeiArticles, getLeiArticles } from '@/lib/lei-articles';
+import { getLeiArticles } from '@/lib/lei-articles';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
 
 interface DocumentNotes {

@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
-  title: 'Lei 14.133/2021 - Todos os Artigos | Prof. Daniel Barral',
+  title: 'Lei 14.133/2021 - Todos os Artigos',
   description: 'Explore todos os 195 artigos da Nova Lei de Licitações e Contratos (Lei 14.133/2021) com materiais didáticos, jurisprudência e comentários do Prof. Daniel Barral.',
   keywords: [
     'lei 14133',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Lei 14.133/2021 - Todos os Artigos Comentados',
     description: 'Acesse todos os 195 artigos da Nova Lei de Licitações com análises, materiais e jurisprudência.',
-    url: 'https://profbarral.com.br/artigos',
+    url: new URL('/artigos', getSiteUrl()),
     siteName: 'Prof. Daniel Barral - Direito Administrativo',
     locale: 'pt_BR',
     type: 'website',
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     creator: '@profbarral',
   },
   alternates: {
-    canonical: 'https://profbarral.com.br/artigos',
+    canonical: new URL('/artigos', getSiteUrl()),
   },
   robots: {
     index: true,
@@ -53,7 +54,7 @@ export default function ArtigosLayout({
             '@type': 'CollectionPage',
             name: 'Lei 14.133/2021 - Todos os Artigos',
             description: 'Coleção completa dos 195 artigos da Nova Lei de Licitações e Contratos (Lei 14.133/2021)',
-            url: 'https://profbarral.com.br/artigos',
+            url: new URL('/artigos', getSiteUrl()).toString(),
             inLanguage: 'pt-BR',
             about: {
               '@type': 'Legislation',
@@ -69,7 +70,7 @@ export default function ArtigosLayout({
               '@type': 'Person',
               name: 'Prof. Daniel Barral',
               jobTitle: 'Professor de Direito Administrativo',
-              url: 'https://profbarral.com.br',
+              url: getSiteUrl().toString(),
             },
             breadcrumb: {
               '@type': 'BreadcrumbList',
@@ -78,13 +79,13 @@ export default function ArtigosLayout({
                   '@type': 'ListItem',
                   position: 1,
                   name: 'Início',
-                  item: 'https://profbarral.com.br',
+                  item: getSiteUrl().toString(),
                 },
                 {
                   '@type': 'ListItem',
                   position: 2,
                   name: 'Lei 14.133/2021 - Artigos',
-                  item: 'https://profbarral.com.br/artigos',
+                  item: new URL('/artigos', getSiteUrl()).toString(),
                 },
               ],
             },

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { LEI_14133_ARTIGOS as LEI_14133_ARTIGOS_FALLBACK } from '@/data/lei-14133-artigos';
+import { getSiteUrl } from '@/lib/site-url';
 
 export async function generateMetadata({
   params,
@@ -40,9 +41,9 @@ export async function generateMetadata({
     };
   }
 
-  const title = `Artigo ${article.numero} - Lei 14.133/2021 | Prof. Daniel Barral`;
+  const title = `Artigo ${article.numero} - Lei 14.133/2021`;
   const description = `${article.ementa} - Análise completa do artigo ${article.numero} da Nova Lei de Licitações e Contratos (Lei 14.133/2021). Materiais, comentários e jurisprudência.`;
-  const url = `https://profbarral.com.br/artigo/${numero}`;
+  const url = new URL(`/artigo/${numero}`, getSiteUrl());
 
   return {
     title,
@@ -71,7 +72,7 @@ export async function generateMetadata({
       type: 'article',
       images: [
         {
-          url: 'https://profbarral.com.br/og-image-artigo.jpg',
+          url: new URL('/og-image-artigo.jpg', getSiteUrl()),
           width: 1200,
           height: 630,
           alt: `Artigo ${numero} - Lei 14.133/2021`,
@@ -83,7 +84,7 @@ export async function generateMetadata({
       title,
       description,
       creator: '@profbarral',
-      images: ['https://profbarral.com.br/twitter-image-artigo.jpg'],
+      images: [new URL('/twitter-image-artigo.jpg', getSiteUrl())],
     },
     alternates: {
       canonical: url,

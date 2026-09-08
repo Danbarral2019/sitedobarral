@@ -4,6 +4,7 @@ import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
 import * as xlsx from 'xlsx';
 import type { PrismaClient } from '@prisma/client';
+import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
 
 /**
  * Remove códigos HTML e tags de links dos textos da planilha TCU
@@ -113,6 +114,8 @@ export const POST = withAdminApi(async (request) => {
     throw new ValidationError('Nenhum arquivo enviado');
   }
 
+  validateWorkbookUpload({ filename: file.name, mimeType: file.type, size: file.size });
+
   console.log('[TCU Manager Validate] Processando arquivo:', file.name, 'Tipo:', sourceType);
 
   // Converte file para buffer
@@ -124,6 +127,7 @@ export const POST = withAdminApi(async (request) => {
     type: 'buffer',
     cellDates: true,
   });
+  validateWorkbookShape(workbook);
 
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];

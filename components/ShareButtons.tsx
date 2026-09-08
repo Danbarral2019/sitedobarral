@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Share2, Linkedin, Twitter, Facebook, Link2, Check } from 'lucide-react';
+import { getSiteUrl } from '@/lib/site-url';
 
 interface ShareButtonsProps {
   url: string;
@@ -13,7 +14,7 @@ interface ShareButtonsProps {
 export default function ShareButtons({ url, title, description, className = '' }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = url.startsWith('http') ? url : `https://profbarral.com.br${url}`;
+  const shareUrl = url.startsWith('http') ? url : new URL(url, getSiteUrl()).toString();
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
 

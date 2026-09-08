@@ -12,6 +12,7 @@ const {
   mockQueryGeminiText,
   mockSearchHistoryCreate,
   mockEnforceAiQuota,
+  mockEnforceRateLimit,
   mockUserRole,
 } = vi.hoisted(() => ({
   mockSemanticSearch: vi.fn(),
@@ -24,12 +25,17 @@ const {
   mockQueryGeminiText: vi.fn(),
   mockSearchHistoryCreate: vi.fn(),
   mockEnforceAiQuota: vi.fn(),
+  mockEnforceRateLimit: vi.fn(),
   // Role injetada no ctx.user — mutável para testar o gate RBAC do bloco `debug`.
   mockUserRole: { value: 'student' },
 }));
 
 vi.mock('@/lib/cache/ai-quota', () => ({
   enforceAiQuota: (...args: any[]) => mockEnforceAiQuota(...args),
+}));
+
+vi.mock('@/lib/cache/rate-limit-helper', () => ({
+  enforceRateLimit: (...args: unknown[]) => mockEnforceRateLimit(...args),
 }));
 
 vi.mock('@/lib/embeddings/vector-search', () => ({
@@ -115,7 +121,9 @@ beforeEach(() => {
   mockQueryGeminiText.mockReset();
   mockSearchHistoryCreate.mockReset();
   mockEnforceAiQuota.mockReset();
+  mockEnforceRateLimit.mockReset();
   mockEnforceAiQuota.mockResolvedValue({ action: 'allow' });
+  mockEnforceRateLimit.mockResolvedValue(undefined);
   mockUserRole.value = 'student';
 
   // Default: adapter passes options through
@@ -185,6 +193,13 @@ describe('POST /api/jurisprudencia/query', () => {
 
     const res = await POST(makeReq({ query: 'pregão eletrônico', filters: { tribunal: 'TCE-SP' } }), routeCtx);
     expect(res.status).toBe(200);
+
+    expect(mockEnforceRateLimit).toHaveBeenCalledWith(
+      'juris-query:u1',
+      10,
+      60,
+      { failureMode: 'closed' },
+    );
 
     expect(mockMapFiltersToSemanticOptions).toHaveBeenCalledWith(
       expect.objectContaining({ tribunal: 'TCE-SP' })

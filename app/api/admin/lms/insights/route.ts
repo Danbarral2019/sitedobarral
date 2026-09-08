@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';

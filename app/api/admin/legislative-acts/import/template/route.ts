@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { apiLogger } from "@/lib/logger";
+import { withAdminApi } from '@/lib/api/handler';
 
 /**
  * GET /api/admin/legislative-acts/import/template
  * Gera template Excel para importação em massa de atos normativos
  */
-export async function GET() {
+export const GET = withAdminApi(async () => {
   try {
     // Criar CSV (mais simples que Excel e suportado nativamente)
     const headers = [
@@ -106,4 +107,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

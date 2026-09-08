@@ -4,17 +4,44 @@ import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 import { Prisma } from '@prisma/client';
 
-// GET /api/glossary - Listar todos os termos (com filtros opcionais)
+const DEFAULT_PAGE_SIZE = 30;
+const MAX_PAGE_SIZE = 30;
+
+function positiveInteger(value: string | null, fallback: number): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+// GET /api/glossary - Listar termos públicos com busca, filtros e paginação
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category');
-    const letter = searchParams.get('letter');
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const category = searchParams.get('category')?.trim() || null;
+    const letter = searchParams.get('letter')?.trim().toUpperCase() || null;
+    const query = searchParams.get('q')?.trim() || null;
+    const page = positiveInteger(searchParams.get('page'), 1);
+    const pageSize = Math.min(
+      positiveInteger(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE),
+      MAX_PAGE_SIZE,
+    );
+    const skip = (page - 1) * pageSize;
+
+    if (letter && !/^[A-Z]$/.test(letter)) {
+      return NextResponse.json({ error: 'Letra inválida' }, { status: 400 });
+    }
+
+    if ((category?.length ?? 0) > 100 || (query?.length ?? 0) > 200) {
+      return NextResponse.json({ error: 'Filtro inválido' }, { status: 400 });
+    }
 
     // Generate cache key based on filters
-    const cacheKey = CacheKeys.glossaryTerms({ category, letter, offset, limit });
+    const cacheKey = CacheKeys.glossaryTerms({
+      category,
+      letter,
+      query,
+      page,
+      pageSize,
+    });
 
     // Use cached result or fetch from database
     const result = await withCache(
@@ -31,12 +58,21 @@ export async function GET(request: NextRequest) {
 
         if (letter) {
           where.term = {
-            startsWith: letter.toUpperCase(),
+            startsWith: letter,
+            mode: 'insensitive',
           };
         }
 
+        if (query) {
+          where.OR = [
+            { term: { contains: query, mode: 'insensitive' } },
+            { definition: { contains: query, mode: 'insensitive' } },
+            { shortDef: { contains: query, mode: 'insensitive' } },
+          ];
+        }
+
         // Buscar termos
-        const [terms, total] = await Promise.all([
+        const [terms, total, allTerms] = await Promise.all([
           prisma.glossaryTerm.findMany({
             where,
             select: {
@@ -53,19 +89,24 @@ export async function GET(request: NextRequest) {
             orderBy: {
               term: 'asc',
             },
-            take: limit,
-            skip: offset,
+            take: pageSize,
+            skip,
           }),
           prisma.glossaryTerm.count({ where }),
+          prisma.glossaryTerm.findMany({
+            where: { isPublic: true },
+            select: { term: true, category: true },
+          }),
         ]);
 
-        // Buscar todas as categorias disponíveis
-        const allTerms = await prisma.glossaryTerm.findMany({
-          where: { isPublic: true },
-          select: { category: true },
-        });
-
         const categories = [...new Set(allTerms.map((t) => t.category).filter(Boolean))].sort();
+        const availableLetters = [
+          ...new Set(
+            allTerms
+              .map((term) => term.term.charAt(0).toUpperCase())
+              .filter((firstLetter) => /^[A-Z]$/.test(firstLetter)),
+          ),
+        ].sort();
 
         // Resolver relatedTerms: IDs → { id, term, slug }
         const allRelatedIds = new Set<string>();
@@ -103,14 +144,18 @@ export async function GET(request: NextRequest) {
           return { ...t, resolvedRelatedTerms: resolvedRelated };
         });
 
+        const totalPages = Math.ceil(total / pageSize);
+
         return {
           terms: enrichedTerms,
-          total,
           categories,
+          availableLetters,
           pagination: {
-            limit,
-            offset,
-            hasMore: offset + limit < total,
+            page,
+            pageSize,
+            total,
+            totalPages,
+            hasMore: page < totalPages,
           },
         };
       },
