@@ -430,7 +430,15 @@ A §9 é explícita: quem sai da elegibilidade tem o chunk **apagado**, não des
 **Files:**
 - Create: `lib/embeddings/tese-reconciliacao.ts`
 - Modify: `app/api/cron/process-index-jobs/route.ts` (após o bloco que processa `pendingDecisions`, ~linha 450)
-- Test: `lib/embeddings/__tests__/tese-reconciliacao.test.ts`
+- Modify: `.github/workflows/test.yml` (passo **Run isolated database scenarios**)
+- Test: `lib/embeddings/__tests__/tese-reconciliacao.test.ts` (unitário, com dublê)
+- Test: `e2e/teses-reconciliacao.spec.ts` (integração, contra banco de verdade)
+
+**Nota sobre os dois testes.** Eles não são redundantes, e nenhum substitui o
+outro. O unitário prova que o código pede a coisa certa e roda em milissegundos
+na suíte inteira. O de integração prova que o banco faz a coisa certa — a única
+forma de pegar um `deleteMany` que seleciona as linhas erradas, que é o defeito
+mais caro possível aqui e o mais silencioso.
 
 **Interfaces:**
 - Consumes: `processTeseEnunciado` da Task 1; `WHERE_ELEGIVEL_BASE` de `lib/tcu/elegibilidade-tese.ts`.
@@ -474,11 +482,23 @@ describe('reconciliarTeses', () => {
   });
 
   // A garantia central da §9: quem perdeu elegibilidade some do índice.
-  it('apaga o chunk de quem deixou de ser elegível', async () => {
-    mockFindMany.mockResolvedValue([]);
+  //
+  // ATENÇÃO ao alcance deste teste. O Prisma aqui é um dublê: ele anota que a
+  // ordem de apagar foi dada, com qual lista de preservados, e devolve o número
+  // que o próprio teste mandou devolver. Nenhuma linha existe, nenhum SQL roda.
+  // Ele prova que o código pede a coisa certa — NÃO prova que o banco apaga as
+  // linhas certas. Quem prova isso é o teste de integração do Step 6, e é por
+  // isso que ele existe.
+  it('preserva os chunks das teses válidas e apaga o resto', async () => {
+    mockFindMany
+      .mockResolvedValueOnce([])                            // pendentes de indexação
+      .mockResolvedValueOnce([{ id: 'e1' }, { id: 'e2' }]); // as válidas, a preservar
     mockDeleteMany.mockResolvedValue({ count: 3 });
     const r = await reconciliarTeses();
     expect(r.apagados).toBe(3);
+    expect(mockDeleteMany).toHaveBeenCalledWith({
+      where: { enunciadoId: { notIn: ['e1', 'e2'] } },
+    });
   });
 
   it('conta falha sem derrubar o lote', async () => {
@@ -540,8 +560,22 @@ export async function reconciliarTeses(
     else falhas++;
   }
 
+  // Duas consultas, e de propósito. A forma curta seria pedir ao Prisma a
+  // negação do predicado — `{ enunciado: { NOT: WHERE_ELEGIVEL_BASE } }` — mas
+  // o predicado tem quatro conjunções, duas delas sobre tabelas relacionadas, e
+  // a semântica dessa negação depende de como o Prisma traduz cada pedaço. Se
+  // ela ficasse rigorosa demais, o cron apagaria a cada rodada o chunk de teses
+  // válidas: elas sumiriam da busca, seriam reindexadas na rodada seguinte
+  // pagando embedding, sumiriam de novo — um moinho silencioso, sem erro nem
+  // log. Aqui o critério aparece uma vez só, na forma positiva, e o delete se
+  // lê em voz alta: apague o que não está na lista dos válidos.
+  const validas = await prisma.teseEnunciado.findMany({
+    where: WHERE_ELEGIVEL_BASE,
+    select: { id: true },
+  });
+
   const { count: apagados } = await prisma.teseEnunciadoChunk.deleteMany({
-    where: { enunciado: { NOT: WHERE_ELEGIVEL_BASE } },
+    where: { enunciadoId: { notIn: validas.map((v) => v.id) } },
   });
 
   return { indexados, apagados, falhas };
@@ -574,12 +608,120 @@ E, após o laço que processa `pendingDecisions`:
     );
 ```
 
-- [ ] **Step 6: Verificação e commit**
+- [ ] **Step 6: Escrever o teste de integração, contra banco de verdade**
+
+Este é o teste que o dublê não consegue dar. Ele roda no job de navegador, que
+desde 08/09/2026 tem banco descartável da Neon — criado e apagado a cada
+execução, com estrutura mas sem dados de produção.
+
+Criar `e2e/teses-reconciliacao.spec.ts` (é um teste do Playwright por causa do
+banco, não por causa do navegador — nenhuma página é aberta):
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { PrismaClient } from '@prisma/client';
+import { PrismaNeon } from '@prisma/adapter-neon';
+import { resolveE2EDatabaseUrl } from './fixtures/database';
+import { reconciliarTeses } from '../lib/embeddings/tese-reconciliacao';
+
+const prisma = new PrismaClient({
+  adapter: new PrismaNeon({ connectionString: resolveE2EDatabaseUrl() }),
+});
+
+const ID_VALIDA = 'e2e-tese-valida';
+const ID_RETIRADA = 'e2e-tese-retirada';
+
+test.beforeAll(async () => {
+  const destilacao = await prisma.teseDestilacao.create({
+    data: {
+      numeroAlvo: 9999,
+      anoAlvo: 2026,
+      assunto: 'Assunto de teste',
+      confianca: 'alta',
+      atual: true,
+    },
+  });
+
+  // Duas teses idênticas em tudo, exceto no que decide a elegibilidade: uma
+  // está válida, a outra foi retirada editorialmente.
+  for (const [id, retiradoEm] of [[ID_VALIDA, null], [ID_RETIRADA, new Date()]] as const) {
+    await prisma.teseEnunciado.create({
+      data: {
+        id,
+        destilacaoId: destilacao.id,
+        ordem: 0,
+        enunciado: `Enunciado ${id}`,
+        inovacao: 'x',
+        trechosFonte: [0],
+        veredito: 'fiel',
+        retiradoEm,
+        publicado: true,
+        trechos: {
+          create: [{ ordem: 0, trecho: 'trecho', origemNumero: 1, origemAno: 2020, origemDocumentId: null, origemUrl: 'https://tcu', noVoto: true }],
+        },
+      },
+    });
+    // Chunk pré-existente para as duas, com vetor qualquer: o que está sob
+    // teste é quem sobrevive à reconciliação, não a qualidade do vetor.
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO "TeseEnunciadoChunk" (id, "enunciadoId", content, embedding, "createdAt", "updatedAt")
+       VALUES (gen_random_uuid(), $1, 'conteúdo', $2::vector, NOW(), NOW())`,
+      id,
+      `[${Array(768).fill(0.01).join(',')}]`,
+    );
+  }
+});
+
+test.afterAll(async () => {
+  await prisma.teseEnunciado.deleteMany({ where: { id: { in: [ID_VALIDA, ID_RETIRADA] } } });
+  await prisma.teseDestilacao.deleteMany({ where: { numeroAlvo: 9999, anoAlvo: 2026 } });
+  await prisma.$disconnect();
+});
+
+test('a reconciliação apaga o chunk da retirada e preserva o da válida', async () => {
+  await reconciliarTeses();
+
+  const sobreviventes = await prisma.teseEnunciadoChunk.findMany({
+    where: { enunciadoId: { in: [ID_VALIDA, ID_RETIRADA] } },
+    select: { enunciadoId: true },
+  });
+
+  expect(sobreviventes.map((s) => s.enunciadoId)).toEqual([ID_VALIDA]);
+});
+```
+
+Acrescentar o arquivo à lista do passo **Run isolated database scenarios** em
+`.github/workflows/test.yml`, e — no mesmo passo — passar `DATABASE_URL` além de
+`TEST_DATABASE_URL`, porque `lib/prisma` lê a primeira:
+
+```yaml
+      - name: Run isolated database scenarios
+        run: >-
+          npm run test:e2e --
+          e2e/admin-authorization.spec.ts
+          e2e/course-expiration.spec.ts
+          e2e/document-download.spec.ts
+          e2e/teses-reconciliacao.spec.ts
+        env:
+          TEST_DATABASE_URL: ${{ steps.banco.outputs.db_url }}
+          DATABASE_URL: ${{ steps.banco.outputs.db_url }}
+```
+
+- [ ] **Step 7: Rodar o teste de integração**
+
+Localmente ele exige um banco isolado; sem `TEST_DATABASE_URL` apontando para um,
+**não rodar contra produção** — o `beforeAll` escreve. A verificação vale no CI,
+na PR. Rodar lá e conferir que o teste aparece como `passed` na saída do passo
+**Run isolated database scenarios**.
+
+Expected: `4 passed` no total do passo (os três anteriores mais este).
+
+- [ ] **Step 8: Verificação e commit**
 
 ```bash
 npx vitest run
 npx tsc --noEmit -p tsconfig.json
-git add lib/embeddings/tese-reconciliacao.ts lib/embeddings/__tests__/tese-reconciliacao.test.ts app/api/cron/process-index-jobs/route.ts
+git add lib/embeddings/tese-reconciliacao.ts lib/embeddings/__tests__/tese-reconciliacao.test.ts e2e/teses-reconciliacao.spec.ts .github/workflows/test.yml app/api/cron/process-index-jobs/route.ts
 git commit -m "feat(teses): reconciliação do índice no cron de indexação"
 ```
 
