@@ -15,6 +15,7 @@ describe('carregarVeredito', () => {
     expect(r).toEqual({
       veredito: 'fiel', herdadoDe: 'a1', julgadoEm: em, julgadoPor: 'daniel',
       publicado: false, vitrinePublica: false, retiradoEm: null, retiradoMotivo: null,
+      reconferenciaPendente: false,
     });
   });
 
@@ -46,6 +47,7 @@ describe('carregarVeredito', () => {
     expect(r).toEqual({
       veredito: null, herdadoDe: null, julgadoEm: null, julgadoPor: null,
       publicado: false, vitrinePublica: false, retiradoEm: null, retiradoMotivo: null,
+      reconferenciaPendente: false,
     });
   });
 
@@ -129,5 +131,95 @@ describe('carregarVeredito', () => {
     ]);
     expect(r.retiradoEm).toBeNull();
     expect(r.retiradoMotivo).toBeNull();
+  });
+});
+
+describe('carregarVeredito — nivel 2, texto diferente (spec §4.1)', () => {
+  const julgado = {
+    id: 'a9',
+    enunciado: 'A prescricao e de dez anos.',
+    veredito: 'fiel',
+    julgadoEm: em,
+    julgadoPor: 'daniel',
+    publicado: true,
+    vitrinePublica: true,
+    retiradoEm: null,
+    retiradoMotivo: null,
+  };
+
+  it('sem a opcao ligada, texto diferente continua NAO herdando nada', () => {
+    const r = carregarVeredito('Redacao completamente outra.', [julgado]);
+    expect(r.veredito).toBeNull();
+    expect(r.reconferenciaPendente).toBe(false);
+  });
+
+  // O nivel 1 nao pode regredir: com texto identico, a vitrine CONTINUA
+  // migrando. E a diferenca entre os dois niveis, e o fixture principal do
+  // arquivo nao cobre isso porque nao traz estado editorial.
+  it('com texto IDENTICO a vitrine continua migrando', () => {
+    const r = carregarVeredito(julgado.enunciado, [julgado], { herdarComTextoDiferente: true });
+    expect(r.vitrinePublica).toBe(true);
+    expect(r.julgadoPor).toBe('daniel');
+    expect(r.reconferenciaPendente).toBe(false);
+  });
+
+  it('com a opcao ligada, herda veredito e acervo mas NAO a vitrine', () => {
+    const r = carregarVeredito('Redacao completamente outra.', [julgado], {
+      herdarComTextoDiferente: true,
+    });
+    expect(r.veredito).toBe('fiel');
+    expect(r.publicado).toBe(true);
+    expect(r.vitrinePublica).toBe(false);
+    expect(r.reconferenciaPendente).toBe(true);
+  });
+
+  // §4.3: dizer que o Daniel julgou um texto que ele nunca leu e a mesma
+  // mentira que a etiqueta de lote conta hoje. O rastro fica em `herdadoDe`.
+  it('nao atribui autoria a quem nao leu o texto novo', () => {
+    const r = carregarVeredito('Redacao completamente outra.', [julgado], {
+      herdarComTextoDiferente: true,
+    });
+    expect(r.julgadoPor).toBeNull();
+    expect(r.julgadoEm).toBeNull();
+    expect(r.herdadoDe).toBe('a9');
+  });
+
+  it('sem antecessor julgado, nao ha heranca nem pendencia', () => {
+    const naoJulgado = { ...julgado, veredito: null, julgadoEm: null, julgadoPor: null };
+    const r = carregarVeredito('Redacao completamente outra.', [naoJulgado], {
+      herdarComTextoDiferente: true,
+    });
+    expect(r.veredito).toBeNull();
+    expect(r.reconferenciaPendente).toBe(false);
+  });
+
+  // Sem pareamento por texto, a versao anterior fala com uma voz so. Se ela
+  // tem vereditos divergentes, nao ha o que herdar sem adivinhar (spec §4.2).
+  it('nao adivinha quando a versao anterior tem vereditos divergentes', () => {
+    const outro = { ...julgado, id: 'a10', veredito: 'errada' };
+    const r = carregarVeredito('Redacao completamente outra.', [julgado, outro], {
+      herdarComTextoDiferente: true,
+    });
+    expect(r.veredito).toBeNull();
+    expect(r.reconferenciaPendente).toBe(false);
+  });
+
+  // A §5 da spec anterior declara impossivel ressuscitar tese retirada. Sem
+  // isto, mudar o texto a traria de volta — o mesmo buraco que a versao
+  // anterior fechou para texto identico, aberto para texto diferente.
+  it('a retirada sobrevive ao texto novo', () => {
+    const retirado = {
+      ...julgado,
+      veredito: null,
+      julgadoEm: null,
+      julgadoPor: null,
+      retiradoEm: em,
+      retiradoMotivo: 'materia estranha',
+    };
+    const r = carregarVeredito('Redacao completamente outra.', [retirado], {
+      herdarComTextoDiferente: true,
+    });
+    expect(r.retiradoEm).toEqual(em);
+    expect(r.retiradoMotivo).toBe('materia estranha');
   });
 });
