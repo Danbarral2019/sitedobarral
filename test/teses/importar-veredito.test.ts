@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { dadosDoVeredito } from '../../scripts/importar-veredito-teses';
+import { dadosDoVeredito } from '../../lib/tcu/dados-do-veredito';
 
 describe('dadosDoVeredito', () => {
   const agora = new Date('2026-09-09T12:00:00Z');

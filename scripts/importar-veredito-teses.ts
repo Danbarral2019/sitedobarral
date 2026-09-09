@@ -21,18 +21,10 @@ import { readFileSync } from 'node:fs';
 import { prisma } from '../lib/prisma';
 import { parsearVeredito } from '../lib/tcu/parsear-veredito';
 import { resolverAlvoDivergencia } from '../lib/tcu/aplicar-veredito';
+import { dadosDoVeredito } from '../lib/tcu/dados-do-veredito';
 
 function flag(nome: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${nome}=`))?.split('=')[1];
-}
-
-/**
- * Os campos que um veredito conferido grava. Extraído para ser testável sem
- * banco: `herdadoDe: null` e `reconferenciaPendente: false` são o que
- * transforma um veredito provisório (spec §4.1, nível 2) em julgamento próprio.
- */
-export function dadosDoVeredito(veredito: string, agora: Date, julgadoPor: string) {
-  return { veredito, julgadoEm: agora, julgadoPor, herdadoDe: null, reconferenciaPendente: false };
 }
 
 async function main() {
