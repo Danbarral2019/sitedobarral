@@ -72,6 +72,37 @@ export function montarLinhasVeredito(chavesData, chavesReconferencia, vereditos)
   return linhas;
 }
 
+/**
+ * Os cartões de reconferência agrupados por acórdão.
+ *
+ * A fila é julgada por ACÓRDÃO — o botão grava `store.cards[chave]`, um
+ * veredito por caso. Um cartão por enunciado dava dois cards visualmente
+ * distintos operando o MESMO estado (clicar num mudava os dois) e um contador
+ * que somava enunciados onde a spec §3.2 conta casos. Agrupando, os pares de
+ * texto ficam empilhados sob um único grupo de botões, que é o que a decisão
+ * de fato é.
+ *
+ * `julgadoPor`/`julgadoEm` vêm do primeiro par: todos os enunciados de um
+ * grupo descendem da mesma versão anterior, julgada de uma vez pelo cartão
+ * daquele acórdão.
+ *
+ * Definida no escopo do módulo pelo mesmo motivo que `montarLinhasVeredito`:
+ * testável em Node e embutida no navegador por `.toString()`.
+ */
+export function agruparReconferencia(cartoes) {
+  const porChave = new Map();
+  for (let i = 0; i < cartoes.length; i++) {
+    const c = cartoes[i];
+    let g = porChave.get(c.chave);
+    if (!g) {
+      g = { chave: c.chave, julgadoPor: c.julgadoPor, julgadoEm: c.julgadoEm, pares: [] };
+      porChave.set(c.chave, g);
+    }
+    g.pares.push({ enunciadoNovo: c.enunciadoNovo, enunciadoAnterior: c.enunciadoAnterior });
+  }
+  return Array.from(porChave.values());
+}
+
 export function renderFolha({ cards, geradoEm, eyebrow, notaRodape, cartoesReconferencia }) {
   const DATA = JSON.stringify(cards);
   const RECONF = JSON.stringify(cartoesReconferencia || []);
@@ -335,6 +366,9 @@ const RECONF = ${RECONF};
 // \`montarLinhasVeredito\` em folha-teses-template.mjs) — embutida aqui por
 // \`.toString()\` para não duplicar a lógica entre o build e o navegador.
 ${montarLinhasVeredito.toString()}
+${agruparReconferencia.toString()}
+// A fila é por acórdão: os enunciados do mesmo caso viram um cartão só.
+const RECONF_GRUPOS = agruparReconferencia(RECONF);
 const KEY = 'calibracao-teses-tcu-fase2a-v1';
 let store = { cards: {}, divs: {} };
 try {
@@ -428,23 +462,29 @@ function renderDivergencias(d) {
   return out;
 }
 
-function renderReconferenciaCard(r) {
-  const v = store.cards[r.chave] || '';
-  const dataAprovacao = r.julgadoEm ? new Date(r.julgadoEm).toLocaleDateString('pt-BR') : '?';
+function renderReconferenciaCard(g) {
+  const v = store.cards[g.chave] || '';
+  const dataAprovacao = g.julgadoEm ? new Date(g.julgadoEm).toLocaleDateString('pt-BR') : '?';
   let html = '<div class="reconf-card">';
-  html += '<span class="reconf-chave">Acórdão ' + esc(r.chave) + '</span>';
-  html += '<div class="reconf-compare">';
-  html += '<div class="reconf-col"><div class="tese-label">Redação vigente (não conferida)</div>';
-  html += '<div class="enunciado">' + esc(r.enunciadoNovo) + '</div></div>';
-  html += '<div class="reconf-col"><div class="tese-label">Redação aprovada anteriormente</div>';
-  html += '<div class="enunciado">' + esc(r.enunciadoAnterior) + '</div></div>';
-  html += '</div>';
-  html += '<p class="reconf-meta">Aprovada por ' + esc(r.julgadoPor) + ' em ' + dataAprovacao + '.</p>';
+  html += '<span class="reconf-chave">Acórdão ' + esc(g.chave) + '</span>';
+  for (let i = 0; i < g.pares.length; i++) {
+    const p = g.pares[i];
+    // Numerar só quando há mais de um par: num cartão de tese única, "tese 1"
+    // é ruído.
+    const sufixo = g.pares.length > 1 ? ' · tese ' + (i + 1) : '';
+    html += '<div class="reconf-compare">';
+    html += '<div class="reconf-col"><div class="tese-label">Redação vigente (não conferida)' + sufixo + '</div>';
+    html += '<div class="enunciado">' + esc(p.enunciadoNovo) + '</div></div>';
+    html += '<div class="reconf-col"><div class="tese-label">Redação aprovada anteriormente' + sufixo + '</div>';
+    html += '<div class="enunciado">' + esc(p.enunciadoAnterior) + '</div></div>';
+    html += '</div>';
+  }
+  html += '<p class="reconf-meta">Aprovada por ' + esc(g.julgadoPor) + ' em ' + dataAprovacao + '.</p>';
   html += '<div class="c-foot">';
-  html += '<div class="seg" role="group" aria-label="Veredito ' + esc(r.chave) + '">';
-  html += '<button class="v-fiel" data-c="' + esc(r.chave) + '" data-set="fiel" aria-pressed="' + (v === 'fiel') + '">Tese fiel</button>';
-  html += '<button class="v-imprecisa" data-c="' + esc(r.chave) + '" data-set="imprecisa" aria-pressed="' + (v === 'imprecisa') + '">Imprecisa</button>';
-  html += '<button class="v-errada" data-c="' + esc(r.chave) + '" data-set="errada" aria-pressed="' + (v === 'errada') + '">Errada</button>';
+  html += '<div class="seg" role="group" aria-label="Veredito ' + esc(g.chave) + '">';
+  html += '<button class="v-fiel" data-c="' + esc(g.chave) + '" data-set="fiel" aria-pressed="' + (v === 'fiel') + '">Tese fiel</button>';
+  html += '<button class="v-imprecisa" data-c="' + esc(g.chave) + '" data-set="imprecisa" aria-pressed="' + (v === 'imprecisa') + '">Imprecisa</button>';
+  html += '<button class="v-errada" data-c="' + esc(g.chave) + '" data-set="errada" aria-pressed="' + (v === 'errada') + '">Errada</button>';
   html += '</div></div>';
   html += '</div>';
   return html;
@@ -452,13 +492,15 @@ function renderReconferenciaCard(r) {
 
 function renderReconferencia() {
   const el = document.getElementById('reconferencia');
-  if (!RECONF.length) { el.innerHTML = ''; return; }
+  if (!RECONF_GRUPOS.length) { el.innerHTML = ''; return; }
   let html = '<div class="reconf-section">';
   html += '<div class="reconf-head"><span class="reconf-title">Reconferência pendente</span>';
-  html += '<span class="reconf-count">' + RECONF.length + '</span></div>';
+  // Conta ACÓRDÃOS, que é a unidade do julgamento — contar enunciados
+  // superestimava a fila.
+  html += '<span class="reconf-count">' + RECONF_GRUPOS.length + '</span></div>';
   html += '<p class="reconf-sub">Estes enunciados foram reescritos desde o último julgamento — o veredito anterior não cobre o texto novo. Confira a redação vigente contra a que foi aprovada e julgue de novo.</p>';
   html += '<div class="reconf-list">';
-  for (let i = 0; i < RECONF.length; i++) html += renderReconferenciaCard(RECONF[i]);
+  for (let i = 0; i < RECONF_GRUPOS.length; i++) html += renderReconferenciaCard(RECONF_GRUPOS[i]);
   html += '</div></div>';
   el.innerHTML = html;
 }

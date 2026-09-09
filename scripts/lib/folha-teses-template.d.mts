@@ -49,3 +49,18 @@ export function montarLinhasVeredito(
   chavesReconferencia: string[],
   vereditos: Record<string, string>
 ): string[];
+
+/** Um acórdão da fila de reconferência, com todos os seus pares de texto. */
+export interface GrupoReconferencia {
+  chave: string;
+  julgadoPor: string;
+  julgadoEm: Date | string;
+  pares: Array<{ enunciadoNovo: string; enunciadoAnterior: string }>;
+}
+
+/**
+ * Agrupa os cartões da fila por acórdão — a unidade do julgamento, já que o
+ * veredito é gravado em `store.cards[chave]`. Sem isso, dois enunciados do
+ * mesmo caso rendiam dois cards compartilhando um único estado.
+ */
+export function agruparReconferencia(cartoes: CartaoReconferencia[]): GrupoReconferencia[];
