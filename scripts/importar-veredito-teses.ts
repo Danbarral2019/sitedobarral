@@ -26,6 +26,15 @@ function flag(nome: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${nome}=`))?.split('=')[1];
 }
 
+/**
+ * Os campos que um veredito conferido grava. Extraído para ser testável sem
+ * banco: `herdadoDe: null` e `reconferenciaPendente: false` são o que
+ * transforma um veredito provisório (spec §4.1, nível 2) em julgamento próprio.
+ */
+export function dadosDoVeredito(veredito: string, agora: Date, julgadoPor: string) {
+  return { veredito, julgadoEm: agora, julgadoPor, herdadoDe: null, reconferenciaPendente: false };
+}
+
 async function main() {
   const arquivo = flag('arquivo');
   const julgadoPor = flag('julgado-por') ?? 'daniel';
@@ -84,7 +93,7 @@ async function main() {
     if (!dryRun) {
       await prisma.teseEnunciado.updateMany({
         where: { destilacaoId: d.id },
-        data: { veredito: caso.veredito, julgadoEm: agora, julgadoPor, herdadoDe: null },
+        data: dadosDoVeredito(caso.veredito, agora, julgadoPor),
       });
     }
     enunciadosGravados += novos.length;
