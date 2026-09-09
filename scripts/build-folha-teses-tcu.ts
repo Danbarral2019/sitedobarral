@@ -27,6 +27,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import { prisma } from '../lib/prisma';
 import { coletarTrechosDoAlvo } from '../lib/tcu/trechos-de-citacao';
+import { selecionarReconferencia } from '../lib/teses/reconferencia';
 import { renderFolha, type CasoCard } from './lib/folha-teses-template.mjs';
 
 const OUT_PADRAO = 'docs/audits/folha-teses-tcu.html';
@@ -86,6 +87,23 @@ async function main() {
     },
   });
   console.log(`destilações atuais no banco: ${destilacoes.length}`);
+
+  // Seleção da fila de reconferência: ANTES e independentemente dos filtros de
+  // --min-no-voto e --tema (ver `selecionarReconferencia`) — quem já foi
+  // conferido uma vez não pode sumir da fila por um limiar de citação.
+  const pendentes = await prisma.teseEnunciado.findMany({
+    where: { reconferenciaPendente: true, destilacao: { atual: true } },
+    select: { herdadoDe: true },
+  });
+  const anteriores = await prisma.teseEnunciado.findMany({
+    where: { id: { in: pendentes.map((p) => p.herdadoDe!).filter(Boolean) } },
+    select: { id: true, enunciado: true, julgadoPor: true, julgadoEm: true },
+  });
+  const cartoesReconferencia = selecionarReconferencia(
+    destilacoes,
+    new Map(anteriores.map((a) => [a.id, a]))
+  );
+  console.log(`reconferência pendente: ${cartoesReconferencia.length} enunciado(s)`);
 
   // Filtra ANTES de montar dossiê: `coletarTrechosDoAlvo` baixa o inteiro teor
   // de cada citante, e os casos fortes têm centenas deles.
@@ -233,6 +251,7 @@ async function main() {
     geradoEm: new Date().toISOString().slice(0, 10),
     eyebrow,
     notaRodape: notas.join(' '),
+    cartoesReconferencia,
   });
 
   mkdirSync(dirname(out), { recursive: true });

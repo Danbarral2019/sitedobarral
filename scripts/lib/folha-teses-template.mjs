@@ -15,9 +15,18 @@
 // os índices gravados deixariam de apontar para os trechos que sustentaram a
 // tese, e exibir o texto errado é pior que não exibir nenhum — o card avisa em
 // vez de mostrar evidência que não é a que o modelo leu.
+//
+// `cartoesReconferencia` (opcional) é a fila dos enunciados com veredito
+// provisório (spec §4.1, nível 2), selecionada ANTES e independentemente dos
+// recortes de `--min-no-voto`/`--tema` que definem `cards`:
+//   { chave, enunciadoNovo, enunciadoAnterior, julgadoPor, julgadoEm }
+// Renderizada à parte, no topo. O veredito de cada cartão usa os mesmos
+// botões fiel/imprecisa/errada dos cards normais, chaveados pela mesma
+// `chave` — o export não precisa de tratamento especial.
 
-export function renderFolha({ cards, geradoEm, eyebrow, notaRodape }) {
+export function renderFolha({ cards, geradoEm, eyebrow, notaRodape, cartoesReconferencia }) {
   const DATA = JSON.stringify(cards);
+  const RECONF = JSON.stringify(cartoesReconferencia || []);
   const GERADO_EM = geradoEm || '';
   const EYEBROW = eyebrow || 'Rede de precedentes · Fase 2-A';
   const NOTA = notaRodape || '';
@@ -162,6 +171,24 @@ blockquote{margin:0;font-size:12.5px;line-height:1.55;color:var(--ink-soft);font
 .sem-tese-title{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--errada)}
 .sem-tese-sub{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
 
+/* reconferência */
+.reconf-section{margin:18px 0 4px}
+.reconf-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.reconf-title{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink)}
+.reconf-count{font-family:var(--mono);font-size:11.5px;color:var(--imprecisa);background:var(--imprecisa-bg);
+  padding:2px 9px;border-radius:99px;font-weight:700}
+.reconf-sub{font-size:12.5px;color:var(--ink-soft);margin:5px 0 0;max-width:70ch}
+.reconf-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.reconf-card{position:relative;background:var(--surface);border:1px solid var(--imprecisa);border-radius:12px;
+  padding:16px 18px;box-shadow:var(--shadow)}
+.reconf-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--imprecisa)}
+.reconf-chave{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink)}
+.reconf-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:620px){.reconf-compare{grid-template-columns:1fr}}
+.reconf-col{padding:12px 14px;background:var(--surface-2);border-radius:10px}
+.reconf-col .tese-label{margin-bottom:6px}
+.reconf-meta{font-size:12px;color:var(--ink-faint);margin-top:10px}
+
 /* sinais */
 .sinais-block{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
 .sinais-block h4,.diverg-block h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;
@@ -232,6 +259,7 @@ textarea{width:100%;height:260px;font-family:var(--mono);font-size:12.5px;line-h
 </header>
 
 <div class="wrap">
+  <div id="reconferencia"></div>
   <div class="list" id="list"></div>
   <div class="foot-note">
     <b>Como ler estes cards.</b> <b>No voto</b> = acórdãos que citam este caso dentro da fundamentação do voto (razão de decidir); <b>citantes distintos</b> = quantos acórdãos diferentes o citam; <b>ocorrências totais</b> = todas as menções, em qualquer seção. A barra mostra, dos citantes distintos, qual fração cita no voto em vez de só mencionar de passagem. Os trechos-fonte de cada tese são o texto literal dos acórdãos citantes — nenhuma paráfrase. ${NOTA} Gerado em ${GERADO_EM}.
@@ -254,6 +282,7 @@ textarea{width:100%;height:260px;font-family:var(--mono);font-size:12.5px;line-h
 
 <script>
 const DATA = ${DATA};
+const RECONF = ${RECONF};
 const KEY = 'calibracao-teses-tcu-fase2a-v1';
 let store = { cards: {}, divs: {} };
 try {
@@ -347,6 +376,41 @@ function renderDivergencias(d) {
   return out;
 }
 
+function renderReconferenciaCard(r) {
+  const v = store.cards[r.chave] || '';
+  const dataAprovacao = r.julgadoEm ? new Date(r.julgadoEm).toLocaleDateString('pt-BR') : '?';
+  let html = '<div class="reconf-card">';
+  html += '<span class="reconf-chave">Acórdão ' + esc(r.chave) + '</span>';
+  html += '<div class="reconf-compare">';
+  html += '<div class="reconf-col"><div class="tese-label">Redação vigente (não conferida)</div>';
+  html += '<div class="enunciado">' + esc(r.enunciadoNovo) + '</div></div>';
+  html += '<div class="reconf-col"><div class="tese-label">Redação aprovada anteriormente</div>';
+  html += '<div class="enunciado">' + esc(r.enunciadoAnterior) + '</div></div>';
+  html += '</div>';
+  html += '<p class="reconf-meta">Aprovada por ' + esc(r.julgadoPor) + ' em ' + dataAprovacao + '.</p>';
+  html += '<div class="c-foot">';
+  html += '<div class="seg" role="group" aria-label="Veredito ' + esc(r.chave) + '">';
+  html += '<button class="v-fiel" data-c="' + esc(r.chave) + '" data-set="fiel" aria-pressed="' + (v === 'fiel') + '">Tese fiel</button>';
+  html += '<button class="v-imprecisa" data-c="' + esc(r.chave) + '" data-set="imprecisa" aria-pressed="' + (v === 'imprecisa') + '">Imprecisa</button>';
+  html += '<button class="v-errada" data-c="' + esc(r.chave) + '" data-set="errada" aria-pressed="' + (v === 'errada') + '">Errada</button>';
+  html += '</div></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderReconferencia() {
+  const el = document.getElementById('reconferencia');
+  if (!RECONF.length) { el.innerHTML = ''; return; }
+  let html = '<div class="reconf-section">';
+  html += '<div class="reconf-head"><span class="reconf-title">Reconferência pendente</span>';
+  html += '<span class="reconf-count">' + RECONF.length + '</span></div>';
+  html += '<p class="reconf-sub">Estes enunciados foram reescritos desde o último julgamento — o veredito anterior não cobre o texto novo. Confira a redação vigente contra a que foi aprovada e julgue de novo.</p>';
+  html += '<div class="reconf-list">';
+  for (let i = 0; i < RECONF.length; i++) html += renderReconferenciaCard(RECONF[i]);
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
 function renderCard(d, order) {
   const v = store.cards[d.chave] || '';
   const card = document.createElement('div');
@@ -395,6 +459,7 @@ function renderCard(d, order) {
 }
 
 function render() {
+  renderReconferencia();
   const list = document.getElementById('list');
   list.innerHTML = '';
   for (let i = 0; i < DATA.length; i++) {
@@ -428,7 +493,9 @@ function updateTally() {
     '<span class="s-errada" style="width:' + (100 * c.errada / n) + '%"></span>';
 }
 
-document.getElementById('list').addEventListener('click', function (e) {
+// Delegado em .wrap, não em #list: a seção de reconferência (#reconferencia)
+// usa os mesmos botões fiel/imprecisa/errada, fora da lista de cards.
+document.querySelector('.wrap').addEventListener('click', function (e) {
   const b = e.target.closest('button[data-set]');
   if (!b) return;
   if (b.dataset.c) {
