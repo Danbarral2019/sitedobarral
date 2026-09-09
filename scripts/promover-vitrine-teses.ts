@@ -42,6 +42,11 @@ async function selecionar() {
       publicado: true,
       vitrinePublica: false,
       julgadoPor: { not: null },
+      // Veredito provisório não vai a público (spec da herança editorial,
+      // §3.1). Ele nasce com `julgadoPor` nulo, então o filtro acima já o
+      // barraria — mas só enquanto ninguém conferir o enunciado sem limpar a
+      // marca. Esta linha torna a garantia explícita em vez de emergente.
+      reconferenciaPendente: false,
     },
     select: {
       id: true,
