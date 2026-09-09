@@ -25,6 +25,21 @@ export interface VeredictoHerdado {
   vitrinePublica: boolean;
   retiradoEm: Date | null;
   retiradoMotivo: string | null;
+  /**
+   * Veredito herdado de uma versão cujo TEXTO ERA DIFERENTE (spec §4.1, nível
+   * 2). Vale para o acervo restrito, nunca para a vitrine, e some quando o
+   * enunciado é conferido de novo.
+   */
+  reconferenciaPendente: boolean;
+}
+
+export interface OpcoesHeranca {
+  /**
+   * Liga o nível 2. Default `false`: nenhum chamador muda de comportamento sem
+   * pedir — e as divergências, que não têm onde guardar a pendência, ficam de
+   * fora por isso (ver persistir-tese.ts).
+   */
+  herdarComTextoDiferente?: boolean;
 }
 
 const SEM_VEREDITO: VeredictoHerdado = {
@@ -36,54 +51,124 @@ const SEM_VEREDITO: VeredictoHerdado = {
   vitrinePublica: false,
   retiradoEm: null,
   retiradoMotivo: null,
+  reconferenciaPendente: false,
 };
+
+export type AnteriorParaHeranca = EnunciadoJulgavel & {
+  julgadoEm: Date | null;
+  julgadoPor: string | null;
+  publicado?: boolean;
+  vitrinePublica?: boolean;
+  retiradoEm?: Date | null;
+  retiradoMotivo?: string | null;
+  /** Do que este anterior já herdou. Necessário para não perder o rastro. */
+  herdadoDe?: string | null;
+  /** Se este anterior é ele próprio um veredito provisório, ainda não relido. */
+  reconferenciaPendente?: boolean;
+};
+
+/**
+ * O enunciado que carrega o julgamento HUMANO por trás de um veredito.
+ *
+ * Quando o antecessor é ele próprio provisório — `julgadoPor` nulo com
+ * `herdadoDe` preenchido, o retrato exato do que o nível 2 grava — apontar
+ * para ele romperia a corrente: a fila de reconferência exige que o
+ * `herdadoDe` tenha autoria (`lib/teses/reconferencia.ts`), e um elo
+ * intermediário sem autoria derruba o cartão. Com destilações diárias, essa
+ * corrente pode ter muitos elos; cada um repassa o mesmo `herdadoDe`, então o
+ * rastro continua chegando ao julgamento original sem precisar percorrê-la.
+ */
+function origemDoJulgamento(anterior: AnteriorParaHeranca): string {
+  if (anterior.julgadoPor == null && anterior.herdadoDe != null) return anterior.herdadoDe;
+  return anterior.id;
+}
 
 export function carregarVeredito(
   enunciadoNovo: string,
-  anteriores: Array<EnunciadoJulgavel & {
-    julgadoEm: Date | null;
-    julgadoPor: string | null;
-    publicado?: boolean;
-    vitrinePublica?: boolean;
-    retiradoEm?: Date | null;
-    retiradoMotivo?: string | null;
-  }>
+  anteriores: Array<AnteriorParaHeranca>,
+  opcoes: OpcoesHeranca = {}
 ): VeredictoHerdado {
-  // DOIS pareamentos, porque os dois eixos da spec §5 têm condições diferentes.
-  //
-  // O estado editorial (publicado/vitrine/retirada) é preso ao TEXTO IDÊNTICO,
-  // e só a ele: a retirada é um ato de quem tirou a tese do ar, e vale enquanto
-  // o texto for o mesmo — julgada ou não. Acoplá-la à existência de veredito
-  // deixava um buraco real: `retirar-teses.ts` retira todo enunciado da chave,
-  // inclusive os que ainda não têm veredito; sem par, o retorno era
-  // SEM_VEREDITO, que ZERA `retiradoEm` — e a redestilação do alvo ressuscitava
-  // a tese retirada, exatamente o que a §5 declara impossível.
-  //
-  // O veredito (e herdadoDe/julgadoEm/julgadoPor) continua exigindo um
-  // anterior JULGADO. Os dois `find` são separados — em vez de checar o
-  // veredito do par editorial — para não perder esse veredito quando há dois
-  // anteriores com o mesmo texto e só o segundo foi julgado: nesse caso o
-  // veredito ainda é herdado do segundo.
-  //
-  // Essa garantia é só do veredito. Os quatro campos editoriais
-  // (publicado/vitrinePublica/retiradoEm/retiradoMotivo) sempre vêm de
-  // `parEditorial` — o PRIMEIRO anterior que casar por texto, julgado ou não
-  // — mesmo quando é o segundo que carrega o veredito. Havendo duplicatas com
-  // o mesmo texto, qual delas é "o primeiro" é indefinido: a consulta que
-  // monta `anteriores` (`persistir-tese.ts`, por volta da linha 172) não tem
-  // `orderBy`, então o estado editorial herdado nesse caso depende da ordem
-  // em que o Postgres devolver as linhas.
   const parEditorial = anteriores.find((a) => a.enunciado === enunciadoNovo);
-  if (!parEditorial) return { ...SEM_VEREDITO };
-  const par = anteriores.find((a) => a.veredito !== null && a.enunciado === enunciadoNovo);
+
+  // ---- Nível 1: texto idêntico. Comportamento inalterado. ----
+  if (parEditorial) {
+    // DOIS pareamentos, porque os dois eixos da spec §5 têm condições diferentes.
+    //
+    // O estado editorial (publicado/vitrine/retirada) é preso ao TEXTO IDÊNTICO,
+    // e só a ele: a retirada é um ato de quem tirou a tese do ar, e vale enquanto
+    // o texto for o mesmo — julgada ou não. Acoplá-la à existência de veredito
+    // deixava um buraco real: `retirar-teses.ts` retira todo enunciado da chave,
+    // inclusive os que ainda não têm veredito; sem par, o retorno era
+    // SEM_VEREDITO, que ZERA `retiradoEm` — e a redestilação do alvo ressuscitava
+    // a tese retirada, exatamente o que a §5 declara impossível.
+    //
+    // O veredito (e herdadoDe/julgadoEm/julgadoPor) continua exigindo um
+    // anterior JULGADO. Os dois `find` são separados — em vez de checar o
+    // veredito do par editorial — para não perder esse veredito quando há dois
+    // anteriores com o mesmo texto e só o segundo foi julgado: nesse caso o
+    // veredito ainda é herdado do segundo.
+    //
+    // Essa garantia é só do veredito. Os quatro campos editoriais
+    // (publicado/vitrinePublica/retiradoEm/retiradoMotivo) sempre vêm de
+    // `parEditorial` — o PRIMEIRO anterior que casar por texto, julgado ou não
+    // — mesmo quando é o segundo que carrega o veredito. Havendo duplicatas com
+    // o mesmo texto, qual delas é "o primeiro" é indefinido: a consulta que
+    // monta `anteriores` (`persistir-tese.ts`, por volta da linha 172) não tem
+    // `orderBy`, então o estado editorial herdado nesse caso depende da ordem
+    // em que o Postgres devolver as linhas.
+    const par = anteriores.find((a) => a.veredito !== null && a.enunciado === enunciadoNovo);
+    return {
+      veredito: par?.veredito ?? null,
+      herdadoDe: par ? origemDoJulgamento(par) : null,
+      julgadoEm: par?.julgadoEm ?? null,
+      julgadoPor: par?.julgadoPor ?? null,
+      publicado: parEditorial.publicado ?? false,
+      vitrinePublica: parEditorial.vitrinePublica ?? false,
+      retiradoEm: parEditorial.retiradoEm ?? null,
+      retiradoMotivo: parEditorial.retiradoMotivo ?? null,
+      // A pendência NÃO se resolve por coincidência de texto. Se o antecessor
+      // era provisório e ninguém o releu, o texto idêntico apenas repete o
+      // enunciado que continua por conferir (spec §5: a pendência sai quando o
+      // enunciado é conferido de novo). Zerá-la aqui apagava a marca a cada
+      // redestilação — e com o cron rodando todo dia, a tese ficava 'fiel'
+      // para sempre sem que ninguém a tivesse lido.
+      reconferenciaPendente: par?.reconferenciaPendente ?? false,
+    };
+  }
+
+  // ---- Nível 2: texto diferente (spec §4.1). ----
+  //
+  // Só entra quando o chamador pede. Sem isto, o default seria uma mudança de
+  // comportamento para todo mundo que chama a função — inclusive as
+  // divergências, que não têm coluna onde marcar a pendência e ficariam com
+  // veredito provisório invisível.
+  if (!opcoes.herdarComTextoDiferente) return { ...SEM_VEREDITO };
+
+  // A retirada é ato de quem tirou a tese do ar, e vale para o acórdão, não
+  // para a redação. Sem esta linha, mudar o texto ressuscita tese retirada.
+  const retirado = anteriores.find((a) => a.retiradoEm != null);
+  const retirada = {
+    retiradoEm: retirado?.retiradoEm ?? null,
+    retiradoMotivo: retirado?.retiradoMotivo ?? null,
+  };
+
+  const julgados = anteriores.filter((a) => a.veredito !== null);
+  if (julgados.length === 0) return { ...SEM_VEREDITO, ...retirada };
+
+  // Sem pareamento por texto (spec §4.2), a versão anterior precisa falar com
+  // uma voz só. Vereditos divergentes não dão o que herdar sem adivinhar.
+  const distintos = new Set(julgados.map((j) => j.veredito));
+  if (distintos.size > 1) return { ...SEM_VEREDITO, ...retirada };
+
+  const origem = julgados[0];
   return {
-    veredito: par?.veredito ?? null,
-    herdadoDe: par?.id ?? null,
-    julgadoEm: par?.julgadoEm ?? null,
-    julgadoPor: par?.julgadoPor ?? null,
-    publicado: parEditorial.publicado ?? false,
-    vitrinePublica: parEditorial.vitrinePublica ?? false,
-    retiradoEm: parEditorial.retiradoEm ?? null,
-    retiradoMotivo: parEditorial.retiradoMotivo ?? null,
+    veredito: origem.veredito,
+    herdadoDe: origemDoJulgamento(origem),
+    julgadoEm: null,
+    julgadoPor: null,
+    publicado: origem.publicado ?? false,
+    vitrinePublica: false,
+    ...retirada,
+    reconferenciaPendente: true,
   };
 }
