@@ -15,9 +15,97 @@
 // os índices gravados deixariam de apontar para os trechos que sustentaram a
 // tese, e exibir o texto errado é pior que não exibir nenhum — o card avisa em
 // vez de mostrar evidência que não é a que o modelo leu.
+//
+// `cartoesReconferencia` (opcional) é a fila dos enunciados com veredito
+// provisório (spec §4.1, nível 2), selecionada ANTES e independentemente dos
+// recortes de `--min-no-voto`/`--tema` que definem `cards`:
+//   { chave, enunciadoNovo, enunciadoAnterior, julgadoPor, julgadoEm }
+// Renderizada à parte, no topo. O veredito de cada cartão usa os mesmos
+// botões fiel/imprecisa/errada dos cards normais, chaveados pela mesma
+// `chave` — o clique já grava em `store.cards` do jeito de sempre. Mas o
+// TEXTO de export precisa de tratamento especial (`montarLinhasVeredito`
+// abaixo): a fila de reconferência pode conter chaves que os recortes de
+// `--tema`/`--min-no-voto` excluíram de `cards`, e o texto exportado
+// precisa listar o veredito dessas chaves também — senão o julgamento
+// marcado na tela some no export, o mesmo defeito que esta seção existe
+// para consertar.
 
-export function renderFolha({ cards, geradoEm, eyebrow, notaRodape }) {
+/**
+ * Monta as linhas de "VEREDITOS POR CASO" do texto de export.
+ *
+ * `chavesData` são as chaves visíveis na folha (já filtradas por
+ * `--min-no-voto`/`--tema`); `chavesReconferencia`, as da fila de
+ * reconferência (selecionada FORA desses recortes). Uma chave de
+ * reconferência ausente de `chavesData` ainda pode ter veredito marcado em
+ * `vereditos` — sem uma seção própria para ela, esse veredito desapareceria
+ * do texto exportado em silêncio.
+ *
+ * Definida no escopo do módulo para ser testável isoladamente (Node importa
+ * esta função direto) e, ao mesmo tempo, executável no navegador: o
+ * `<script>` gerado por `renderFolha` embute `montarLinhasVeredito.toString()`
+ * — mesma implementação nos dois lados, sem duplicar a lógica.
+ */
+export function montarLinhasVeredito(chavesData, chavesReconferencia, vereditos) {
+  const linhas = ['VEREDITOS POR CASO:'];
+  for (let i = 0; i < chavesData.length; i++) {
+    const chave = chavesData[i];
+    linhas.push('  Acórdão ' + chave + ': ' + (vereditos[chave] || '(pendente)'));
+  }
+
+  const presentes = new Set(chavesData);
+  const vistas = new Set();
+  const extras = [];
+  for (let i = 0; i < chavesReconferencia.length; i++) {
+    const chave = chavesReconferencia[i];
+    if (presentes.has(chave) || vistas.has(chave)) continue;
+    vistas.add(chave);
+    extras.push(chave);
+  }
+  if (extras.length) {
+    linhas.push('');
+    linhas.push('VEREDITOS POR CASO (RECONFERÊNCIA, FORA DO RECORTE DESTA FOLHA):');
+    for (let i = 0; i < extras.length; i++) {
+      const chave = extras[i];
+      linhas.push('  Acórdão ' + chave + ': ' + (vereditos[chave] || '(pendente)'));
+    }
+  }
+  return linhas;
+}
+
+/**
+ * Os cartões de reconferência agrupados por acórdão.
+ *
+ * A fila é julgada por ACÓRDÃO — o botão grava `store.cards[chave]`, um
+ * veredito por caso. Um cartão por enunciado dava dois cards visualmente
+ * distintos operando o MESMO estado (clicar num mudava os dois) e um contador
+ * que somava enunciados onde a spec §3.2 conta casos. Agrupando, os pares de
+ * texto ficam empilhados sob um único grupo de botões, que é o que a decisão
+ * de fato é.
+ *
+ * `julgadoPor`/`julgadoEm` vêm do primeiro par: todos os enunciados de um
+ * grupo descendem da mesma versão anterior, julgada de uma vez pelo cartão
+ * daquele acórdão.
+ *
+ * Definida no escopo do módulo pelo mesmo motivo que `montarLinhasVeredito`:
+ * testável em Node e embutida no navegador por `.toString()`.
+ */
+export function agruparReconferencia(cartoes) {
+  const porChave = new Map();
+  for (let i = 0; i < cartoes.length; i++) {
+    const c = cartoes[i];
+    let g = porChave.get(c.chave);
+    if (!g) {
+      g = { chave: c.chave, julgadoPor: c.julgadoPor, julgadoEm: c.julgadoEm, pares: [] };
+      porChave.set(c.chave, g);
+    }
+    g.pares.push({ enunciadoNovo: c.enunciadoNovo, enunciadoAnterior: c.enunciadoAnterior });
+  }
+  return Array.from(porChave.values());
+}
+
+export function renderFolha({ cards, geradoEm, eyebrow, notaRodape, cartoesReconferencia }) {
   const DATA = JSON.stringify(cards);
+  const RECONF = JSON.stringify(cartoesReconferencia || []);
   const GERADO_EM = geradoEm || '';
   const EYEBROW = eyebrow || 'Rede de precedentes · Fase 2-A';
   const NOTA = notaRodape || '';
@@ -162,6 +250,24 @@ blockquote{margin:0;font-size:12.5px;line-height:1.55;color:var(--ink-soft);font
 .sem-tese-title{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--errada)}
 .sem-tese-sub{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
 
+/* reconferência */
+.reconf-section{margin:18px 0 4px}
+.reconf-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.reconf-title{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink)}
+.reconf-count{font-family:var(--mono);font-size:11.5px;color:var(--imprecisa);background:var(--imprecisa-bg);
+  padding:2px 9px;border-radius:99px;font-weight:700}
+.reconf-sub{font-size:12.5px;color:var(--ink-soft);margin:5px 0 0;max-width:70ch}
+.reconf-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.reconf-card{position:relative;background:var(--surface);border:1px solid var(--imprecisa);border-radius:12px;
+  padding:16px 18px;box-shadow:var(--shadow)}
+.reconf-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--imprecisa)}
+.reconf-chave{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink)}
+.reconf-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:620px){.reconf-compare{grid-template-columns:1fr}}
+.reconf-col{padding:12px 14px;background:var(--surface-2);border-radius:10px}
+.reconf-col .tese-label{margin-bottom:6px}
+.reconf-meta{font-size:12px;color:var(--ink-faint);margin-top:10px}
+
 /* sinais */
 .sinais-block{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
 .sinais-block h4,.diverg-block h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;
@@ -232,6 +338,7 @@ textarea{width:100%;height:260px;font-family:var(--mono);font-size:12.5px;line-h
 </header>
 
 <div class="wrap">
+  <div id="reconferencia"></div>
   <div class="list" id="list"></div>
   <div class="foot-note">
     <b>Como ler estes cards.</b> <b>No voto</b> = acórdãos que citam este caso dentro da fundamentação do voto (razão de decidir); <b>citantes distintos</b> = quantos acórdãos diferentes o citam; <b>ocorrências totais</b> = todas as menções, em qualquer seção. A barra mostra, dos citantes distintos, qual fração cita no voto em vez de só mencionar de passagem. Os trechos-fonte de cada tese são o texto literal dos acórdãos citantes — nenhuma paráfrase. ${NOTA} Gerado em ${GERADO_EM}.
@@ -254,6 +361,14 @@ textarea{width:100%;height:260px;font-family:var(--mono);font-size:12.5px;line-h
 
 <script>
 const DATA = ${DATA};
+const RECONF = ${RECONF};
+// Mesma implementação testada em Node (ver o comentário acima de
+// \`montarLinhasVeredito\` em folha-teses-template.mjs) — embutida aqui por
+// \`.toString()\` para não duplicar a lógica entre o build e o navegador.
+${montarLinhasVeredito.toString()}
+${agruparReconferencia.toString()}
+// A fila é por acórdão: os enunciados do mesmo caso viram um cartão só.
+const RECONF_GRUPOS = agruparReconferencia(RECONF);
 const KEY = 'calibracao-teses-tcu-fase2a-v1';
 let store = { cards: {}, divs: {} };
 try {
@@ -347,6 +462,49 @@ function renderDivergencias(d) {
   return out;
 }
 
+function renderReconferenciaCard(g) {
+  const v = store.cards[g.chave] || '';
+  const dataAprovacao = g.julgadoEm ? new Date(g.julgadoEm).toLocaleDateString('pt-BR') : '?';
+  let html = '<div class="reconf-card">';
+  html += '<span class="reconf-chave">Acórdão ' + esc(g.chave) + '</span>';
+  for (let i = 0; i < g.pares.length; i++) {
+    const p = g.pares[i];
+    // Numerar só quando há mais de um par: num cartão de tese única, "tese 1"
+    // é ruído.
+    const sufixo = g.pares.length > 1 ? ' · tese ' + (i + 1) : '';
+    html += '<div class="reconf-compare">';
+    html += '<div class="reconf-col"><div class="tese-label">Redação vigente (não conferida)' + sufixo + '</div>';
+    html += '<div class="enunciado">' + esc(p.enunciadoNovo) + '</div></div>';
+    html += '<div class="reconf-col"><div class="tese-label">Redação aprovada anteriormente' + sufixo + '</div>';
+    html += '<div class="enunciado">' + esc(p.enunciadoAnterior) + '</div></div>';
+    html += '</div>';
+  }
+  html += '<p class="reconf-meta">Aprovada por ' + esc(g.julgadoPor) + ' em ' + dataAprovacao + '.</p>';
+  html += '<div class="c-foot">';
+  html += '<div class="seg" role="group" aria-label="Veredito ' + esc(g.chave) + '">';
+  html += '<button class="v-fiel" data-c="' + esc(g.chave) + '" data-set="fiel" aria-pressed="' + (v === 'fiel') + '">Tese fiel</button>';
+  html += '<button class="v-imprecisa" data-c="' + esc(g.chave) + '" data-set="imprecisa" aria-pressed="' + (v === 'imprecisa') + '">Imprecisa</button>';
+  html += '<button class="v-errada" data-c="' + esc(g.chave) + '" data-set="errada" aria-pressed="' + (v === 'errada') + '">Errada</button>';
+  html += '</div></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderReconferencia() {
+  const el = document.getElementById('reconferencia');
+  if (!RECONF_GRUPOS.length) { el.innerHTML = ''; return; }
+  let html = '<div class="reconf-section">';
+  html += '<div class="reconf-head"><span class="reconf-title">Reconferência pendente</span>';
+  // Conta ACÓRDÃOS, que é a unidade do julgamento — contar enunciados
+  // superestimava a fila.
+  html += '<span class="reconf-count">' + RECONF_GRUPOS.length + '</span></div>';
+  html += '<p class="reconf-sub">Estes enunciados foram reescritos desde o último julgamento — o veredito anterior não cobre o texto novo. Confira a redação vigente contra a que foi aprovada e julgue de novo.</p>';
+  html += '<div class="reconf-list">';
+  for (let i = 0; i < RECONF_GRUPOS.length; i++) html += renderReconferenciaCard(RECONF_GRUPOS[i]);
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
 function renderCard(d, order) {
   const v = store.cards[d.chave] || '';
   const card = document.createElement('div');
@@ -395,6 +553,7 @@ function renderCard(d, order) {
 }
 
 function render() {
+  renderReconferencia();
   const list = document.getElementById('list');
   list.innerHTML = '';
   for (let i = 0; i < DATA.length; i++) {
@@ -428,7 +587,9 @@ function updateTally() {
     '<span class="s-errada" style="width:' + (100 * c.errada / n) + '%"></span>';
 }
 
-document.getElementById('list').addEventListener('click', function (e) {
+// Delegado em .wrap, não em #list: a seção de reconferência (#reconferencia)
+// usa os mesmos botões fiel/imprecisa/errada, fora da lista de cards.
+document.querySelector('.wrap').addEventListener('click', function (e) {
   const b = e.target.closest('button[data-set]');
   if (!b) return;
   if (b.dataset.c) {
@@ -467,12 +628,11 @@ document.getElementById('btnExport').addEventListener('click', function () {
   let lines = [];
   lines.push('CALIBRAÇÃO DE TESES — Rede de precedentes TCU');
   lines.push('');
-  lines.push('VEREDITOS POR CASO:');
-  for (let i = 0; i < DATA.length; i++) {
-    const d = DATA[i];
-    const v = store.cards[d.chave] || '(pendente)';
-    lines.push('  Acórdão ' + d.chave + ': ' + v);
-  }
+  lines = lines.concat(montarLinhasVeredito(
+    DATA.map(function (d) { return d.chave; }),
+    RECONF.map(function (r) { return r.chave; }),
+    store.cards
+  ));
   let hasDiv = false;
   const divLines = [];
   for (let i = 0; i < DATA.length; i++) {

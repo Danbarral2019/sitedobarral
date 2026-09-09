@@ -2170,6 +2170,11 @@ model TeseEnunciado {
   atualizadoEm   DateTime  @default(now()) @updatedAt
   /// Ciclo do embedding, no desenho de Document e TribunalDecision (spec §9).
   embeddingStatus String?
+  /// Veredito herdado de uma versão anterior cujo TEXTO ERA DIFERENTE (spec
+  /// §4.1, nível 2). Vale para o acervo restrito, nunca para a vitrine, e some
+  /// quando o enunciado é conferido de novo. A assinatura desse estado é
+  /// `julgadoPor` nulo com `herdadoDe` preenchido.
+  reconferenciaPendente Boolean @default(false)
 
   trechos TeseTrechoFonte[]
 
@@ -2178,6 +2183,7 @@ model TeseEnunciado {
   @@index([publicado])
   @@index([vitrinePublica])
   @@index([embeddingStatus])
+  @@index([reconferenciaPendente])
 }
 
 /// A evidência literal de uma tese, copiada no momento da destilação.

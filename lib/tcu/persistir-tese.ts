@@ -204,6 +204,11 @@ export async function persistirDestilacao(
         select: {
           id: true, enunciado: true, veredito: true, julgadoEm: true, julgadoPor: true,
           publicado: true, vitrinePublica: true, retiradoEm: true, retiradoMotivo: true,
+          // Os dois campos que fazem a pendência sobreviver a uma segunda
+          // redestilação: sem eles, `carregarVeredito` não tem como saber que
+          // o antecessor era provisório, e a marca some sem ninguém ter lido
+          // o enunciado.
+          herdadoDe: true, reconferenciaPendente: true,
         },
       },
       divergencias: { select: { id: true, trecho: true, veredito: true, julgadoEm: true, julgadoPor: true } },
@@ -223,7 +228,10 @@ export async function persistirDestilacao(
 
   let herdados = 0;
   const enunciados = (tese.teses ?? []).map((t, i) => {
-    const h = carregarVeredito(t.enunciado, anterioresEnunciados);
+    // Nível 2 ligado só aqui: TeseDivergencia não tem `reconferenciaPendente`,
+    // então um veredito provisório numa divergência ficaria invisível. O `map`
+    // das divergências, logo abaixo, segue chamando sem a opção.
+    const h = carregarVeredito(t.enunciado, anterioresEnunciados, { herdarComTextoDiferente: true });
     if (h.veredito !== null) herdados++;
     return {
       ordem: i,

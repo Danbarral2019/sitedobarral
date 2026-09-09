@@ -21,6 +21,7 @@ import { readFileSync } from 'node:fs';
 import { prisma } from '../lib/prisma';
 import { parsearVeredito } from '../lib/tcu/parsear-veredito';
 import { resolverAlvoDivergencia } from '../lib/tcu/aplicar-veredito';
+import { dadosDoVeredito } from '../lib/tcu/dados-do-veredito';
 
 function flag(nome: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${nome}=`))?.split('=')[1];
@@ -84,7 +85,7 @@ async function main() {
     if (!dryRun) {
       await prisma.teseEnunciado.updateMany({
         where: { destilacaoId: d.id },
-        data: { veredito: caso.veredito, julgadoEm: agora, julgadoPor, herdadoDe: null },
+        data: dadosDoVeredito(caso.veredito, agora, julgadoPor),
       });
     }
     enunciadosGravados += novos.length;
