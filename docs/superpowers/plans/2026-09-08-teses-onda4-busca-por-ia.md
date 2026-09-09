@@ -24,6 +24,35 @@
 - **Três arquivos são do usuário e não entram em commit algum:** `docs/audits/folha-teses-tcu-licitacoes.html`, `catalogacao-fontes-tcu-licitacoes.docx`, `.claude/settings.json`.
 - **Staging explícito** — nunca `git add -A`.
 
+## Procedência dos números
+
+Nem todo número deste plano tem o mesmo peso, e quem executa precisa saber
+distinguir. Os da primeira tabela seguem convenção existente no código e não
+devem ser mexidos sem motivo; os da segunda são escolha, e vale confirmá-los.
+
+**Convenção da casa — mudar só com motivo:**
+
+| Número | Onde | Precedente |
+|---|---|---|
+| `limit * 2` no ramo das teses | Task 3 | Os ramos de documentos (`vector-search.ts:349`) e de atos (`:380`) usam o mesmo. Quem foge é o do TST, com `limit * 4` e justificativa escrita. |
+| `threshold` compartilhado (0.5) | Task 3 | Default único da função, aplicado a todos os ramos. |
+| `LOTE_PADRAO = 50` | Task 2 | Igual ao `MAX_JOBS_PER_RUN` do próprio cron. |
+| top-5 na medição | Task 7 | `recall@5` é a métrica que o projeto já usa (`eval/README.md`). |
+
+**Escolha, não medida — confirmar antes de fixar:**
+
+| Escolha | Onde | O que se sabe |
+|---|---|---|
+| Formato do prefixo: assunto + acórdão + enunciado | Task 1 | Julgamento a partir da §9. Poderia levar `inovacao` ou o primeiro trecho-fonte. Muda o retrieval de forma material e ninguém mediu. |
+| Janela do `tesesNoTopo` (top-3) | Task 7 | Arbitrária. É só um indicador de observação, não um portão. |
+| Critério de aceitação para ligar no assistente | Task 7 | **Deliberadamente não fixado neste plano** — ver a Task 7. |
+
+Uma observação que vale para os dois primeiros itens da primeira tabela: eles
+são convenção, não resultado de medição. A distribuição de similaridade de um
+enunciado — curto e abstrato — provavelmente não é a mesma de um acórdão de 68
+mil caracteres, e isso nunca foi medido para ramo nenhum. A Task 7 é a primeira
+oportunidade de olhar para esse dado.
+
 ## Estrutura de arquivos
 
 | Arquivo | Responsabilidade |
@@ -1329,10 +1358,29 @@ async function main() {
     });
   }
 
-  const pior = Math.max(...medidas.map((m) => m.deslocados.length));
+  // O histograma é o que permite fixar o limiar olhando o dado, em vez de
+  // escolher um número antes e defendê-lo depois (ver o Step 3).
+  const histograma = medidas.reduce<Record<number, number>>((acc, m) => {
+    acc[m.deslocados.length] = (acc[m.deslocados.length] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const piores = [...medidas]
+    .sort((a, b) => b.deslocados.length - a.deslocados.length)
+    .slice(0, 3);
+
   const arquivo = `eval/reports/teses-${new Date().toISOString().slice(0, 10)}.json`;
-  writeFileSync(arquivo, JSON.stringify({ medidas, pior }, null, 2));
-  console.log(`Relatório em ${arquivo}. Pior deslocamento numa única query: ${pior}`);
+  writeFileSync(arquivo, JSON.stringify({ medidas, histograma, piores }, null, 2));
+
+  console.log(`Relatório em ${arquivo}`);
+  console.log('Queries por nº de acórdãos deslocados do top-5:');
+  for (const [n, qtd] of Object.entries(histograma).sort()) {
+    console.log(`  ${n} deslocado(s): ${qtd} query(ies)`);
+  }
+  console.log('\nAs três piores:');
+  for (const p of piores) {
+    console.log(`  "${p.query}" — perdeu ${p.deslocados.length}: ${p.deslocados.join(', ')}`);
+  }
 }
 
 main();
@@ -1351,13 +1399,34 @@ Acrescentar a `package.json`:
 Run: `npm run eval:teses`
 Custo: só embeddings e FTS, sem LLM — R$ 0, como o `eval:run`.
 
-- [ ] **Step 3: Decidir com o número na mão**
+- [ ] **Step 3: Olhar a distribuição antes de fixar o critério**
 
-Critério de aceitação, a confirmar com o usuário antes de ligar no assistente: **nenhuma query pode perder mais de um acórdão do top-5** para a entrada das teses. Se perder, o caminho não é desligar a feature — é reduzir o `limit` do ramo D (hoje `limit * 2`, Task 3) ou aplicar fator de desconto na `similarity` do ramo, como o `hierarchy_level` já faz para atos normativos.
+**Este plano não fixa o limiar de aceitação, de propósito.** Uma versão anterior
+dizia "nenhuma query pode perder mais de um acórdão do top-5", e aquele *um*
+tinha saído da cabeça de quem escreveu — sem estudo, sem precedente no projeto.
+É o número que decide se a feature entra no assistente: frouxo, a tese empurra
+os acórdãos para fora; rígido, a feature nunca liga. Fixá-lo antes de ver os
+dados seria escolher no escuro e depois defender a escolha.
+
+A ordem correta é a inversa. Levar ao usuário, do relatório:
+
+- o **histograma** de `deslocados` — quantas queries perderam 0, 1, 2, 3+ acórdãos do top-5;
+- as **três piores queries**, com a lista do que saiu e do que entrou no lugar;
+- a variação de `posicaoMediaAcordaos`, que diz se o efeito é empurrão geral ou expulsão pontual.
+
+Só então o limiar é fixado, com ele, e escrito na §9 da spec junto do dado que
+o justificou.
+
+Se o deslocamento for grande demais, o caminho **não é desligar a feature**. É
+reduzir o `limit` do ramo D (hoje `limit * 2`, Task 3) ou aplicar fator de
+desconto na `similarity` do ramo, como o `hierarchy_level` já faz para atos
+normativos — e medir de novo.
 
 - [ ] **Step 4: Registrar o resultado e commitar**
 
-Acrescentar à §9 do spec um parágrafo com a data, o número medido e a decisão tomada.
+Acrescentar à §9 do spec um parágrafo com a data, o histograma medido, o limiar
+fixado com o usuário no Step 3 e a decisão que ele sustentou. O limiar sem o
+dado que o gerou vira número mágico na próxima vez que alguém o encontrar.
 
 ```bash
 npx vitest run
