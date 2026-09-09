@@ -12,7 +12,8 @@
 
 ## Global Constraints
 
-- **Diretório de trabalho:** `C:\Users\User\projetos\sitedobarral`. Rodar tudo da raiz.
+- **Diretório de trabalho:** este worktree, `C:\Users\User\projetos\sitedobarral\.claude\worktrees\heranca-editorial`. Rodar tudo da raiz dele; **não** navegar para o checkout principal.
+- **Testes de script vivem em `test/<área>/`**, não em `scripts/__tests__/`. É a convenção do projeto: `test/legislative-scrapers/normalize-theme-tic.test.ts` cobre `scripts/normalize-theme-tic.ts`.
 - **Idioma:** comentários, mensagens de commit, saída de script e todo texto de interface em português, **com acentuação correta** — nunca "nao" por "não", "acordao" por "acórdão".
 - **Verificação obrigatória antes de reportar qualquer tarefa:** `npx vitest run` (suíte inteira) **e** `npx tsc --noEmit -p tsconfig.json`. Linha de base: **3.037 testes passando, zero erros de tipo** (09/09/2026). O vitest usa esbuild e não checa tipos — suíte verde não prova compilação.
 - **Migrações:** o deploy roda `prisma migrate deploy`. Gerar a migração **offline** com `prisma migrate diff` e **não aplicar** contra produção — a execução fica com o usuário.
@@ -344,35 +345,76 @@ Criar `prisma/migrations/<AAAAMMDDHHMMSS>_add_reconferencia_pendente/migration.s
 
 Expected: `Generated Prisma Client`.
 
-- [ ] **Step 3: Escrever o teste da persistência**
+- [ ] **Step 3: Atualizar o teste existente que muda de comportamento**
 
-Acrescentar ao final de `lib/tcu/persistir-tese.test.ts`:
+> **Este passo é o coração da Task, e não é regressão.** O teste `(b) enunciado
+> identico herda o veredito; enunciado alterado NAO herda`, em
+> `lib/tcu/persistir-tese.test.ts:140`, afirma hoje que texto alterado **não**
+> herda. Ligar o nível 2 muda exatamente isso. O teste deve ser atualizado para
+> asserir o comportamento novo — **não** "consertado" o código para preservar o
+> antigo, que desfaria a tarefa inteira.
+
+Renomear o teste e substituir as duas últimas asserções (linhas 165-166):
 
 ```typescript
-describe('persistirDestilacao — heranca com texto diferente', () => {
-  it('grava a pendencia quando a versao anterior foi julgada e o texto mudou', async () => {
-    // A versão anterior tem veredito e está publicada; a nova traz outra redação.
-    mockDestilacaoAnterior({
+  it('(b) enunciado identico herda com autoria; enunciado alterado herda provisoriamente', async () => {
+```
+
+```typescript
+    expect(enunciados[0].veredito).toBe('aprovada');
+    expect(enunciados[0].herdadoDe).toBe('e1');
+    expect(enunciados[0].reconferenciaPendente).toBe(false);
+    // Nível 2 (spec §4.1): o texto mudou, então o veredito atravessa como
+    // provisório — com rastro, sem autoria, e fora da vitrine.
+    expect(enunciados[1].veredito).toBe('aprovada');
+    expect(enunciados[1].herdadoDe).toBe('e1');
+    expect(enunciados[1].julgadoPor).toBeNull();
+    expect(enunciados[1].vitrinePublica).toBe(false);
+    expect(enunciados[1].reconferenciaPendente).toBe(true);
+```
+
+E acrescentar, ao final do arquivo, o caso que prova que o acervo é preservado:
+
+```typescript
+describe('persistirDestilacao — heranca com texto diferente (spec §4.1)', () => {
+  it('mantem o acervo e larga a vitrine quando o texto muda', async () => {
+    mockAnterior.mockResolvedValue({
+      id: 'anterior-id',
       enunciados: [{
-        id: 'ant-1', enunciado: 'Redacao antiga.', veredito: 'fiel',
+        id: 'e1', enunciado: 'Redacao antiga.', veredito: 'fiel',
         julgadoEm: new Date('2026-08-13T00:00:00Z'), julgadoPor: 'daniel',
         publicado: true, vitrinePublica: true, retiradoEm: null, retiradoMotivo: null,
       }],
+      divergencias: [],
     });
 
-    await persistirDestilacao(alvoPadrao, { teses: [{ enunciado: 'Redacao nova.', inovacao: 'x', trechosFonte: [0] }] });
+    const tese: TeseDestilada = {
+      chave: '1/2026',
+      assunto: 'Assunto',
+      teses: [{ enunciado: 'Redacao nova, outra.', inovacao: '', trechosFonte: [] }],
+      sinaisQualitativos: [],
+      divergencias: [],
+      confianca: 'alta',
+    };
 
-    const gravado = enunciadoGravado(0);
-    expect(gravado.veredito).toBe('fiel');
-    expect(gravado.publicado).toBe(true);
-    expect(gravado.vitrinePublica).toBe(false);
-    expect(gravado.julgadoPor).toBeNull();
-    expect(gravado.reconferenciaPendente).toBe(true);
+    await persistirDestilacao({ numero: 1, ano: 2026 }, tese, fazerDossie([]));
+
+    const enunciados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(enunciados[0].veredito).toBe('fiel');
+    expect(enunciados[0].publicado).toBe(true);
+    expect(enunciados[0].vitrinePublica).toBe(false);
+    expect(enunciados[0].julgadoPor).toBeNull();
+    expect(enunciados[0].reconferenciaPendente).toBe(true);
   });
 });
 ```
 
-> Os helpers `mockDestilacaoAnterior`, `persistirDestilacao`, `alvoPadrao` e `enunciadoGravado` já existem no arquivo — reusar os que estão lá, com os nomes que o arquivo usa, em vez de criar novos.
+> **Idioma do arquivo, para reusar em vez de inventar:** os mocks são
+> `mockAnterior.mockResolvedValue({ id, enunciados, divergencias })`; o dossiê vem
+> de `fazerDossie([...])`; a assinatura é
+> `persistirDestilacao({ numero, ano }, tese, dossie)` — três argumentos —; e o
+> que foi gravado se lê em
+> `ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create`.
 
 - [ ] **Step 4: Rodar e ver falhar**
 
@@ -414,7 +456,7 @@ Sem isto a marca nunca sai, e a fila da Task 4 devolve para sempre o que já foi
 
 **Files:**
 - Modify: `scripts/importar-veredito-teses.ts:87` (o `data` do `updateMany`)
-- Test: `scripts/__tests__/importar-veredito-teses.test.ts`
+- Test: `test/teses/importar-veredito.test.ts`
 
 **Interfaces:**
 - Consumes: a coluna da Task 2.
@@ -422,7 +464,7 @@ Sem isto a marca nunca sai, e a fila da Task 4 devolve para sempre o que já foi
 
 - [ ] **Step 1: Escrever o teste**
 
-Criar `scripts/__tests__/importar-veredito-teses.test.ts`:
+Criar `test/teses/importar-veredito.test.ts`:
 
 ```typescript
 // @vitest-environment node
@@ -452,7 +494,7 @@ describe('dadosDoVeredito', () => {
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `npx vitest run scripts/__tests__/importar-veredito-teses.test.ts`
+Run: `npx vitest run test/teses/importar-veredito.test.ts`
 Expected: FAIL — `dadosDoVeredito` não é exportada.
 
 - [ ] **Step 3: Extrair a função e limpar a pendência**
@@ -483,7 +525,7 @@ A `update` das divergências (linha 109-112) **não** muda: `TeseDivergencia` n�
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `npx vitest run scripts/__tests__/importar-veredito-teses.test.ts`
+Run: `npx vitest run test/teses/importar-veredito.test.ts`
 Expected: PASS (2 testes).
 
 - [ ] **Step 5: Verificação e commit**
@@ -491,7 +533,7 @@ Expected: PASS (2 testes).
 ```bash
 npx vitest run
 npx tsc --noEmit -p tsconfig.json
-git add scripts/importar-veredito-teses.ts scripts/__tests__/importar-veredito-teses.test.ts
+git add scripts/importar-veredito-teses.ts test/teses/importar-veredito.test.ts
 git commit -m "feat(teses): conferir de novo limpa a pendência"
 ```
 
@@ -502,7 +544,7 @@ git commit -m "feat(teses): conferir de novo limpa a pendência"
 **Files:**
 - Modify: `scripts/build-folha-teses-tcu.ts` (a seleção, por volta da linha 79; a montagem dos cartões)
 - Modify: `scripts/lib/folha-teses-template.mjs` (o bloco do cartão)
-- Test: `scripts/__tests__/folha-reconferencia.test.ts`
+- Test: `test/teses/folha-reconferencia.test.ts`
 
 **Interfaces:**
 - Consumes: a coluna da Task 2.
@@ -512,7 +554,7 @@ git commit -m "feat(teses): conferir de novo limpa a pendência"
 
 - [ ] **Step 1: Escrever o teste da seleção**
 
-Criar `scripts/__tests__/folha-reconferencia.test.ts`:
+Criar `test/teses/folha-reconferencia.test.ts`:
 
 ```typescript
 // @vitest-environment node
@@ -564,7 +606,7 @@ describe('selecionarReconferencia', () => {
 
 - [ ] **Step 2: Rodar e ver falhar**
 
-Run: `npx vitest run scripts/__tests__/folha-reconferencia.test.ts`
+Run: `npx vitest run test/teses/folha-reconferencia.test.ts`
 Expected: FAIL — `selecionarReconferencia` não é exportada.
 
 - [ ] **Step 3: Implementar a seleção**
@@ -616,7 +658,7 @@ export function selecionarReconferencia(
 
 - [ ] **Step 4: Rodar e ver passar**
 
-Run: `npx vitest run scripts/__tests__/folha-reconferencia.test.ts`
+Run: `npx vitest run test/teses/folha-reconferencia.test.ts`
 Expected: PASS (3 testes).
 
 - [ ] **Step 5: Ligar na folha**
@@ -646,7 +688,7 @@ Passar `cartoesReconferencia` ao template, que renderiza a seção no topo com o
 ```bash
 npx vitest run
 npx tsc --noEmit -p tsconfig.json
-git add scripts/build-folha-teses-tcu.ts scripts/lib/folha-teses-template.mjs scripts/__tests__/folha-reconferencia.test.ts
+git add scripts/build-folha-teses-tcu.ts scripts/lib/folha-teses-template.mjs test/teses/folha-reconferencia.test.ts
 git commit -m "feat(teses): seção de reconferência na folha de calibração"
 ```
 
