@@ -54,16 +54,38 @@ const SEM_VEREDITO: VeredictoHerdado = {
   reconferenciaPendente: false,
 };
 
+export type AnteriorParaHeranca = EnunciadoJulgavel & {
+  julgadoEm: Date | null;
+  julgadoPor: string | null;
+  publicado?: boolean;
+  vitrinePublica?: boolean;
+  retiradoEm?: Date | null;
+  retiradoMotivo?: string | null;
+  /** Do que este anterior já herdou. Necessário para não perder o rastro. */
+  herdadoDe?: string | null;
+  /** Se este anterior é ele próprio um veredito provisório, ainda não relido. */
+  reconferenciaPendente?: boolean;
+};
+
+/**
+ * O enunciado que carrega o julgamento HUMANO por trás de um veredito.
+ *
+ * Quando o antecessor é ele próprio provisório — `julgadoPor` nulo com
+ * `herdadoDe` preenchido, o retrato exato do que o nível 2 grava — apontar
+ * para ele romperia a corrente: a fila de reconferência exige que o
+ * `herdadoDe` tenha autoria (`lib/teses/reconferencia.ts`), e um elo
+ * intermediário sem autoria derruba o cartão. Com destilações diárias, essa
+ * corrente pode ter muitos elos; cada um repassa o mesmo `herdadoDe`, então o
+ * rastro continua chegando ao julgamento original sem precisar percorrê-la.
+ */
+function origemDoJulgamento(anterior: AnteriorParaHeranca): string {
+  if (anterior.julgadoPor == null && anterior.herdadoDe != null) return anterior.herdadoDe;
+  return anterior.id;
+}
+
 export function carregarVeredito(
   enunciadoNovo: string,
-  anteriores: Array<EnunciadoJulgavel & {
-    julgadoEm: Date | null;
-    julgadoPor: string | null;
-    publicado?: boolean;
-    vitrinePublica?: boolean;
-    retiradoEm?: Date | null;
-    retiradoMotivo?: string | null;
-  }>,
+  anteriores: Array<AnteriorParaHeranca>,
   opcoes: OpcoesHeranca = {}
 ): VeredictoHerdado {
   const parEditorial = anteriores.find((a) => a.enunciado === enunciadoNovo);
@@ -97,14 +119,20 @@ export function carregarVeredito(
     const par = anteriores.find((a) => a.veredito !== null && a.enunciado === enunciadoNovo);
     return {
       veredito: par?.veredito ?? null,
-      herdadoDe: par?.id ?? null,
+      herdadoDe: par ? origemDoJulgamento(par) : null,
       julgadoEm: par?.julgadoEm ?? null,
       julgadoPor: par?.julgadoPor ?? null,
       publicado: parEditorial.publicado ?? false,
       vitrinePublica: parEditorial.vitrinePublica ?? false,
       retiradoEm: parEditorial.retiradoEm ?? null,
       retiradoMotivo: parEditorial.retiradoMotivo ?? null,
-      reconferenciaPendente: false,
+      // A pendência NÃO se resolve por coincidência de texto. Se o antecessor
+      // era provisório e ninguém o releu, o texto idêntico apenas repete o
+      // enunciado que continua por conferir (spec §5: a pendência sai quando o
+      // enunciado é conferido de novo). Zerá-la aqui apagava a marca a cada
+      // redestilação — e com o cron rodando todo dia, a tese ficava 'fiel'
+      // para sempre sem que ninguém a tivesse lido.
+      reconferenciaPendente: par?.reconferenciaPendente ?? false,
     };
   }
 
@@ -135,7 +163,7 @@ export function carregarVeredito(
   const origem = julgados[0];
   return {
     veredito: origem.veredito,
-    herdadoDe: origem.id,
+    herdadoDe: origemDoJulgamento(origem),
     julgadoEm: null,
     julgadoPor: null,
     publicado: origem.publicado ?? false,

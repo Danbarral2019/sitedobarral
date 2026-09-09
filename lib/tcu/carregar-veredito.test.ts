@@ -223,3 +223,56 @@ describe('carregarVeredito — nivel 2, texto diferente (spec §4.1)', () => {
     expect(r.retiradoMotivo).toBe('materia estranha');
   });
 });
+
+// A pendência sai quando o enunciado é CONFERIDO de novo (spec §5), não quando
+// o cron redestila. Com 49 destilações num único dia, o antecessor provisório
+// deixou de ser hipótese: é o caso comum de qualquer alvo redestilado duas
+// vezes antes da reconferência.
+describe('carregarVeredito — antecessor ele proprio provisorio', () => {
+  // e2: veredito herdado por texto diferente. Sem autoria, apontando para o
+  // julgamento humano de e1.
+  const provisorio = {
+    id: 'e2',
+    enunciado: 'Redacao intermediaria.',
+    veredito: 'fiel',
+    julgadoEm: null,
+    julgadoPor: null,
+    publicado: true,
+    vitrinePublica: false,
+    retiradoEm: null,
+    retiradoMotivo: null,
+    herdadoDe: 'e1',
+    reconferenciaPendente: true,
+  };
+
+  it('nivel 1 preserva a pendencia em vez de apaga-la por coincidencia de texto', () => {
+    const r = carregarVeredito('Redacao intermediaria.', [provisorio]);
+    expect(r.veredito).toBe('fiel');
+    expect(r.reconferenciaPendente).toBe(true);
+  });
+
+  it('nivel 1 mantem o rastro no julgamento humano, nao no elo intermediario', () => {
+    const r = carregarVeredito('Redacao intermediaria.', [provisorio]);
+    expect(r.herdadoDe).toBe('e1');
+  });
+
+  it('nivel 2 repassa o herdadoDe do antecessor provisorio', () => {
+    const r = carregarVeredito('Redacao terceira, outra vez diferente.', [provisorio], {
+      herdarComTextoDiferente: true,
+    });
+    expect(r.veredito).toBe('fiel');
+    expect(r.reconferenciaPendente).toBe(true);
+    expect(r.herdadoDe).toBe('e1');
+  });
+
+  // Um antecessor conferido por pessoa é o fim da corrente: é ELE o julgamento.
+  it('antecessor com autoria continua sendo a origem, mesmo tendo herdadoDe', () => {
+    const conferido = {
+      ...provisorio, id: 'e3', julgadoPor: 'daniel', julgadoEm: em, reconferenciaPendente: false,
+    };
+    expect(carregarVeredito('Redacao intermediaria.', [conferido]).herdadoDe).toBe('e3');
+    expect(
+      carregarVeredito('Outra redacao.', [conferido], { herdarComTextoDiferente: true }).herdadoDe
+    ).toBe('e3');
+  });
+});

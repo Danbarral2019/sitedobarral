@@ -204,6 +204,11 @@ export async function persistirDestilacao(
         select: {
           id: true, enunciado: true, veredito: true, julgadoEm: true, julgadoPor: true,
           publicado: true, vitrinePublica: true, retiradoEm: true, retiradoMotivo: true,
+          // Os dois campos que fazem a pendência sobreviver a uma segunda
+          // redestilação: sem eles, `carregarVeredito` não tem como saber que
+          // o antecessor era provisório, e a marca some sem ninguém ter lido
+          // o enunciado.
+          herdadoDe: true, reconferenciaPendente: true,
         },
       },
       divergencias: { select: { id: true, trecho: true, veredito: true, julgadoEm: true, julgadoPor: true } },
