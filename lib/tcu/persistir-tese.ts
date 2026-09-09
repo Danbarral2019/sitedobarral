@@ -223,7 +223,10 @@ export async function persistirDestilacao(
 
   let herdados = 0;
   const enunciados = (tese.teses ?? []).map((t, i) => {
-    const h = carregarVeredito(t.enunciado, anterioresEnunciados);
+    // Nível 2 ligado só aqui: TeseDivergencia não tem `reconferenciaPendente`,
+    // então um veredito provisório numa divergência ficaria invisível. O `map`
+    // das divergências, logo abaixo, segue chamando sem a opção.
+    const h = carregarVeredito(t.enunciado, anterioresEnunciados, { herdarComTextoDiferente: true });
     if (h.veredito !== null) herdados++;
     return {
       ordem: i,

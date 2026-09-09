@@ -137,7 +137,7 @@ describe('persistirDestilacao', () => {
     expect(data.divergencias.create[0].veredito).toBeNull();
   });
 
-  it('(b) enunciado identico herda o veredito; enunciado alterado NAO herda', async () => {
+  it('(b) enunciado identico herda com autoria; enunciado alterado herda provisoriamente', async () => {
     mockAnterior.mockResolvedValue({
       id: 'anterior-id',
       enunciados: [
@@ -162,10 +162,16 @@ describe('persistirDestilacao', () => {
     const enunciados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
     expect(enunciados[0].veredito).toBe('aprovada');
     expect(enunciados[0].herdadoDe).toBe('e1');
-    expect(enunciados[1].veredito).toBeNull();
-    expect(enunciados[1].herdadoDe).toBeNull();
-    expect(r.herdados).toBe(1);
-    expect(r.novos).toBe(1);
+    expect(enunciados[0].reconferenciaPendente).toBe(false);
+    // Nível 2 (spec §4.1): o texto mudou, então o veredito atravessa como
+    // provisório — com rastro, sem autoria, e fora da vitrine.
+    expect(enunciados[1].veredito).toBe('aprovada');
+    expect(enunciados[1].herdadoDe).toBe('e1');
+    expect(enunciados[1].julgadoPor).toBeNull();
+    expect(enunciados[1].vitrinePublica).toBe(false);
+    expect(enunciados[1].reconferenciaPendente).toBe(true);
+    expect(r.herdados).toBe(2);
+    expect(r.novos).toBe(0);
   });
 
   it('(c) divergencia e pareada pelo trecho de apoio, nao por origemChave/natureza', async () => {
@@ -210,7 +216,13 @@ describe('persistirDestilacao', () => {
   it('(d) aritmetica de herdados/novos com mistura de enunciados e divergencias', async () => {
     mockAnterior.mockResolvedValue({
       id: 'anterior-id',
-      enunciados: [{ id: 'e1', enunciado: 'A', veredito: 'aprovada', julgadoEm: diasAtras(1), julgadoPor: 'd' }],
+      enunciados: [
+        { id: 'e1', enunciado: 'A', veredito: 'aprovada', julgadoEm: diasAtras(1), julgadoPor: 'd' },
+        // Segundo veredito, DIVERGENTE do primeiro: mantém "B nova"/"C nova"
+        // fora do nível 2 (spec §4.1 exige voz única), preservando o foco
+        // deste teste — a aritmética — livre do efeito da herança provisória.
+        { id: 'e2', enunciado: 'Z antiga', veredito: 'rejeitada', julgadoEm: diasAtras(1), julgadoPor: 'd' },
+      ],
       divergencias: [{ id: 'd1', trecho: 'X', veredito: 'procedente', julgadoEm: diasAtras(1), julgadoPor: 'd' }],
     });
     const tese: TeseDestilada = {
@@ -451,7 +463,7 @@ describe('persistirDestilacao', () => {
     expect(criado.vitrinePublica).toBe(true);
   });
 
-  it('texto alterado não herda nada — volta à fila de julgamento', async () => {
+  it('texto alterado herda o veredito provisoriamente, sem retirada nem vitrine', async () => {
     mockAnterior.mockResolvedValue({
       id: 'ant', enunciados: [{
         id: 'e-ant', enunciado: 'TEXTO ANTIGO', veredito: 'fiel',
@@ -466,10 +478,15 @@ describe('persistirDestilacao', () => {
       { alvo: { numero: 1441, ano: 2016 }, contagem: { citantesDistintos: 0, noVoto: 0, ocorrenciasTotal: 0 }, trechos: [] },
     );
     const criado = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create[0];
-    expect(criado.veredito).toBeNull();
-    expect(criado.publicado).toBe(false);
+    // Nível 2 (spec §4.1): sem par de texto, o único veredito julgado do
+    // anterior ainda atravessa — provisório, sem autoria e fora da vitrine.
+    expect(criado.veredito).toBe('fiel');
+    expect(criado.herdadoDe).toBe('e-ant');
+    expect(criado.julgadoPor).toBeNull();
+    expect(criado.publicado).toBe(true);
     expect(criado.vitrinePublica).toBe(false);
     expect(criado.retiradoEm).toBeNull();
+    expect(criado.reconferenciaPendente).toBe(true);
   });
 });
 
@@ -579,4 +596,54 @@ describe('ehElegivel — limiar informado pelo chamador', () => {
   it('entra com exatamente 10 quando o limiar e 10', () => expect(ehElegivel(10, null, agora, 10)).toBe(true));
   it('o limiar elevado nao afeta a regra de redestilacao', () =>
     expect(ehElegivel(15, { dossieNoVoto: 10, criadoEm: diasAtras(8) }, agora, 10)).toBe(true));
+});
+
+describe('persistirDestilacao — heranca com texto diferente (spec §4.1)', () => {
+  let ultimoTx: TxMock;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDocs.mockResolvedValue([]);
+    mockTransaction.mockImplementation(async (cb: (tx: TxMock) => Promise<unknown>) => {
+      ultimoTx = {
+        teseDestilacao: {
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          create: vi.fn().mockImplementation((args: { data: unknown }) =>
+            Promise.resolve({ id: 'nova-destilacao-id', ...(args.data as object) })
+          ),
+        },
+      };
+      return cb(ultimoTx);
+    });
+  });
+
+  it('mantem o acervo e larga a vitrine quando o texto muda', async () => {
+    mockAnterior.mockResolvedValue({
+      id: 'anterior-id',
+      enunciados: [{
+        id: 'e1', enunciado: 'Redacao antiga.', veredito: 'fiel',
+        julgadoEm: new Date('2026-08-13T00:00:00Z'), julgadoPor: 'daniel',
+        publicado: true, vitrinePublica: true, retiradoEm: null, retiradoMotivo: null,
+      }],
+      divergencias: [],
+    });
+
+    const tese: TeseDestilada = {
+      chave: '1/2026',
+      assunto: 'Assunto',
+      teses: [{ enunciado: 'Redacao nova, outra.', inovacao: '', trechosFonte: [] }],
+      sinaisQualitativos: [],
+      divergencias: [],
+      confianca: 'alta',
+    };
+
+    await persistirDestilacao({ numero: 1, ano: 2026 }, tese, fazerDossie([]));
+
+    const enunciados = ultimoTx.teseDestilacao.create.mock.calls[0][0].data.enunciados.create;
+    expect(enunciados[0].veredito).toBe('fiel');
+    expect(enunciados[0].publicado).toBe(true);
+    expect(enunciados[0].vitrinePublica).toBe(false);
+    expect(enunciados[0].julgadoPor).toBeNull();
+    expect(enunciados[0].reconferenciaPendente).toBe(true);
+  });
 });
