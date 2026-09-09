@@ -13,8 +13,54 @@ const ANO_ALVO = 2026;
 // depende de `DATABASE_URL` — não de `TEST_DATABASE_URL` — apontando para o
 // banco descartável: é o que `lib/prisma` lê ao montar o client. Ver o passo
 // "Run isolated database scenarios" em .github/workflows/test.yml.
+//
+// É o único spec de `e2e/` que fala com o banco fora do navegador, e por isso
+// escapa da guarda de `e2e/fixtures/database.ts`: aquela função só decide o
+// que vai para `webServer.env`, e devolve `TEST_DATABASE_URL` sem sequer olhar
+// para `DATABASE_URL`. Neste projeto a `DATABASE_URL` local aponta para
+// PRODUÇÃO — então quem definisse apenas `TEST_DATABASE_URL` para rodar os
+// cenários isolados veria este spot escrever no banco de verdade. A guarda
+// abaixo pertence a este arquivo, e não ao helper compartilhado: endurecer o
+// helper quebraria a execução local dos outros specs, que nunca tocam
+// `DATABASE_URL`.
+
+/** Mesmo host e mesmo nome de banco — credenciais e parâmetros podem diferir. */
+function mesmoBanco(a: string, b: string): boolean {
+  try {
+    const ua = new URL(a);
+    const ub = new URL(b);
+    return ua.hostname.toLowerCase() === ub.hostname.toLowerCase() && ua.pathname === ub.pathname;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Aborta o spec quando as duas variáveis não concordam. Com elas apontando
+ * para o mesmo banco, o único destino possível das escritas é o banco
+ * descartável que o operador escolheu de propósito — no CI, a branch efêmera
+ * da Neon; localmente, o que ele tiver montado para isto.
+ */
+function bancoDescartavelOk(): boolean {
+  const doPrisma = process.env.DATABASE_URL;
+  const doTeste = process.env.TEST_DATABASE_URL;
+  return Boolean(doPrisma && doTeste && mesmoBanco(doPrisma, doTeste));
+}
+
+function exigirBancoDescartavel(): void {
+  if (!bancoDescartavelOk()) {
+    throw new Error(
+      'Spec recusado: este arquivo escreve no banco via `lib/prisma`, que lê DATABASE_URL. ' +
+        'Defina DATABASE_URL e TEST_DATABASE_URL apontando para o MESMO banco descartável antes de rodá-lo. ' +
+        'Sem isso, a DATABASE_URL local deste projeto aponta para produção.',
+    );
+  }
+}
+
 test.describe('herança editorial entre versões de uma tese', () => {
   test.beforeAll(async () => {
+    exigirBancoDescartavel();
+
     // Versão anterior: conferida individualmente, publicada e na vitrine —
     // o estado dos acórdãos que a redestilação apagou antes da herança de
     // nível 2 existir (spec §7).
@@ -49,6 +95,9 @@ test.describe('herança editorial entre versões de uma tese', () => {
   });
 
   test.afterAll(async () => {
+    // Se a guarda barrou o `beforeAll`, nada foi criado — e a limpeza não pode
+    // ser a primeira escrita a escapar para o banco errado.
+    if (!bancoDescartavelOk()) return;
     // Cascade cuida de TeseEnunciado (e de TeseTrechoFonte, se houvesse).
     await prisma.teseDestilacao.deleteMany({
       where: { numeroAlvo: NUMERO_ALVO, anoAlvo: ANO_ALVO },
