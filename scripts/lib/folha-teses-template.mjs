@@ -22,7 +22,55 @@
 //   { chave, enunciadoNovo, enunciadoAnterior, julgadoPor, julgadoEm }
 // Renderizada à parte, no topo. O veredito de cada cartão usa os mesmos
 // botões fiel/imprecisa/errada dos cards normais, chaveados pela mesma
-// `chave` — o export não precisa de tratamento especial.
+// `chave` — o clique já grava em `store.cards` do jeito de sempre. Mas o
+// TEXTO de export precisa de tratamento especial (`montarLinhasVeredito`
+// abaixo): a fila de reconferência pode conter chaves que os recortes de
+// `--tema`/`--min-no-voto` excluíram de `cards`, e o texto exportado
+// precisa listar o veredito dessas chaves também — senão o julgamento
+// marcado na tela some no export, o mesmo defeito que esta seção existe
+// para consertar.
+
+/**
+ * Monta as linhas de "VEREDITOS POR CASO" do texto de export.
+ *
+ * `chavesData` são as chaves visíveis na folha (já filtradas por
+ * `--min-no-voto`/`--tema`); `chavesReconferencia`, as da fila de
+ * reconferência (selecionada FORA desses recortes). Uma chave de
+ * reconferência ausente de `chavesData` ainda pode ter veredito marcado em
+ * `vereditos` — sem uma seção própria para ela, esse veredito desapareceria
+ * do texto exportado em silêncio.
+ *
+ * Definida no escopo do módulo para ser testável isoladamente (Node importa
+ * esta função direto) e, ao mesmo tempo, executável no navegador: o
+ * `<script>` gerado por `renderFolha` embute `montarLinhasVeredito.toString()`
+ * — mesma implementação nos dois lados, sem duplicar a lógica.
+ */
+export function montarLinhasVeredito(chavesData, chavesReconferencia, vereditos) {
+  const linhas = ['VEREDITOS POR CASO:'];
+  for (let i = 0; i < chavesData.length; i++) {
+    const chave = chavesData[i];
+    linhas.push('  Acórdão ' + chave + ': ' + (vereditos[chave] || '(pendente)'));
+  }
+
+  const presentes = new Set(chavesData);
+  const vistas = new Set();
+  const extras = [];
+  for (let i = 0; i < chavesReconferencia.length; i++) {
+    const chave = chavesReconferencia[i];
+    if (presentes.has(chave) || vistas.has(chave)) continue;
+    vistas.add(chave);
+    extras.push(chave);
+  }
+  if (extras.length) {
+    linhas.push('');
+    linhas.push('VEREDITOS POR CASO (RECONFERÊNCIA, FORA DO RECORTE DESTA FOLHA):');
+    for (let i = 0; i < extras.length; i++) {
+      const chave = extras[i];
+      linhas.push('  Acórdão ' + chave + ': ' + (vereditos[chave] || '(pendente)'));
+    }
+  }
+  return linhas;
+}
 
 export function renderFolha({ cards, geradoEm, eyebrow, notaRodape, cartoesReconferencia }) {
   const DATA = JSON.stringify(cards);
@@ -283,6 +331,10 @@ textarea{width:100%;height:260px;font-family:var(--mono);font-size:12.5px;line-h
 <script>
 const DATA = ${DATA};
 const RECONF = ${RECONF};
+// Mesma implementação testada em Node (ver o comentário acima de
+// \`montarLinhasVeredito\` em folha-teses-template.mjs) — embutida aqui por
+// \`.toString()\` para não duplicar a lógica entre o build e o navegador.
+${montarLinhasVeredito.toString()}
 const KEY = 'calibracao-teses-tcu-fase2a-v1';
 let store = { cards: {}, divs: {} };
 try {
@@ -534,12 +586,11 @@ document.getElementById('btnExport').addEventListener('click', function () {
   let lines = [];
   lines.push('CALIBRAÇÃO DE TESES — Rede de precedentes TCU');
   lines.push('');
-  lines.push('VEREDITOS POR CASO:');
-  for (let i = 0; i < DATA.length; i++) {
-    const d = DATA[i];
-    const v = store.cards[d.chave] || '(pendente)';
-    lines.push('  Acórdão ' + d.chave + ': ' + v);
-  }
+  lines = lines.concat(montarLinhasVeredito(
+    DATA.map(function (d) { return d.chave; }),
+    RECONF.map(function (r) { return r.chave; }),
+    store.cards
+  ));
   let hasDiv = false;
   const divLines = [];
   for (let i = 0; i < DATA.length; i++) {

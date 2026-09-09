@@ -37,3 +37,15 @@ export function renderFolha(opts: {
   /** Fila de reconferência (spec §4.1, nível 2) — renderizada no topo, à parte dos cards. */
   cartoesReconferencia?: CartaoReconferencia[];
 }): string;
+
+/**
+ * Monta as linhas de "VEREDITOS POR CASO" do texto de export, incluindo uma
+ * seção à parte para chaves da fila de reconferência ausentes de
+ * `chavesData` (recortadas por --min-no-voto/--tema) — sem isso, o veredito
+ * marcado nesses cartões desapareceria do texto exportado.
+ */
+export function montarLinhasVeredito(
+  chavesData: string[],
+  chavesReconferencia: string[],
+  vereditos: Record<string, string>
+): string[];
