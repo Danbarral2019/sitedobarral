@@ -25,6 +25,9 @@ const prisma = new PrismaClient({ adapter, log: ['error'] });
 const SELECT_ENUNCIADO = {
   id: true, enunciado: true, veredito: true, julgadoEm: true, julgadoPor: true,
   publicado: true, vitrinePublica: true, retiradoEm: true, retiradoMotivo: true,
+  // Mesmo par que `persistir-tese.ts` seleciona: sem eles `carregarVeredito`
+  // não reconhece um antecessor provisório e perde o rastro do julgamento.
+  herdadoDe: true, reconferenciaPendente: true,
 } as const;
 
 async function montarGrupos(): Promise<GrupoDeVersoes[]> {
@@ -50,7 +53,15 @@ async function montarGrupos(): Promise<GrupoDeVersoes[]> {
     const anterior = versoes.filter((v) => !v.atual).at(-1);
     if (!vigente || !anterior) continue;
     grupos.push({
-      vigentes: vigente.enunciados.map((e) => ({ id: e.id, enunciado: e.enunciado, veredito: e.veredito })),
+      chave: `${vigente.numeroAlvo}/${vigente.anoAlvo}`,
+      vigentes: vigente.enunciados.map((e) => ({
+        id: e.id,
+        enunciado: e.enunciado,
+        veredito: e.veredito,
+        // `julgadoPor` do VIGENTE: sem ele o plano marcaria pendência sobre o
+        // que uma pessoa acabou de conferir.
+        julgadoPor: e.julgadoPor,
+      })),
       anteriores: anterior.enunciados,
     });
   }
@@ -67,9 +78,20 @@ async function main() {
 
   const { herdar, marcar } = planejarBackfill(grupos);
 
+  // Contagens não deixam conferir nada, e este script roda uma vez só, contra
+  // produção: o dry-run é o único pré-voo do operador. Listar chave e id é o
+  // que permite abrir a folha e olhar o acórdão antes de aplicar.
   console.log(`\n1º movimento — voltam ao acervo restrito: ${herdar.length} enunciado(s)`);
-  console.log(`2º movimento — só ganham a marca de pendência: ${marcar.length} enunciado(s)`);
+  for (const h of herdar) {
+    console.log(`   Acórdão ${h.chave} · ${h.enunciadoId} · veredito ${h.veredito}` +
+      `${h.publicado ? ' · publicado' : ''} · herda de ${h.herdadoDe}`);
+  }
+
+  console.log(`\n2º movimento — só ganham a marca de pendência: ${marcar.length} enunciado(s)`);
   console.log('   (o 2º não muda o que está no ar; torna visível o veredito de lote sobre conferência anterior)');
+  for (const m of marcar) {
+    console.log(`   Acórdão ${m.chave} · ${m.enunciadoId} · herda de ${m.herdadoDe}`);
+  }
 
   if (!executar) {
     console.log('\nModo: dry-run (nada será gravado)');
@@ -79,27 +101,36 @@ async function main() {
 
   console.log('\nModo: EXECUTAR');
 
-  for (const h of herdar) {
-    await prisma.teseEnunciado.update({
-      where: { id: h.enunciadoId },
-      data: {
-        veredito: h.veredito,
-        publicado: h.publicado,
-        herdadoDe: h.herdadoDe,
-        vitrinePublica: false,
-        julgadoEm: null,
-        julgadoPor: null,
-        reconferenciaPendente: true,
-      },
-    });
-  }
+  // Tudo numa transação só: uma falha no meio deixava metade do primeiro
+  // movimento aplicada, sem forma barata de descobrir onde parou — e o segundo
+  // movimento agora grava linha a linha (cada uma com o seu `herdadoDe`),
+  // então não há mais um `updateMany` que sirva de âncora.
+  await prisma.$transaction([
+    ...herdar.map((h) =>
+      prisma.teseEnunciado.update({
+        where: { id: h.enunciadoId },
+        data: {
+          veredito: h.veredito,
+          publicado: h.publicado,
+          herdadoDe: h.herdadoDe,
+          vitrinePublica: false,
+          julgadoEm: null,
+          julgadoPor: null,
+          reconferenciaPendente: true,
+        },
+      })
+    ),
+    ...marcar.map((m) =>
+      prisma.teseEnunciado.update({
+        where: { id: m.enunciadoId },
+        // `herdadoDe` junto da marca: a fila da folha descarta em silêncio a
+        // pendência que não aponta para o enunciado aprovado.
+        data: { reconferenciaPendente: true, herdadoDe: m.herdadoDe },
+      })
+    ),
+  ]);
 
-  const marcados = await prisma.teseEnunciado.updateMany({
-    where: { id: { in: marcar } },
-    data: { reconferenciaPendente: true },
-  });
-
-  console.log(`\nHerdados: ${herdar.length} · Marcados: ${marcados.count}\n`);
+  console.log(`\nHerdados: ${herdar.length} · Marcados: ${marcar.length}\n`);
 }
 
 main()

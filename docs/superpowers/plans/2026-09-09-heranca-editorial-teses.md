@@ -702,12 +702,26 @@ git commit -m "feat(teses): seção de reconferência na folha de calibração"
 - Test: `lib/tcu/backfill-heranca.test.ts`
 - Test: `e2e/heranca-editorial.spec.ts`
 
+> **Correção de 09/09/2026 — este texto estava errado, e o erro chegou ao código.**
+> A versão original devolvia `marcar: string[]`, uma lista pura de ids. Como o
+> segundo movimento gravava só `reconferenciaPendente`, e como nesses
+> enunciados o `herdadoDe` é nulo por construção, a fila da folha
+> (`lib/teses/reconferencia.ts`, que exige `reconferenciaPendente` **E**
+> `herdadoDe`) os descartava em silêncio: metade do backfill era inerte, contra
+> a spec §7, que manda "marcar a pendência **e gravar `herdadoDe`**". O plano
+> abaixo já está corrigido — `marcar` carrega o id do antecessor **conferido
+> individualmente** (nunca o de lote, que faria a folha exibir "Aprovada por
+> danbarral:lote-confianca-alta"), o vigente traz `julgadoPor` para não pedir
+> reconferência do que uma pessoa acabou de conferir, e o grupo traz `chave`
+> para o dry-run poder listar o que vai tocar.
+
 **Interfaces:**
 - Consumes: `carregarVeredito(..., { herdarComTextoDiferente: true })` da Task 1; a coluna da Task 2.
 - Produces:
-  - `interface PlanoHerdar { enunciadoId: string; veredito: string; publicado: boolean; herdadoDe: string }`
-  - `interface GrupoDeVersoes { vigentes: Array<{ id: string; enunciado: string; veredito: string | null }>; anteriores: Array<AnteriorJulgavel> }`
-  - `planejarBackfill(grupos: GrupoDeVersoes[]): { herdar: PlanoHerdar[]; marcar: string[] }`
+  - `interface PlanoHerdar { chave: string; enunciadoId: string; veredito: string; publicado: boolean; herdadoDe: string }`
+  - `interface PlanoMarcar { chave: string; enunciadoId: string; herdadoDe: string }`
+  - `interface GrupoDeVersoes { chave: string; vigentes: Array<{ id: string; enunciado: string; veredito: string | null; julgadoPor: string | null }>; anteriores: Array<AnteriorJulgavel> }`
+  - `planejarBackfill(grupos: GrupoDeVersoes[]): { herdar: PlanoHerdar[]; marcar: PlanoMarcar[] }`
 
 > **O backfill aplica a MESMA regra da Task 1, chamando a mesma função.** Um
 > `planejarBackfill` com lógica própria seria uma segunda implementação da
@@ -719,12 +733,20 @@ git commit -m "feat(teses): seção de reconferência na folha de calibração"
 
 - [ ] **Step 1: Escrever o teste dos dois movimentos**
 
+> **Testar `planejarBackfill` isolado NÃO basta.** Foi exatamente assim que o
+> defeito acima atravessou cinco revisões: o plano casava com o teste, e o
+> teste nunca perguntava se a fila mostrava alguma coisa. O arquivo precisa
+> conter também o par **`planejarBackfill` → `selecionarReconferencia`**,
+> alimentando a saída de um na entrada do outro, que é como os dois se
+> encontram em produção.
+
 Criar `lib/tcu/backfill-heranca.test.ts`:
 
 ```typescript
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { planejarBackfill } from './backfill-heranca';
+import { planejarBackfill, type GrupoDeVersoes } from './backfill-heranca';
+import { selecionarReconferencia } from '../teses/reconferencia';
 
 const em = new Date('2026-08-13T00:00:00Z');
 const antecessorJulgado = {
@@ -734,59 +756,94 @@ const antecessorJulgado = {
 };
 const antecessorDeLote = { ...antecessorJulgado, id: 'ant-2', julgadoPor: 'danbarral:lote-confianca-alta' };
 
+const grupo = (over: Partial<GrupoDeVersoes> = {}): GrupoDeVersoes => ({
+  chave: '1441/2016',
+  vigentes: [],
+  anteriores: [antecessorJulgado],
+  ...over,
+});
+
 describe('planejarBackfill', () => {
   // Primeiro movimento: os 3 acórdãos que sumiram (spec §7).
   it('herda para enunciado vigente SEM veredito', () => {
-    const r = planejarBackfill([{
-      vigentes: [{ id: 'novo-1', enunciado: 'Nova.', veredito: null }],
-      anteriores: [antecessorJulgado],
-    }]);
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-1', enunciado: 'Nova.', veredito: null, julgadoPor: null }],
+    })]);
     expect(r.herdar).toEqual([
-      { enunciadoId: 'novo-1', veredito: 'fiel', publicado: true, herdadoDe: 'ant-1' },
+      { chave: '1441/2016', enunciadoId: 'novo-1', veredito: 'fiel', publicado: true, herdadoDe: 'ant-1' },
     ]);
     expect(r.marcar).toEqual([]);
   });
 
   // Segundo movimento: os 6 carimbados pelo lote (spec §7). Nada sai do ar —
   // o veredito de lote fica, e a pendencia torna visivel o que estava oculto.
+  // A marca vem acompanhada de `herdadoDe`, senao a fila a descarta.
   it('apenas marca quando o vigente ja tem veredito e o antecessor foi conferido', () => {
-    const r = planejarBackfill([{
-      vigentes: [{ id: 'novo-2', enunciado: 'Nova.', veredito: 'fiel' }],
-      anteriores: [antecessorJulgado],
-    }]);
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-2', enunciado: 'Nova.', veredito: 'fiel', julgadoPor: 'danbarral:lote-confianca-alta' }],
+    })]);
     expect(r.herdar).toEqual([]);
-    expect(r.marcar).toEqual(['novo-2']);
+    expect(r.marcar).toEqual([{ chave: '1441/2016', enunciadoId: 'novo-2', herdadoDe: 'ant-1' }]);
+  });
+
+  // O id gravado e o do antecessor CONFERIDO INDIVIDUALMENTE, nunca o de lote
+  // — com o de lote, a folha exibiria "Aprovada por danbarral:lote-...".
+  it('marca apontando para o antecessor conferido, nao para o de lote', () => {
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-6', enunciado: 'Nova.', veredito: 'fiel', julgadoPor: 'danbarral:lote-confianca-alta' }],
+      anteriores: [antecessorDeLote, antecessorJulgado],
+    })]);
+    expect(r.marcar).toEqual([{ chave: '1441/2016', enunciadoId: 'novo-6', herdadoDe: 'ant-1' }]);
   });
 
   // Antecessor de lote nao e conferencia individual: marcar seria ruido.
   it('nao marca quando o antecessor tambem era de lote', () => {
-    const r = planejarBackfill([{
-      vigentes: [{ id: 'novo-3', enunciado: 'Nova.', veredito: 'fiel' }],
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-3', enunciado: 'Nova.', veredito: 'fiel', julgadoPor: 'danbarral:lote-confianca-alta' }],
       anteriores: [antecessorDeLote],
-    }]);
+    })]);
     expect(r.herdar).toEqual([]);
+    expect(r.marcar).toEqual([]);
+  });
+
+  // Pedir reconferencia do que uma pessoa acabou de conferir e inventar
+  // trabalho, e contradiz `dados-do-veredito.ts`.
+  it('nao marca quando o proprio vigente ja foi conferido por uma pessoa', () => {
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-7', enunciado: 'Nova.', veredito: 'fiel', julgadoPor: 'daniel' }],
+    })]);
     expect(r.marcar).toEqual([]);
   });
 
   // O backfill nao pode inventar onde a regra da Task 1 se recusa a decidir.
   it('nao herda quando a versao anterior tem vereditos divergentes', () => {
-    const r = planejarBackfill([{
-      vigentes: [{ id: 'novo-4', enunciado: 'Nova.', veredito: null }],
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-4', enunciado: 'Nova.', veredito: null, julgadoPor: null }],
       anteriores: [antecessorJulgado, { ...antecessorJulgado, id: 'ant-3', veredito: 'errada' }],
-    }]);
+    })]);
     expect(r.herdar).toEqual([]);
   });
 
   // Texto identico ja e tratado pela redestilacao (nivel 1); o backfill nao
   // tem o que fazer, e marcar seria pendencia falsa.
   it('ignora enunciado cujo texto e identico ao do antecessor', () => {
-    const r = planejarBackfill([{
-      vigentes: [{ id: 'novo-5', enunciado: 'Antiga.', veredito: 'fiel' }],
-      anteriores: [antecessorJulgado],
-    }]);
+    const r = planejarBackfill([grupo({
+      vigentes: [{ id: 'novo-5', enunciado: 'Antiga.', veredito: 'fiel', julgadoPor: null }],
+    })]);
     expect(r.herdar).toEqual([]);
     expect(r.marcar).toEqual([]);
   });
+});
+
+// O par completo: o plano só vale se o que ele grava chega à fila. Um helper
+// simula a escrita do script (cada movimento grava `reconferenciaPendente` E
+// `herdadoDe`) e entrega o resultado a `selecionarReconferencia`; as asserções
+// conferem que o cartão aparece com o texto anterior e a AUTORIA certos.
+describe('planejarBackfill — o que o plano grava chega mesmo a fila', () => {
+  // ... aplicarNaFila(plano, enunciados, anteriores) → selecionarReconferencia
+  it('o 2o movimento produz um cartao visivel, com o texto e a autoria certos', () => { /* ... */ });
+  it('o 1o movimento tambem chega a fila', () => { /* ... */ });
+  it('a marca nunca atribui a uma pessoa um carimbo de lote', () => { /* ... */ });
 });
 ```
 
@@ -810,44 +867,61 @@ Criar `lib/tcu/backfill-heranca.ts`:
  * com o nível 2 ligado, a mesma função que a redestilação usa. Uma segunda
  * implementação estaria livre para divergir da primeira, e é justamente contra
  * isso que este projeto centraliza suas regras.
+ *
+ * POR QUE O PLANO NÃO CARREGA `retiradoEm`/`retiradoMotivo` — a justificativa
+ * fica NO ARQUIVO, não no diretório de planejamento: medido em 09/09/2026, as
+ * 3 únicas retiradas do banco estão todas na versão VIGENTE, então não há o
+ * que recuperar, e o nível 2 fecha a lacuna para o futuro. É um fato do banco
+ * naquela data, e envelhece.
  */
-import { carregarVeredito, type EnunciadoJulgavel } from './carregar-veredito';
+import { carregarVeredito, type AnteriorParaHeranca } from './carregar-veredito';
 
 const ETIQUETA_DE_LOTE = ':lote-';
 
-export type AnteriorJulgavel = EnunciadoJulgavel & {
-  julgadoEm: Date | null;
-  julgadoPor: string | null;
-  publicado?: boolean;
-  vitrinePublica?: boolean;
-  retiradoEm?: Date | null;
-  retiradoMotivo?: string | null;
-};
+export type AnteriorJulgavel = AnteriorParaHeranca;
+
+/** Um julgamento é de pessoa quando não traz a etiqueta de lote. */
+function ehConferenciaIndividual(julgadoPor: string | null | undefined): boolean {
+  return julgadoPor != null && !julgadoPor.includes(ETIQUETA_DE_LOTE);
+}
 
 export interface PlanoHerdar {
+  chave: string;
   enunciadoId: string;
   veredito: string;
   publicado: boolean;
   herdadoDe: string;
 }
 
+/**
+ * O segundo movimento também grava `herdadoDe`, e não só a marca de pendência:
+ * sem ele a fila da folha descarta o enunciado em silêncio.
+ */
+export interface PlanoMarcar {
+  chave: string;
+  enunciadoId: string;
+  herdadoDe: string;
+}
+
 export interface GrupoDeVersoes {
-  vigentes: Array<{ id: string; enunciado: string; veredito: string | null }>;
+  chave: string;
+  vigentes: Array<{ id: string; enunciado: string; veredito: string | null; julgadoPor: string | null }>;
   anteriores: AnteriorJulgavel[];
 }
 
 export function planejarBackfill(
   grupos: GrupoDeVersoes[]
-): { herdar: PlanoHerdar[]; marcar: string[] } {
+): { herdar: PlanoHerdar[]; marcar: PlanoMarcar[] } {
   const herdar: PlanoHerdar[] = [];
-  const marcar: string[] = [];
+  const marcar: PlanoMarcar[] = [];
 
   for (const g of grupos) {
     // Uma conferência individual em qualquer enunciado da versão anterior
     // qualifica o grupo: a folha julga por cartão de acórdão, então o
-    // julgamento vale para a versão inteira.
-    const houveConferenciaIndividual = g.anteriores.some(
-      (a) => a.veredito !== null && a.julgadoPor !== null && !a.julgadoPor.includes(ETIQUETA_DE_LOTE)
+    // julgamento vale para a versão inteira. Guardamos QUAL enunciado era, e
+    // não apenas que houve um: é o id dele que o segundo movimento grava.
+    const conferidoIndividualmente = g.anteriores.find(
+      (a) => a.veredito !== null && ehConferenciaIndividual(a.julgadoPor)
     );
 
     for (const v of g.vigentes) {
@@ -862,6 +936,7 @@ export function planejarBackfill(
         // anterior falou com uma voz só — a regra da Task 1 já cuidou disso.
         if (h.veredito === null || h.herdadoDe === null) continue;
         herdar.push({
+          chave: g.chave,
           enunciadoId: v.id,
           veredito: h.veredito,
           publicado: h.publicado,
@@ -871,9 +946,14 @@ export function planejarBackfill(
       }
 
       // Segundo movimento: o vigente já tem veredito, então nada sai do ar.
-      // Só marca, e só quando o antecessor foi conferência individual —
-      // marcar um lote que sucede outro lote não informa nada a ninguém.
-      if (houveConferenciaIndividual) marcar.push(v.id);
+      // Quem já foi conferido por uma PESSOA nesta versão está lido.
+      if (ehConferenciaIndividual(v.julgadoPor)) continue;
+
+      // Só marca quando o antecessor foi conferência individual — marcar um
+      // lote que sucede outro lote não informa nada a ninguém.
+      if (conferidoIndividualmente) {
+        marcar.push({ chave: g.chave, enunciadoId: v.id, herdadoDe: conferidoIndividualmente.id });
+      }
     }
   }
 
@@ -884,7 +964,7 @@ export function planejarBackfill(
 - [ ] **Step 4: Rodar e ver passar**
 
 Run: `npx vitest run lib/tcu/backfill-heranca.test.ts`
-Expected: PASS (3 testes).
+Expected: PASS — os dois movimentos e o par com a fila.
 
 - [ ] **Step 5: Escrever o script**
 
@@ -918,6 +998,9 @@ const prisma = new PrismaClient({ adapter, log: ['error'] });
 const SELECT_ENUNCIADO = {
   id: true, enunciado: true, veredito: true, julgadoEm: true, julgadoPor: true,
   publicado: true, vitrinePublica: true, retiradoEm: true, retiradoMotivo: true,
+  // Mesmo par que `persistir-tese.ts` seleciona: sem eles `carregarVeredito`
+  // não reconhece um antecessor provisório e perde o rastro do julgamento.
+  herdadoDe: true, reconferenciaPendente: true,
 } as const;
 
 async function montarGrupos(): Promise<GrupoDeVersoes[]> {
@@ -943,7 +1026,15 @@ async function montarGrupos(): Promise<GrupoDeVersoes[]> {
     const anterior = versoes.filter((v) => !v.atual).at(-1);
     if (!vigente || !anterior) continue;
     grupos.push({
-      vigentes: vigente.enunciados.map((e) => ({ id: e.id, enunciado: e.enunciado, veredito: e.veredito })),
+      chave: `${vigente.numeroAlvo}/${vigente.anoAlvo}`,
+      vigentes: vigente.enunciados.map((e) => ({
+        id: e.id,
+        enunciado: e.enunciado,
+        veredito: e.veredito,
+        // `julgadoPor` do VIGENTE: sem ele o plano marcaria pendência sobre o
+        // que uma pessoa acabou de conferir.
+        julgadoPor: e.julgadoPor,
+      })),
       anteriores: anterior.enunciados,
     });
   }
@@ -960,9 +1051,21 @@ async function main() {
 
   const { herdar, marcar } = planejarBackfill(grupos);
 
+  // Contagens não deixam conferir nada, e este script roda uma vez só, contra
+  // produção: o dry-run é o único pré-voo do operador. Listar chave e id é o
+  // que permite abrir a folha e olhar o acórdão antes de aplicar (é o que
+  // `scripts/publicar-acervo-teses.ts` já faz com o que vai tocar).
   console.log(`\n1º movimento — voltam ao acervo restrito: ${herdar.length} enunciado(s)`);
-  console.log(`2º movimento — só ganham a marca de pendência: ${marcar.length} enunciado(s)`);
+  for (const h of herdar) {
+    console.log(`   Acórdão ${h.chave} · ${h.enunciadoId} · veredito ${h.veredito}` +
+      `${h.publicado ? ' · publicado' : ''} · herda de ${h.herdadoDe}`);
+  }
+
+  console.log(`\n2º movimento — só ganham a marca de pendência: ${marcar.length} enunciado(s)`);
   console.log('   (o 2º não muda o que está no ar; torna visível o veredito de lote sobre conferência anterior)');
+  for (const m of marcar) {
+    console.log(`   Acórdão ${m.chave} · ${m.enunciadoId} · herda de ${m.herdadoDe}`);
+  }
 
   if (!executar) {
     console.log('\nModo: dry-run (nada será gravado)');
@@ -972,27 +1075,36 @@ async function main() {
 
   console.log('\nModo: EXECUTAR');
 
-  for (const h of herdar) {
-    await prisma.teseEnunciado.update({
-      where: { id: h.enunciadoId },
-      data: {
-        veredito: h.veredito,
-        publicado: h.publicado,
-        herdadoDe: h.herdadoDe,
-        vitrinePublica: false,
-        julgadoEm: null,
-        julgadoPor: null,
-        reconferenciaPendente: true,
-      },
-    });
-  }
+  // Tudo numa transação só: uma falha no meio deixava metade do primeiro
+  // movimento aplicada, sem forma barata de descobrir onde parou — e o segundo
+  // movimento grava linha a linha (cada uma com o seu `herdadoDe`), então não
+  // há `updateMany` que sirva de âncora.
+  await prisma.$transaction([
+    ...herdar.map((h) =>
+      prisma.teseEnunciado.update({
+        where: { id: h.enunciadoId },
+        data: {
+          veredito: h.veredito,
+          publicado: h.publicado,
+          herdadoDe: h.herdadoDe,
+          vitrinePublica: false,
+          julgadoEm: null,
+          julgadoPor: null,
+          reconferenciaPendente: true,
+        },
+      })
+    ),
+    ...marcar.map((m) =>
+      prisma.teseEnunciado.update({
+        where: { id: m.enunciadoId },
+        // `herdadoDe` junto da marca: a fila da folha descarta em silêncio a
+        // pendência que não aponta para o enunciado aprovado.
+        data: { reconferenciaPendente: true, herdadoDe: m.herdadoDe },
+      })
+    ),
+  ]);
 
-  const marcados = await prisma.teseEnunciado.updateMany({
-    where: { id: { in: marcar } },
-    data: { reconferenciaPendente: true },
-  });
-
-  console.log(`\nHerdados: ${herdar.length} · Marcados: ${marcados.count}\n`);
+  console.log(`\nHerdados: ${herdar.length} · Marcados: ${marcar.length}\n`);
 }
 
 main()
@@ -1022,6 +1134,18 @@ test('texto novo sai da vitrine, fica no acervo e entra na fila', async () => {
 ```
 
 Acrescentar o arquivo à lista do passo **Run isolated database scenarios** em `.github/workflows/test.yml`.
+
+> **Guarda obrigatória no topo do spec.** Este é o único arquivo de `e2e/` que
+> fala com o banco fora do navegador, e por isso escapa de
+> `e2e/fixtures/database.ts` — aquela função só decide o que vai para
+> `webServer.env`, e devolve `TEST_DATABASE_URL` sem olhar para
+> `DATABASE_URL`. Neste projeto a `DATABASE_URL` local aponta para PRODUÇÃO.
+> O `beforeAll` precisa abortar quando `DATABASE_URL` e `TEST_DATABASE_URL` não
+> apontarem para o mesmo banco (mesmo host, mesmo nome), com mensagem dizendo
+> por quê — e o `afterAll` precisa desistir da limpeza pelo mesmo teste, para
+> que ela não seja a primeira escrita a escapar. A guarda fica NESTE arquivo, e
+> não no helper compartilhado: endurecer o helper quebraria a execução local
+> dos outros três specs, que nunca tocam `DATABASE_URL`.
 
 - [ ] **Step 7: Verificação e commit**
 
