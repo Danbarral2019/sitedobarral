@@ -19,14 +19,10 @@ const RAIZ = path.resolve(__dirname, '..', '..');
 const PASTAS = ['app', 'components', 'hooks'];
 const IGNORAR = new Set(['node_modules', '.next', '.claude', '__tests__']);
 
-// Violações anteriores à #212, fora do escopo dela. Ficam listadas para não
-// crescerem; ao corrigir uma, remova a linha (o segundo teste cobra isso).
-const CONHECIDAS = new Set([
-  'app/artigos/page.tsx -> @/lib/article-utils',
-  'components/ArticleBadges.tsx -> @/lib/article-utils',
-  'components/ArticleTreeNavigator.tsx -> @/lib/article-utils',
-  'components/lms/GamificationSidebar.tsx -> @/lib/gamification',
-]);
+// Exceções toleradas temporariamente, no formato 'arquivo -> @/lib/modulo'.
+// Deve ficar vazia; se precisar pôr algo aqui, remova a linha ao corrigir
+// (o segundo teste cobra isso).
+const CONHECIDAS = new Set<string>([]);
 
 function listarFontes(pasta: string): string[] {
   if (!fs.existsSync(pasta)) return [];

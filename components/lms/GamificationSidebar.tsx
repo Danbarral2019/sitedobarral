@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Flame, Trophy, Award, ChevronRight, Loader2 } from 'lucide-react';
-import { BADGE_TYPES } from '@/lib/gamification';
+import { BADGE_TYPES } from '@/lib/gamification-constants';
 import LeaderboardModal from './LeaderboardModal';
 
 interface GamificationData {

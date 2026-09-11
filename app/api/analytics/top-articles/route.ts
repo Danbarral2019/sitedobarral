@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTopArticles, getDocumentCountByArticle } from '@/lib/article-utils';
+import { getTopArticles, getDocumentCountByArticle } from '@/lib/article-analytics';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
