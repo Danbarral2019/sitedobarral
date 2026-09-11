@@ -7,7 +7,7 @@
 import { Mail, Trash2, Calendar, CheckCircle, XCircle, Users } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { NewsletterSubscriber, deleteNewsletterSubscriber } from '@/lib/newsletter';
+import type { NewsletterSubscriber } from '@/lib/newsletter';
 
 const STATUS_LABELS: Record<string, string> = {
   active: 'Ativo',
@@ -117,7 +117,12 @@ export const newsletterConfig: AdminListConfig<NewsletterSubscriber> = createLis
       color: 'text-red-600',
       action: async (subscriber) => {
         if (!confirm(`Tem certeza que deseja deletar o assinante "${subscriber.email}"?`)) return;
-        await deleteNewsletterSubscriber(subscriber.id);
+        const response = await fetch(`/api/newsletter/${subscriber.id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao deletar assinante');
+        }
       },
     },
   ],

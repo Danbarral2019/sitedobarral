@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Eye, EyeOff, Edit, Trash2, BookOpen, BarChart3, ExternalLink } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { GlossaryTerm, deleteGlossaryTerm } from '@/lib/glossario';
+import type { GlossaryTerm } from '@/lib/glossario';
 
 // Helper function
 function getCategoryColor(category: string | null): string {
@@ -182,7 +182,12 @@ export const glossarioConfig: AdminListConfig<GlossaryTerm> = createListConfig<G
         if (!confirm(`Tem certeza que deseja deletar o termo "${term.term}"?`)) {
           return;
         }
-        await deleteGlossaryTerm(term.id);
+        const response = await fetch(`/api/admin/glossary/${term.id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao deletar termo');
+        }
       },
     },
   ],

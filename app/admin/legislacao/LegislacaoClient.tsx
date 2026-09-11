@@ -11,7 +11,7 @@
 
 import { ResourceListClient } from '@/components/admin/ResourceListClient';
 import { PaginatedResult } from '@/lib/types/admin-list';
-import { LegislativeAct, LegislativeActStats } from '@/lib/legislacao';
+import type { LegislativeAct, LegislativeActStats } from '@/lib/legislacao';
 import { LegislacaoHeader } from './Header';
 import { createLegislacaoConfig } from './config';
 

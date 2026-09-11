@@ -79,15 +79,6 @@ export async function fetchGlossaryTermsPaginated(params: {
 }
 
 /**
- * Deletar termo do glossário
- */
-export async function deleteGlossaryTerm(id: string): Promise<void> {
-  await prisma.glossaryTerm.delete({
-    where: { id },
-  });
-}
-
-/**
  * Toggle status público
  */
 export async function toggleGlossaryTermPublic(id: string, currentStatus: boolean): Promise<void> {

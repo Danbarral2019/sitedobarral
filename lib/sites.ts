@@ -68,7 +68,3 @@ export async function fetchSitesPaginated(params: {
     totalPages: Math.ceil(total / pageSize),
   };
 }
-
-export async function deleteSite(id: string): Promise<void> {
-  await prisma.recommendedSite.delete({ where: { id } });
-}

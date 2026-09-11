@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Eye, Edit, Trash2, Calendar, CheckCircle, XCircle, Share2, FileText, Clock } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { BlogPost, deleteBlogPost } from '@/lib/blog';
+import type { BlogPost } from '@/lib/blog';
 
 export const blogConfig: AdminListConfig<BlogPost> = createListConfig<BlogPost>({
   title: 'Gerenciar Blog',
@@ -153,7 +153,12 @@ export const blogConfig: AdminListConfig<BlogPost> = createListConfig<BlogPost>(
         if (!confirm(`Tem certeza que deseja deletar "${post.title}"?`)) {
           return;
         }
-        await deleteBlogPost(post.id);
+        const response = await fetch(`/api/admin/blog-posts/${post.id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao deletar post');
+        }
       },
     },
   ],

@@ -7,7 +7,7 @@
 import { Mail, Trash2, Calendar, User, CheckCircle, Clock } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { ContactForm, deleteContactForm } from '@/lib/contatos';
+import type { ContactForm } from '@/lib/contatos';
 
 const STATUS_LABELS: Record<string, string> = {
   novo: 'Novo',
@@ -136,7 +136,14 @@ export const contatosConfig: AdminListConfig<ContactForm> = createListConfig<Con
       color: 'text-red-600',
       action: async (contact) => {
         if (!confirm(`Tem certeza que deseja deletar a mensagem de "${contact.name}"?`)) return;
-        await deleteContactForm(contact.id);
+        const response = await fetch('/api/admin/contatos', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: contact.id }),
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao deletar mensagem');
+        }
       },
     },
   ],

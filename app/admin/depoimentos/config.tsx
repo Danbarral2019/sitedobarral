@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { MessageSquare, Star, Edit, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { Testimonial } from '@/lib/depoimentos';
+import type { Testimonial } from '@/lib/depoimentos';
 
 export const depoimentosConfig: AdminListConfig<Testimonial> = createListConfig<Testimonial>({
   title: 'Depoimentos',

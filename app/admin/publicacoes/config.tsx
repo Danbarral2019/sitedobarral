@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Eye, Edit, Trash2, Calendar, CheckCircle, XCircle, BookOpen, FileText, Newspaper } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { Publication, deletePublication } from '@/lib/publications';
+import type { Publication } from '@/lib/publications';
 
 // Helper functions
 function getTypeLabel(type: string): string {
@@ -175,7 +175,12 @@ export const publicationsConfig: AdminListConfig<Publication> = createListConfig
         if (!confirm(`Tem certeza que deseja deletar "${pub.title}"?`)) {
           return;
         }
-        await deletePublication(pub.id);
+        const response = await fetch(`/api/admin/publications/${pub.id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao deletar publicação');
+        }
       },
     },
   ],
