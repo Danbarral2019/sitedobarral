@@ -11,7 +11,7 @@
 import { Eye, Edit, Trash2, Scale, Calendar, ExternalLink, FileText, Download } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
-import { LegislativeAct, LegislativeActStats } from '@/lib/legislacao';
+import type { LegislativeAct, LegislativeActStats } from '@/lib/legislacao';
 
 // Helper functions
 const TYPE_LABELS: Record<string, string> = {

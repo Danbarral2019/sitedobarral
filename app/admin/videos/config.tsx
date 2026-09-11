@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { Youtube, ExternalLink, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig, FilterConfig } from '@/lib/types/admin-list';
-import { CourseVideo } from '@/lib/videos';
+import type { CourseVideo } from '@/lib/videos';
 
 
 interface VideosConfigProps {

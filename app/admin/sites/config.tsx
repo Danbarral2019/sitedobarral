@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Globe, Edit, Trash2, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
 import { createListConfig } from '@/components/admin/ResourceListContainer';
 import { AdminListConfig } from '@/lib/types/admin-list';
-import { RecommendedSite, deleteSite } from '@/lib/sites';
+import type { RecommendedSite } from '@/lib/sites';
 
 export const sitesConfig: AdminListConfig<RecommendedSite> = createListConfig<RecommendedSite>({
   title: 'Sites Recomendados',
@@ -135,7 +135,12 @@ export const sitesConfig: AdminListConfig<RecommendedSite> = createListConfig<Re
       color: 'text-red-600',
       action: async (site) => {
         if (!confirm(`Tem certeza que deseja deletar "${site.title}"?`)) return;
-        await deleteSite(site.id);
+        const response = await fetch(`/api/admin/sites/${site.id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao deletar site');
+        }
       },
     },
   ],

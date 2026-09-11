@@ -70,12 +70,3 @@ export async function fetchBlogPostsPaginated(params: {
     totalPages: Math.ceil(total / pageSize),
   };
 }
-
-/**
- * Deletar post do blog
- */
-export async function deleteBlogPost(id: string): Promise<void> {
-  await prisma.blogPost.delete({
-    where: { id },
-  });
-}

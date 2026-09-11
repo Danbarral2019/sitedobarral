@@ -79,12 +79,3 @@ export async function fetchPublicationsPaginated(params: {
     totalPages: Math.ceil(total / pageSize),
   };
 }
-
-/**
- * Deletar publicação
- */
-export async function deletePublication(id: string): Promise<void> {
-  await prisma.publication.delete({
-    where: { id },
-  });
-}

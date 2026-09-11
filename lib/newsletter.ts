@@ -68,7 +68,3 @@ export async function fetchNewsletterSubscribersPaginated(params: {
     totalPages: Math.ceil(total / pageSize),
   };
 }
-
-export async function deleteNewsletterSubscriber(id: string): Promise<void> {
-  await prisma.newsletterSubscriber.delete({ where: { id } });
-}

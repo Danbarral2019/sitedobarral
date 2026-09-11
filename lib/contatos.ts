@@ -59,7 +59,3 @@ export async function fetchContactFormsPaginated(params: {
     totalPages: Math.ceil(total / pageSize),
   };
 }
-
-export async function deleteContactForm(id: string): Promise<void> {
-  await prisma.contactForm.delete({ where: { id } });
-}
