@@ -69,6 +69,7 @@ export default async function DocumentoPage({ params }: PageProps) {
       r2Key: true,
       tcuTextoCompleto: true,
       textoIntegral: true,
+      textoIntegralOcr: true,
     },
   });
 
@@ -216,6 +217,12 @@ export default async function DocumentoPage({ params }: PageProps) {
                   <span className="text-sm font-semibold text-brand-600 group-open:hidden">Ler</span>
                   <span className="text-sm font-semibold text-brand-600 hidden group-open:inline">Recolher</span>
                 </summary>
+                {inteiroTeor!.ocr && (
+                  <p className="mt-4 text-sm text-ink-muted max-w-[65ch]">
+                    Texto transcrito por reconhecimento óptico (OCR) do PDF digitalizado. Pode conter
+                    pequenos erros de transcrição; para citar, confira na fonte oficial.
+                  </p>
+                )}
                 {inteiroTeorTruncado(inteiroTeor!.texto) && (
                   <p className="mt-4 text-sm text-ink-muted max-w-[65ch]">
                     {inteiroTeor!.avisoLongo} e o texto abaixo está incompleto. A íntegra está na fonte oficial.

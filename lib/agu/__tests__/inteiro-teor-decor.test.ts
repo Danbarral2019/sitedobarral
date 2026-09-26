@@ -3,8 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const { mockExtrair } = vi.hoisted(() => ({ mockExtrair: vi.fn() }));
+const { mockExtrair, mockOcr } = vi.hoisted(() => ({ mockExtrair: vi.fn(), mockOcr: vi.fn() }));
 vi.mock('../../text-extractor', () => ({ extractTextFromPDF: (...a: unknown[]) => mockExtrair(...a) }));
+// O OCR real chama o Gemini: nos testes, sempre simulado.
+vi.mock('../../ai/ocr-pdf', async (orig) => ({
+  ...(await orig<typeof import('../../ai/ocr-pdf')>()),
+  transcreverPdfComOcr: (...a: unknown[]) => mockOcr(...a),
+}));
 
 import {
   aplicarTeto,
@@ -251,13 +256,43 @@ describe('capturarInteiroTeorDecor', () => {
     expect(update.mock.calls[0][0].data.textoIntegral.length).toBe(TETO_CHARS_TEXTO_INTEGRAL);
   });
 
-  it('PDF sem texto (escaneado) é falha e gasta tentativa — sem OCR', async () => {
+  it('PDF sem texto (escaneado) cujo OCR falha é falha e gasta tentativa', async () => {
     mockExtrair.mockResolvedValue({ success: true, text: '   \n-- 1 of 1 --\n' });
+    mockOcr.mockResolvedValue({ ok: false, erro: 'OCR interrompido: RECITATION' });
     const { db, update } = dbFake();
     const r = await capturarInteiroTeorDecor(db, doc, { fetchImpl: fetchPdf() });
     expect(r.status).toBe('falha');
-    expect(r.erro).toMatch(/sem texto/);
+    expect(r.erro).toMatch(/sem texto extraível; OCR interrompido: RECITATION/);
     expect(update.mock.calls[0][0].data).toEqual({ textoIntegralTentativas: { increment: 1 } });
+  });
+
+  it('PDF sem texto (escaneado) passa pelo OCR e grava com a marca de OCR', async () => {
+    mockExtrair.mockResolvedValue({ success: true, text: '   \n-- 1 of 1 --\n' });
+    const corpo = 'Trata-se de consulta sobre repactuação em contrato de serviço continuado. '.repeat(8).trim();
+    const transcricao = [
+      'ADVOCACIA-GERAL DA UNIÃO', 'NOTA DECOR/CGU/AGU N° 031/2009', corpo, '2',
+      'continuação da NOTA DECOR/CGU/AGU N° 031/2009', 'Fls. 12', '(...)', 'Brasília, 7 de janeiro de 2009.',
+    ].join('\n');
+    mockOcr.mockResolvedValue({ ok: true, texto: transcricao, tokensEntrada: 2375, tokensSaida: 4943 });
+    const { db, update } = dbFake();
+
+    const r = await capturarInteiroTeorDecor(db, doc, { fetchImpl: fetchPdf() });
+
+    expect(r).toMatchObject({ status: 'ok', ocr: true });
+    const data = update.mock.calls[0][0].data;
+    expect(data.textoIntegralOcr).toBe(true);
+    expect(data.textoIntegral).toContain('repactuação');
+    expect(data.textoIntegral).toContain('(...)');
+    expect(data.textoIntegral).not.toMatch(/continuação da NOTA|Fls\. 12/);
+  });
+
+  it('PDF com camada de texto não chama o OCR e grava sem a marca', async () => {
+    mockOcr.mockClear();
+    mockExtrair.mockResolvedValue({ success: true, text: FIXTURE });
+    const { db, update } = dbFake();
+    await capturarInteiroTeorDecor(db, doc, { fetchImpl: fetchPdf() });
+    expect(mockOcr).not.toHaveBeenCalled();
+    expect(update.mock.calls[0][0].data.textoIntegralOcr).toBe(false);
   });
 
   it('falha de download incrementa tentativas e não grava texto', async () => {

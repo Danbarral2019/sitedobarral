@@ -175,6 +175,9 @@ model Document {
   /// Falhas de captura (download, PDF sem texto etc.). A fila exclui quem
   /// chega a 3; um fix que possa recuperar os afetados reseta o contador.
   textoIntegralTentativas Int       @default(0)
+  /// O texto integral veio do OCR de PDF digitalizado (lib/ai/ocr-pdf.ts), não
+  /// da camada de texto do PDF. A página avisa que a transcrição pode ter erros.
+  textoIntegralOcr        Boolean   @default(false)
 
   tcuRelator        String? // Nome do relator
   tcuOrgaoJulgador  String? // Órgão julgador (Plenário, 1ª Câmara, etc)

@@ -9,7 +9,7 @@ import { downloadFromR2 } from '@/lib/storage/r2-client';
 import { extractText, normalizeText } from '@/lib/text-extractor';
 import { chunkText, chunkLegalDocument, chunkTCUDocument, TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
-import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
+import { transcreverPdfComOcr } from '@/lib/ai/ocr-pdf';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
 import { selectSourceText } from './source-text';
@@ -399,36 +399,13 @@ async function extractTextWithFallback(
  * OCR via Gemini Vision para PDFs escaneados
  */
 async function extractTextWithGeminiVision(pdfBuffer: Buffer): Promise<string> {
-  const { GoogleGenAI } = await import('@google/genai');
-
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY not configured');
-  }
-
-  const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
-  // Converte PDF buffer para base64
-  const base64 = pdfBuffer.toString('base64');
-
-  const result = await genAI.models.generateContent({
-    model: PRIMARY_GEMINI_MODEL,
-    contents: [
-      {
-        inlineData: {
-          mimeType: 'application/pdf',
-          data: base64,
-        },
-      },
-      {
-        text: `Extraia todo o texto deste documento PDF escaneado.
-             Mantenha a formatacao original (paragrafos, listas, etc).
-             Retorne apenas o texto extraido, sem comentarios adicionais.`,
-      },
-    ],
-  });
-
-  return result.text ?? '';
+  // Porta única de OCR (lib/ai/ocr-pdf.ts). Até 26/09/2026 esta função chamava
+  // o PRIMARY_GEMINI_MODEL (gemini-3-flash-preview), que recusa 8 de 10
+  // transcrições com finishReason RECITATION e devolve texto vazio, sem erro:
+  // o fallback de OCR não funcionava para PDF escaneado.
+  const r = await transcreverPdfComOcr(pdfBuffer);
+  if (!r.ok) throw new Error(r.erro);
+  return r.texto;
 }
 
 /**

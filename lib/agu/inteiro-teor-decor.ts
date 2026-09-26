@@ -24,10 +24,14 @@
  * embeddings. O texto é para LEITURA: não entra no retrieval (ver o
  * comentário do campo em prisma/schema.prisma).
  *
- * Sem OCR: PDF sem camada de texto é registrado como falha (OCR custa).
+ * PDF sem camada de texto (digitalizado; mais da metade do passivo) passa pelo
+ * OCR de lib/ai/ocr-pdf.ts e é gravado com `textoIntegralOcr: true`, que a
+ * página usa para avisar que a transcrição pode ter erros. Custo medido em
+ * 26/09/2026: ~US$ 0,0035 e ~21 s por parecer.
  */
 import type { PrismaClient } from '@prisma/client';
 import { extractTextFromPDF } from '../text-extractor';
+import { limparCabecalhosDeOcr, transcreverPdfComOcr, type ResultadoOcr } from '../ai/ocr-pdf';
 
 /** Mesmo teto do inteiro teor do TCU (TETO_CHARS_CATALOGO). */
 export const TETO_CHARS_TEXTO_INTEGRAL = 500_000;
@@ -222,13 +226,18 @@ export interface ResultadoExtracao {
   erro?: string;
   texto?: string;
   truncado?: boolean;
+  /** O texto veio do OCR (PDF digitalizado), não da camada de texto do PDF. */
+  ocr?: boolean;
+}
+
+export interface OpcoesExtracao {
+  fetchImpl?: typeof fetch;
+  /** Injeção para teste; o padrão chama o Gemini. */
+  ocrImpl?: (pdf: Buffer) => Promise<ResultadoOcr>;
 }
 
 /** Baixa + extrai + normaliza + teto, SEM gravar. Usado pela simulação do backfill. */
-export async function extrairInteiroTeorDecor(
-  url: string,
-  opts?: { fetchImpl?: typeof fetch },
-): Promise<ResultadoExtracao> {
+export async function extrairInteiroTeorDecor(url: string, opts?: OpcoesExtracao): Promise<ResultadoExtracao> {
   if (!ehPdfPublicoDecor(url)) return { ok: false, erro: 'URL não é PDF público do DECOR' };
 
   const r = await baixarPdfDecor(url, { fetchImpl: opts?.fetchImpl });
@@ -238,12 +247,20 @@ export async function extrairInteiroTeorDecor(
   if (!ext.success) return { ok: false, erro: `extração PDF: ${(ext.error ?? '').slice(0, 80)}` };
 
   const normalizado = normalizarTextoPdf(ext.text);
-  if (normalizado.length < MIN_CHARS_UTEIS) {
-    // Provável PDF escaneado. Sem OCR (custo): registra falha.
-    return { ok: false, erro: `PDF sem texto extraível (${normalizado.length} chars)` };
+  if (normalizado.length >= MIN_CHARS_UTEIS) {
+    const { texto, truncado } = aplicarTeto(normalizado);
+    return { ok: true, texto, truncado, ocr: false };
   }
-  const { texto, truncado } = aplicarTeto(normalizado);
-  return { ok: true, texto, truncado };
+
+  // PDF digitalizado: sem camada de texto, vai para o OCR.
+  const ocr = await (opts?.ocrImpl ?? transcreverPdfComOcr)(r.buf);
+  if (!ocr.ok) return { ok: false, erro: `PDF sem texto extraível; ${ocr.erro}` };
+  const doOcr = normalizarTextoPdf(limparCabecalhosDeOcr(ocr.texto));
+  if (doOcr.length < MIN_CHARS_UTEIS) {
+    return { ok: false, erro: `PDF sem texto extraível; OCR devolveu ${doOcr.length} chars` };
+  }
+  const { texto, truncado } = aplicarTeto(doOcr);
+  return { ok: true, texto, truncado, ocr: true };
 }
 
 export interface ResultadoCaptura {
@@ -251,13 +268,14 @@ export interface ResultadoCaptura {
   erro?: string;
   chars?: number;
   truncado?: boolean;
+  ocr?: boolean;
 }
 
 /** Captura e grava o inteiro teor de UM documento. Ver o cabeçalho do módulo. */
 export async function capturarInteiroTeorDecor(
   db: DbTextoIntegral,
   doc: DocumentoParaCapturar,
-  opts?: { fetchImpl?: typeof fetch },
+  opts?: OpcoesExtracao,
 ): Promise<ResultadoCaptura> {
   const r = await extrairInteiroTeorDecor(doc.url, opts);
 
@@ -275,7 +293,8 @@ export async function capturarInteiroTeorDecor(
       textoIntegral: r.texto,
       textoIntegralFonte: doc.url,
       textoIntegralEm: new Date(),
+      textoIntegralOcr: !!r.ocr,
     },
   });
-  return { status: 'ok', chars: r.texto.length, truncado: r.truncado };
+  return { status: 'ok', chars: r.texto.length, truncado: r.truncado, ocr: !!r.ocr };
 }
