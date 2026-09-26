@@ -7,6 +7,7 @@ import {
   extractYear,
   parseBRDate,
   extractTextFromHTML,
+  extractParagraphsFromHTML,
 } from '../utils';
 
 describe('normalizeTribunalCode', () => {
@@ -108,5 +109,31 @@ describe('extractTextFromHTML', () => {
 
   it('converte <br> em separador de espaço', () => {
     expect(extractTextFromHTML('<div>linha1<br>linha2</div>')).toBe('linha1 linha2');
+  });
+});
+
+describe('extractParagraphsFromHTML', () => {
+  const html =
+    '<div><p>INTEIRO TEOR DA DELIBERAÇÃO</p><p>RELATÓRIO</p><p>Trata-se de   <b>auditoria</b>\n de conformidade.</p>' +
+    '<p>&nbsp;</p><ul><li>item um</li><li>item dois</li></ul>Linha A<br>Linha B</div>';
+
+  it('mantém um parágrafo por bloco e por <br>', () => {
+    expect(extractParagraphsFromHTML(html).split('\n')).toEqual([
+      'INTEIRO TEOR DA DELIBERAÇÃO',
+      'RELATÓRIO',
+      'Trata-se de auditoria de conformidade.',
+      'item um',
+      'item dois',
+      'Linha A',
+      'Linha B',
+    ]);
+  });
+
+  // A forma achatada cola palavras na fronteira de bloco ("DELIBERAÇÃORELATÓRIO");
+  // esta não pode colar.
+  it('não cola palavras de blocos vizinhos', () => {
+    const texto = extractParagraphsFromHTML(html);
+    expect(texto).not.toContain('DELIBERAÇÃORELATÓRIO');
+    expect(texto).not.toContain('umitem');
   });
 });

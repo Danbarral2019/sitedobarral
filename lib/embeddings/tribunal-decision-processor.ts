@@ -10,6 +10,19 @@ import { chunkLegalDocument, type TextChunk } from './text-chunker';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';
 import { apiLogger } from "@/lib/logger";
 
+/**
+ * Tribunais cujo `fullText` entra no embedding. Só o TST: lá ele é a tese da
+ * súmula/OJ, curta e central. O TCE-PE passou a gravar o inteiro teor
+ * (2026-09-26) para LEITURA na página; indexá-lo trocaria o resumo por dezenas
+ * de chunks de voto, a mesma aposta do PR #206 no TCU, que ainda não foi medida.
+ * Incluir um tribunal aqui é decisão de retrieval: medir no eval antes.
+ */
+const TRIBUNAIS_COM_TEXTO_INTEGRAL_INDEXADO = new Set(['TST']);
+
+export function indexaTextoIntegral(tribunalCode: string): boolean {
+  return TRIBUNAIS_COM_TEXTO_INTEGRAL_INDEXADO.has(tribunalCode.toUpperCase());
+}
+
 // ===========================
 // Types
 // ===========================
@@ -86,9 +99,10 @@ export async function processTribunalDecision(
       });
     }
 
-    // 3. Montar texto: fullIdentifier + ementa + fullText
+    // 3. Montar texto: fullIdentifier + ementa + (fullText do TST | summary)
     const textParts = [decision.fullIdentifier, decision.ementa];
-    if (decision.fullText) textParts.push(decision.fullText);
+    const textoIntegral = indexaTextoIntegral(decision.tribunalCode) ? decision.fullText : null;
+    if (textoIntegral) textParts.push(textoIntegral);
     else if (decision.summary) textParts.push(decision.summary);
 
     const fullText = textParts.join('\n\n');

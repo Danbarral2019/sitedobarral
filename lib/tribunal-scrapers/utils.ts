@@ -119,6 +119,36 @@ export function extractTextFromHTML(html: string): string {
     .trim();
 }
 
+/**
+ * Como `extractTextFromHTML`, mas preserva os parágrafos: fim de bloco
+ * (p, div, li, h1-h6, tr) e <br> viram quebra de linha, e só os espaços dentro
+ * de cada linha são colapsados. Serve ao texto GRAVADO para leitura (inteiro
+ * teor); `extractTextFromHTML` continua sendo a forma achatada que alimenta
+ * ementa e classificação, que não devem mudar por causa disto.
+ */
+export function extractParagraphsFromHTML(html: string): string {
+  // Quebra de linha crua no fonte HTML é espaço, não parágrafo.
+  const preprocessed = html
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6]|tr|blockquote)\s*>/gi, '$&\n');
+
+  const $ = cheerio.load(preprocessed);
+  $('script, style, nav, footer, header, noscript').remove();
+
+  let text = $('body').text();
+  if (!text.trim()) {
+    text = $.root().text();
+  }
+
+  return text
+    .split('\n')
+    .map((linha) => linha.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n')
+    .trim();
+}
+
 // ===========================
 // Decision number normalization
 // ===========================
