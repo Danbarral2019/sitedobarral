@@ -59,6 +59,8 @@ export interface InteiroTeorParaExibir {
   subtitulo: string;
   /** Início do aviso de texto cortado, com a concordância certa ("Este acórdão é longo demais"). */
   avisoLongo: string;
+  /** Transcrição por OCR de PDF digitalizado: a página avisa que pode ter erros. */
+  ocr?: boolean;
 }
 
 /** Artigo + nome do documento de fonte externa, pela categoria. */
@@ -89,12 +91,13 @@ export function escolherInteiroTeor(doc: {
   category: string;
   tcuTextoCompleto?: string | null;
   textoIntegral?: string | null;
+  textoIntegralOcr?: boolean | null;
 }): InteiroTeorParaExibir | null {
   if (doc.tcuTextoCompleto && doc.tcuTextoCompleto.trim()) {
     return { texto: doc.tcuTextoCompleto, subtitulo: 'Relatório, voto e acórdão', avisoLongo: 'Este acórdão é longo demais' };
   }
   if (doc.textoIntegral && doc.textoIntegral.trim()) {
-    return { texto: doc.textoIntegral, ...nomeDoDocumento(doc.category) };
+    return { texto: doc.textoIntegral, ...nomeDoDocumento(doc.category), ocr: !!doc.textoIntegralOcr };
   }
   return null;
 }
