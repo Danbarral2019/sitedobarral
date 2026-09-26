@@ -97,6 +97,8 @@ import { tceRJScraper } from './tce-rj';
 import { tceRSScraper } from './tce-rs';
 import { tcePEScraper } from './tce-pe';
 import { tcdfScraper } from './tcdf';
+import { trf5Scraper } from './trf5';
+import { tjdftScraper } from './tjdft';
 
 registerScraper(tceSPScraper);
 registerScraper(tcePRScraper);
@@ -106,3 +108,5 @@ registerScraper(tceRJScraper);
 registerScraper(tceRSScraper);
 registerScraper(tcePEScraper);
 registerScraper(tcdfScraper);
+registerScraper(trf5Scraper);
+registerScraper(tjdftScraper);

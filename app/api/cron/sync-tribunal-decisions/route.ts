@@ -13,7 +13,7 @@ export const maxDuration = 300;
  * Cron semanal: executa todos os scrapers de tribunais
  * Schedule: "0 7 * * 1" (segunda-feira 7h UTC = 4h BR)
  *
- * `?somente=<code>` executa só aquele scraper. Scrapers com `agendaPropria`
+ * `?somente=<code>[,<code>]` executa só esses scrapers. Scrapers com `agendaPropria`
  * ficam fora da rodada comum e têm entrada própria no vercel.json.
  */
 export async function GET(request: NextRequest) {
@@ -31,9 +31,10 @@ export async function GET(request: NextRequest) {
     definirOrcamentoIA(40);
 
     const somente = new URL(request.url).searchParams.get('somente');
-    const scrapers = getAllScrapers().filter((s) => (somente ? s.code === somente : !s.agendaPropria));
-    if (somente && scrapers.length === 0) {
-      return NextResponse.json({ error: `Scraper "${somente}" não encontrado` }, { status: 400 });
+    const codigos = somente ? somente.split(',').map((c) => c.trim()).filter(Boolean) : null;
+    const scrapers = getAllScrapers().filter((s) => (codigos ? codigos.includes(s.code) : !s.agendaPropria));
+    if (codigos && scrapers.length !== codigos.length) {
+      return NextResponse.json({ error: `Scraper não encontrado em "${somente}"` }, { status: 400 });
     }
     const results = [];
 

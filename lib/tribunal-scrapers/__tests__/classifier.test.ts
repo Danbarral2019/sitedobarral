@@ -5,6 +5,7 @@ import {
   classifyDecision,
   generateDecisionSummary,
   promptAmbiguos,
+  textoParaIA,
   definirOrcamentoIA,
   orcamentoIARestante,
 } from '../classifier';
@@ -237,7 +238,7 @@ describe('generateDecisionSummary', () => {
 
 describe('promptAmbiguos', () => {
   it('acrescenta o critério de "licitação só como contexto" apenas para tribunais judiciais', () => {
-    for (const t of ['STF', 'STJ', 'TRF5', 'TJDF']) expect(promptAmbiguos(t)).toContain('tribunal judicial');
+    for (const t of ['STF', 'STJ', 'TRF5', 'TJDF', 'TJDFT', 'TJSP']) expect(promptAmbiguos(t)).toContain('tribunal judicial');
     for (const t of ['TCU', 'TCE-SC', 'TCDF', undefined]) expect(promptAmbiguos(t)).not.toContain('tribunal judicial');
   });
 });
@@ -295,5 +296,17 @@ describe('classifyDecision — rejeição por palavra-chave de texto sobre licit
   it('texto sem menção a licitação não gasta IA', async () => {
     await classifyDecision({ title: 'x', ementa: 'Aposentadoria especial de servidor.' }, true);
     expect(generateMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('textoParaIA', () => {
+  it('inclui o texto da decisão quando existe (no TCDF a tese está no dispositivo)', () => {
+    const t = textoParaIA({ title: 'Decisão 1/2026 TCDF', ementa: 'Edital do Pregão X.', fullText: 'O Tribunal decidiu: determinar a exclusão da exigência de atestado.' });
+    expect(t).toContain('Ementa: Edital do Pregão X.');
+    expect(t).toContain('Texto da decisão: O Tribunal decidiu: determinar a exclusão');
+  });
+
+  it('sem texto da decisão, fica só a ementa', () => {
+    expect(textoParaIA({ title: 't', ementa: 'e' })).not.toContain('Texto da decisão');
   });
 });

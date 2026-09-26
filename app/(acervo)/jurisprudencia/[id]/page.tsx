@@ -135,6 +135,8 @@ function tribunalLabel(code: string): string {
     'tce-rs': 'TCE-RS',
     'tce-pe': 'TCE-PE',
     tcdf: 'TCDF',
+    trf5: 'TRF5',
+    tjdft: 'TJDFT',
     'datajud-stj': 'DataJud (STJ)',
     tst: 'TST',
   };
@@ -222,10 +224,11 @@ export default function JurisprudenciaDetailPage() {
   const isCanonical = CANONICAL_TYPES.includes(decision.decisionType);
   const sumula = isCanonical ? parseSumulaPayload(decision.sourceRawData) : null;
   // Inteiro teor: acórdão do TCU (Document.tcuTextoCompleto, via a API),
-  // deliberação do TCE-PE e dispositivo da decisão do TCDF. As súmulas do TST também preenchem fullText, mas lá
+  // deliberação do TCE-PE, dispositivo da decisão do TCDF e acórdão do TRF5
+  // (o Júlia não publica link por documento). As súmulas do TST também preenchem fullText, mas lá
   // ele é o payload da tese, já renderizado acima; por isso a lista fechada.
   const inteiroTeor =
-    !isCanonical && ['TCU', 'TCE-PE', 'TCDF'].includes(decision.tribunalCode) ? decision.fullText : null;
+    !isCanonical && ['TCU', 'TCE-PE', 'TCDF', 'TRF5'].includes(decision.tribunalCode) ? decision.fullText : null;
   const blocosInteiroTeor = inteiroTeor ? blocosDoInteiroTeor(inteiroTeor) : [];
   const sitBadge = sumula ? SITUACAO_BADGES[sumula.situacao] : null;
 

@@ -398,17 +398,24 @@ ATENÇÃO (tribunal judicial): a TESE precisa ser sobre a disciplina de licitaç
 - suspensão de liminar sobre concessão de serviços não pedagógicos em escolas, decidindo requisitos de contracautela → a tese é processual e de concessão: REJEITAR
 Também REJEITAR quando o que se decide é competência, requisitos de liminar ou contracautela, cabimento de recurso ou improbidade em geral.`;
 
-const TRIBUNAIS_JUDICIAIS = /^(STF|STJ|TST|TRF\d?|TJ[A-Z]{2}|TNU)$/i;
+const TRIBUNAIS_JUDICIAIS = /^(STF|STJ|TST|TRF\d?|TJ[A-Z]{2,3}|TNU)$/i;
 
 export function promptAmbiguos(tribunalCode?: string): string {
   return TRIBUNAIS_JUDICIAIS.test((tribunalCode || '').trim()) ? PROMPT_AMBIGUOS + CLAUSULA_JUDICIAIS : PROMPT_AMBIGUOS;
 }
 
-function textoParaIA(d: DecisionInput): string {
+/**
+ * Texto enviado à IA. Inclui o texto da decisão quando existe: no TCDF a
+ * "ementa" só descreve o objeto do processo e o que foi decidido está no
+ * dispositivo; sem ele, a IA rejeitava por "não indicar a tese".
+ */
+export function textoParaIA(d: DecisionInput): string {
+  const decisao = (d.fullText || '').trim();
   return `Tribunal: ${d.tribunalCode || 'n/d'}
 Tipo: ${d.decisionType || 'n/d'}
 Título: ${d.title}
-Ementa: ${d.ementa.slice(0, 3000)}`;
+Ementa: ${d.ementa.slice(0, 3000)}${decisao ? `
+Texto da decisão: ${decisao.slice(0, 2500)}` : ''}`;
 }
 
 /**

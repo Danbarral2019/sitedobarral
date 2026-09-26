@@ -28,6 +28,8 @@ const TRIBUNAL_COLORS: Record<string, string> = {
   'TCE-RS': 'bg-violet-100 text-violet-800',
   'TCE-PE': 'bg-teal-100 text-teal-800',
   'TCDF': 'bg-teal-100 text-teal-800',
+  'TRF5': 'bg-rose-100 text-rose-800',
+  'TJDFT': 'bg-rose-100 text-rose-800',
   TCU: 'bg-red-100 text-red-800',
   'DATAJUD-STJ': 'bg-red-100 text-red-800',
   TST: 'bg-rose-100 text-rose-800',
