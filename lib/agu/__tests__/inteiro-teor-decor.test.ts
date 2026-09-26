@@ -70,6 +70,13 @@ describe('normalizarTextoPdf (texto real de PDF do DECOR)', () => {
     expect(texto).not.toMatch(/-- \d+ of \d+ --/);
   });
 
+  // Regressão (26/09/2026): 1 dos 20 primeiros PDFs do passivo trazia 0x00, e o
+  // Postgres recusava a gravação ("invalid byte sequence for encoding UTF8").
+  it('remove o caractere nulo, que o Postgres não aceita em texto', () => {
+    expect(normalizarTextoPdf('PARECER N\u0000º 1/2012\u0000\nTexto do parecer.')).not.toContain('\u0000');
+    expect(normalizarTextoPdf('PARECER N\u0000º 1/2012')).toBe('PARECER Nº 1/2012');
+  });
+
   it('não deixa tabulação nem espaços repetidos', () => {
     expect(texto).not.toMatch(/\t/);
     expect(texto).not.toMatch(/ {2,}/);
