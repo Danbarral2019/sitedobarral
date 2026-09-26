@@ -40,6 +40,9 @@ const DISABLED_MESSAGE = 'Site tcjuris.tce.mg.gov.br indisponivel - scraper desa
 class TCEMGScraper implements TribunalScraper {
   code = SCRAPER_CODE;
   name = 'TCE-MG';
+  // Em 26/09/2026 o site voltou, mas a pesquisa exige reCAPTCHA v2 e passa por
+  // WAF F5; os dados abertos do TCE-MG não publicam decisões.
+  disabled = 'Pesquisa do TCE-MG exige reCAPTCHA; sem fonte automatizável';
   fullName = 'Tribunal de Contas do Estado de Minas Gerais';
   type = 'tce' as const;
   hasApi = false;

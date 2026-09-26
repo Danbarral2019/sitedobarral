@@ -97,97 +97,140 @@ const CSV_COLUMNS: (keyof CSVRow)[] = [
   'NrDOE', 'NmRelator', 'Termos', 'ReferenciaLegislativas', 'DsTema', 'UrlPDF',
 ];
 
+/**
+ * Orçamento de tempo para processar decisões numa execução. O cron semanal
+ * roda os TCEs em sequência dentro de maxDuration = 300 s, e cada decisão
+ * aprovada gera resumo no Gemini. O que não couber fica para a semana
+ * seguinte: a seleção sempre recomeça pelos mais recentes que faltam.
+ */
+const TEMPO_PROCESSAMENTO_MS = 90_000;
+
 // ===========================
 // CSV Parsing (no external libs)
 // ===========================
 
 /**
- * Parse a CSV line that uses semicolon delimiter and may have quoted fields.
- * Handles:
- * - Fields wrapped in double quotes (e.g., "value with ; inside")
- * - Escaped double quotes inside quoted fields (e.g., "He said ""hello""")
- * - Trailing whitespace inside quoted fields
+ * Parse do CSV inteiro (delimitador ';'), campo a campo.
+ *
+ * Não quebra por linha antes de parsear: o TCE-PR publica resumos com quebra
+ * de linha DENTRO de campos entre aspas (75 registros em 2026), e o parser
+ * antigo, que dividia o texto por linha, deslocava as colunas desses
+ * registros. Trata aspas escapadas (""), BOM e CRLF. Pula o cabeçalho.
  */
-function parseCSVLine(line: string): string[] {
-  const fields: string[] = [];
+export function parseCSV(csvText: string): CSVRow[] {
+  const text = csvText.charCodeAt(0) === 0xfeff ? csvText.slice(1) : csvText;
+  const records: string[][] = [];
+  let fields: string[] = [];
   let current = '';
   let inQuotes = false;
-  let i = 0;
 
-  while (i < line.length) {
-    const char = line[i];
+  const endField = () => {
+    fields.push(current);
+    current = '';
+  };
+  const endRecord = () => {
+    endField();
+    if (fields.some((f) => f.trim() !== '')) records.push(fields);
+    fields = [];
+  };
 
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
     if (inQuotes) {
       if (char === '"') {
-        // Check for escaped quote ""
-        if (i + 1 < line.length && line[i + 1] === '"') {
+        if (text[i + 1] === '"') {
           current += '"';
-          i += 2;
-          continue;
+          i++;
+        } else {
+          inQuotes = false;
         }
-        // End of quoted field
-        inQuotes = false;
-        i++;
-        continue;
+      } else {
+        current += char;
       }
+    } else if (char === '"') {
+      inQuotes = true;
+    } else if (char === ';') {
+      endField();
+    } else if (char === '\n') {
+      endRecord();
+    } else if (char !== '\r') {
       current += char;
-      i++;
-    } else {
-      if (char === '"') {
-        inQuotes = true;
-        i++;
-        continue;
-      }
-      if (char === ';') {
-        fields.push(current.trim());
-        current = '';
-        i++;
-        continue;
-      }
-      current += char;
-      i++;
     }
   }
+  if (current !== '' || fields.length > 0) endRecord();
 
-  // Push the last field
-  fields.push(current.trim());
+  // records[0] é o cabeçalho
+  return records.slice(1).map((f) => {
+    const row: Record<string, string> = {};
+    for (let j = 0; j < CSV_COLUMNS.length; j++) {
+      row[CSV_COLUMNS[j]] = (f[j] || '').trim();
+    }
+    return row as unknown as CSVRow;
+  });
+}
 
-  return fields;
+/** Minúsculas e sem diacríticos: "Licitação" e "licitacao" viram a mesma coisa. */
+function semAcento(texto: string): string {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 /**
- * Parse the full CSV text into an array of CSVRow objects.
- * Skips the BOM if present and the header row.
+ * Filtra as linhas relevantes para licitações. Compara SEM acento dos dois
+ * lados: os termos padrão (`DEFAULT_SEARCH_TERMS`) são escritos sem acento e
+ * o CSV é acentuado, então a comparação literal quase nunca casava (70
+ * linhas de 2026 em vez de 239).
  */
-function parseCSV(csvText: string): CSVRow[] {
-  // Remove BOM if present
-  let text = csvText;
-  if (text.charCodeAt(0) === 0xFEFF) {
-    text = text.slice(1);
-  }
+export function filtrarPorTermos(rows: CSVRow[], searchTerms: string[]): CSVRow[] {
+  const termos = searchTerms.map(semAcento);
 
-  const lines = text.split(/\r?\n/);
-  if (lines.length < 2) return [];
-
-  // Skip header row (line 0)
-  const rows: CSVRow[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-
-    const fields = parseCSVLine(line);
-
-    // Build row object mapping columns to values
-    const row: Record<string, string> = {};
-    for (let j = 0; j < CSV_COLUMNS.length; j++) {
-      row[CSV_COLUMNS[j]] = (fields[j] || '').trim();
+  return rows.filter((row) => {
+    // Consulta e prejulgado entram sempre (decisões paradigmáticas)
+    if (/consulta|prejulgado/.test(semAcento(row.DsClasseProcessual))) {
+      return true;
     }
 
-    rows.push(row as unknown as CSVRow);
-  }
+    const pesquisavel = semAcento(
+      [
+        row.DsResumo,
+        row.DsTitulo,
+        row.DsClasseProcessual,
+        row.DsSubClasseProcessual,
+        row.DsTema,
+        row.Termos,
+        row.ReferenciaLegislativas,
+        row.DsEntidade,
+      ].join(' '),
+    );
 
-  return rows;
+    return termos.some((termo) => pesquisavel.includes(termo));
+  });
+}
+
+/** "DD/MM/YYYY" → número comparável (YYYYMMDD); sem data vai para o fim. */
+function chaveData(data?: string): number {
+  const m = data?.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  return m ? Number(`${m[3]}${m[2]}${m[1]}`) : 0;
+}
+
+/**
+ * Escolhe o que processar nesta execução: tira o que já está no banco ANTES
+ * de aplicar o limite e começa pelo julgamento mais recente.
+ *
+ * Antes, o limite era aplicado primeiro sobre o CSV em ordem crescente: a
+ * janela era sempre a mesma, já toda gravada, e o scraper passou de
+ * 27/04/2026 a 26/09/2026 criando 0 itens por semana com status "success".
+ */
+export function selecionarParaProcessar<T extends { dataJulgamento?: string }>(
+  decisoes: T[],
+  chave: (d: T) => string,
+  existentes: Set<string>,
+  maxItems: number,
+  forcar: boolean,
+): T[] {
+  return decisoes
+    .filter((d) => forcar || !existentes.has(chave(d)))
+    .sort((x, y) => chaveData(y.dataJulgamento) - chaveData(x.dataJulgamento))
+    .slice(0, maxItems);
 }
 
 /**
@@ -288,7 +331,7 @@ class TCEPRScraper implements TribunalScraper {
       }
 
       // Filter rows by relevance to search terms
-      const filtered = this.filterBySearchTerms(allRows, searchTerms);
+      const filtered = filtrarPorTermos(allRows, searchTerms);
       console.log(`[${SCRAPER_CODE}] Filtered ${filtered.length} relevant rows from ${allRows.length} total`);
 
       // Convert CSV rows to RawDecision format
@@ -305,7 +348,20 @@ class TCEPRScraper implements TribunalScraper {
 
       result.itemsFound = unique.length;
 
-      for (const raw of unique.slice(0, maxItems)) {
+      const identificador = (d: RawDecision) =>
+        buildFullIdentifier(SCRAPER_CODE, 'acordao', normalizeDecisionNumber(d.decisionNumber));
+      const jaGravados = await prisma.tribunalDecision.findMany({
+        where: { fullIdentifier: { in: unique.map(identificador) } },
+        select: { fullIdentifier: true },
+      });
+      const existentes = new Set(jaGravados.map((d) => d.fullIdentifier));
+      const aProcessar = selecionarParaProcessar(unique, identificador, existentes, maxItems, forceRescrape);
+      result.itemsSkipped = unique.length - aProcessar.length;
+
+      let processados = 0;
+      for (const raw of aProcessar) {
+        if (Date.now() - startTime > TEMPO_PROCESSAMENTO_MS) break;
+        processados++;
         try {
           await this.processDecision(raw, result, forceRescrape);
         } catch (error) {
@@ -326,6 +382,9 @@ class TCEPRScraper implements TribunalScraper {
         metadata: {
           totalCSVRows: allRows.length,
           filteredRows: filtered.length,
+          jaGravados: existentes.size,
+          selecionados: aProcessar.length,
+          processados,
           source: 'dados-abertos-csv',
         },
       });
@@ -366,38 +425,6 @@ class TCEPRScraper implements TribunalScraper {
     }
 
     return parseCSV(csvText);
-  }
-
-  // ===========================
-  // Filter by search terms
-  // ===========================
-
-  private filterBySearchTerms(rows: CSVRow[], searchTerms: string[]): CSVRow[] {
-    const termsLower = searchTerms.map(t => t.toLowerCase());
-
-    return rows.filter(row => {
-      // Always include Consulta/Prejulgado class (paradigmatic decisions)
-      const classeProcessual = row.DsClasseProcessual.toLowerCase();
-      if (/consulta|prejulgado/.test(classeProcessual)) {
-        return true;
-      }
-
-      // Combine searchable fields into one lowercase string
-      const searchable = [
-        row.DsResumo,
-        row.DsTitulo,
-        row.DsClasseProcessual,
-        row.DsSubClasseProcessual,
-        row.DsTema,
-        row.Termos,
-        row.ReferenciaLegislativas,
-        row.DsEntidade,
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      return termsLower.some(term => searchable.includes(term));
-    });
   }
 
   // ===========================

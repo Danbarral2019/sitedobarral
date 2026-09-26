@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError } from '@/lib/errors/api-error';
@@ -36,17 +35,8 @@ export async function POST(request: NextRequest) {
     const result = await scraper.scrape({ maxItems: 50 });
     const duration = Date.now() - startTime;
 
-    // Log health
-    await prisma.scraperHealthLog.create({
-      data: {
-        scraperCode: scraper.code,
-        status: result.itemsError > 0 ? 'partial_failure' : 'success',
-        itemsFound: result.itemsFound,
-        itemsNew: result.itemsNew,
-        itemsError: result.itemsError,
-        duration,
-      },
-    });
+    // O log de saúde é gravado pelo próprio scraper (logScraperHealth). Uma
+    // segunda linha aqui mascarava falhas — ver sync-tribunal-decisions.
 
     return NextResponse.json({
       success: true,

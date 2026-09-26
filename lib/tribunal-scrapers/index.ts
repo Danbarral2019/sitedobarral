@@ -16,6 +16,12 @@ export interface TribunalScraper {
   type: 'tce' | 'judicial';
   hasApi: boolean;
   supportsFullText: boolean;
+  /**
+   * Motivo, quando o scraper está desativado. O cron semanal pula scrapers
+   * desativados sem gravar log de saúde (senão o monitor acusaria falha para
+   * sempre); o gatilho manual do admin continua podendo executá-lo.
+   */
+  disabled?: string;
   canHandle(tribunalCode: string): boolean;
   scrape(options: TribunalScrapeOptions): Promise<TribunalScrapeResult>;
   healthCheck(): Promise<ScraperHealthStatus>;
