@@ -27,6 +27,7 @@ import { fetchInteiroTeor } from './inteiro-teor-fetch';
 import { rtfToText } from './rtf-to-text';
 import { analisarAcordao, artigosDebatidos } from './analise-relevancia';
 import { prisma } from '../prisma';
+import { CATEGORIAS_CURADAS_TCU, dadosDePromocao, devePromover } from './publicacao-grafo';
 
 /** Acima disto trunca e marca `truncado: true` no JSON (o de 14,5 MB do spike). */
 export const TETO_CHARS_CATALOGO = 500_000;
@@ -45,6 +46,8 @@ export interface ResultadoCatalogacao {
   chars?: number;
   /** Texto cortado no teto de 500.000 chars (TETO_CHARS_CATALOGO). Ausente nos caminhos de falha. */
   truncado?: boolean;
+  /** Acórdão do grafo promovido a acervo público (lib/tcu/publicacao-grafo.ts). */
+  promovido?: boolean;
 }
 
 async function marcarFalha(id: string, erro: string): Promise<void> {
@@ -104,10 +107,32 @@ export async function catalogarAcordao(doc: AcordaoParaCatalogar): Promise<Resul
     },
   });
 
+  const promovido = await promoverSeForDeLicitacao(doc.id, final);
+
   return {
     status: analise.secoes === null ? 'ok-sem-secoes' : 'ok',
     debatidos,
     chars: final.length,
     truncado,
+    promovido,
   };
+}
+
+/**
+ * Acórdão do grafo cujo inteiro teor cita lei de licitações vira acervo público
+ * (lib/tcu/publicacao-grafo.ts). Roda aqui porque é aqui que o inteiro teor
+ * chega: assim os acórdãos que o backfill retroativo continua trazendo seguem a
+ * mesma regra do passivo, sem passo manual.
+ */
+async function promoverSeForDeLicitacao(id: string, texto: string): Promise<boolean> {
+  const atual = await prisma.document.findUnique({ where: { id }, select: { category: true, url: true, tags: true } });
+  if (!atual) return false;
+  const duplicaCurado = atual.url
+    ? (await prisma.document.count({
+        where: { url: atual.url, category: { in: [...CATEGORIAS_CURADAS_TCU] }, id: { not: id } },
+      })) > 0
+    : false;
+  if (!devePromover({ category: atual.category, tcuTextoCompleto: texto, duplicaCurado })) return false;
+  await prisma.document.update({ where: { id }, data: dadosDePromocao(atual.tags) });
+  return true;
 }

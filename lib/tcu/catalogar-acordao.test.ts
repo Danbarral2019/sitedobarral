@@ -1,16 +1,24 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFetch, mockRtfToText, mockUpdate } = vi.hoisted(() => ({
+const { mockFetch, mockRtfToText, mockUpdate, mockFindUnique, mockCount } = vi.hoisted(() => ({
   mockFetch: vi.fn(),
   mockRtfToText: vi.fn(),
   mockUpdate: vi.fn(),
+  mockFindUnique: vi.fn(),
+  mockCount: vi.fn(),
 }));
 
 vi.mock('@/lib/tcu/inteiro-teor-fetch', () => ({ fetchInteiroTeor: (...a: unknown[]) => mockFetch(...a) }));
 vi.mock('@/lib/tcu/rtf-to-text', () => ({ rtfToText: (...a: unknown[]) => mockRtfToText(...a) }));
 vi.mock('@/lib/prisma', () => ({
-  prisma: { document: { update: (...a: unknown[]) => mockUpdate(...a) } },
+  prisma: {
+    document: {
+      update: (...a: unknown[]) => mockUpdate(...a),
+      findUnique: (...a: unknown[]) => mockFindUnique(...a),
+      count: (...a: unknown[]) => mockCount(...a),
+    },
+  },
 }));
 
 import { catalogarAcordao } from './catalogar-acordao';
@@ -28,6 +36,9 @@ describe('catalogarAcordao', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpdate.mockResolvedValue({});
+    // Padrão: acórdão curado (não é do grafo), então a promoção não se aplica.
+    mockFindUnique.mockResolvedValue({ category: 'acordao', url: 'https://tcu/1', tags: null });
+    mockCount.mockResolvedValue(0);
   });
 
   it('sucesso: persiste análise, texto e debatidos; status ok', async () => {
@@ -118,5 +129,60 @@ describe('catalogarAcordao', () => {
     const data = mockUpdate.mock.calls[0][0].data;
     expect(data.tcuTextoCompleto.length).toBe(500_000);
     expect(data.tcuAnalise.truncado).toBe(true);
+  });
+});
+
+describe('catalogarAcordao — promoção do grafo a acervo público', () => {
+  const TEXTO_LICITACAO = `${TEXTO_COM_SECOES}
+Nos termos do art. 62 da Lei nº 14.133/2021, a habilitação...`;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpdate.mockResolvedValue({});
+    mockFetch.mockResolvedValue({ ok: true, buf: Buffer.from('rtf') });
+    mockCount.mockResolvedValue(0);
+  });
+
+  it('promove acórdão do grafo que cita lei de licitações', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_LICITACAO);
+    mockFindUnique.mockResolvedValue({ category: 'acordao-grafo', url: 'https://tcu/1', tags: '["TCU","grafo","2026"]' });
+
+    const r = await catalogarAcordao(doc);
+
+    expect(r.promovido).toBe(true);
+    const promo = mockUpdate.mock.calls[1][0];
+    expect(promo.where).toEqual({ id: 'd1' });
+    expect(promo.data).toEqual({ category: 'acordao', isPublic: true, isCommon: true, tags: '["TCU","2026"]' });
+  });
+
+  it('não promove acórdão do grafo que não cita lei de licitações', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_COM_SECOES);
+    mockFindUnique.mockResolvedValue({ category: 'acordao-grafo', url: 'https://tcu/1', tags: null });
+
+    const r = await catalogarAcordao(doc);
+
+    expect(r.promovido).toBe(false);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('não promove quando já existe acórdão curado com a mesma URL', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_LICITACAO);
+    mockFindUnique.mockResolvedValue({ category: 'acordao-grafo', url: 'https://tcu/1', tags: null });
+    mockCount.mockResolvedValue(1);
+
+    const r = await catalogarAcordao(doc);
+
+    expect(r.promovido).toBe(false);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('não mexe em acórdão que já é curado', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_LICITACAO);
+    mockFindUnique.mockResolvedValue({ category: 'acordao', url: 'https://tcu/1', tags: null });
+
+    const r = await catalogarAcordao(doc);
+
+    expect(r.promovido).toBe(false);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
   });
 });
