@@ -5,8 +5,10 @@
 
 ## Visão geral
 
-Pipeline diário que busca normas relevantes no DOU (15 termos amplos),
-classifica via IA editorial (Gemini 3-flash, threshold 70), grava na fila
+Pipeline diário que busca normas relevantes no DOU (15 termos amplos em
+`lib/dou-search-terms.ts`), descarta famílias fora de escopo com o pré-filtro
+determinístico, busca o texto oficial de cada candidato, classifica via IA
+editorial (prompt v2, threshold 70, piso 50), grava na fila
 `/admin/clipping-dou` e envia email pro admin quando há novidades. Zero
 auto-import.
 
@@ -15,7 +17,10 @@ auto-import.
 | Item | Caminho |
 |---|---|
 | Cron diário | `app/api/cron/sync-dou-atos-normativos/route.ts` (8h UTC) |
-| Classificador IA | `lib/dou-editorial-classifier.ts` |
+| Pré-filtro de escopo | `lib/dou-escopo-prefiltro.ts` (Defesa Civil, orçamento, consulta tributária, concessão específica, ato concreto, imóvel da SPU) |
+| Classificador IA | `lib/dou-editorial-classifier.ts` (recebe o texto oficial, até 3.000 caracteres) |
+| Gabarito do editor | `eval/dou-triagem-2026-09.json` (607 itens julgados em 26/09/2026) |
+| Avaliação | `scripts/eval-dou-prefiltro.ts` (sem custo) · `scripts/eval-dou-classificador.ts` (Gemini) |
 | Email | `sendDouEditorialAlert` em `lib/email.ts` |
 | Fila admin | `app/admin/clipping-dou/` |
 | API admin | `app/api/admin/clipping-dou/{list,[id]/approve,[id]/reject,bulk}` |
@@ -100,7 +105,7 @@ Depois copie o `trigger_id` retornado pra essa documentação.
 - Verifique `/api/dou-clipping-health` → `classifiedLast24h`. Se 0, o cron
   pode não estar rodando — checar Vercel cron logs.
 - Se cron rodou mas `queuePending=0`: ou termos restritos demais (revisitar
-  `SEARCH_TERMS_V2` em `app/api/cron/sync-dou-atos-normativos/route.ts`),
+  `SEARCH_TERMS_V2` em `lib/dou-search-terms.ts`),
   ou classificador rejeitando tudo (rodar lookback dry-run e inspecionar
   scores).
 
@@ -108,6 +113,23 @@ Depois copie o `trigger_id` retornado pra essa documentação.
 - Classificador está descalibrado pro escopo editorial. Refine system
   prompt em `lib/dou-editorial-classifier.ts:SYSTEM_PROMPT`, incremente
   `EDITORIAL_PROMPT_VERSION` e rode reclassify ad-hoc.
+- Antes de publicar qualquer mudança de prompt ou de pré-filtro, meça contra o
+  gabarito do editor:
+  - `npx tsx scripts/eval-dou-prefiltro.ts` — tem de terminar com 0 aprovados
+    descartados (sai com código 1 se atingir algum).
+  - `npx dotenv -e .env.local -- npx tsx scripts/eval-dou-classificador.ts` —
+    amostra de 118 itens. Medição de 26/09/2026 (prompt v2 com texto): 12/12
+    aprovados chegam à fila; 3/106 rejeitados ainda chegam. Sem o texto
+    oficial, o v2 perde a Portaria SEGES 6.364 (nota 45).
+- Rejeições novas viram gabarito: exporte e acrescente ao JSON para que a
+  próxima calibração as considere.
+
+**Sintoma: cron perto do limite de 300 s**
+- Em set/2026 o cron levava 226-288 s. A busca no DOU (15 termos paginados,
+  1,5 s entre termos) consome ~175 s; texto oficial ~2 s (6 em paralelo);
+  IA ~40 s. `stats.segundos` na resposta mostra o tempo por fase. O texto
+  oficial para de ser buscado aos 200 s (`TEXT_FETCH_DEADLINE_MS`) e os
+  candidatos restantes seguem só com o trecho da busca.
 
 **Sintoma: erro 500 no `/admin/clipping-dou`**
 - Geralmente: campo `editorialAffects` com JSON malformado. Use a função

@@ -1,5 +1,5 @@
 /**
- * Lookback CLI: re-busca o DOU dos últimos N dias com os 15 termos do
+ * Lookback CLI: re-busca o DOU dos últimos N dias com os termos do
  * Clipping v2, classifica via IA editorial e popula a fila admin.
  *
  * NÃO dispara email (volume potencial alto distrai). Dedup por
@@ -23,24 +23,10 @@ import {
   type EditorialCandidate,
 } from '../lib/dou-editorial-classifier';
 import { prisma } from '../lib/prisma';
+import { motivoForaDeEscopo } from '../lib/dou-escopo-prefiltro';
+import { scrapeContent, type DOUEnrichedContent } from '../lib/dou-scraper';
+import { SEARCH_TERMS_V2 } from '../lib/dou-search-terms';
 
-const SEARCH_TERMS_V2 = [
-  'lei 14.133 OR lei 14133 OR nova lei de licitações',
-  'decreto licitação OR decreto contratação',
-  'instrução normativa SEGES OR instrução normativa MGI',
-  'portaria normativa licitação OR portaria normativa contratação',
-  'portaria SEGES OR portaria MGI',
-  'instrução normativa CGU OR portaria CGU',
-  'parecer AGU OR orientação normativa AGU',
-  'portaria SECEX OR resolução TCU',
-  'decreto servidor público federal',
-  'decreto teletrabalho OR decreto jornada servidor',
-  'decreto contratos administrativos federais',
-  'decreto regime jurídico único',
-  'decreto regulamenta lei 14.133',
-  'reorganização administração federal contratações',
-  'fundo de contratações OR centralização compras governo',
-];
 
 const BATCH_SIZE = 5;
 const SCORE_FLOOR = 50;
@@ -77,9 +63,15 @@ async function main() {
   console.log(`[lookback] ${results.length} resultados únicos`);
 
   // 2. Filtrar concretos + dedup
-  const candidates: Array<{ raw: typeof results[number]; cleanTitle: string; cleanAbstract: string }> = [];
+  const candidates: Array<{
+    raw: typeof results[number];
+    cleanTitle: string;
+    cleanAbstract: string;
+    enriched?: DOUEnrichedContent | null;
+  }> = [];
   let skippedConcreto = 0;
   let skippedDup = 0;
+  let skippedEscopo = 0;
 
   for (const r of results) {
     const cleanTitle = r.title.replace(/<[^>]*>/g, '').trim();
@@ -101,9 +93,19 @@ async function main() {
     });
     if (dupA) { skippedDup++; continue; }
 
+    if (motivoForaDeEscopo({ title: cleanTitle, abstract: cleanAbstract, hierarchyStr: r.hierarchyStr })) {
+      skippedEscopo++;
+      continue;
+    }
+
     candidates.push({ raw: r, cleanTitle, cleanAbstract });
   }
-  console.log(`[lookback] candidatos pra IA: ${candidates.length} (concretos: ${skippedConcreto}, dups: ${skippedDup})`);
+  console.log(`[lookback] candidatos pra IA: ${candidates.length} (concretos: ${skippedConcreto}, dups: ${skippedDup}, fora de escopo: ${skippedEscopo})`);
+
+  // 2b. Texto oficial de cada candidato (a IA erra julgando só o trecho da busca)
+  for (const c of candidates) {
+    c.enriched = await scrapeContent(c.raw.href).catch(() => null);
+  }
 
   // 3. Classificar IA + grava staging com source='lookback'
   let added = 0;
@@ -119,6 +121,7 @@ async function main() {
           title: b.cleanTitle,
           abstract: b.cleanAbstract,
           hierarchyStr: b.raw.hierarchyStr,
+          fullText: b.enriched?.conteudo || null,
         })),
       );
     } catch (e) {
@@ -153,6 +156,10 @@ async function main() {
             section: c.raw.section || 'do1',
             publishDate: c.raw.date || new Date().toLocaleDateString('pt-BR'),
             hierarchyStr: c.raw.hierarchyStr,
+            fullContent: c.enriched?.conteudo || null,
+            edition: c.enriched?.edicao || null,
+            page: c.enriched?.pagina || null,
+            organ: c.enriched?.orgao || null,
             category: 'ato_normativo',
             approvalStatus: 'pending',
             confidence: r.score,
