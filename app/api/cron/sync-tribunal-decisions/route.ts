@@ -26,23 +26,22 @@ export async function GET(request: NextRequest) {
     const results = [];
 
     for (const scraper of scrapers) {
+      if (scraper.disabled) {
+        console.log(`[Sync Tribunal Decisions] ${scraper.code} desativado: ${scraper.disabled}`);
+        results.push({ scraperCode: scraper.code, skipped: scraper.disabled });
+        continue;
+      }
       const startTime = Date.now();
       try {
         console.log(`[Sync Tribunal Decisions] Executando scraper: ${scraper.code}`);
         const result = await scraper.scrape({ maxItems: 50 });
         const duration = Date.now() - startTime;
 
-        // Log health
-        await prisma.scraperHealthLog.create({
-          data: {
-            scraperCode: scraper.code,
-            status: result.itemsError > 0 ? 'partial_failure' : 'success',
-            itemsFound: result.itemsFound,
-            itemsNew: result.itemsNew,
-            itemsError: result.itemsError,
-            duration,
-          },
-        });
+        // O log de saúde é gravado pelo próprio scraper (logScraperHealth), com
+        // o status real e a mensagem de erro. Não gravar uma segunda linha
+        // aqui: ela saía "success" sempre que itemsError era 0 — inclusive
+        // quando a fonte tinha caído — e zerava a contagem de falhas
+        // consecutivas do cron tribunal-scraper-health, que nunca alertava.
 
         console.log(
           `[Sync Tribunal Decisions] ${scraper.code}: found=${result.itemsFound} new=${result.itemsNew} errors=${result.itemsError} (${duration}ms)`
