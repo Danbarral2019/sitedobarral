@@ -7,7 +7,9 @@
  * - origem 'editor' → manually_approved / manually_rejected, reviewedBy = editor
  * - origem 'ia-*'   → auto_approved / auto_rejected
  * Aprovados ganham resumo (se não tiverem) e entram na fila de indexação.
- * Só mexe em quem AINDA está pendente (idempotente).
+ * Só mexe em quem AINDA está pendente (idempotente). Com
+ * --de-rejeitados-por-palavra-chave, mexe em quem está auto_rejected sem
+ * passagem pela IA, e só APROVA (rejeição confirmada fica como está).
  *
  * Uso:
  *   npx dotenv -e .env.local -- npx tsx scripts/aplicar-julgamento-pendentes.ts --decisoes <arquivo.json> [--aplicar]
@@ -31,6 +33,7 @@ async function main() {
   const i = process.argv.indexOf('--decisoes');
   if (i < 0) throw new Error('Informe --decisoes <arquivo.json>');
   const aplicar = process.argv.includes('--aplicar');
+  const deRejeitados = process.argv.includes('--de-rejeitados-por-palavra-chave');
   const decisoes: Decisao[] = JSON.parse(readFileSync(process.argv[i + 1], 'utf8'));
 
   const atuais = await prisma.tribunalDecision.findMany({
@@ -43,8 +46,11 @@ async function main() {
 
   for (const d of decisoes) {
     const atual = porId.get(d.id);
-    if (!atual || atual.approvalStatus !== 'pending') {
-      cont['ignorado (não está mais pendente)'] = (cont['ignorado (não está mais pendente)'] || 0) + 1;
+    const elegivel = deRejeitados
+      ? atual?.approvalStatus === 'auto_rejected' && !(atual.classificationReasoning || '').includes('IA') && d.decisao === 'aprovar'
+      : atual?.approvalStatus === 'pending';
+    if (!atual || !elegivel) {
+      cont['ignorado'] = (cont['ignorado'] || 0) + 1;
       continue;
     }
     const aprovado = d.decisao === 'aprovar';

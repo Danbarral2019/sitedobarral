@@ -48,6 +48,8 @@ export interface OpcoesConsultaStf {
   dataFim?: string;
   tamanho?: number;
   desloc?: number;
+  /** Só casos-paradigma de repercussão geral (carga histórica dos temas). */
+  somenteRepercussaoGeral?: boolean;
 }
 
 export function montarCorpoConsulta(o: OpcoesConsultaStf): object {
@@ -61,6 +63,10 @@ export function montarCorpoConsulta(o: OpcoesConsultaStf): object {
       },
     },
   ];
+
+  if (o.somenteRepercussaoGeral) {
+    filter.push({ term: { is_repercussao_geral: true } });
+  }
 
   const faixa: Record<string, string> = {};
   if (o.dataInicio) faixa.gte = o.dataInicio;

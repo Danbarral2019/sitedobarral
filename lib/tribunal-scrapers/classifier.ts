@@ -252,8 +252,13 @@ export async function classifyDecision(
   }
 
   // For pending decisions, optionally use Gemini IA for better classification
+  // Também vão para a IA as rejeições por palavra-chave de texto que menciona
+  // licitação: ementas curtas e em caixa alta somam poucos pontos. Em
+  // 26/09/2026 a palavra-chave tinha rejeitado teses de repercussão geral como
+  // "transporte público coletivo pressupõe prévia licitação" (RE 1001104).
+  const rejeicaoDiscutivel = approvalStatus === 'auto_rejected' && /licita/i.test(combinedText);
   const usarIA = useAI ?? orcamentoIA > 0;
-  if (approvalStatus === 'pending' && usarIA) {
+  if ((approvalStatus === 'pending' || rejeicaoDiscutivel) && usarIA) {
     if (useAI === undefined) orcamentoIA--;
     const ia = await julgarAmbiguoComIA(decision);
     if (ia && ia.veredito !== 'duvida') {
@@ -268,7 +273,7 @@ export async function classifyDecision(
         confidence: 70,
       };
     }
-    reasoning.push(ia ? `IA em dúvida: ${ia.motivo}` : 'IA indisponível ou resposta inválida; mantido pendente');
+    reasoning.push(ia ? `IA em dúvida: ${ia.motivo}` : 'IA indisponível ou resposta inválida; mantida a classificação por palavra-chave');
   }
 
   return {
