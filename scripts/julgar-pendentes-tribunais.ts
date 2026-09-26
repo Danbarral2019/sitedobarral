@@ -9,6 +9,9 @@
  * Uso:
  *   npx dotenv -e .env.local -- npx tsx scripts/julgar-pendentes-tribunais.ts --saida <arquivo.json> [--limite N]
  *
+ * Com --rejeitados-por-palavra-chave, julga em vez disso as decisões rejeitadas
+ * só pelo scoring (sem passagem pela IA) cuja ementa menciona licitação.
+ *
  * Custo: 1 chamada Gemini Flash por decisão.
  */
 import 'dotenv/config';
@@ -29,8 +32,15 @@ async function main() {
   if (!saida) throw new Error('Informe --saida <arquivo.json>');
   const limite = Number(arg('--limite')) || undefined;
 
+  const rejeitadosKw = process.argv.includes('--rejeitados-por-palavra-chave');
   const pendentes = await prisma.tribunalDecision.findMany({
-    where: { approvalStatus: 'pending' },
+    where: rejeitadosKw
+      ? {
+          approvalStatus: 'auto_rejected',
+          ementa: { contains: 'licita', mode: 'insensitive' },
+          NOT: { classificationReasoning: { contains: 'IA' } },
+        }
+      : { approvalStatus: 'pending' },
     select: {
       id: true, tribunalCode: true, decisionType: true, decisionNumber: true, title: true,
       ementa: true, relevanceScore: true, url: true, dataJulgamento: true,

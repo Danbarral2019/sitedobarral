@@ -273,3 +273,27 @@ describe('classifyDecision — orçamento de IA por execução', () => {
     definirOrcamentoIA(0);
   });
 });
+
+describe('classifyDecision — rejeição por palavra-chave de texto sobre licitação', () => {
+  // 'licitação' (+10) sozinha fica abaixo de 20: rejeitada pela palavra-chave.
+  const curta = { title: 'RE 1001104', ementa: 'TRANSPORTE PÚBLICO COLETIVO – LICITAÇÃO – FORMA ESSENCIAL.' };
+  beforeEach(() => generateMock.mockReset());
+
+  it('vai para a IA quando há orçamento, e a IA pode aprovar', async () => {
+    generateMock.mockResolvedValue({ text: JSON.stringify({ veredito: 'aprovar', nota: 90, motivo: 'tese de RG', temas: [] }) });
+    expect((await classifyDecision(curta, false)).approvalStatus).toBe('auto_rejected');
+    const r = await classifyDecision(curta, true);
+    expect(r.approvalStatus).toBe('auto_approved');
+    expect(r.reasoning).toContain('IA: tese de RG');
+  });
+
+  it('se a IA não decide, continua rejeitada (não vira pendente)', async () => {
+    generateMock.mockResolvedValue({ text: JSON.stringify({ veredito: 'duvida', nota: 50, motivo: 'incerto', temas: [] }) });
+    expect((await classifyDecision(curta, true)).approvalStatus).toBe('auto_rejected');
+  });
+
+  it('texto sem menção a licitação não gasta IA', async () => {
+    await classifyDecision({ title: 'x', ementa: 'Aposentadoria especial de servidor.' }, true);
+    expect(generateMock).not.toHaveBeenCalled();
+  });
+});
