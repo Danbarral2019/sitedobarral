@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { coletarStj } from '@/lib/stj/coletar';
+import { definirOrcamentoIA } from '@/lib/tribunal-scrapers/classifier';
 
 export const maxDuration = 300;
 
@@ -16,6 +17,8 @@ export async function GET(request: NextRequest) {
       // Dois meses por rodada: os dumps são mensais e podem trazer julgados
       // novos acrescentados a um dump já visto. O upsert é idempotente, então
       // reprocessar dispensa cursor de estado.
+      // IA para as decisões que o scoring por palavra-chave deixa pendentes.
+      definirOrcamentoIA(30);
       const r = await coletarStj({ meses: 2 });
       responseBody = { ok: true, ...r };
 

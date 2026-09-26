@@ -4,10 +4,23 @@ import {
   detectLeiArticles,
   classifyDecision,
   generateDecisionSummary,
+  promptAmbiguos,
+  definirOrcamentoIA,
+  orcamentoIARestante,
 } from '../classifier';
 
 // Mock do cliente Gemini usado por classifyWithAI/generateDecisionSummary.
 const queryGeminiTextMock = vi.fn();
+const generateMock = vi.fn();
+// Falha simulada fora do vi.fn: o Vitest reporta como erro do teste a
+// exceção lançada por um vi.fn, mesmo quando o código sob teste a captura.
+let falharGenerate = false;
+vi.mock('@/lib/ai', () => ({
+  generate: async (...args: unknown[]) => {
+    if (falharGenerate) throw new Error('429');
+    return generateMock(...args);
+  },
+}));
 vi.mock('@/lib/gemini/cached-client', () => ({
   queryGeminiText: (...args: unknown[]) => queryGeminiTextMock(...args),
 }));
@@ -125,42 +138,67 @@ describe('classifyDecision (sem IA — scoring por keywords)', () => {
 });
 
 describe('classifyDecision — caminho de IA (pending + useAI)', () => {
-  beforeEach(() => queryGeminiTextMock.mockReset());
+  beforeEach(() => generateMock.mockReset());
 
   // Decisão de score intermediário (pending, 20-54): 'licitação' (+10 alta),
   // 'fiscalização' (+5 média), 'gestão contratual' (+5 média), 'convênio' (+2 baixa) = 22.
   const pendingDecision = {
     title: 'Análise de licitação',
-    ementa: 'Trata de fiscalização e gestão contratual, além de convênio de cooperação.',
+    ementa: 'Trata de fiscalização e gestão contratual, além de convênio de cooperação. Art. 75 da Lei 14.133.',
   };
+  const responde = (o: object) => generateMock.mockResolvedValue({ text: JSON.stringify(o) });
 
-  it('usa o resultado da IA e preserva leiArticles/suggestedCourses locais', async () => {
+  it('aprova quando a IA diz aprovar, com nota mínima de 55 e artigos locais preservados', async () => {
     const base = await classifyDecision(pendingDecision, false);
     expect(base.approvalStatus).toBe('pending'); // garante que entra no ramo de IA
 
-    queryGeminiTextMock.mockResolvedValue({
-      response: JSON.stringify({
-        relevanceScore: 88,
-        approvalStatus: 'auto_approved',
-        themes: ['tema-ia'],
-        reasoning: 'relevante segundo IA',
-        confidence: 90,
-      }),
-    });
-
+    responde({ veredito: 'aprovar', nota: 40, motivo: 'fixa tese sobre dispensa', temas: ['contratação direta'] });
     const r = await classifyDecision(pendingDecision, true);
     expect(r.approvalStatus).toBe('auto_approved');
-    expect(r.relevanceScore).toBe(88);
-    expect(queryGeminiTextMock).toHaveBeenCalledTimes(1);
+    expect(r.relevanceScore).toBe(55);
+    expect(r.leiArticles).toEqual(base.leiArticles);
+    expect(r.reasoning).toContain('IA: fixa tese sobre dispensa');
+    expect(generateMock).toHaveBeenCalledTimes(1);
+    expect(generateMock.mock.calls[0][1]).toMatchObject({ provider: 'gemini', temperature: 0, thinkingBudget: 0 });
+    // Sem modelo explícito, a lib/ai manda o modelo padrão da tarefa (Claude) ao Gemini: 404.
+    expect(generateMock.mock.calls[0][1].model).toMatch(/^gemini-/);
   });
 
-  it('cai para o score por keyword quando o JSON da IA é inválido', async () => {
-    queryGeminiTextMock.mockResolvedValue({ response: 'não é json' });
+  it('rejeita quando a IA diz rejeitar', async () => {
+    responde({ veredito: 'rejeitar', nota: 10, motivo: 'capa de contrato, sem tese', temas: [] });
     const r = await classifyDecision(pendingDecision, true);
-    // classifyWithAI devolve null no parse-fail; classifyDecision mantém o pending
-    expect(r.approvalStatus).toBe('pending');
+    expect(r.approvalStatus).toBe('auto_rejected');
+    expect(r.relevanceScore).toBe(10);
   });
 
+  it('mantém pendente quando a IA tem dúvida', async () => {
+    responde({ veredito: 'duvida', nota: 50, motivo: 'incerto', temas: [] });
+    expect((await classifyDecision(pendingDecision, true)).approvalStatus).toBe('pending');
+  });
+
+  it('mantém pendente quando a resposta não é JSON', async () => {
+    generateMock.mockResolvedValue({ text: 'não é json' });
+    expect((await classifyDecision(pendingDecision, true)).approvalStatus).toBe('pending');
+  });
+
+  it('mantém pendente quando o veredito está fora do schema', async () => {
+    responde({ veredito: 'talvez', nota: 90, motivo: '', temas: [] });
+    expect((await classifyDecision(pendingDecision, true)).approvalStatus).toBe('pending');
+  });
+
+  it('mantém pendente quando a chamada à IA falha', async () => {
+    falharGenerate = true;
+    try {
+      expect((await classifyDecision(pendingDecision, true)).approvalStatus).toBe('pending');
+    } finally {
+      falharGenerate = false;
+    }
+  });
+
+  it('não chama a IA sem useAI', async () => {
+    await classifyDecision(pendingDecision, false);
+    expect(generateMock).not.toHaveBeenCalled();
+  });
 });
 
 describe('generateDecisionSummary', () => {
@@ -194,5 +232,44 @@ describe('generateDecisionSummary', () => {
     // o bloco catch de tratamento de erro.
     queryGeminiTextMock.mockResolvedValue({});
     expect(await generateDecisionSummary({ title: 'A', ementa: longText })).toBeNull();
+  });
+});
+
+describe('promptAmbiguos', () => {
+  it('acrescenta o critério de "licitação só como contexto" apenas para tribunais judiciais', () => {
+    for (const t of ['STF', 'STJ', 'TRF5', 'TJDF']) expect(promptAmbiguos(t)).toContain('tribunal judicial');
+    for (const t of ['TCU', 'TCE-SC', 'TCDF', undefined]) expect(promptAmbiguos(t)).not.toContain('tribunal judicial');
+  });
+});
+
+describe('classifyDecision — orçamento de IA por execução', () => {
+  const pendente = { title: 'Análise de licitação', ementa: 'Trata de fiscalização e gestão contratual, além de convênio de cooperação.' };
+  beforeEach(() => {
+    generateMock.mockReset();
+    generateMock.mockResolvedValue({ text: JSON.stringify({ veredito: 'aprovar', nota: 80, motivo: 'tese', temas: [] }) });
+  });
+
+  it('sem orçamento definido, não chama a IA (comportamento de sempre)', async () => {
+    definirOrcamentoIA(0);
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('pending');
+    expect(generateMock).not.toHaveBeenCalled();
+  });
+
+  it('consome o orçamento só em pendentes e para quando ele acaba', async () => {
+    definirOrcamentoIA(2);
+    await classifyDecision({ title: 'x', ementa: 'aposentadoria de servidor' }); // rejeitado por palavra-chave: não gasta
+    expect(orcamentoIARestante()).toBe(2);
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('auto_approved');
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('auto_approved');
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('pending');
+    expect(generateMock).toHaveBeenCalledTimes(2);
+    expect(orcamentoIARestante()).toBe(0);
+  });
+
+  it('useAI explícito vence o orçamento', async () => {
+    definirOrcamentoIA(5);
+    await classifyDecision(pendente, false);
+    expect(generateMock).not.toHaveBeenCalled();
+    definirOrcamentoIA(0);
   });
 });

@@ -5,6 +5,7 @@ import { apiLogger } from '@/lib/logger';
 import { normalizarDocumentoStf } from '@/lib/stf/normalizar';
 import { selecionarRecorte } from '@/lib/stf/recorte';
 import { persistirDecisoesStf } from '@/lib/stf/persistir';
+import { definirOrcamentoIA } from '@/lib/tribunal-scrapers/classifier';
 import { logScraperHealth } from '@/lib/tribunal-scrapers/utils';
 import { SCRAPER_CODE_STF } from '@/lib/stf/constantes';
 import type { StfDocumentoBruto, StfDecisaoNormalizada } from '@/lib/stf/types';
@@ -56,6 +57,8 @@ export async function POST(request: NextRequest) {
       .filter((d): d is StfDecisaoNormalizada => d !== null);
     const selecionados = selecionarRecorte(normalizados);
 
+    // IA para os pendentes do lote (o runner envia lotes de 40 documentos).
+    definirOrcamentoIA(20);
     const r = await persistirDecisoesStf(selecionados, {});
     const duration = Date.now() - inicio;
 
