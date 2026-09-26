@@ -25,9 +25,8 @@ const POR_PAGINA = 40; // máximo aceito pela API
 const MAX_PAGINAS = 100;
 const DIAS_JANELA = 45;
 const TEMPO_PROCESSAMENTO_MS = 60_000;
+// Crimes licitatórios entram (decisão editorial de 26/09/2026).
 const RE_TEMA = /licita|contratos? administrativ/i;
-/** Crimes licitatórios ficam fora até decisão editorial (ver trf5.ts). */
-const RE_CRIMINAL = /^\W*(APELA[ÇC][ÃA]O CRIMINAL|PENAL|PROCESSO PENAL|DIREITO PENAL|HABEAS CORPUS|CRIME)/i;
 
 export interface TjdftRegistro {
   uuid?: string;
@@ -70,7 +69,7 @@ export function registroParaDecisao(r: TjdftRegistro): DecisaoTjdft {
 }
 
 export function noRecorteTjdft(r: TjdftRegistro, d: DecisaoTjdft): boolean {
-  return !r.segredoJustica && RE_TEMA.test(d.ementa) && !RE_CRIMINAL.test(d.ementa);
+  return !r.segredoJustica && RE_TEMA.test(d.ementa);
 }
 
 export function montarCorpoTjdft(o: { termo: string; inicio: string; fim: string; pagina: number }): object {

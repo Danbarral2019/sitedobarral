@@ -11,7 +11,7 @@
  * exibido na página do site; o link aponta para a pesquisa.
  *
  * Volume medido (ago/2026): ~61 documentos/mês com "licitação" e ~28 com
- * "contrato administrativo", com sobreposição; ~20% criminais.
+ * "contrato administrativo", com sobreposição; ~20% são crimes licitatórios.
  */
 
 import { prisma } from '@/lib/prisma';
@@ -30,11 +30,8 @@ const MAX_PAGINAS = 20;
 const DIAS_JANELA = 45;
 const TEMPO_PROCESSAMENTO_MS = 60_000;
 
-/**
- * Crimes licitatórios ficam fora até decisão editorial (26/09/2026: quatro
- * julgados do STF sobre o tema foram separados para o editor decidir).
- */
-const CLASSES_CRIMINAIS = /CRIMINAL|PENAL|HABEAS|CRIME|REVIS[ÃA]O CRIMINAL|EXECU[ÇC][ÃA]O PENAL/i;
+// Crimes licitatórios entram (decisão editorial de 26/09/2026): o recorte é
+// só temático, pela ementa.
 const RE_TEMA = /licita|contratos? administrativ/i;
 
 export interface Trf5Doc {
@@ -107,9 +104,9 @@ export function docParaDecisao(d: Trf5Doc): DecisaoTrf5 {
   };
 }
 
-/** Entra no acervo: cível (não criminal) e com o tema na ementa. */
+/** Entra no acervo quando a ementa trata do tema (inclusive crimes licitatórios). */
 export function noRecorteTrf5(d: DecisaoTrf5): boolean {
-  return !CLASSES_CRIMINAIS.test(d.classe) && RE_TEMA.test(d.ementa);
+  return RE_TEMA.test(d.ementa);
 }
 
 function dataBr(d: Date): string {

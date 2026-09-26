@@ -49,9 +49,9 @@ describe('TRF5', () => {
     expect(d.fullText).toContain('APELANTE: BASIS TECNOLOGIA');
   });
 
-  it('recorte: cível com o tema na ementa entra; criminal fica fora', () => {
+  it('recorte: tema na ementa entra, inclusive crimes licitatórios', () => {
     expect(noRecorteTrf5(docParaDecisao(DOC))).toBe(true);
-    expect(noRecorteTrf5(docParaDecisao({ ...DOC, classeJudicial: 'APELAÇÃO CRIMINAL' }))).toBe(false);
+    expect(noRecorteTrf5(docParaDecisao({ ...DOC, classeJudicial: 'APELAÇÃO CRIMINAL' }))).toBe(true);
     expect(noRecorteTrf5(docParaDecisao({ ...DOC, texto: ' EMENTA \n PREVIDENCIÁRIO. APOSENTADORIA. ' }))).toBe(false);
   });
 
@@ -83,11 +83,11 @@ describe('TJDFT', () => {
     expect(d.dataJulgamento?.toISOString().slice(0, 10)).toBe('2026-09-01');
   });
 
-  it('recorte: tema na ementa, sem segredo de justiça e fora do criminal', () => {
+  it('recorte: tema na ementa e sem segredo de justiça, inclusive crimes licitatórios', () => {
     expect(noRecorteTjdft(REG, registroParaDecisao(REG))).toBe(true);
     expect(noRecorteTjdft({ ...REG, segredoJustica: true }, registroParaDecisao(REG))).toBe(false);
     const penal = { ...REG, ementa: 'APELAÇÃO CRIMINAL. FRAUDE À LICITAÇÃO. ART. 337-F DO CP.' };
-    expect(noRecorteTjdft(penal, registroParaDecisao(penal))).toBe(false);
+    expect(noRecorteTjdft(penal, registroParaDecisao(penal))).toBe(true);
   });
 
   it('respeita o máximo de 40 por página e filtra acórdãos por data de julgamento', () => {
