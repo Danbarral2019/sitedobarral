@@ -37,6 +37,7 @@ import {
   logScraperHealth,
   sleep,
   extractTextFromHTML,
+  extractParagraphsFromHTML,
 } from './utils';
 import { classifyDecision, generateDecisionSummary } from './classifier';
 import { setLeiArticles } from '@/lib/lei-articles';
@@ -49,6 +50,8 @@ import { apiLogger } from "@/lib/logger";
 const SCRAPER_CODE = 'tce-pe';
 const API_BASE = 'https://portal.tce.pe.gov.br/jurisprudencia/services/jurisprudencia/api/publico';
 const PAGE_SIZE = 200;
+/** Aviso que a API põe em `descricaoParecerProcesso` quando não tem o texto (visto em 26/09/2026). */
+const SEM_TEXTO_NA_FONTE = /^(<[^>]+>\s*)*n[ãa]o foi poss[íi]vel obter o texto/i;
 const MAX_PAGES = 50; // Safety limit: 200 * 50 = 10.000 items max scan
 
 // ===========================
@@ -60,6 +63,8 @@ interface RawDecision {
   title: string;
   ementa: string;
   fullText?: string;
+  /** Inteiro teor com parágrafos, para gravar; `fullText` segue achatado. */
+  inteiroTeor?: string;
   relator?: string;
   orgaoJulgador?: string;
   dataJulgamento?: string;
@@ -290,7 +295,8 @@ class TCEPEScraper implements TribunalScraper {
   // Fetch deliberacoes (paginated)
   // ===========================
 
-  private async fetchDeliberacoes(page: number): Promise<DeliberacaoItem[]> {
+  /** Público para o backfill do inteiro teor (scripts/backfill-tce-pe-inteiro-teor.ts). */
+  async fetchDeliberacoes(page: number): Promise<DeliberacaoItem[]> {
     const url = `${API_BASE}/deliberacoes?page=${page}&size=${PAGE_SIZE}&sort=dataJulgamentoProcesso,desc`;
 
     const response = await fetchWithRetry(url, {
@@ -364,7 +370,8 @@ class TCEPEScraper implements TribunalScraper {
   // Deliberacao → RawDecision
   // ===========================
 
-  private deliberacaoToDecision(item: DeliberacaoItem): RawDecision {
+  /** Público para o backfill do inteiro teor (scripts/backfill-tce-pe-inteiro-teor.ts). */
+  deliberacaoToDecision(item: DeliberacaoItem): RawDecision {
     const numDelib = (item.numeroDeliberacaoProcesso || '').trim();
     const anoDelib = (item.anoDeliberacaoProcesso || '').trim();
     const decisionNumber = numDelib && anoDelib ? `${numDelib}/${anoDelib}` : numDelib || 'unknown';
@@ -374,8 +381,11 @@ class TCEPEScraper implements TribunalScraper {
     const modalidade = (item.modalidadeProcesso || '').trim();
 
     // Extract plain text from HTML inteiro teor
-    const parecerHtml = (item.descricaoParecerProcesso || '').trim();
+    // A API às vezes devolve um aviso no lugar do texto; aviso não é inteiro teor.
+    const parecerBruto = (item.descricaoParecerProcesso || '').trim();
+    const parecerHtml = SEM_TEXTO_NA_FONTE.test(parecerBruto) ? '' : parecerBruto;
     const fullText = parecerHtml ? extractTextFromHTML(parecerHtml) : undefined;
+    const inteiroTeor = parecerHtml ? extractParagraphsFromHTML(parecerHtml) : undefined;
 
     // Extract ementa: try to find RELATÓRIO/EMENTA section, skip header boilerplate
     const ementa = fullText ? this.extractEmenta(fullText, tipoDoc, decisionNumber) : '';
@@ -397,6 +407,7 @@ class TCEPEScraper implements TribunalScraper {
       title: titleParts.join(' '),
       ementa: ementa || (unidade ? `${tipoDoc} ${decisionNumber} - ${unidade}` : `${tipoDoc} ${decisionNumber}`),
       fullText,
+      inteiroTeor,
       relator,
       orgaoJulgador,
       dataJulgamento: (item.dataJulgamentoProcesso || '').trim() || undefined,
@@ -513,6 +524,11 @@ class TCEPEScraper implements TribunalScraper {
       fullIdentifier,
       title: raw.title,
       ementa: raw.ementa,
+      // Inteiro teor (descricaoParecerProcesso). Era extraído, usado na
+      // classificação e no resumo, e descartado; a "ementa" acima é só um
+      // recorte de 2.000 caracteres dele. Não entra no embedding: ver
+      // indexaTextoIntegral em lib/embeddings/tribunal-decision-processor.ts.
+      fullText: raw.inteiroTeor || raw.fullText || null,
       summary,
       relator: raw.relator || null,
       orgaoJulgador: raw.orgaoJulgador || null,

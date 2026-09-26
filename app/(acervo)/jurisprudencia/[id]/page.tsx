@@ -220,10 +220,11 @@ export default function JurisprudenciaDetailPage() {
   const CANONICAL_TYPES = ['sumula', 'orientacao_jurisprudencial', 'precedente_normativo'];
   const isCanonical = CANONICAL_TYPES.includes(decision.decisionType);
   const sumula = isCanonical ? parseSumulaPayload(decision.sourceRawData) : null;
-  // Inteiro teor do acórdão do TCU (Document.tcuTextoCompleto, via a API). As
-  // súmulas do TST também preenchem fullText, mas lá ele é o payload da tese,
-  // já renderizado acima; por isso o bloco é só do TCU.
-  const inteiroTeor = !isCanonical && decision.tribunalCode === 'TCU' ? decision.fullText : null;
+  // Inteiro teor: acórdão do TCU (Document.tcuTextoCompleto, via a API) e
+  // deliberação do TCE-PE. As súmulas do TST também preenchem fullText, mas lá
+  // ele é o payload da tese, já renderizado acima; por isso a lista fechada.
+  const inteiroTeor =
+    !isCanonical && ['TCU', 'TCE-PE'].includes(decision.tribunalCode) ? decision.fullText : null;
   const blocosInteiroTeor = inteiroTeor ? blocosDoInteiroTeor(inteiroTeor) : [];
   const sitBadge = sumula ? SITUACAO_BADGES[sumula.situacao] : null;
 
@@ -375,7 +376,7 @@ export default function JurisprudenciaDetailPage() {
               <span>
                 <span className="text-lg font-bold text-ink-primary">Inteiro teor</span>
                 <span className="text-sm text-ink-muted ml-2">
-                  relatório, voto e acórdão · cerca de {Math.max(1, Math.round(inteiroTeor!.length / 3000))} páginas
+                  texto integral da decisão · cerca de {Math.max(1, Math.round(inteiroTeor!.length / 3000))} páginas
                 </span>
               </span>
               <span className="text-sm font-semibold text-brand-600 group-open:hidden">Ler</span>
