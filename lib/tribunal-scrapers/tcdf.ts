@@ -24,7 +24,7 @@ import tls from 'node:tls';
 import { prisma } from '@/lib/prisma';
 import type { TribunalScraper, TribunalScrapeOptions, TribunalScrapeResult, ScraperHealthStatus } from './index';
 import { buildFullIdentifier, normalizeDecisionNumber, normalizeTribunalCode, extractYear, logScraperHealth } from './utils';
-import { classifyDecision, generateDecisionSummary } from './classifier';
+import { classifyDecision, generateDecisionSummary, consumirOrcamentoIA, julgarAmbiguoComIA, type JulgamentoIA } from './classifier';
 import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from '@/lib/logger';
 import { LETS_ENCRYPT_YE1, ISRG_ROOT_YE_CRUZADA_X2 } from './certs/lets-encrypt-ye';
@@ -150,12 +150,24 @@ type Status = 'auto_approved' | 'pending' | 'auto_rejected';
  * tribunal (publicada, tema "Licitações e Contratos"), e isso vale mais que o
  * scoring por palavra-chave, que rejeitaria 155 das 902 (26/09/2026):
  * - relevância Média, Alta ou Altíssima no TCDF → aprovada;
- * - relevância Baixa → segue o classificador, mas nunca é rejeitada de
- *   saída: no pior caso fica pendente.
+ * - relevância Baixa → segue o classificador (que já usa a IA nos pendentes);
+ *   se a palavra-chave rejeitar, a decisão vai para a IA em vez de sair
+ *   rejeitada. Sem IA disponível, fica pendente.
+ *
+ * `julgar` é null quando não há orçamento de IA.
  */
-export function statusTcdf(relevancia: string | undefined, statusClassificador: Status): Status {
+export async function statusTcdf(
+  relevancia: string | undefined,
+  classificacao: { approvalStatus: Status; reasoning: string },
+  julgar: (() => Promise<JulgamentoIA | null>) | null,
+): Promise<Status> {
   if (/^(m[ée]dia|alta|alt[íi]ssima)$/i.test((relevancia || '').trim())) return 'auto_approved';
-  return statusClassificador === 'auto_rejected' ? 'pending' : statusClassificador;
+  if (classificacao.approvalStatus !== 'auto_rejected') return classificacao.approvalStatus;
+  if (classificacao.reasoning.includes('IA:')) return 'auto_rejected'; // a IA já julgou
+  const ia = julgar ? await julgar() : null;
+  if (ia?.veredito === 'aprovar') return 'auto_approved';
+  if (ia?.veredito === 'rejeitar') return 'auto_rejected';
+  return 'pending';
 }
 
 /** Baixa todas as páginas de um ano (ou do acervo inteiro, sem ano). */
@@ -183,6 +195,8 @@ class TCDFScraper implements TribunalScraper {
   type = 'tce' as const;
   hasApi = true;
   supportsFullText = true;
+  // O cron semanal dos TCEs já chega perto dos 300 s; o TCDF roda à parte.
+  agendaPropria = true;
 
   canHandle(tribunalCode: string): boolean {
     return tribunalCode.toLowerCase() === SCRAPER_CODE;
@@ -282,7 +296,10 @@ class TCDFScraper implements TribunalScraper {
       decisionType: 'decisao',
       tribunalCode: 'TCDF',
     });
-    const approvalStatus = statusTcdf(d.relevanciaTcdf, classification.approvalStatus);
+    const entradaIA = { title: d.title, ementa: d.ementa, fullText: d.fullText, decisionType: 'decisao', tribunalCode: 'TCDF' };
+    const approvalStatus = await statusTcdf(d.relevanciaTcdf, classification, () =>
+      consumirOrcamentoIA() ? julgarAmbiguoComIA(entradaIA) : Promise.resolve(null),
+    );
     const summary =
       approvalStatus === 'auto_approved'
         ? await generateDecisionSummary({ title: d.title, ementa: d.ementa })

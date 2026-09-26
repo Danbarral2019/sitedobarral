@@ -100,6 +100,7 @@ function getCategoryLabel(category: string): string {
     'tribunal-tce-rj': 'TCE-RJ',
     'tribunal-tce-rs': 'TCE-RS',
     'tribunal-tce-pe': 'TCE-PE',
+    'tribunal-tcdf': 'TCDF',
     'tribunal-stj': 'STJ (DataJud)',
     'tribunal-tst': 'Súmula TST',
   };

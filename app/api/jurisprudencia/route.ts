@@ -16,6 +16,7 @@ const TRIBUNAL_CODES = [
   'TCE-SC',
   'TCE-RJ',
   'TCE-PE',
+  'TCDF',
   'STJ',
   'STF',
   'TST',

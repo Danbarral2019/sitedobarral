@@ -41,6 +41,8 @@ const TRIBUNALS = [
   { code: 'TCE-RJ', label: 'TCE-RJ' },
   { code: 'TCE-RS', label: 'TCE-RS' },
   { code: 'TCE-PE', label: 'TCE-PE' },
+  { code: 'TCDF', label: 'TCDF' },
+  { code: 'STF', label: 'STF' },
   { code: 'STJ', label: 'STJ' },
   { code: 'TST', label: 'TST (Súmulas)' },
 ];
@@ -102,6 +104,7 @@ function tribunalColor(code: string): string {
     'TCE-RJ': 'bg-amber-accent-soft text-amber-accent-deep',
     'TCE-RS': 'bg-brand-100 text-brand-800',
     'TCE-PE': 'bg-brand-100 text-brand-800',
+    'TCDF': 'bg-brand-100 text-brand-800',
     'STJ': 'bg-red-100 text-red-800',
     'STF': 'bg-rose-100 text-rose-800',
     'TST': 'bg-brand-100 text-brand-800',

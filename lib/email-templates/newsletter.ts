@@ -101,6 +101,7 @@ const tribunalColors: Record<string, string> = {
   'TCE-RJ': '#8a6235',
   'TCE-RS': '#8a6235',
   'TCE-PE': '#20364e',
+  'TCDF': '#20364e',
   'STJ': '#8a6235',
   'STF': '#8a6235',
   'CNJ': '#20364e',

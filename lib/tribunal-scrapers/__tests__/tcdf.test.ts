@@ -56,15 +56,31 @@ describe('TCDF: hitParaDecisao', () => {
 });
 
 describe('TCDF: statusTcdf', () => {
-  it('aprova o que o TCDF marcou com relevância Média ou maior', () => {
-    for (const r of ['Média', 'Alta', 'Altíssima']) expect(statusTcdf(r, 'auto_rejected')).toBe('auto_approved');
+  const kw = (approvalStatus: 'auto_approved' | 'pending' | 'auto_rejected', reasoning = '+10: licitação') => ({ approvalStatus, reasoning });
+  const ia = (veredito: 'aprovar' | 'rejeitar' | 'duvida') => async () => ({ veredito, nota: 50, motivo: 'x', temas: [] });
+
+  it('aprova o que o TCDF marcou com relevância Média ou maior', async () => {
+    for (const r of ['Média', 'Alta', 'Altíssima']) expect(await statusTcdf(r, kw('auto_rejected'), null)).toBe('auto_approved');
   });
 
-  it('relevância Baixa segue o classificador, mas nunca é rejeitada de saída', () => {
-    expect(statusTcdf('Baixa', 'auto_approved')).toBe('auto_approved');
-    expect(statusTcdf('Baixa', 'pending')).toBe('pending');
-    expect(statusTcdf('Baixa', 'auto_rejected')).toBe('pending');
-    expect(statusTcdf(undefined, 'auto_rejected')).toBe('pending');
+  it('relevância Baixa segue o classificador quando ele aprova ou deixa pendente', async () => {
+    expect(await statusTcdf('Baixa', kw('auto_approved'), ia('rejeitar'))).toBe('auto_approved');
+    expect(await statusTcdf('Baixa', kw('pending'), ia('aprovar'))).toBe('pending');
+  });
+
+  it('rejeição por palavra-chave vai para a IA em vez de sair rejeitada', async () => {
+    expect(await statusTcdf('Baixa', kw('auto_rejected'), ia('aprovar'))).toBe('auto_approved');
+    expect(await statusTcdf('Baixa', kw('auto_rejected'), ia('rejeitar'))).toBe('auto_rejected');
+    expect(await statusTcdf('Baixa', kw('auto_rejected'), ia('duvida'))).toBe('pending');
+  });
+
+  it('sem IA disponível, rejeição por palavra-chave fica pendente', async () => {
+    expect(await statusTcdf('Baixa', kw('auto_rejected'), null)).toBe('pending');
+    expect(await statusTcdf('Baixa', kw('auto_rejected'), async () => null)).toBe('pending');
+  });
+
+  it('rejeição que já veio da IA é mantida', async () => {
+    expect(await statusTcdf('Baixa', kw('auto_rejected', 'IA: capa de edital'), ia('aprovar'))).toBe('auto_rejected');
   });
 });
 

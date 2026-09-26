@@ -7,15 +7,19 @@
  *   npx dotenv -e .env.local -- npx tsx scripts/importar-tcdf.ts            # simulação
  *   npx dotenv -e .env.local -- npx tsx scripts/importar-tcdf.ts --aplicar  # grava
  *
- * Custo ao aplicar: 1 resumo no Gemini por decisão aprovada.
+ * Custo ao aplicar: 1 resumo no Gemini por decisão aprovada + 1 julgamento
+ * de IA por decisão de relevância Baixa que a palavra-chave não aprova.
  */
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
 import { tcdfScraper, buscarDecisoesTcdf, hitParaDecisao } from '@/lib/tribunal-scrapers/tcdf';
-import { classifyDecision } from '@/lib/tribunal-scrapers/classifier';
+import { classifyDecision, definirOrcamentoIA } from '@/lib/tribunal-scrapers/classifier';
 
 async function main() {
   if (process.argv.includes('--aplicar')) {
+    // Carga inicial: a IA calibrada julga todos os que a palavra-chave não
+    // decide (relevância Baixa no TCDF). Sem teto aqui; no cron o teto é 40.
+    definirOrcamentoIA(100_000);
     const r = await tcdfScraper.scrape({ acervoCompleto: true, maxItems: 5000, tempoMaxMs: Infinity });
     console.log(JSON.stringify({ ...r, errors: r.errors.slice(0, 10) }, null, 1));
     return;

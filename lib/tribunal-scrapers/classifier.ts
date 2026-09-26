@@ -198,6 +198,13 @@ export function definirOrcamentoIA(chamadas: number): void {
   orcamentoIA = Math.max(0, Math.floor(chamadas));
 }
 
+/** Reserva uma chamada do orçamento; false se ele acabou. */
+export function consumirOrcamentoIA(): boolean {
+  if (orcamentoIA <= 0) return false;
+  orcamentoIA--;
+  return true;
+}
+
 export function orcamentoIARestante(): number {
   return orcamentoIA;
 }
