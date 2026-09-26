@@ -54,6 +54,10 @@
       "schedule": "30 6 * * *"
     },
     {
+      "path": "/api/cron/catalog-decor-inteiro-teor",
+      "schedule": "30 9 * * *"
+    },
+    {
       "path": "/api/cron/sync-precedentes-tcu",
       "schedule": "45 6 * * *"
     },

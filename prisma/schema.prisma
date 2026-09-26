@@ -157,6 +157,25 @@ model Document {
   /// leitura na página do documento e da jurisprudência (2026-09-26).
   /// A busca por palavra-chave (FTS) continua sem alcançá-lo.
   tcuTextoCompleto  String?   @db.Text // Texto integral do acórdão (pode ser muito longo)
+
+  /// Inteiro teor de documento de fonte externa, para LEITURA na página
+  /// /documento/[id] (hoje: pareceres da AGU com PDF público do DECOR,
+  /// gravados pelo cron catalog-decor-inteiro-teor via
+  /// lib/agu/inteiro-teor-decor.ts; teto de 500 mil chars).
+  /// ⚠️ NÃO é lido por lib/embeddings/source-text.ts: não entra no retrieval
+  /// sem antes medir o efeito no eval (o teste
+  /// lib/embeddings/__tests__/source-text-sem-texto-integral.test.ts trava isso).
+  /// ⚠️ Separado de `content` de propósito: o sync mensal da CONUNI
+  /// (lib/conuni-sync.ts) recalcula e SOBRESCREVE `content` a cada rodada.
+  textoIntegral           String?   @db.Text
+  /// URL de onde o texto integral foi baixado (a do momento da captura).
+  textoIntegralFonte      String?
+  /// Quando o texto integral foi gravado.
+  textoIntegralEm         DateTime?
+  /// Falhas de captura (download, PDF sem texto etc.). A fila exclui quem
+  /// chega a 3; um fix que possa recuperar os afetados reseta o contador.
+  textoIntegralTentativas Int       @default(0)
+
   tcuRelator        String? // Nome do relator
   tcuOrgaoJulgador  String? // Órgão julgador (Plenário, 1ª Câmara, etc)
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { blocosDoInteiroTeor, inteiroTeorTruncado, TETO_INTEIRO_TEOR } from '../inteiro-teor-exibicao';
+import { blocosDoInteiroTeor, escolherInteiroTeor, inteiroTeorTruncado, TETO_INTEIRO_TEOR } from '../inteiro-teor-exibicao';
 
 // Início real do inteiro teor do Acórdão 5890/2021 – 2ª Câmara, como sai do RTF.
 const INICIO = [
@@ -60,5 +60,31 @@ describe('inteiroTeorTruncado', () => {
   it('reconhece o texto cortado no teto de gravação', () => {
     expect(inteiroTeorTruncado('x'.repeat(TETO_INTEIRO_TEOR))).toBe(true);
     expect(inteiroTeorTruncado('x'.repeat(1000))).toBe(false);
+  });
+});
+
+describe('escolherInteiroTeor (seção "Inteiro teor" da página do documento)', () => {
+  it('acórdão do TCU: usa tcuTextoCompleto com o rótulo de relatório/voto/acórdão', () => {
+    const r = escolherInteiroTeor({ category: 'acordao', tcuTextoCompleto: 'RELATÓRIO ...', textoIntegral: 'outro' });
+    expect(r).toEqual({ texto: 'RELATÓRIO ...', subtitulo: 'Relatório, voto e acórdão', avisoLongo: 'Este acórdão é longo demais' });
+  });
+
+  it('parecer da AGU: cai para textoIntegral, sem falar em "voto e acórdão"', () => {
+    const r = escolherInteiroTeor({ category: 'parecer', tcuTextoCompleto: null, textoIntegral: 'PARECER Nº 1/2026' });
+    expect(r?.texto).toBe('PARECER Nº 1/2026');
+    expect(r?.subtitulo).toBe('Texto integral do parecer');
+    expect(r?.subtitulo).not.toMatch(/acórdão|voto/i);
+    expect(r?.avisoLongo).toBe('Este parecer é longo demais');
+  });
+
+  it('concorda o aviso com o tipo do documento', () => {
+    expect(escolherInteiroTeor({ category: 'nota-tecnica', textoIntegral: 'x' })?.avisoLongo).toBe('Esta nota técnica é longa demais');
+    expect(escolherInteiroTeor({ category: 'despacho', textoIntegral: 'x' })?.subtitulo).toBe('Texto integral do despacho');
+    expect(escolherInteiroTeor({ category: 'outra', textoIntegral: 'x' })?.subtitulo).toBe('Texto integral');
+  });
+
+  it('sem nenhum dos dois (ou só espaços): não há seção', () => {
+    expect(escolherInteiroTeor({ category: 'parecer' })).toBeNull();
+    expect(escolherInteiroTeor({ category: 'parecer', tcuTextoCompleto: '  ', textoIntegral: '' })).toBeNull();
   });
 });

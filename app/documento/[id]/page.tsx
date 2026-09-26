@@ -7,7 +7,7 @@ import BackLink from './BackLink';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { hasAccessToDocument } from '@/lib/auth';
 import { trechoDeAmostra } from '@/lib/text-preview';
-import { blocosDoInteiroTeor, inteiroTeorTruncado } from '@/lib/tcu/inteiro-teor-exibicao';
+import { blocosDoInteiroTeor, escolherInteiroTeor, inteiroTeorTruncado } from '@/lib/tcu/inteiro-teor-exibicao';
 
 const CATEGORY_LABELS: Record<string, string> = {
   acordao: 'Acórdão TCU',
@@ -68,6 +68,7 @@ export default async function DocumentoPage({ params }: PageProps) {
       aiClassification: true,
       r2Key: true,
       tcuTextoCompleto: true,
+      textoIntegral: true,
     },
   });
 
@@ -107,11 +108,13 @@ export default async function DocumentoPage({ params }: PageProps) {
   const amostra = trechoDeAmostra(textoIntegral, LIMITE_AMOSTRA);
   const displayContent = temAcesso ? textoIntegral : amostra.trecho;
 
-  // Inteiro teor do acórdão (RTF oficial convertido pelo catalog-tcu-inteiro-teor).
-  // Estava no banco, alimentava a IA desde o PR #206, e o leitor era mandado ao
-  // site do TCU para ler o mesmo texto.
-  const inteiroTeor = temAcesso && doc.tcuTextoCompleto ? doc.tcuTextoCompleto : null;
-  const blocosInteiroTeor = inteiroTeor ? blocosDoInteiroTeor(inteiroTeor) : [];
+  // Inteiro teor: o do acórdão do TCU (RTF oficial convertido pelo
+  // catalog-tcu-inteiro-teor) ou, na falta dele, o texto integral de fonte
+  // externa (parecer da AGU em PDF público do DECOR, gravado pelo
+  // catalog-decor-inteiro-teor). Estavam no banco e o leitor era mandado ao
+  // site de origem para ler o mesmo texto.
+  const inteiroTeor = temAcesso ? escolherInteiroTeor(doc) : null;
+  const blocosInteiroTeor = inteiroTeor ? blocosDoInteiroTeor(inteiroTeor.texto) : [];
 
   // Arquivo enviado pelo admin mora no R2 com URL pública: mostrá-la a quem não
   // tem acesso entregaria o documento restrito inteiro pelo botão da fonte.
@@ -205,17 +208,17 @@ export default async function DocumentoPage({ params }: PageProps) {
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-ink-primary">
                   <span>
                     <span className="font-label text-ink-muted block mb-1">Inteiro teor</span>
-                    <span className="font-semibold">Relatório, voto e acórdão</span>
+                    <span className="font-semibold">{inteiroTeor!.subtitulo}</span>
                     <span className="text-sm text-ink-muted ml-2">
-                      cerca de {Math.max(1, Math.round(inteiroTeor!.length / 3000))} páginas
+                      cerca de {Math.max(1, Math.round(inteiroTeor!.texto.length / 3000))} páginas
                     </span>
                   </span>
                   <span className="text-sm font-semibold text-brand-600 group-open:hidden">Ler</span>
                   <span className="text-sm font-semibold text-brand-600 hidden group-open:inline">Recolher</span>
                 </summary>
-                {inteiroTeorTruncado(inteiroTeor!) && (
+                {inteiroTeorTruncado(inteiroTeor!.texto) && (
                   <p className="mt-4 text-sm text-ink-muted max-w-[65ch]">
-                    Este acórdão é longo demais e o texto abaixo está incompleto. A íntegra está na fonte oficial.
+                    {inteiroTeor!.avisoLongo} e o texto abaixo está incompleto. A íntegra está na fonte oficial.
                   </p>
                 )}
                 <div className="font-reading text-ink-secondary max-w-[65ch] mt-6">

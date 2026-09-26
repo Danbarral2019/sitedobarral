@@ -51,6 +51,9 @@ const PROIBIDOS = [
   'leiIndexerError',
   'embeddingError',
   'tcuEnriquecimentoErro',
+  // Inteiro teor do parecer (PDF do DECOR): pesado, e nenhum consumidor desta
+  // rota pública o usa — a leitura é na página /documento/[id], atrás do acesso.
+  'textoIntegral',
 ];
 
 /** Campos sem os quais alguma tela quebra. */
