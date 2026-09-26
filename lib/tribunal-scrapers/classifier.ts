@@ -183,9 +183,28 @@ function detectSuggestedCourses(text: string): string[] {
 // Main classifier
 // ===========================
 
+/**
+ * Orçamento de chamadas de IA para decisões pendentes, por execução. As rotas
+ * de coleta (cron dos TCEs, ingestão do STF, cron do STJ) definem o valor no
+ * início; os scrapers chamam `classifyDecision` sem o 2º argumento e consomem
+ * dele. Padrão 0: sem orçamento, nada muda.
+ *
+ * Antes disso nenhum chamador ligava a IA, e as decisões com score 20-54
+ * ficavam pendentes para sempre (459 em 26/09/2026).
+ */
+let orcamentoIA = 0;
+
+export function definirOrcamentoIA(chamadas: number): void {
+  orcamentoIA = Math.max(0, Math.floor(chamadas));
+}
+
+export function orcamentoIARestante(): number {
+  return orcamentoIA;
+}
+
 export async function classifyDecision(
   decision: DecisionInput,
-  useAI = false
+  useAI?: boolean
 ): Promise<ClassificationResult> {
   // Combine available text
   const combinedText = [decision.title, decision.ementa, decision.fullText || '']
@@ -233,7 +252,9 @@ export async function classifyDecision(
   }
 
   // For pending decisions, optionally use Gemini IA for better classification
-  if (approvalStatus === 'pending' && useAI) {
+  const usarIA = useAI ?? orcamentoIA > 0;
+  if (approvalStatus === 'pending' && usarIA) {
+    if (useAI === undefined) orcamentoIA--;
     const ia = await julgarAmbiguoComIA(decision);
     if (ia && ia.veredito !== 'duvida') {
       const aprovado = ia.veredito === 'aprovar';
@@ -310,7 +331,7 @@ Responda APENAS com o resumo, sem prefixos como "Resumo:" ou marcação.`;
 // ===========================
 
 /** Versão do critério de julgamento dos casos duvidosos (vai para o reasoning). */
-export const IA_AMBIGUOS_VERSAO = 'v2';
+export const IA_AMBIGUOS_VERSAO = 'v3';
 
 export interface JulgamentoIA {
   veredito: 'aprovar' | 'rejeitar' | 'duvida';
@@ -351,6 +372,26 @@ DÚVIDA: use só quando o texto não permite decidir.
 
 Responda em JSON conforme o schema. nota: 0-100 (relevância para o acervo). motivo: uma frase, citando o que a decisão decide. temas: até 3, em português.`;
 
+/**
+ * Critério extra para tribunais JUDICIAIS, onde o caso chega de outro ramo do
+ * direito com a licitação só como contexto. Calibrado em 26/09/2026 contra 53
+ * votos do editor: com esta cláusula o STF foi a 10/10 (sem ela, 8/10), mas
+ * nos tribunais de contas ela derrubava prejulgados que o editor aprovou (o
+ * prompt base acertou 43/43 nos TCs). Por isso só entra para judiciais.
+ */
+const CLAUSULA_JUDICIAIS = `
+
+ATENÇÃO (tribunal judicial): a TESE precisa ser sobre a disciplina de licitações e contratos. Se a licitação ou o contrato é só o contexto do caso e o que se decide é matéria de outro ramo, REJEITAR. Exemplos julgados pelo editor:
+- embargos sobre a retroatividade da Lei 14.230/2021 em ação de improbidade por direcionamento de licitação → a tese é de improbidade: REJEITAR
+- suspensão de liminar sobre concessão de serviços não pedagógicos em escolas, decidindo requisitos de contracautela → a tese é processual e de concessão: REJEITAR
+Também REJEITAR quando o que se decide é competência, requisitos de liminar ou contracautela, cabimento de recurso ou improbidade em geral.`;
+
+const TRIBUNAIS_JUDICIAIS = /^(STF|STJ|TST|TRF\d?|TJ[A-Z]{2}|TNU)$/i;
+
+export function promptAmbiguos(tribunalCode?: string): string {
+  return TRIBUNAIS_JUDICIAIS.test((tribunalCode || '').trim()) ? PROMPT_AMBIGUOS + CLAUSULA_JUDICIAIS : PROMPT_AMBIGUOS;
+}
+
 function textoParaIA(d: DecisionInput): string {
   return `Tribunal: ${d.tribunalCode || 'n/d'}
 Tipo: ${d.decisionType || 'n/d'}
@@ -370,7 +411,7 @@ export async function julgarAmbiguoComIA(decision: DecisionInput): Promise<Julga
     const { text } = await generate('classification', {
       provider: 'gemini',
       model: PRIMARY_GEMINI_MODEL,
-      systemPrompt: PROMPT_AMBIGUOS,
+      systemPrompt: promptAmbiguos(decision.tribunalCode),
       messages: [{ role: 'user', content: textoParaIA(decision) }],
       responseSchema: ESQUEMA_JULGAMENTO,
       temperature: 0,

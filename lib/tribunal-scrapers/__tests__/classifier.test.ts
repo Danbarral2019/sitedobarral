@@ -4,6 +4,9 @@ import {
   detectLeiArticles,
   classifyDecision,
   generateDecisionSummary,
+  promptAmbiguos,
+  definirOrcamentoIA,
+  orcamentoIARestante,
 } from '../classifier';
 
 // Mock do cliente Gemini usado por classifyWithAI/generateDecisionSummary.
@@ -229,5 +232,44 @@ describe('generateDecisionSummary', () => {
     // o bloco catch de tratamento de erro.
     queryGeminiTextMock.mockResolvedValue({});
     expect(await generateDecisionSummary({ title: 'A', ementa: longText })).toBeNull();
+  });
+});
+
+describe('promptAmbiguos', () => {
+  it('acrescenta o critério de "licitação só como contexto" apenas para tribunais judiciais', () => {
+    for (const t of ['STF', 'STJ', 'TRF5', 'TJDF']) expect(promptAmbiguos(t)).toContain('tribunal judicial');
+    for (const t of ['TCU', 'TCE-SC', 'TCDF', undefined]) expect(promptAmbiguos(t)).not.toContain('tribunal judicial');
+  });
+});
+
+describe('classifyDecision — orçamento de IA por execução', () => {
+  const pendente = { title: 'Análise de licitação', ementa: 'Trata de fiscalização e gestão contratual, além de convênio de cooperação.' };
+  beforeEach(() => {
+    generateMock.mockReset();
+    generateMock.mockResolvedValue({ text: JSON.stringify({ veredito: 'aprovar', nota: 80, motivo: 'tese', temas: [] }) });
+  });
+
+  it('sem orçamento definido, não chama a IA (comportamento de sempre)', async () => {
+    definirOrcamentoIA(0);
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('pending');
+    expect(generateMock).not.toHaveBeenCalled();
+  });
+
+  it('consome o orçamento só em pendentes e para quando ele acaba', async () => {
+    definirOrcamentoIA(2);
+    await classifyDecision({ title: 'x', ementa: 'aposentadoria de servidor' }); // rejeitado por palavra-chave: não gasta
+    expect(orcamentoIARestante()).toBe(2);
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('auto_approved');
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('auto_approved');
+    expect((await classifyDecision(pendente)).approvalStatus).toBe('pending');
+    expect(generateMock).toHaveBeenCalledTimes(2);
+    expect(orcamentoIARestante()).toBe(0);
+  });
+
+  it('useAI explícito vence o orçamento', async () => {
+    definirOrcamentoIA(5);
+    await classifyDecision(pendente, false);
+    expect(generateMock).not.toHaveBeenCalled();
+    definirOrcamentoIA(0);
   });
 });

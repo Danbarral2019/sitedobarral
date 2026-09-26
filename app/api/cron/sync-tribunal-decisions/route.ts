@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { apiLogger } from '@/lib/logger';
+import { definirOrcamentoIA } from '@/lib/tribunal-scrapers/classifier';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -21,6 +22,10 @@ export async function GET(request: NextRequest) {
 
     // Import dinâmico dos scrapers (evita bundling em todas as rotas)
     const { getAllScrapers } = await import('@/lib/tribunal-scrapers');
+
+    // Decisões que o scoring por palavra-chave deixa pendentes são julgadas por
+    // IA até este teto por execução (calibrada em 26/09/2026: 51/53 com o editor).
+    definirOrcamentoIA(40);
 
     const scrapers = getAllScrapers();
     const results = [];
