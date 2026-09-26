@@ -7,6 +7,10 @@
  * Linhas curtas e todas em maiúsculas (RELATÓRIO, VOTO, ACÓRDÃO Nº 5890/2021 –
  * TCU – 2ª Câmara) viram títulos de seção, porque é por elas que o leitor se
  * orienta num texto de dezenas de páginas.
+ *
+ * Serve também ao texto integral dos pareceres da AGU (`Document.textoIntegral`),
+ * que chega aqui já com um parágrafo por linha (lib/agu/inteiro-teor-decor.ts
+ * junta as linhas do PDF e tira os marcadores de página na gravação).
  */
 
 /**
@@ -43,4 +47,54 @@ export function blocosDoInteiroTeor(texto: string): BlocoInteiroTeor[] {
 
 export function inteiroTeorTruncado(texto: string): boolean {
   return texto.length >= TETO_INTEIRO_TEOR;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Qual inteiro teor a página mostra
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface InteiroTeorParaExibir {
+  texto: string;
+  /** Subtítulo da seção recolhida "Inteiro teor". */
+  subtitulo: string;
+  /** Início do aviso de texto cortado, com a concordância certa ("Este acórdão é longo demais"). */
+  avisoLongo: string;
+}
+
+/** Artigo + nome do documento de fonte externa, pela categoria. */
+function nomeDoDocumento(category: string): { subtitulo: string; avisoLongo: string } {
+  switch (category) {
+    case 'nota-tecnica':
+      return { subtitulo: 'Texto integral da nota técnica', avisoLongo: 'Esta nota técnica é longa demais' };
+    case 'despacho':
+      return { subtitulo: 'Texto integral do despacho', avisoLongo: 'Este despacho é longo demais' };
+    case 'parecer':
+    case 'parecer-vinculante':
+    case 'decor':
+      return { subtitulo: 'Texto integral do parecer', avisoLongo: 'Este parecer é longo demais' };
+    default:
+      return { subtitulo: 'Texto integral', avisoLongo: 'Este documento é longo demais' };
+  }
+}
+
+/**
+ * Escolhe o inteiro teor que a página /documento/[id] mostra:
+ *  1. `tcuTextoCompleto` — acórdão do TCU (relatório, voto e acórdão);
+ *  2. `textoIntegral`    — documento de fonte externa (hoje, parecer da AGU em
+ *     PDF público do DECOR, gravado por lib/agu/inteiro-teor-decor.ts).
+ * Devolve null quando não há nenhum dos dois. Quem decide se o leitor PODE
+ * ver é a página (`temAcesso`), não esta função.
+ */
+export function escolherInteiroTeor(doc: {
+  category: string;
+  tcuTextoCompleto?: string | null;
+  textoIntegral?: string | null;
+}): InteiroTeorParaExibir | null {
+  if (doc.tcuTextoCompleto && doc.tcuTextoCompleto.trim()) {
+    return { texto: doc.tcuTextoCompleto, subtitulo: 'Relatório, voto e acórdão', avisoLongo: 'Este acórdão é longo demais' };
+  }
+  if (doc.textoIntegral && doc.textoIntegral.trim()) {
+    return { texto: doc.textoIntegral, ...nomeDoDocumento(doc.category) };
+  }
+  return null;
 }
