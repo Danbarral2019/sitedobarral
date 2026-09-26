@@ -160,14 +160,14 @@ export async function statusTcdf(
   relevancia: string | undefined,
   classificacao: { approvalStatus: Status; reasoning: string },
   julgar: (() => Promise<JulgamentoIA | null>) | null,
-): Promise<Status> {
-  if (/^(m[ée]dia|alta|alt[íi]ssima)$/i.test((relevancia || '').trim())) return 'auto_approved';
-  if (classificacao.approvalStatus !== 'auto_rejected') return classificacao.approvalStatus;
-  if (classificacao.reasoning.includes('IA:')) return 'auto_rejected'; // a IA já julgou
+): Promise<{ status: Status; motivoIA?: string }> {
+  if (/^(m[ée]dia|alta|alt[íi]ssima)$/i.test((relevancia || '').trim())) return { status: 'auto_approved' };
+  if (classificacao.approvalStatus !== 'auto_rejected') return { status: classificacao.approvalStatus };
+  if (classificacao.reasoning.includes('IA:')) return { status: 'auto_rejected' }; // a IA já julgou
   const ia = julgar ? await julgar() : null;
-  if (ia?.veredito === 'aprovar') return 'auto_approved';
-  if (ia?.veredito === 'rejeitar') return 'auto_rejected';
-  return 'pending';
+  if (ia?.veredito === 'aprovar') return { status: 'auto_approved', motivoIA: ia.motivo };
+  if (ia?.veredito === 'rejeitar') return { status: 'auto_rejected', motivoIA: ia.motivo };
+  return { status: 'pending', motivoIA: ia?.motivo };
 }
 
 /** Baixa todas as páginas de um ano (ou do acervo inteiro, sem ano). */
@@ -297,7 +297,7 @@ class TCDFScraper implements TribunalScraper {
       tribunalCode: 'TCDF',
     });
     const entradaIA = { title: d.title, ementa: d.ementa, fullText: d.fullText, decisionType: 'decisao', tribunalCode: 'TCDF' };
-    const approvalStatus = await statusTcdf(d.relevanciaTcdf, classification, () =>
+    const { status: approvalStatus, motivoIA } = await statusTcdf(d.relevanciaTcdf, classification, () =>
       consumirOrcamentoIA() ? julgarAmbiguoComIA(entradaIA) : Promise.resolve(null),
     );
     const summary =
@@ -332,8 +332,11 @@ class TCDFScraper implements TribunalScraper {
       confidence: classification.confidence,
       classificationReasoning: [
         classification.reasoning,
+        motivoIA ? `IA (rejeição por palavra-chave revista): ${motivoIA}` : null,
         d.relevanciaTcdf ? `TCDF: publicada, relevância ${d.relevanciaTcdf}` : 'TCDF: publicada',
-      ].join('; '),
+      ]
+        .filter(Boolean)
+        .join('; '),
     };
 
     if (existe) {
