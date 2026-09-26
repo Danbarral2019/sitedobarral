@@ -7,8 +7,8 @@
  * FLUXO:
  * 1. Auth (CRON_SECRET)
  * 2. Buscar DOU com SEARCH_TERMS_V2 (15 termos, recall > precision)
- * 3. Filtrar concretos + deduplicar por DB antes de gastar IA
- * 4. Classificar candidatos por IA em batches (EDITORIAL_BATCH_SIZE)
+ * 3. Filtrar concretos + deduplicar por DB + pré-filtro de escopo antes de gastar IA
+ * 4. Buscar o texto oficial de cada candidato e classificar por IA em batches (EDITORIAL_BATCH_SIZE)
  * 5. Descartar score < EDITORIAL_AMBIGUOUS_FLOOR; criar DOUStagingDocument para o resto
  * 6. Detectar alterações na Lei 14.133 → LeiArticleNote
  * 7. Enviar email editorial se houver novos itens no staging
@@ -18,6 +18,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { searchLastWeek } from '@/lib/dou-api';
+import { scrapeContent, type DOUEnrichedContent } from '@/lib/dou-scraper';
+import { motivoForaDeEscopo } from '@/lib/dou-escopo-prefiltro';
+import { SEARCH_TERMS_V2 } from '@/lib/dou-search-terms';
 import { isAtoNormativoGeral } from '@/lib/dou-normative-filter';
 import { detectModifications } from '@/lib/dou-change-detector';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
@@ -33,28 +36,15 @@ import { apiLogger } from '@/lib/logger';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-// Termos expandidos do Clipping v2 — recall > precision (Apêndice 1 da spec)
-const SEARCH_TERMS_V2 = [
-  'lei 14.133 OR lei 14133 OR nova lei de licitações',
-  'decreto licitação OR decreto contratação',
-  'instrução normativa SEGES OR instrução normativa MGI',
-  'portaria normativa licitação OR portaria normativa contratação',
-  'portaria SEGES OR portaria MGI',
-  'instrução normativa CGU OR portaria CGU',
-  'parecer AGU OR orientação normativa AGU',
-  'portaria SECEX OR resolução TCU',
-  'decreto servidor público federal',
-  'decreto teletrabalho OR decreto jornada servidor',
-  'decreto contratos administrativos federais',
-  'decreto regime jurídico único',
-  'decreto regulamenta lei 14.133',
-  'reorganização administração federal contratações',
-  'fundo de contratações OR centralização compras governo',
-];
 
 const EDITORIAL_BATCH_SIZE = 5;
 const EDITORIAL_SCORE_THRESHOLD = 70;
 const EDITORIAL_AMBIGUOUS_FLOOR = 50;
+// Orçamento de tempo para buscar o texto oficial, contado do início do cron.
+// Passado esse ponto, os candidatos restantes são classificados só pelo trecho
+// da busca, deixando ~100 s de maxDuration para a IA e a gravação.
+const TEXT_FETCH_DEADLINE_MS = 200_000;
+const TEXT_FETCH_CONCURRENCY = 6;
 
 // Mapeamento de changeType → LeiArticleNote.type
 const CHANGE_TYPE_MAP: Record<string, string> = {
@@ -99,11 +89,16 @@ export async function GET(request: NextRequest) {
  * Spec: docs/superpowers/specs/2026-05-03-dou-clipping-v2-design.md
  */
 async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse> {
+  const startedAt = Date.now();
   console.log('[Sync DOU v2] Iniciando — termos:', SEARCH_TERMS_V2.length);
 
   const stats = {
     totalBuscados: 0,
     filtradosPorConcreto: 0,
+    foraDeEscopo: {} as Record<string, number>,
+    textoObtido: 0,
+    semTexto: 0,
+    segundos: {} as Record<string, number>,
     duplicados: 0,
     classificadosIA: 0,
     descartadosScoreBaixo: 0,
@@ -130,6 +125,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     await new Promise((res) => setTimeout(res, 1500));
   }
   const results = Array.from(allResults.values());
+  stats.segundos.busca = Math.round((Date.now() - startedAt) / 1000);
   stats.totalBuscados = results.length;
   console.log(`[Sync DOU v2] ${results.length} resultados únicos`);
 
@@ -142,6 +138,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     raw: Awaited<ReturnType<typeof searchLastWeek>>[number];
     cleanTitle: string;
     cleanAbstract: string;
+    enriched?: DOUEnrichedContent | null;
   }> = [];
 
   for (const r of results) {
@@ -171,8 +168,33 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     });
     if (dupAct) { stats.duplicados++; continue; }
 
+    const motivo = motivoForaDeEscopo({ title: cleanTitle, abstract: cleanAbstract, hierarchyStr: r.hierarchyStr });
+    if (motivo) {
+      stats.foraDeEscopo[motivo] = (stats.foraDeEscopo[motivo] || 0) + 1;
+      if (dryRun) stats.detalhes.push(`[FORA ${motivo}] ${cleanTitle.substring(0, 80)}`);
+      continue;
+    }
+
     candidatesForAI.push({ raw: r, cleanTitle, cleanAbstract });
   }
+
+  stats.segundos.buscaEFiltros = Math.round((Date.now() - startedAt) / 1000);
+
+  // 2b. Texto oficial: o trecho da busca engana a IA (ver eval-dou-classificador).
+  for (let i = 0; i < candidatesForAI.length; i += TEXT_FETCH_CONCURRENCY) {
+    if (Date.now() - startedAt > TEXT_FETCH_DEADLINE_MS) break;
+    await Promise.all(
+      candidatesForAI.slice(i, i + TEXT_FETCH_CONCURRENCY).map(async (cand) => {
+        cand.enriched = await scrapeContent(cand.raw.href).catch((e) => {
+          apiLogger.warn({ err: e, url: cand.raw.href }, '[Sync DOU v2] Texto oficial indisponível');
+          return null;
+        });
+      }),
+    );
+  }
+  stats.textoObtido = candidatesForAI.filter((c) => c.enriched?.conteudo).length;
+  stats.semTexto = candidatesForAI.length - stats.textoObtido;
+  stats.segundos.textoOficial = Math.round((Date.now() - startedAt) / 1000) - stats.segundos.buscaEFiltros;
   console.log(`[Sync DOU v2] ${candidatesForAI.length} candidatos pra IA`);
 
   // 3. Classificar IA em batches de EDITORIAL_BATCH_SIZE
@@ -187,6 +209,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
           title: b.cleanTitle,
           abstract: b.cleanAbstract,
           hierarchyStr: b.raw.hierarchyStr,
+          fullText: b.enriched?.conteudo || null,
         })),
       );
       stats.classificadosIA += batch.length;
@@ -236,7 +259,7 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
       if (cls.score < EDITORIAL_AMBIGUOUS_FLOOR) {
         stats.descartadosScoreBaixo++;
         if (dryRun) {
-          stats.detalhes.push(`[DESCARTE score=${cls.score}] ${cand.cleanTitle.substring(0, 80)}`);
+          stats.detalhes.push(`[DESCARTE score=${cls.score}] ${cand.cleanTitle.substring(0, 80)} — ${cls.summary.substring(0, 160)}`);
         }
         continue;
       }
@@ -260,6 +283,10 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
             section: cand.raw.section || 'do1',
             publishDate: cand.raw.date || new Date().toLocaleDateString('pt-BR'),
             hierarchyStr: cand.raw.hierarchyStr,
+            fullContent: cand.enriched?.conteudo || null,
+            edition: cand.enriched?.edicao || null,
+            page: cand.enriched?.pagina || null,
+            organ: cand.enriched?.orgao || null,
             category: 'ato_normativo',
             approvalStatus: 'pending',
             confidence: cls.score,
@@ -310,6 +337,8 @@ async function runV2(dryRun: boolean, maxResults: number): Promise<NextResponse>
     // Rate limiting entre batches IA
     await new Promise((res) => setTimeout(res, 1000));
   }
+
+  stats.segundos.total = Math.round((Date.now() - startedAt) / 1000);
 
   // 5. Email se houver >=1 staging novo (e não-dryrun)
   if (!dryRun && newStagingItems.length > 0) {

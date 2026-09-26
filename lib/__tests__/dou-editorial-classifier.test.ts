@@ -9,6 +9,7 @@ vi.mock('@/lib/ai', () => ({
 import {
   classifyEditorialBatch,
   EDITORIAL_PROMPT_VERSION,
+  EDITORIAL_TEXT_MAX_CHARS,
 } from '../dou-editorial-classifier';
 
 describe('classifyEditorialBatch', () => {
@@ -118,5 +119,24 @@ describe('classifyEditorialBatch', () => {
     const args = mockGenerate.mock.calls[0][1];
     expect(args.systemPrompt).toContain('jurista especializado em Lei 14.133/2021');
     expect(args.responseSchema).toMatchObject({ type: 'OBJECT', required: ['items'] });
+  });
+
+  it('envia o texto integral truncado quando o candidato o traz', async () => {
+    mockGenerate.mockResolvedValue({
+      text: JSON.stringify({ items: [{ score: 90, reason: '', summary: '', affects: [], actType: 'decreto', ambiguous: false }] }),
+    });
+    const texto = 'Art. 1º Regulamenta o art. 79 da Lei 14.133. ' + 'x'.repeat(EDITORIAL_TEXT_MAX_CHARS * 2);
+    await classifyEditorialBatch([{ title: 'Decreto 13.106', abstract: 'trecho', hierarchyStr: '', fullText: texto }]);
+    const prompt: string = mockGenerate.mock.calls[0][1].messages[0].content;
+    expect(prompt).toContain('Texto: Art. 1º Regulamenta o art. 79');
+    expect(prompt.length).toBeLessThan(EDITORIAL_TEXT_MAX_CHARS + 500);
+  });
+
+  it('omite a linha de texto quando não há texto integral', async () => {
+    mockGenerate.mockResolvedValue({
+      text: JSON.stringify({ items: [{ score: 10, reason: '', summary: '', affects: [], actType: 'null', ambiguous: false }] }),
+    });
+    await classifyEditorialBatch([{ title: 'a', abstract: 'trecho', hierarchyStr: '' }]);
+    expect(mockGenerate.mock.calls[0][1].messages[0].content).not.toContain('Texto:');
   });
 });

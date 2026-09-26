@@ -118,3 +118,6 @@ dev.log
 
 # Isolated implementation worktrees
 .worktrees/
+
+# Cache de textos do DOU usado por scripts/eval-dou-classificador.ts
+eval/reports/.dou-textos-cache.json
