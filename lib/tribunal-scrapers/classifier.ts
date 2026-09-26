@@ -7,6 +7,8 @@
 
 import { KEYWORDS_RELEVANCIA, CURSOS_KEYWORDS, detectTemas } from '@/lib/shared-keywords';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
+import { generate } from '@/lib/ai';
+import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { apiLogger } from "@/lib/logger";
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 
@@ -232,19 +234,20 @@ export async function classifyDecision(
 
   // For pending decisions, optionally use Gemini IA for better classification
   if (approvalStatus === 'pending' && useAI) {
-    try {
-      const aiResult = await classifyWithAI(decision, finalScore, themes);
-      if (aiResult) {
-        return {
-          ...aiResult,
-          themes: themes.length > 0 ? themes : aiResult.themes,
-          leiArticles,
-          suggestedCourses: suggestedCourses.join(','),
-        };
-      }
-    } catch {
-      reasoning.push('IA classification failed, using keyword-only score');
+    const ia = await julgarAmbiguoComIA(decision);
+    if (ia && ia.veredito !== 'duvida') {
+      const aprovado = ia.veredito === 'aprovar';
+      return {
+        relevanceScore: aprovado ? Math.max(55, ia.nota) : Math.min(19, ia.nota),
+        approvalStatus: aprovado ? 'auto_approved' : 'auto_rejected',
+        themes: themes.length > 0 ? themes : ia.temas,
+        leiArticles,
+        reasoning: [...reasoning, `IA: ${ia.motivo}`].join('; '),
+        suggestedCourses: suggestedCourses.join(','),
+        confidence: 70,
+      };
     }
+    reasoning.push(ia ? `IA em dúvida: ${ia.motivo}` : 'IA indisponível ou resposta inválida; mantido pendente');
   }
 
   return {
@@ -306,54 +309,83 @@ Responda APENAS com o resumo, sem prefixos como "Resumo:" ou marcação.`;
 // AI classification (for pending decisions)
 // ===========================
 
-async function classifyWithAI(
-  decision: DecisionInput,
-  keywordScore: number,
-  detectedThemes: string[]
-): Promise<ClassificationResult | null> {
-  const prompt = `Analise a seguinte decisao de tribunal e classifique sua relevancia para licitacoes e contratos administrativos (Lei 14.133/2021).
+/** Versão do critério de julgamento dos casos duvidosos (vai para o reasoning). */
+export const IA_AMBIGUOS_VERSAO = 'v2';
 
-Tribunal: ${decision.tribunalCode || 'N/A'}
-Tipo: ${decision.decisionType || 'N/A'}
-Titulo: ${decision.title}
-Ementa: ${decision.ementa.slice(0, 2000)}
+export interface JulgamentoIA {
+  veredito: 'aprovar' | 'rejeitar' | 'duvida';
+  nota: number;
+  motivo: string;
+  temas: string[];
+}
 
-Score keyword: ${keywordScore}
-Temas detectados: ${detectedThemes.join(', ') || 'nenhum'}
+const ESQUEMA_JULGAMENTO = {
+  type: 'OBJECT',
+  properties: {
+    veredito: { type: 'STRING', enum: ['aprovar', 'rejeitar', 'duvida'] },
+    nota: { type: 'NUMBER' },
+    motivo: { type: 'STRING' },
+    temas: { type: 'ARRAY', items: { type: 'STRING' } },
+  },
+  required: ['veredito', 'nota', 'motivo', 'temas'],
+} as const;
 
-Avalie especialmente:
-- Esta decisao fixa uma tese juridica sobre a Lei 14.133? E uma consulta em tese?
-- Traz interpretacao nova ou consolidada sobre licitacoes?
-- Tem carater paradigmatico (uniformizacao, sumula, enunciado, precedente)?
+const PROMPT_AMBIGUOS = `Você é um jurista especializado em licitações e contratos administrativos (Lei 14.133/2021, Lei 8.666/1993, Lei 13.303/2016).
 
-Responda APENAS com JSON (sem markdown):
-{
-  "relevanceScore": <0-100>,
-  "approvalStatus": "<auto_approved|pending|auto_rejected>",
-  "themes": ["tema1", "tema2"],
-  "reasoning": "<explicacao curta>",
-  "confidence": <0-100>
-}`;
+Sua função: decidir se uma decisão de tribunal entra no acervo de jurisprudência de um portal jurídico sobre licitações e contratos. O acervo existe para quem precisa saber COMO o tribunal interpreta a matéria.
 
-  const result = await queryGeminiText(prompt, {
-    temperature: 0.2,
-    maxOutputTokens: 512,
-    thinkingBudget: 0,
-    useCache: false,
-  });
+APROVAR quando a decisão fixa ou aplica um entendimento jurídico reaproveitável sobre:
+- licitação (modalidades, habilitação, julgamento, pesquisa de preços, edital, impugnação)
+- contratação direta (dispensa, inexigibilidade, credenciamento)
+- contratos administrativos (alteração, reequilíbrio, reajuste, fiscalização, extinção, sanções)
+- responsabilização por irregularidade em licitação ou contrato, quando a ementa explica o fundamento
+- consulta respondida em tese sobre esses temas
 
+REJEITAR quando:
+- é capa ou resumo de um contrato ou licitação concreta sem tese (partes, objeto, valor, "em exame")
+- o tema é outro: pessoal, previdência, educação, saúde, tributário, contas anuais, orçamento
+- é só aplicação de multa ou julgamento de regularidade sem o fundamento jurídico
+- o texto é só metadado, sem conteúdo
+
+DÚVIDA: use só quando o texto não permite decidir.
+
+Responda em JSON conforme o schema. nota: 0-100 (relevância para o acervo). motivo: uma frase, citando o que a decisão decide. temas: até 3, em português.`;
+
+function textoParaIA(d: DecisionInput): string {
+  return `Tribunal: ${d.tribunalCode || 'n/d'}
+Tipo: ${d.decisionType || 'n/d'}
+Título: ${d.title}
+Ementa: ${d.ementa.slice(0, 3000)}`;
+}
+
+/**
+ * Julga, com IA, uma decisão que o scoring por palavra-chave deixou em
+ * pendente (score 20-54). Devolve null se a chamada falhar ou a resposta vier
+ * fora do schema — nesse caso a decisão continua pendente.
+ */
+export async function julgarAmbiguoComIA(decision: DecisionInput): Promise<JulgamentoIA | null> {
   try {
-    const parsed = JSON.parse(result.response);
+    // O modelo precisa ir explícito: forçar só o provider mantém o modelo
+    // padrão da tarefa (Claude), e o Gemini responde 404.
+    const { text } = await generate('classification', {
+      provider: 'gemini',
+      model: PRIMARY_GEMINI_MODEL,
+      systemPrompt: PROMPT_AMBIGUOS,
+      messages: [{ role: 'user', content: textoParaIA(decision) }],
+      responseSchema: ESQUEMA_JULGAMENTO,
+      temperature: 0,
+      thinkingBudget: 0,
+    });
+    const j = JSON.parse(text || '');
+    if (!['aprovar', 'rejeitar', 'duvida'].includes(j?.veredito)) return null;
     return {
-      relevanceScore: parsed.relevanceScore ?? keywordScore,
-      approvalStatus: parsed.approvalStatus ?? 'pending',
-      themes: parsed.themes ?? detectedThemes,
-      leiArticles: [],
-      reasoning: parsed.reasoning ?? '',
-      suggestedCourses: '',
-      confidence: parsed.confidence ?? 50,
+      veredito: j.veredito,
+      nota: Math.max(0, Math.min(100, Math.round(Number(j.nota) || 0))),
+      motivo: String(j.motivo || '').trim(),
+      temas: Array.isArray(j.temas) ? j.temas.map(String).slice(0, 3) : [],
     };
-  } catch {
+  } catch (error) {
+    apiLogger.warn({ err: error }, '[classifier] julgamento por IA falhou');
     return null;
   }
 }
