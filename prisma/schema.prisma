@@ -150,11 +150,12 @@ model Document {
   tcuDataJulgamento DateTime? // Data do julgamento do acórdão
   tcuLinkPDF        String? // Link oficial do PDF no site do TCU
   tcuEmentaCompleta String?   @db.Text // Ementa oficial completa (pode ser longa)
-  /// ⚠️ NÃO INDEXAR. Este campo NÃO é lido por lib/embeddings/source-text.ts
-  /// (que usa [content, tcuEmentaCompleta, description]) e NÃO PODE passar a
-  /// ser: indexá-lo somaria ~116k chunks e traria o flooding do top-5 recusado
-  /// no design de 2026-07-07. O inteiro teor está aqui para ANÁLISE
-  /// (lib/tcu/analise-relevancia.ts), não para retrieval.
+  /// Inteiro teor do RTF oficial, gravado pelo catalog-tcu-inteiro-teor (teto
+  /// TETO_CHARS_CATALOGO). Três usos: análise (lib/tcu/analise-relevancia.ts);
+  /// retrieval, com prioridade 1 em lib/embeddings/source-text.ts desde o PR #206
+  /// (03/09/2026), que reverteu a recusa dos designs de 07/07 e 15/07/2026; e
+  /// leitura na página do documento e da jurisprudência (2026-09-26).
+  /// A busca por palavra-chave (FTS) continua sem alcançá-lo.
   tcuTextoCompleto  String?   @db.Text // Texto integral do acórdão (pode ser muito longo)
   tcuRelator        String? // Nome do relator
   tcuOrgaoJulgador  String? // Órgão julgador (Plenário, 1ª Câmara, etc)

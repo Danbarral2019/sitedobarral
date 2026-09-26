@@ -16,10 +16,13 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFindUnique } = vi.hoisted(() => ({ mockFindUnique: vi.fn() }));
+const { mockFindUnique, mockTemAcesso } = vi.hoisted(() => ({ mockFindUnique: vi.fn(), mockTemAcesso: vi.fn() }));
 
 vi.mock('@/lib/prisma', () => ({
   prisma: { document: { findUnique: (...a: unknown[]) => mockFindUnique(...a) } },
+}));
+vi.mock('@/lib/auth', () => ({
+  hasAccessToDocument: (...a: unknown[]) => mockTemAcesso(...a),
 }));
 vi.mock('@/lib/logger', () => ({
   apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -60,8 +63,11 @@ const NECESSARIOS = [
 describe('GET /api/documents/[id] — campos internos', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockTemAcesso.mockImplementation(async (d: { isPublic: boolean }) => d.isPublic);
     mockFindUnique.mockResolvedValue({
       id: 'doc-1',
+      isPublic: true,
+      isCommon: false,
       title: 'ON de teste',
       description: 'desc',
       content: 'texto integral',
@@ -115,5 +121,62 @@ describe('GET /api/documents/[id] — campos internos', () => {
     expect(body.keyPoints).toBe('pontos');
     expect(body.practicalUse).toBe('uso');
     expect(body.importance).toBe('alta');
+  });
+});
+
+/**
+ * Regressão (2026-09-26): o `select` fechava as colunas, mas não o acesso.
+ * Qualquer um com o id lia o texto integral de documento restrito (Manual TCU,
+ * ONs restritas), contornando a amostra da página /documento/[id].
+ */
+describe('GET /api/documents/[id] — documento restrito', () => {
+  const longo = 'Primeira frase do manual. '.repeat(60);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFindUnique.mockResolvedValue({
+      id: 'doc-1',
+      title: 'Manual TCU, seção 3',
+      description: 'desc',
+      content: longo,
+      summary: 'resumo de curadoria',
+      isPublic: false,
+      isCommon: true,
+      courseId: null,
+      notes: { publicNotes: 'obs do prof', practicalUse: 'uso', keyPoints: 'pontos', importance: 'alta' },
+    });
+  });
+
+  it('sem acesso: devolve só a amostra, sem resumo nem notas', async () => {
+    mockTemAcesso.mockResolvedValue(false);
+    const body = await (await GET(req(), ctx)).json();
+    expect(body.content.length).toBeLessThanOrEqual(520);
+    expect(body.content.length).toBeGreaterThan(0);
+    expect(body.summary).toBeNull();
+    expect(body.publicNotes).toBeNull();
+    expect(body.keyPoints).toBeNull();
+    expect(body.notes).toBeNull();
+    expect(body.acessoRestrito).toBe(true);
+  });
+
+  it('com acesso (assinante): devolve o texto integral', async () => {
+    mockTemAcesso.mockResolvedValue(true);
+    const body = await (await GET(req(), ctx)).json();
+    expect(body.content).toBe(longo);
+    expect(body.summary).toBe('resumo de curadoria');
+    expect(body.publicNotes).toBe('obs do prof');
+  });
+
+  it('a resposta não expõe os campos usados só para decidir o acesso', async () => {
+    mockTemAcesso.mockResolvedValue(true);
+    const body = await (await GET(req(), ctx)).json();
+    expect(body).not.toHaveProperty('isPublic');
+    expect(body).not.toHaveProperty('isCommon');
+  });
+
+  it('decide o acesso com isPublic, isCommon e courseId do documento', async () => {
+    mockTemAcesso.mockResolvedValue(false);
+    await GET(req(), ctx);
+    expect(mockTemAcesso).toHaveBeenCalledWith({ isPublic: false, isCommon: true, courseId: null });
   });
 });

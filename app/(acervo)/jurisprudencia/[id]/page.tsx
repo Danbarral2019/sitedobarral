@@ -7,6 +7,7 @@ import {
   Scale, ArrowLeft, ExternalLink, Calendar, User, Building2,
   Tag, BookOpen, Loader2, Sparkles
 } from 'lucide-react';
+import { blocosDoInteiroTeor, inteiroTeorTruncado } from '@/lib/tcu/inteiro-teor-exibicao';
 
 interface DecisionDetail {
   id: string;
@@ -219,6 +220,11 @@ export default function JurisprudenciaDetailPage() {
   const CANONICAL_TYPES = ['sumula', 'orientacao_jurisprudencial', 'precedente_normativo'];
   const isCanonical = CANONICAL_TYPES.includes(decision.decisionType);
   const sumula = isCanonical ? parseSumulaPayload(decision.sourceRawData) : null;
+  // Inteiro teor do acórdão do TCU (Document.tcuTextoCompleto, via a API). As
+  // súmulas do TST também preenchem fullText, mas lá ele é o payload da tese,
+  // já renderizado acima; por isso o bloco é só do TCU.
+  const inteiroTeor = !isCanonical && decision.tribunalCode === 'TCU' ? decision.fullText : null;
+  const blocosInteiroTeor = inteiroTeor ? blocosDoInteiroTeor(inteiroTeor) : [];
   const sitBadge = sumula ? SITUACAO_BADGES[sumula.situacao] : null;
 
   return (
@@ -361,6 +367,40 @@ export default function JurisprudenciaDetailPage() {
             <p className="text-ink-secondary leading-relaxed whitespace-pre-line">{decision.ementa}</p>
           )}
         </div>
+
+        {/* Inteiro teor — recolhido: são dezenas de páginas abaixo da ementa */}
+        {blocosInteiroTeor.length > 0 && (
+          <details className="bg-white rounded-[6px] border p-6 mb-8 group">
+            <summary className="cursor-pointer list-none flex items-center justify-between gap-4">
+              <span>
+                <span className="text-lg font-bold text-ink-primary">Inteiro teor</span>
+                <span className="text-sm text-ink-muted ml-2">
+                  relatório, voto e acórdão · cerca de {Math.max(1, Math.round(inteiroTeor!.length / 3000))} páginas
+                </span>
+              </span>
+              <span className="text-sm font-semibold text-brand-600 group-open:hidden">Ler</span>
+              <span className="text-sm font-semibold text-brand-600 hidden group-open:inline">Recolher</span>
+            </summary>
+            {inteiroTeorTruncado(inteiroTeor!) && (
+              <p className="mt-4 text-sm text-ink-muted">
+                Este acórdão é longo demais e o texto abaixo está incompleto. A íntegra está na fonte oficial.
+              </p>
+            )}
+            <div className="text-ink-secondary leading-relaxed mt-6 max-w-[65ch]">
+              {blocosInteiroTeor.map((b, i) =>
+                b.tipo === 'titulo' ? (
+                  <h3 key={i} className="font-bold text-ink-primary mt-8 mb-3">
+                    {b.texto}
+                  </h3>
+                ) : (
+                  <p key={i} className="mb-3">
+                    {b.texto}
+                  </p>
+                ),
+              )}
+            </div>
+          </details>
+        )}
 
         {/* IRRs (Incidentes de Recursos Repetitivos) — quando houver */}
         {sumula && sumula.irrs.length > 0 && (

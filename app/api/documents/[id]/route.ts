@@ -3,6 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
+import { hasAccessToDocument } from '@/lib/auth';
+import { trechoDeAmostra } from '@/lib/text-preview';
+
+/** Mesmo corte da página /documento/[id]. */
+const LIMITE_AMOSTRA = 520;
 
 export async function GET(
   request: NextRequest,
@@ -80,6 +85,10 @@ export async function GET(
         notes: {
           select: { publicNotes: true, practicalUse: true, keyPoints: true, importance: true },
         },
+
+        // Só para decidir o acesso; saem da resposta logo abaixo.
+        isPublic: true,
+        isCommon: true,
       },
     });
 
@@ -88,13 +97,38 @@ export async function GET(
       throw new NotFoundError('Documento');
     }
 
-    apiLogger.info({ documentId }, 'Document fetched successfully');
+    // O `select` acima fechou o vazamento de colunas, mas não o de acesso: sem
+    // esta checagem, qualquer um com o id lia o texto integral de documento
+    // restrito (seções do Manual TCU, ONs restritas), contornando a amostra da
+    // página /documento/[id]. Quem não tem acesso recebe aqui o mesmo que lá:
+    // a amostra do texto, sem resumo nem notas de curadoria.
+    const { isPublic, isCommon, ...publico } = document;
+    const temAcesso = await hasAccessToDocument({ isPublic, isCommon, courseId: document.courseId });
+
+    apiLogger.info({ documentId, temAcesso }, 'Document fetched successfully');
+
+    if (!temAcesso) {
+      return NextResponse.json({
+        ...publico,
+        content: trechoDeAmostra(document.content || document.description || '', LIMITE_AMOSTRA).trecho,
+        summary: null,
+        notes: null,
+        publicNotes: null,
+        notesKeyPoints: null,
+        notesPracticalUse: null,
+        notesImportance: null,
+        keyPoints: null,
+        practicalUse: null,
+        importance: null,
+        acessoRestrito: true,
+      });
+    }
 
     // Map satellite table notes back to flat names for frontend compatibility.
     // `adminNotes` NÃO é remapeado: é nota interna ("Observações Privadas (Admin)"
     // no Step 4 do wizard) e nenhum consumidor desta rota o exibe.
     const response = {
-      ...document,
+      ...publico,
       publicNotes: document.notes?.publicNotes ?? document.publicNotes,
       keyPoints: document.notes?.keyPoints ?? document.notesKeyPoints,
       practicalUse: document.notes?.practicalUse ?? document.notesPracticalUse,
