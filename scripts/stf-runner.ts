@@ -16,6 +16,7 @@
  *
  * Uso:
  *   npm run stf:coletar
+ *   STF_MODO=repercussao-geral npm run stf:coletar   # carga histórica dos temas de RG, sem janela
  *
  * Abre uma janela de Chromium por ~30s e posta o resultado em
  * POST /api/ingest/stf (produção, por padrão — ver `ingestUrl` abaixo).
@@ -68,12 +69,23 @@ async function main() {
   }
 
   const desde = dataLimite(DIAS_JANELA);
-  console.log(`janela: julgados desde ${desde} (${DIAS_JANELA} dias)`);
-  const consultas: OpcoesConsultaStf[] = [
-    { termo: '"Lei 14.133"', base: 'acordaos', dataInicio: desde },
-    { termo: '"Lei 14.133"', base: 'decisoes', dataInicio: desde },
-    { termo: 'licitação OR licitações OR licitatório OR licitatória', base: 'acordaos', dataInicio: desde },
-  ];
+  // Os casos-paradigma de repercussão geral sobre licitação são antigos: a
+  // janela mensal nunca os alcança (8 de 645 no acervo em 26/09/2026). O modo
+  // abaixo é uma carga histórica única, sem janela, só com RG.
+  const modoRG = process.env.STF_MODO === 'repercussao-geral';
+  const consultas: OpcoesConsultaStf[] = modoRG
+    ? [
+        'licitação OR licitações OR licitatório OR licitatória',
+        '"Lei 14.133"',
+        '"Lei 8.666"',
+        '"contrato administrativo" OR "contratos administrativos"',
+      ].map((termo) => ({ termo, base: 'acordaos' as const, somenteRepercussaoGeral: true }))
+    : [
+        { termo: '"Lei 14.133"', base: 'acordaos', dataInicio: desde },
+        { termo: '"Lei 14.133"', base: 'decisoes', dataInicio: desde },
+        { termo: 'licitação OR licitações OR licitatório OR licitatória', base: 'acordaos', dataInicio: desde },
+      ];
+  console.log(modoRG ? 'modo: repercussão geral, sem janela' : `janela: julgados desde ${desde} (${DIAS_JANELA} dias)`);
 
   // headless: false é REQUISITO, não preferência — headless recebe 403. Ver
   // o cabeçalho deste arquivo para as medições.

@@ -43,6 +43,15 @@ describe('montarCorpoConsulta', () => {
     expect(c.from).toBe(100);
   });
 
+  it('restringe aos casos de repercussão geral só quando pedido', () => {
+    const com = montarCorpoConsulta({ termo: 'licitação', base: 'acordaos', somenteRepercussaoGeral: true }) as {
+      query: { bool: { filter: object[] } };
+    };
+    expect(com.query.bool.filter).toContainEqual({ term: { is_repercussao_geral: true } });
+    const sem = montarCorpoConsulta({ termo: 'licitação', base: 'acordaos' }) as { query: { bool: { filter: object[] } } };
+    expect(JSON.stringify(sem)).not.toContain('is_repercussao_geral":true');
+  });
+
   it('aponta para o endpoint público do STF', () => {
     expect(URL_API_STF).toBe('https://jurisprudencia.stf.jus.br/api/search/search');
   });
