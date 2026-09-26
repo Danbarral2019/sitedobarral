@@ -97,7 +97,12 @@ function larguraDeReferencia(linhas: string[]): number {
  * e mantém as quebras de parágrafo.
  */
 export function normalizarTextoPdf(texto: string): string {
+  // O Postgres recusa o caractere nulo em coluna de texto ("invalid byte
+  // sequence for encoding UTF8: 0x00"), e há PDF antigo do DECOR que o traz.
+  // Sem esta limpeza a gravação lança como falha de infraestrutura, que não
+  // conta tentativa, e o parecer volta à fila todo dia.
   const linhas = texto
+    .replace(/\u0000/g, '')
     .split(/\r?\n/)
     .map(limparLinha)
     .filter((l) => !MARCADOR_DE_PAGINA.test(l));
