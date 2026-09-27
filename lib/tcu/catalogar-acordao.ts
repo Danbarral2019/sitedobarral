@@ -81,19 +81,24 @@ export interface OpcoesCatalogacao {
   enfileirarEmbedding?: boolean;
   /** Promove a acervo público o acórdão do grafo de licitação (padrão: sim). */
   promover?: boolean;
+  /**
+   * Tempo limite do download do RTF (padrão: o de fetchInteiroTeor, 60 s).
+   * Medido em 27/09/2026: um RTF de 15 MB do Plenário levou 200 s para descer.
+   */
+  timeoutMs?: number;
 }
 
 export async function catalogarAcordao(
   doc: AcordaoParaCatalogar,
   opcoes: OpcoesCatalogacao = {}
 ): Promise<ResultadoCatalogacao> {
-  const { enfileirarEmbedding = true, promover = true } = opcoes;
+  const { enfileirarEmbedding = true, promover = true, timeoutMs } = opcoes;
   if (!doc.tcuLinkPDF) {
     await marcarFalha(doc.id, 'tcuLinkPDF ausente');
     return { status: 'falha', erro: 'tcuLinkPDF ausente' };
   }
 
-  const r = await fetchInteiroTeor(doc.tcuLinkPDF);
+  const r = await fetchInteiroTeor(doc.tcuLinkPDF, timeoutMs ? { timeoutMs } : undefined);
   if (!r.ok) {
     await marcarFalha(doc.id, r.erro);
     return { status: 'falha', erro: r.erro };

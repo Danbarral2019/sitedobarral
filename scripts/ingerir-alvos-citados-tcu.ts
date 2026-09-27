@@ -66,6 +66,12 @@ const FEED = 'https://dados-abertos.apps.tcu.gov.br/api/acordao/recupera-acordao
 const UA = 'Mozilla/5.0 (compatible; SiteDoBarral/1.0)';
 const CURSOR_ID = MARCA_ALVOS_CITADOS;
 const MAX_TENTATIVAS = 3;
+/**
+ * O padrão de 60 s derrubava justamente os acórdãos grandes do Plenário: medido
+ * em 27/09/2026, um RTF de 15 MB levou 200 s. Acima de 20 MB o teto continua
+ * valendo, porque o rtf-parser estoura a pilha (visto num de 32 MB).
+ */
+const TIMEOUT_RTF_MS = 300_000;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -134,7 +140,7 @@ async function catalogar(
 ): Promise<void> {
   const t0 = Date.now();
   const r: ResultadoCatalogacao = await comRetryDB(
-    () => catalogarAcordao(doc, { enfileirarEmbedding: false, promover: false }),
+    () => catalogarAcordao(doc, { enfileirarEmbedding: false, promover: false, timeoutMs: TIMEOUT_RTF_MS }),
     `catalogar ${chave}`
   );
   const seg = (Date.now() - t0) / 1000;

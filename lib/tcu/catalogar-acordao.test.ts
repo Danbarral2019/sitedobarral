@@ -211,4 +211,14 @@ Nos termos do art. 62 da Lei nº 14.133/2021, a habilitação...`;
     expect(mockUpdate).toHaveBeenCalledTimes(1);
     expect(mockFindUnique).not.toHaveBeenCalled();
   });
+  it('timeoutMs chega ao download; sem ele, vale o padrão do fetch', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_COM_SECOES);
+    mockFindUnique.mockResolvedValue({ category: 'acordao', url: 'https://tcu/1', tags: null });
+
+    await catalogarAcordao(doc, { timeoutMs: 300_000 });
+    expect(mockFetch).toHaveBeenLastCalledWith('https://x/y.rtf', { timeoutMs: 300_000 });
+
+    await catalogarAcordao(doc);
+    expect(mockFetch).toHaveBeenLastCalledWith('https://x/y.rtf', undefined);
+  });
 });
