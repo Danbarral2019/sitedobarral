@@ -1,9 +1,17 @@
+/**
+ * Reenvia a um destinatário uma edição já enviada do clipping diário.
+ *
+ * Reconstrói os itens pelo mesmo caminho do arquivo da área restrita
+ * (`getArchiveEntry`), que lê o payload multi-tribunal e o legado só-TCU, e
+ * renderiza com o mesmo template do cron. Não chama LLM: os bullets de IA vêm
+ * do cache gravado no envio original.
+ */
 import { prisma } from '../lib/prisma';
 import { sendEmail } from '../lib/email';
-import { renderDailyClipping, type ClippingAcordao } from '../lib/email-templates/daily-clipping';
+import { renderDailyClippingV2 } from '../lib/email-templates/daily-clipping';
 import { signUnsubscribeToken } from '../lib/clipping/unsubscribe-token';
 import { signViewToken } from '../lib/clipping/view-token';
-import { formatSentDateParam, startOfBrasiliaDay } from '../lib/clipping/archive';
+import { formatSentDateParam, getArchiveEntry, startOfBrasiliaDay } from '../lib/clipping/archive';
 
 function parseArgs(argv: string[]): { date?: string; to?: string; name?: string; dryRun: boolean } {
   const out: { date?: string; to?: string; name?: string; dryRun: boolean } = { dryRun: false };
@@ -36,77 +44,27 @@ async function main() {
   const [, y, m, d] = dateMatch;
   const sentDateKey = startOfBrasiliaDay(new Date(`${y}-${m}-${d}T12:00:00Z`));
 
-  const send = await prisma.dailyClippingSend.findUnique({ where: { sentDate: sentDateKey } });
-  if (!send) {
+  const entry = await getArchiveEntry(sentDateKey);
+  if (!entry) {
     console.error(`Nenhum DailyClippingSend encontrado para sentDate=${sentDateKey.toISOString()}`);
     process.exit(1);
   }
 
-  const acordaoIds: string[] = JSON.parse(send.acordaoIdsIncluded || '[]');
-  if (acordaoIds.length === 0) {
-    console.error(`DailyClippingSend ${send.id} não tem acordaoIdsIncluded.`);
+  const totalItems = entry.groups.reduce((acc, g) => acc + g.items.length, 0);
+  if (totalItems === 0) {
+    console.error(`O envio de ${args.date} (status=${entry.status}) não tem itens reconstruíveis.`);
     process.exit(1);
   }
 
-  const docs = await prisma.document.findMany({
-    where: { id: { in: acordaoIds } },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      url: true,
-      tcuNumeroAcordao: true,
-      tcuEmentaCompleta: true,
-      tcuRelator: true,
-      tcuOrgaoJulgador: true,
-      tcuLinkPDF: true,
-      tcuDataJulgamento: true,
-      clippingExtract: { select: { dispositivos: true, extractMethod: true, aiBullets: true } },
-    },
-  });
-
-  const docMap = new Map(docs.map((d) => [d.id, d]));
-  const acordaos: ClippingAcordao[] = acordaoIds
-    .map((id) => docMap.get(id))
-    .filter((d): d is NonNullable<typeof d> => Boolean(d))
-    .map((c) => ({
-      documentId: c.id,
-      numeroAcordao: c.tcuNumeroAcordao || c.title || '',
-      colegiado: c.tcuOrgaoJulgador || 'TCU',
-      relator: c.tcuRelator,
-      dataSessao: c.tcuDataJulgamento,
-      ementa: (c.tcuEmentaCompleta || c.description || '').trim(),
-      linkPdf: c.tcuLinkPDF,
-      linkInternal: c.url,
-      dispositivos: (() => {
-        const raw = c.clippingExtract?.dispositivos;
-        if (!raw) return [];
-        try {
-          const parsed = JSON.parse(raw);
-          return Array.isArray(parsed) ? (parsed as ClippingAcordao['dispositivos']) : [];
-        } catch { return []; }
-      })(),
-      extractMethod: (c.clippingExtract?.extractMethod as ClippingAcordao['extractMethod'] | undefined) || 'failed',
-      aiBullets: (() => {
-        const raw = c.clippingExtract?.aiBullets;
-        if (!raw) return undefined;
-        try {
-          const parsed = JSON.parse(raw);
-          return Array.isArray(parsed) ? parsed.filter((s: unknown): s is string => typeof s === 'string') : undefined;
-        } catch { return undefined; }
-      })(),
-    }));
-
-  const referenceDate = new Date(sentDateKey.getTime() - 24 * 60 * 60 * 1000);
   const adminUserId = `admin:${args.to.toLowerCase()}`;
   const sentDateParam = formatSentDateParam(sentDateKey);
 
-  const rendered = renderDailyClipping({
-    sendId: `resend-${send.id}`,
+  const rendered = renderDailyClippingV2({
+    sendId: `resend-${sentDateParam}`,
     recipientName: args.name || args.to,
     unsubscribeToken: signUnsubscribeToken(adminUserId),
-    referenceDate,
-    acordaos,
+    referenceDate: entry.referenceDate,
+    groups: entry.groups,
     viewToken: signViewToken(sentDateParam),
     sentDateParam,
     showArchiveBanner: process.env.CLIPPING_NEW_FEATURE_BANNER === 'true',
@@ -114,7 +72,10 @@ async function main() {
 
   console.log(`Reenvio do clipping de ${args.date} (sentDate=${sentDateKey.toISOString()})`);
   console.log(`  → para: ${args.to}`);
-  console.log(`  → ${acordaos.length} acórdão(s) reconstruído(s) (de ${acordaoIds.length} salvos)`);
+  for (const g of entry.groups) console.log(`  → ${g.tribunalCode}: ${g.items.length}`);
+  if (entry.missingIds.length > 0) {
+    console.log(`  → ${entry.missingIds.length} item(ns) não existem mais no banco e ficaram de fora`);
+  }
   console.log(`  → subject: ${rendered.subject}`);
 
   if (args.dryRun) {
