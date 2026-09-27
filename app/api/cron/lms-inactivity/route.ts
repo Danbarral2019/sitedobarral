@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
       where: {
         OR: [
           { isLifetime: true },
+          { expiresAt: null }, // assinatura ativa (a Stripe controla o fim)
           { expiresAt: { gte: now } },
         ],
       },
