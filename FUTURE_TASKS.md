@@ -1,7 +1,95 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-05-16
+> Atualizado em: 2026-09-27
+
+---
+
+## 📌 Estado em 27/09/2026
+
+Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef3a`), o histórico completo do git (PRs até #231), os handoffs `docs/HANDOFF-*.md`, os relatórios de `docs/audits/` e os roadmaps. Nada foi verificado no banco de produção nem em serviço externo: onde a conclusão depende do dado (conteúdo populado, execução de cron, configuração na Vercel ou na Stripe), o item ficou como **dúvida** e não como concluído. As seções históricas abaixo foram mantidas, com a marca `✅ CONCLUÍDO (data)` e a evidência nos itens resolvidos.
+
+### Aberto, por prioridade
+
+**Bloqueante ou alta**
+
+| Item | Situação | Evidência / próximo passo |
+|---|---|---|
+| P2. Verificação dos fluxos de lançamento | Aberto; testes E2E em construção em outra sessão | `docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`. Ficam fora dela a renderização da newsletter em Gmail/Outlook e o PIX |
+| PIX (Pix Automático) | Bloqueio externo | Aguarda convite da Stripe; código atrás de `NEXT_PUBLIC_PIX_ENABLED` (seção P1) |
+| Indexar 1.519 decisões de tribunal aprovadas e fora da busca semântica | Aberto; o teto do Gemini, estourado em 26/09/2026, foi resolvido em 27/09/2026 (informação do Daniel) | `scripts/indexar-decisoes-pendentes.ts` (PR #231) para no primeiro erro de cota e devolve o lote a `pending`; o cron `process-index-jobs` sozinho levaria ~50 dias. Antes de rodar, levantar volume e custo |
+| Newsletter de setembro/2026 | Não confirmada | `docs/audits/2026-09-newsletter-alert.md`: o check de 02/09 não alcançou `/api/newsletter-health` (403 do proxy da sessão), e o envio do dia 01/09 ficou sem verificação |
+| CNPJ no termo de uso | Não iniciado; depende de definição do objetivo | `docs/HANDOFF-2026-08-19-stj-e-clipping.md` §2(3): o Decreto nº 7.962, de 15 de março de 2013, exige CNPJ em destaque no comércio eletrônico |
+
+**Média**
+
+| Item | Situação | Evidência / próximo passo |
+|---|---|---|
+| BIA-1. Régua de resposta ampliada | Parcial | Passe barato do prompt em produção (PR #134). Faltam as dimensões novas (`eval/judge.ts` ainda tem só `faithfulness`, `citationAccuracy`, `completeness`), as respostas de referência e a estabilidade do juiz |
+| BIA-5. Buracos de dados | Parcial | Informativos do TCU voltaram via CSV (PR #138); Inf. 44/2010, Inf. 50/2011 e Enunciado IBDA nº 5 não foram reconferidos no banco |
+| `/api/area-restrita/search-all` sem filtro por matrícula | Aberto | Nenhuma referência a matrícula na rota (medido em 27/09); dívida registrada em `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(6) |
+| Teses do TCU: 20 cartões de reconferência e promoção à vitrine | Aberto; ação editorial do Daniel | `docs/HANDOFF-2026-09-09-heranca-editorial.md` §4 |
+| Teses do TCU: Onda 4 (busca por IA) | Plano escrito, não executado | PR #213 aberto desde 08/09/2026; o comando `prisma migrate diff` do plano usa flags removidas no Prisma 7.8 |
+| Acórdãos citados que não existem no acervo (alvos citados do TCU) | Em andamento em outra sessão | PR #229 (rascunho). Não mexer nos arquivos dela |
+| Clipping com TCDF, TRF5 e TJDFT | Em andamento | PR #232 (rascunho) |
+| Bundle do navegador e `vitest` varrendo `.claude/` | Em andamento | PR #233 (rascunho); `vitest.config.ts` ainda não exclui `.claude/**` na `main` |
+| STJ: resíduos do conector | Aberto | `docs/HANDOFF-2026-08-19-stj-e-clipping.md` §8: 7 dumps de 2022 e 2023 perdidos por WAF (`npm run stj:coletar -- --tudo`), 264 aprovados sem `summary`, dois `scraperCode` para o mesmo conector, cobertura nunca medida, guard de mojibake sem fixture real. A primeira execução do `sync-stj` na Vercel (05/09) não foi conferida |
+| Eval: adaptador não espelha produção | Aberto | `baselineSearch` não aplica `detectQueryDomain`; as 10 anotações de jurisprudência do golden set são derivadas de metadados, sem conferência humana (`docs/HANDOFF-2026-08-18-stf-e-busca.md` §5) |
+| Glossário e FAQ: conteúdo | Frontend pronto; conteúdo não verificado | Ver seção "Glossário e FAQ" e A7 |
+| Onda 7.4 (A1 a A8): conteúdo e validação | Código entregue; população e validação não verificadas | Ver seção "Onda 7.4" |
+
+**Baixa**
+
+| Item | Situação | Evidência |
+|---|---|---|
+| Rotas fora do padrão Fase 8 | Aberto (medido em 27/09) | 117 de 299 `route.ts` sem `handleApiError` nem `withAdminApi`/`withUserApi`/`withPublicApi`; 36 delas são crons que usam `withCronTelemetry`/`withCronRoute` (padrão próprio, com Sentry e `ScraperHealthLog`), de modo que as rotas não-cron fora do padrão são 81 |
+| `console.error` versus Sentry | Aberto (medido em 27/09) | 239 `console.error` para 41 `Sentry.capture*` em `app/`, `lib/`, `components/` e `hooks/`, sem testes (≈5,8:1) |
+| Chunk compartilhado de 402 KB na home | Aberto | `docs/audits/2026-08-31-desempenho-remedicao.md` |
+| Redirecionamento apex → www em um salto | Configuração da Vercel, fora do repositório | `docs/audits/2026-08-31-desempenho-remedicao.md` |
+| TCE-PE: `extractTextFromHTML` cola palavras na fronteira de bloco | Achado registrado, não corrigido | Commit do PR #218 |
+| T16. Teto de tamanho no RTF do clipping | Condicional | O teto de 20 MB existe no catálogo (`lib/tcu/inteiro-teor-fetch.ts:13`), mas não no clipping (`lib/clipping/dispositivo-extractor.ts:142`) |
+| Resíduos de higiene | Aberto | `scripts/import-tcu-precedentes.ts:436` ainda usa `claude-3-5-haiku-20241022`; `mailchimpId` sobrevive só na interface de `lib/newsletter.ts:15`; `scripts/migrate-mp-to-stripe.ts` permanece; 16 `.md` na raiz |
+| Tribunais: 21 pendentes após o julgamento por IA | Aberto | 3 dúvidas e 18 sem texto suficiente (PR #226) |
+| 1 PDF em `failed` na indexação | Aberto | `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(8) |
+| T10, T15 (Lighthouse), Q1, BIA-8 | Aberto ou condicional | Ver as seções respectivas |
+
+### Crons: `vercel.json` × handlers (27/09/2026)
+
+São 36 handlers em `app/api/cron/` e **todos** usam `withCronTelemetry`/`withCronRoute` (`lib/cron-telemetry.ts`), que grava `ScraperHealthLog` e captura no Sentry. O número de maio ("8/25 crons com `ScraperHealthLog`") está superado: a Onda 1 (PRs #16, #17, #21) e o PR #104 cobriram todos. O `vercel.json` tem 35 entradas (`sync-tribunal-decisions` aparece três vezes, com `?somente=`) e `regions: ["gru1"]`.
+
+| Cron | Backlog dizia | Hoje | Evidência |
+|---|---|---|---|
+| `process-index-jobs` | pausado | **Agendado**, diário às 11h UTC | PR #184 |
+| `compute-streaks` | pausado | **Agendado**, diário às 3h UTC | PR #107 |
+| `sync-tcu-informativos` | parado 89 dias | **Agendado**, fonte trocada para CSV de dados abertos | PRs #31 (pausa) e #138 (retorno) |
+| `sync-tcu-manual` | parado 96 dias | Agendado; não estava quebrado (o TCU não publicava versão nova) | PR #31 |
+| `summarize-conuni` | não populava | Agendado semanalmente, lote 150 | PR #30; drenagem do passivo não verificada no banco |
+| `social-publish` | inexistente | Agendado, dias úteis 13h e 17h UTC | PR #110 |
+| `lms-inactivity` | pausado | **Continua pausado** | PR #25; ver dúvida |
+| `daily-tcu-clipping` | ativo | **Sem agendamento**, marcado `@deprecated` desde 24/05/2026, substituído por `daily-clipping` | Cabeçalho de `app/api/cron/daily-tcu-clipping/route.ts`; remoção prevista "após 2 semanas" não feita |
+| `sync-datajud` | ativo | **Sem agendamento** | STJ trocou DataJud por Espelhos (PR #192) |
+| `revalidate-acervo` | não citado | Sem agendamento, de uso manual | Cabeçalho da rota |
+
+### Dúvidas para o Daniel
+
+Itens que dependem de decisão de produto ou de verificação fora do repositório; ficam listados também na descrição do PR desta atualização.
+
+1. **Onda 7.4, conteúdo (A1, A3, A5, A6, A7):** badges iniciais, quizzes piloto, cross-refs, leituras sugeridas e as 30 perguntas do FAQ foram populados? O código está no ar; o dado não foi conferido.
+2. **A2, redes sociais:** o cron `social-publish` está agendado. As credenciais `INSTAGRAM_*`/`LINKEDIN_*` foram validadas e houve posts piloto? Publicar em redes com o modo "em breve" ligado é intencional?
+3. **A4, vídeo no R2:** o E2E em produção (upload, matriculado assiste, não matriculado bloqueado, URL expira) foi feito? As gravações começaram?
+4. **A8, Planejamento:** o e-mail de anúncio (`POST /api/admin/planning/announce`) chegou a ser enviado?
+5. **`lms-inactivity`:** reativar, manter pausado ou declarar obsoleto?
+6. **`daily-tcu-clipping` e `sync-datajud`:** sem agendamento e substituídos (`daily-clipping`; STJ por Espelhos). Aposentar as rotas?
+7. **Stripe, resíduos da Fase 3:** e-mail `dpo@profdanielbarral.com`, URLs de `/termos` e `/privacidade` no Customer Portal e Customer Portal em modo live: feitos? O histórico da seção P1 ainda os mostra como pendentes.
+8. **T2b:** manter as 73 ONs sem link DOU específico e a revisão humana (`reviewed=true`) como pendências, ou encerrar?
+9. **T10 (app mobile) e BIA-8 (GraphRAG):** continuam no backlog?
+10. **Newsletter de setembro/2026:** foi enviada?
+11. **STF:** os 211 julgados pendentes de revisão de 18/08 foram absorvidos pelo julgamento por IA do PR #226 (459 pendentes tratados em 26/09)? O commit não separa por tribunal.
+12. **Golden set:** as 10 anotações de jurisprudência derivadas de metadados serão conferidas por você?
+13. **CNPJ no termo de uso:** qual é o objetivo (privacidade do endereço, retirada de páginas públicas mantendo onde a lei exige)?
+14. **Drop de `DocumentAnalysis` e `LessonComment` no banco:** o PR #106 removeu os models e deixou o `DROP TABLE` "pendente em produção"; depois veio a baseline de migrações. Confirmar se as tabelas foram de fato removidas.
+15. **Redirecionamento apex → www:** a mudança na configuração de domínio da Vercel foi feita?
+16. **Resíduos do STJ e do TCE-PE** (dumps de 2022 e 2023, 264 sem `summary`, passivo do inteiro teor do TCE-PE limitado a 76 de 405): vale gastar Gemini neles?
 
 ---
 
@@ -22,6 +110,8 @@ Consolida as ações para resolver os ~80 achados das duas auditorias abaixo em 
 | 6. Refactor estrutural | Componentes >800L, Server Components, CLAUDE.md | 2-3 semanas |
 
 **Total: ~6-8 semanas** (paralelo a desenvolvimento de features). Pode pausar a qualquer onda sem perda.
+
+> **✅ CONCLUÍDO (2026-05-20).** As 6 ondas e a Onda 7 foram executadas entre 16 e 20/05/2026: Onda 0/1 (PRs #8 a #21), Onda 2 (#22 a #26), Onda 3 (#27 a #32), Onda 4 (#33 a #86, incluindo 4.5 a 4.7), Onda 5 (#87 a #89), Onda 6 (#90 a #101), Onda 7 (#102 a #110), com o drop da coluna legada `leiArticles` em #115/#116. Balanço em `docs/audits/2026-05-19-saneamento-status-report.md`. Os resíduos que sobreviveram estão no quadro "Estado em 27/09/2026". As decisões do PO listadas abaixo foram tomadas na Onda 7.4 (PR #106; ver seção própria).
 
 **Princípios:** observabilidade antes de fix; cada PR ≤500 LOC; schema sempre backward-compat; mudanças atrás de env var; instrumentar baseline antes; trunk-based.
 
@@ -51,6 +141,15 @@ Complementar à auditoria de falhas silenciosas — investiga "o que está pesan
 
 **Plano de saneamento de médio prazo** (4 sprints) no relatório.
 
+**Conferência de 27/09/2026:**
+1. Padrão Fase 8: **parcial.** O relatório de 19/05 registrou 280/280 após a Onda 4.2 (PRs #33 a #51, #64 a #68), mas rotas novas voltaram a nascer fora do padrão: hoje são 117 de 299 `route.ts` sem `handleApiError` nem os wrappers, das quais 36 são crons com `withCronTelemetry`/`withCronRoute`; restam 81 rotas não-cron. Try/catch não foi re-medido.
+2. Implementações concorrentes: admins de documentos ✅ (PRs #91, #105); admins TCU ✅ (PR #97); admins de analytics ✅ na prática, pois `/admin/analytics-hub` usa as três páginas como abas e as rotas antigas redirecionam (`next.config.ts:43-44`); AGU v1 × v4 ✅ (PRs #88, #89); classificadores TCU e DOU **obsoleto por decisão registrada** no PR #105 (pipelines distintos, não duplicação); hooks de busca ✅ (`use-search` removido no PR #105).
+3. `lib/ai/`: ✅ CONCLUÍDO (2026-05-17), PRs #52 a #63, #70, #71.
+4. Crons à toa: ✅ tratado; `process-index-jobs` e `compute-streaks` foram pausados (PR #25) e depois reativados com função real (PRs #184, #107); `lms-inactivity` segue pausado (dúvida nº 5).
+5. Features 80% prontas: decididas na Onda 7.4 (PR #106); ver seção própria.
+
+Wins rápidos: ✅ CONCLUÍDOS (2026-05-16): `gru1` (PR #22), Cache-Control por rota (PR #23), deps mortas (PR #24; `docx` mantido por estar em uso em `lib/planejamento/export/renderers/docx.ts`), pausa de crons (PR #25), órfãos e backups (PRs #26, #103).
+
 Ver também: [`docs/audits/2026-05-16-silent-failures.md`](docs/audits/2026-05-16-silent-failures.md) (30+ falhas silenciosas, complementar)
 
 ---
@@ -72,6 +171,15 @@ Investigação disparada pela descoberta de bug crítico no `LeiIndexer` (trunca
 **Observabilidade insuficiente:** 467 `console.error` vs 7 `Sentry.captureException` (ratio 67:1). Apenas 8/25 crons usam `ScraperHealthLog` — os outros 17 são opacos.
 
 **Lição transversal:** padronizar instrumentação (`ScraperHealthLog` + Sentry) em todos os crons evita 90% dos casos de "falha silenciosa por meses sem detectar".
+
+**Conferência de 27/09/2026:**
+1. `thinkingBudget`: ✅ CONCLUÍDO (2026-05-16), PRs #27 e #28; default `thinkingBudget = 0` em `lib/gemini/cached-client.ts:78`.
+2. Modelos Claude antigos: ✅ CONCLUÍDO (2026-05-16/17), PRs #29, #52, #54; os classificadores resolvem `claude-haiku-4-5-20251001` via `lib/ai/registry.ts:31`. Resíduo fora de produção: `scripts/import-tcu-precedentes.ts:436`.
+3. Crons parados: ✅ CONCLUÍDO; ver o quadro de crons no topo (PRs #30, #31, #107, #138, #184).
+4. Webhook Resend: ✅ CONCLUÍDO (2026-05-16), PR #15; `app/api/webhooks/resend/route.ts:5` e `:36` validam a assinatura Svix via `lib/webhooks/svix.ts`.
+5. `monitoring-alerts`: ✅ CONCLUÍDO (2026-05-16), PR #19; `app/api/cron/monitoring-alerts/route.ts:138` checa `result.error`.
+
+Observabilidade: `ScraperHealthLog` ✅ em 36 de 36 crons (PRs #16, #17, #21, #104). A razão `console.error` : Sentry, re-medida em 27/09, é 239:41 (≈5,8:1) no escopo `app/` + `lib/` + `components/` + `hooks/`, sem testes; o escopo da medição de maio (467:7) não foi documentado, então a comparação é aproximada. Resíduos P1/P2 do relatório: timeouts AGU/CONUNI ✅ (PR #104); `lib/email.ts` já loga com `apiLogger` (linha 72), mas ainda usa `console.warn` sem Sentry quando falta `RESEND_API_KEY` (linha 79); `gemini-test` ✅ removido (PR #103); `r2-client` ✅ (PR #104); rate limit em webhooks **obsoleto por decisão registrada** no PR #104 (assinatura + idempotência já barram); `Document.themes` não verificado no banco.
 
 Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabelas detalhadas, recomendações P0/P1/P2 e arquivos:linha específicos.
 
@@ -101,6 +209,8 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 ---
 
 ### BIA-1. Régua de resposta ampliada + otimização da síntese [Alta] — MAIOR ALAVANCA
+> **Conferência de 27/09/2026: PARCIAL.** O passe barato do prompt de síntese entrou em produção (PR #134; +4,2 pp no overall segundo `docs/ROADMAP_BUSCA_QUALIDADE.md`). Os passos 1, 2 e 5 não foram feitos: `eval/judge.ts` continua com as três dimensões originais, não há respostas de referência no golden set e não houve juiz duplo. Rodar exige autorização de custo (Claude por query).
+
 **Objetivo:** subir a qualidade PERCEBIDA da resposta (o que o usuário lê), que o recall@5 não mede. `recall@5=66%` diz que o doc certo está no top-5; não diz se a resposta é correta, completa, bem-citada e sem alucinação.
 **Estado atual:** régua com 3 dimensões já existe e roda. Baselines de jul/2026 registrados.
 **Passos:**
@@ -132,6 +242,8 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **(b) alvo primário `highlyRelevant` ✅** (decisão do PO 2026-07-09: opção não-destrutiva): nova métrica `recallAt5Primary` = recall@5 contra `highlyRelevant` (grade 2), `null` quando a query não tem alvo primário (ignorada no agregado, à la nDCG). **Nada foi apagado do golden** — preserva `relevant` para recall@10/nDCG. Baseline: **recall@5-primário 54,2%** (55/55 queries têm alvo primário). É barra mais estrita que o recall@5 amplo (mede se o essencial curado entra no top-5); lente complementar, não substituta. Diagnóstico em `eval/scripts/analyze-overannotated.ts` (19/55 super-anotadas, teto médio recall@5 = 86,8%). ⚠️ [[feedback_eval_ground_truth_bias]] respeitado — sem re-anotação a partir do pipeline.
 
 ### BIA-5. Cobrir buracos de dados (scraper gaps) [Média]
+> **Conferência de 27/09/2026: PARCIAL.** O scraper de Informativos do TCU foi refeito sobre o CSV de dados abertos, com backfill (PR #138), e o acervo cresceu muito depois de julho (STF #182, STJ #192, TCDF/TRF5/TJDFT #228, acórdãos do grafo #219, inteiro teor do DECOR #220/#222). Não foi reconferido no banco se Inf. 44/2010, Inf. 50/2011 e o Enunciado IBDA nº 5 estão presentes, nem feita a auditoria de referências do passo 1.
+
 **Objetivo:** indexar docs de alto valor referenciados mas ausentes no DB.
 **Estado atual:** roadmap notou ausentes (ex.: Inf. 44/2010, Inf. 50/2011, Enunciado IBDA nº 5) — indício de falha de scraper/indexação.
 **Passos:** auditar referências (golden + uso real) vs DB; listar ausentes de alto valor; corrigir scraper ou importar. Seguir [[document-inclusion-workflow]] (regra do usuário).
@@ -157,10 +269,14 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Fix:** apontar a busca de documentos do `global-search` para `hybridSearch` (ou um variante retrieval-only). **Nuance de custo/latência:** global-search é busca enquanto-digita (debounce 300ms); `hybridSearch` precisa de embedding da query — mas embedding é BARATO (Gemini, centavos/1M tokens); a síntese cara (Claude) continua só no card de IA (debounce 1500ms). Uniformizar NÃO dispara custo de Claude. Mitigar latência: híbrido no Enter/submit, ou FTS-first + upgrade híbrido. Auditar quais tipos (docs/atos/pareceres/jurisprudência) valem migrar. **Prioridade Alta — é a primeira impressão do produto.**
 **Status:** ✅ **BIA-0b IMPLEMENTADO 2026-07-08** (FTS-first + upgrade híbrido, endpoint `/api/area-restrita/global-search/hybrid` só para `document`+`legislative-act`, pós-filtro de matrícula). BIA-0a (piscar/foco) também resolvido antes. Restante do BIA-0: só o que o BIA-0c registra abaixo.
 
-### BIA-0c. [ACHADO 2026-07-08] Card de IA não filtra documentos por matrícula [Média]
+### BIA-0c. [ACHADO 2026-07-08] Card de IA não filtra documentos por matrícula [Média] ✅ CONCLUÍDO (2026-07-09)
+**Resolvido no PR #135** ("card de IA respeita matrícula por curso"): `lib/rag/answerContext.ts:257` aplica `filterByEnrollment` (importado de `lib/search/hybrid-documents`) sobre os resultados, com as matrículas buscadas em `app/api/documents/query/route.ts`. Documentos comuns ou sem curso continuam visíveis, como na lista do BIA-0b. Resíduo relacionado, ainda aberto: `/api/area-restrita/search-all` não filtra matrícula (ver quadro no topo).
+
 Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridSearch` com `courseId: undefined` → o card de IA (e as fontes citadas) pode retornar documentos de cursos em que o aluno **NÃO** está matriculado. Não é o escopo do BIA-0b (a lista já pós-filtra por matrícula no endpoint `/global-search/hybrid`). Avaliar: (a) se há documentos restritos de fato expostos no card, (b) aplicar o mesmo pós-filtro por matrícula em `answerContext`/`documents/query`. Prioridade Média (risco de acesso, mas a maioria do acervo é `isCommon`/público).
 
 ### BIA-8. [EXPLORAÇÃO CONDICIONAL] GraphRAG sobre o acervo jurídico [a decidir]
+> **Conferência de 27/09/2026: ABERTO, condicional.** O gatilho (evidência da BIA-1 de erro relacional) não ocorreu, porque a régua ampliada não foi construída. Nota: o grafo de precedentes do TCU (`AcordaoCitacao`, julho/2026) é infraestrutura nova de grafo, usada pelas teses, não pelo RAG; o A/B dos acórdãos do grafo no retrieval foi refutado (PR #177).
+
 **⚠️ Condicionado à BIA-1 — NÃO construir no escuro.** O domínio jurídico é um grafo natural (leis → artigos → revoga/altera; pareceres → citam artigos; jurisprudência → aplica teses; súmulas → consolidam). GraphRAG (retrieval aumentado por grafo de conhecimento) permitiria raciocínio **multi-hop** e respostas cientes de relações (ex.: "parecer sobre o art. X considerando que foi alterado pelo decreto Y").
 **Por que condicional:** o retrieval está *near-ceiling* e as falhas atuais são teto-de-métrica + ranking de `Document`, **não** lacunas multi-hop (mesmo perfil de risco da 4.2/Fase 8 — ver `docs/ROADMAP_BUSCA_QUALIDADE.md`). O valor potencial é em **correção/raciocínio da RESPOSTA**, que a régua da BIA-1 vai começar a medir. **Só explorar se a BIA-1 mostrar que os erros de resposta são relacionais/multi-hop.**
 **Antes de qualquer dependência externa, aproveitar a infra de grafo que JÁ existe** (subutilizada): `LegislativeActRelation` (alterações/revogações), `LeiArticleCrossRef`, `LeiArticleSuggestedReading`, `leiArticlesArr` (doc→artigos), flag `revoked`.
@@ -225,6 +341,8 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 
 </details>
 
+> **Conferência de 27/09/2026:** cartão LIVE mantido; PIX segue aguardando convite (bloqueio externo). Não há registro no repositório de que o e-mail `dpo@profdanielbarral.com`, as URLs de `/termos` e `/privacidade` no Customer Portal e o Customer Portal live tenham sido configurados: ficam como dúvida nº 7.
+>
 > **Nota (2026-07-11):** os checklists das Fases 2 e 3 acima ficaram como histórico. A virada LIVE + smoke E2E com cartão real já foram concluídos (ver Status no topo desta seção). O único item vivo é o PIX (bloqueio externo).
 
 **Arquivos relevantes:** `lib/stripe.ts`, `app/api/pagamento/{checkout,status,webhook}/route.ts`, `scripts/stripe-bootstrap.ts`
@@ -235,7 +353,7 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 
 ### P2. Verificação Manual Pós-Deploy [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
-**Status:** Pendente
+**Status:** Pendente. **Conferência de 27/09/2026: ABERTO, em andamento.** O PR #208 acrescentou testes de navegador para fluxos críticos de acesso e o PR #211 deu ao CI um banco descartável da Neon; os seis primeiros fluxos abaixo (exceto PIX) estão sendo automatizados por outra sessão (`docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`). PIX depende do convite da Stripe; a renderização da newsletter em Gmail/Outlook continua manual.
 
 - [ ] Registro sem QR Code → verificação email → login → planos
 - [ ] Registro com QR Code → verificação → login → área restrita
@@ -284,6 +402,8 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 - [x] Re-rodar este audit (`scripts/audit-legislative-acts.ts`) e confirmar que `spotCheckSuspicious` cai para ≤ 2 atos (ou zero) e `unparsedHost` vai a 0. (post-fix: `spotCheckSuspicious` = 10, majoritariamente falsos-positivos de ratio; stored lengths melhoraram em 8/11. Ver diff summary.)
 
 **Arquivos relevantes:** `scripts/scrape-legislative-acts-content.ts`, `scripts/audit-legislative-acts.ts`, `lib/tribunal-scrapers/`, `docs/audits/2026-04-19-legislative-acts-audit.md`, `docs/audits/2026-04-19-legislative-acts-audit.json`
+
+> **Conferência de 27/09/2026: ✅ CONCLUÍDO no essencial (2026-07-31).** Todos os itens de ação acima estão marcados, e a formatação dos atos passou por nova auditoria e correções em julho: blocos HTML concatenados (PR #172), portais Volto (PR #173), auditoria de formatação de todos os atos (PR #174), falsos negativo e positivo do detector (PR #176), além da skill `atos-normativos-import`. Resíduos declarados como condicionais, sem caso real hoje: parser dedicado do TCU SPA, parser de PDF do MPF e as 11 INs SEGES sem `themes` (esta última não reconferida no banco).
 
 ### T2. Verificar Redação Atualizada da ON 45 [Média] — ✅ CONCLUÍDO (2026-06-18)
 
@@ -363,6 +483,8 @@ Leitura do texto integral das 7 mostrou que **NÃO** eram todas de pessoal (a av
 - **MANTIDAS (licitações — em escopo):** ON 01/2016 (cessão de uso via pregão), 02/2016 (dispensa p/ remanescente de obra, substituída pela ON 80/2024), 04/2016 (pesquisa de preços). E 06/2017 (competência da CNU — limítrofe/meta, mantida por ora).
 - **EXCLUÍDAS (tema de pessoal, fora de escopo — 2026-07-11):** ON 03/2016 (estágio probatório + licença gestante), 07/2017 (estágio probatório/Lei 8.112), 08/2018 (heteroidentificação de cotistas em concurso). Removidas via `scripts/delete-ons-cnu-pessoal.ts --apply` (mesmo critério das ON 104/106). Total de ONs públicas: 108 → **105**.
 
+> **Conferência de 27/09/2026:** núcleo concluído, como já registrado. Depois de julho vieram o cron mensal `ons-monitor` (PR #159, agendado), a exclusão das 5 fundamentações legadas (PR #160) e a integridade da Lei Comentada (PR #161). Continuam abertas, sem evidência em contrário, as 73 ONs sem link DOU específico e a revisão humana (`reviewed=true`): dúvida nº 8.
+
 **Arquivos relevantes:** `scripts/scrape-ons-oficial.ts`, `scripts/fix-and-diff-ons.ts`, `scripts/apply-ons-update.ts`, `lib/agu-modules/orientacoes-normativas.ts`, `app/(acervo)/base-conhecimento/[categoria]/page.tsx`, banco (tabela `Document` filtrada por `category='orientacao-normativa'`).
 
 ### T3. Verificar Indexação Completa de Atos Normativos Novos [Alta] ✅ CONCLUÍDO (2026-02-23)
@@ -425,6 +547,8 @@ Sidebar reduzido de 21 para 14 itens agrupando páginas relacionadas com tabs UR
 ## 🎯 Onda 7.4 — Decisões de Produto (2026-05-19)
 
 Decisões coletadas para 14 features dormentes da campanha de saneamento.
+
+> **Conferência de 27/09/2026.** A parte de código das ativações foi entregue entre 19 e 20/05/2026 (PRs #107 a #110); o que resta em cada item é conteúdo ou validação, que depende do banco e não foi verificado (dúvidas nº 1 a 4). Resumo: A1 código ✅ (cron `compute-streaks` agendado no PR #107, admin `/admin/badges` com 12 tipos no PR #109), badges e fluxo E2E não verificados; A2 código ✅ (cron `social-publish` no PR #110, agendado), credenciais e posts piloto não verificados; A3 admin de quiz existe (`app/admin/lms/[courseId]/lessons/[lessonId]/quiz/page.tsx`), quizzes não verificados; A4 código ✅ na `main` (commits de 10 e 11/07/2026, `components/lms/HostedVideoPlayer.tsx`, `app/admin/videos/upload/page.tsx`, `CourseVideo.storageType` em `prisma/schema.prisma:715`), E2E em produção e gravações não verificados; A5 e A6 editores existentes em `app/admin/lei-14133/comentada/` (PR #110 reverteu a duplicação do #109), curadoria não verificada; A7 frontend ✅ (`app/faq/page.tsx`, `app/admin/faq/page.tsx`, PR #107), 30 perguntas não verificadas; A8 banner ✅ (PR #108) e endpoint de anúncio ✅ (PR #110), envio não verificado.
 
 ### ✅ Dropadas (Onda 7.4 PR técnica)
 - **DocumentAnalysis** — drop model (vinculado a Sistema D removido na PR #9)
@@ -579,7 +703,7 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - [x] DNS prefetch/preconnect para serviços externos (fonts, Sentry, Vercel Analytics, Mercado Pago)
 - [x] ISR configurado em jurisprudencia (30min) — soma-se a home/blog/publicações/cursos (1h)
 - [x] Bundle analyzer: `@next/bundle-analyzer` + script `npm run analyze`
-- [ ] QR codes base64 → PNG: **Deferido** — impacto baixo (QR codes raramente na navegação), requer mudança arquitetural (upload R2, alterar model, migrar dados)
+- [ ] QR codes base64 → PNG (sem mudança até 27/09/2026): **Deferido** — impacto baixo (QR codes raramente na navegação), requer mudança arquitetural (upload R2, alterar model, migrar dados)
 
 ### T12. Performance — Fase 3 [Concluído ✅]
 **Status:** Avaliado e implementado o viável em 2026-02-23
@@ -606,6 +730,8 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - [ ] Avaliar tornar JetBrains Mono lazy (usado em 25+ componentes, risco de regressão visual)
 - [ ] Re-rodar Lighthouse em ambiente sem Kaspersky para baseline limpo
 - [ ] Investigar restante de 280 KB de "Reduce unused JavaScript": após o code split do lei-14133-artigos, sobram ~200 KB ainda — provavelmente Stripe SDK, jspdf carregando antes do click, etc.
+
+> **Conferência de 27/09/2026: PARCIAL, números de maio aposentados.** `docs/audits/2026-08-31-desempenho-remedicao.md` substituiu o relatório de 09/05: compressão, cache e erros de console não procedem mais; os redirecionamentos custam ~0,9 s (apex → www, configuração da Vercel, fora do repositório); o que sobra em código é o chunk compartilhado de 402 KB, que exige o analisador de bundle. O PR #217 tirou o Prisma do bundle de componentes cliente e o PR #233 (rascunho) tira o tracing do Sentry do navegador. Obs.: há dois itens numerados T15 neste arquivo (este e o de Glossário e FAQ); a numeração foi mantida para não quebrar referências.
 
 **Por que baixa prioridade:** A home pública é landing page. Aluno logado entra direto na área restrita, que já tem dynamic imports (T11) e bundle menor. O ganho percebido pelo público pagante é pequeno comparado ao custo.
 
@@ -634,6 +760,8 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 
 **Por que baixa:** o log estruturado + Sentry já dão o sinal de abuso; o painel é monitoramento proativo, não proteção (a proteção já está no ar). Fazer só se sentir falta de visibilidade.
 
+**Conferência de 27/09/2026: ABERTO.** Nenhuma rota ou tela lê os contadores `ai:quota:d:*`; só `lib/cache/ai-quota.ts` e seu teste os referenciam.
+
 **Esforço:** ~0,5-1 dia (rota admin com SCAN + join com `User` p/ nome/email + card no monitoring). **Arquivos:** `lib/cache/ai-quota.ts` (helper de leitura), `app/api/admin/monitoring/`, `app/admin/monitoring/`.
 
 ### T16. Clipping TCU — Size cap para RTFs gigantes [Baixa, condicional]
@@ -658,6 +786,8 @@ if (contentLength > MAX_RTF_BYTES) return null; // PDF fallback
 
 **Trigger pra implementar:** Aparecer um segundo acórdão > 20 MB em até 90 dias, OU um cron timeout efetivo causado por múltiplos acórdãos grandes no mesmo dia. Quando implementar, threshold inicial sugerido: **20 MB** (pega o 1144, conservador o suficiente pra não disparar em casos médios).
 
+**Conferência de 27/09/2026: ABERTO, condicional.** O clipping continua sem teto (`lib/clipping/dispositivo-extractor.ts:142`). O mesmo padrão já existe para o catálogo do inteiro teor, com teto de 20 MB checado por `content-length` antes do download (`lib/tcu/inteiro-teor-fetch.ts:13` e `:31`), e pode ser reaproveitado se o gatilho ocorrer.
+
 **Sinais a monitorar:**
 - `ClippingItemExtract.extractMethod = 'pdf_parse'` (deveria ser raro; aumentou = mais acórdãos grandes)
 - `pdfFetchFailed = true` em entries recentes (cron estourando timeouts mesmo com 90s + retry)
@@ -681,6 +811,8 @@ Código funcional arquivado em `FUNCIONALIDADES_FUTURAS/` para implementação f
 
 > Arquivado em 2025-01-27. Status: testado e funcional na data do arquivamento.
 
+> **Conferência de 27/09/2026: OBSOLETO.** A pasta `FUNCIONALIDADES_FUTURAS/` foi apagada em 16/05/2026 porque quebrava o build da Vercel (PR #18, commit `00d3d80c`). O código pode ser recuperado do histórico do git anterior a esse commit. O `vitest.config.ts` ainda lista a pasta em `exclude`, sem efeito.
+
 ---
 
 ## GLOSSÁRIO E FAQ — Frontend Público
@@ -688,6 +820,8 @@ Código funcional arquivado em `FUNCIONALIDADES_FUTURAS/` para implementação f
 ### T15. Páginas Públicas do Glossário e FAQ [Média]
 **Prioridade:** Média
 **Status:** Backend 100% completo (16 APIs, 3 models Prisma). Faltam páginas públicas.
+
+> **Conferência de 27/09/2026: frontend ✅ CONCLUÍDO; conteúdo não verificado.** Glossário: `app/(acervo)/glossario/page.tsx`, `app/(acervo)/glossario/[slug]/page.tsx` e admin em `app/admin/glossario/` (lista, novo, edição); a paginação veio no commit `abd8349` e o admin deixou de levar o Prisma ao navegador no PR #217. FAQ: `app/faq/page.tsx` com busca, accordion e feedback, e `app/admin/faq/page.tsx` com contadores de visualização e utilidade (PR #107). Não foi possível confirmar sem o banco se os 50 a 100 termos e as 30 a 50 perguntas iniciais existem (dúvida nº 1).
 
 **Glossário — falta:**
 - [ ] Página `/glossario` (lista alfabética, busca, filtros por categoria, navegação A-Z)
