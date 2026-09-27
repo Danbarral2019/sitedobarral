@@ -10,7 +10,7 @@ import {
 } from '@/lib/clipping/archive';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Clipping TCU — Arquivo' };
+export const metadata = { title: 'Clipping — Arquivo' };
 
 interface PageProps {
   searchParams: Promise<{ q?: string; offset?: string }>;
@@ -37,7 +37,7 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
   if (!eligible) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
-        <h1 className="text-2xl font-bold text-ink-primary mb-3">Clipping TCU — Arquivo</h1>
+        <h1 className="text-2xl font-bold text-ink-primary mb-3">Clipping — Arquivo</h1>
         <div className="bg-amber-accent-soft border border-amber-accent-soft rounded-md p-4 text-sm text-ink-primary">
           O arquivo de clippings é exclusivo para alunos com matrícula ou assinatura ativa. Se você
           acha que isso é um engano, escreva para{' '}
@@ -62,10 +62,10 @@ export default async function ClippingArchivePage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold text-ink-primary mb-2">Clipping TCU — Arquivo</h1>
+      <h1 className="text-2xl font-bold text-ink-primary mb-2">Clipping — Arquivo</h1>
       <p className="text-sm text-ink-muted mb-5">
-        Releia clippings diários enviados anteriormente. Os trechos são extraídos do inteiro teor
-        dos acórdãos.
+        Releia clippings diários enviados anteriormente, com as decisões de tribunais de contas e
+        do Judiciário sobre licitações e contratos.
       </p>
 
       <form method="get" action="/area-restrita/clipping" className="mb-6">

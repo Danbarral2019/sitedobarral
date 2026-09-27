@@ -511,9 +511,9 @@ function buildSubject(referenceDate: Date, groups: ClippingGroup[]): string {
   const totalItems = groups.reduce((acc, g) => acc + g.items.length, 0);
   if (groups.length === 1) {
     const g = groups[0];
-    return `Clipping Jurídico — ${dataRef} — ${g.tribunalCode}, ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}`;
+    return `Clipping — ${dataRef} — ${g.tribunalCode}, ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}`;
   }
-  return `Clipping Jurídico — ${dataRef} — ${groups.length} tribunais, ${totalItems} decisões`;
+  return `Clipping — ${dataRef} — ${groups.length} tribunais, ${totalItems} decisões`;
 }
 
 export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmail {
@@ -551,7 +551,7 @@ export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmai
   const bannerHtml = showArchiveBanner
     ? `<div style="margin:0 0 18px;padding:12px 16px;background:#eeeae4;border-left:4px solid #20364e;border-radius:6px;">
          <p style="margin:0;font-size:13px;color:#20364e;line-height:1.5;">
-           <strong>Novidade:</strong> o clipping agora cobre múltiplos tribunais (TCU, TCEs, STJ). Arquivo em
+           <strong>Novidade:</strong> o clipping deixou de ser só do TCU e agora reúne decisões de outros tribunais de contas e do Judiciário. Arquivo em
            <a href="${archiveUrl}" style="color:#20364e;font-weight:600;text-decoration:underline;">/area-restrita/clipping</a>.
          </p>
        </div>`
@@ -576,7 +576,7 @@ export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmai
         <tr>
           <td style="background:#1a1c20;padding:28px 32px;color:#f7f6f3;">
             <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#6b6e72;">Prof. Daniel Barral</p>
-            <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Clipping Jurídico</h1>
+            <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">Clipping</h1>
             <p style="margin:6px 0 0;font-size:14px;color:#e8e6e1;">${dataRef} &middot; ${tribunaisLabel} &middot; ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}</p>
           </td>
         </tr>
@@ -614,7 +614,7 @@ export function renderDailyClippingV2(input: DailyClippingInputV2): RenderedEmai
 </html>`;
 
   const text = [
-    `Clipping Jurídico — ${dataRef}`,
+    `Clipping — ${dataRef}`,
     `${groups.length === 1 ? groups[0].tribunalCode : `${groups.length} tribunais`} · ${totalItems} ${totalItems === 1 ? 'decisão' : 'decisões'}`,
     viewInBrowserUrl ? `Ver no navegador: ${viewInBrowserUrl}` : null,
     '',
