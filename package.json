@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "NODE_OPTIONS=--max-old-space-size=7168 sh -c 'prisma generate && prisma migrate deploy && next build'",
+    "vercel-build": "NODE_OPTIONS=--max-old-space-size=7168 sh scripts/vercel-build.sh",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
