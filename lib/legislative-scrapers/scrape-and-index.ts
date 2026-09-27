@@ -9,6 +9,8 @@ import { prisma } from '@/lib/prisma';
 import { scrapeUrl } from '@/lib/legislative-scrapers';
 import { processLegislativeAct } from '@/lib/embeddings/legislative-act-processor';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
+import { extractEmenta, looksLikeDefectiveEmenta } from '@/lib/legislative-scrapers/extract-ementa';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { apiLogger } from "@/lib/logger";
 
 export interface ScrapeAndIndexResult {
@@ -22,7 +24,15 @@ export interface ScrapeAndIndexResult {
 export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexResult> {
   const act = await prisma.legislativeAct.findUnique({
     where: { id: actId },
-    select: { id: true, officialUrl: true, content: true, contentHash: true, fullNumber: true },
+    select: {
+      id: true,
+      officialUrl: true,
+      content: true,
+      contentHash: true,
+      fullNumber: true,
+      title: true,
+      ementa: true,
+    },
   });
 
   if (!act || !act.officialUrl) {
@@ -44,6 +54,15 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
     return { scraped: false, indexed: false, error: result.error };
   }
 
+  // 1.2. Ementa oficial a partir do texto integral, quando a gravada é trecho
+  // do corpo do ato (abstract do DOU) ou só o título. Ementa já correta
+  // (cadastro manual, import) nunca é sobrescrita.
+  let newEmenta: string | null = null;
+  if (looksLikeDefectiveEmenta(act.ementa, act.title)) {
+    const extracted = extractEmenta(result.content);
+    if (extracted?.complete) newEmenta = normalizeScrapedText(extracted.ementa);
+  }
+
   // 1.5. Validar formatação ANTES de salvar — evita poluir DB com mojibake,
   // FAQ-no-lugar-do-ato, NBSP/zero-width residuais. Errors bloqueiam,
   // warnings são logadas mas não bloqueiam.
@@ -51,6 +70,7 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
     url: act.officialUrl,
     content: result.content,
     previousContent: act.content,
+    ...(newEmenta ? { ementa: newEmenta } : {}),
   });
   if (!validation.ok) {
     const errMsg = `Validação falhou: ${validation.errors.join('; ')}`;
@@ -77,6 +97,7 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
     where: { id: actId },
     data: {
       content: result.content,
+      ...(newEmenta ? { ementa: newEmenta } : {}),
       contentHash: result.hash || null,
       scrapeStatus: 'success',
       scrapeError: null,

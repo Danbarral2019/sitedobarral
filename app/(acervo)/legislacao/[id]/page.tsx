@@ -20,6 +20,7 @@ import { getLeiArticles } from '@/lib/lei-articles';
 import { formatLegalContent } from '@/lib/format-legal-content';
 import { getRelationsForAct } from '@/lib/legislative-acts/relations';
 import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';
+import { normalizeActType, getOfficialSourceLabel } from '@/lib/legislacao/labels';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -129,8 +130,9 @@ export default async function LegislativeActPage({ params }: PageProps) {
     notFound();
   }
 
-  const typeLabel = TYPE_LABELS[act.type] || act.type.toUpperCase();
-  const typeColor = TYPE_COLORS[act.type] || 'bg-surface-deep text-ink-secondary border-border-subtle';
+  const actType = normalizeActType(act.type);
+  const typeLabel = TYPE_LABELS[actType] || act.type.toUpperCase();
+  const typeColor = TYPE_COLORS[actType] || 'bg-surface-deep text-ink-secondary border-border-subtle';
 
   // Parse leiArticles JSON string to array
   const leiArticlesArray: string[] = getLeiArticles(act);
@@ -234,7 +236,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Ver no Planalto
+                  {getOfficialSourceLabel(act.officialUrl)}
                 </a>
               )}
               {act.pdfUrl && (

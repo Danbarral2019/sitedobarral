@@ -8,6 +8,8 @@ import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { extractIssuerFromDouHierarchy } from '@/lib/dou-issuer';
 import { getHierarchyLevel } from '@/lib/legislative-acts/hierarchy';
 import { setLeiArticles } from '@/lib/lei-articles';
+import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
+import { extractEmenta } from '@/lib/legislative-scrapers/extract-ementa';
 import { apiLogger } from "@/lib/logger";
 
 export const runtime = 'nodejs';
@@ -93,20 +95,41 @@ export const POST = withAdminApi<{ id: string }>(async (_request, { params, user
       const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
 
       if (number) {
-        const fullNumber = `${safeActType === 'in' ? 'IN' : safeActType === 'on' ? 'ON' : safeActType === 'mp' ? 'MP' : safeActType.charAt(0).toUpperCase() + safeActType.slice(1)} ${number}/${year}`;
-        const existing = await tx.legislativeAct.findUnique({ where: { fullNumber } });
+        // O classificador do DOU usa abreviações (`mp`); o acervo usa o type
+        // canônico `medida-provisoria` e o fullNumber por extenso, igual ao
+        // cadastro manual; senão a mesma MP entra duas vezes com nomes
+        // diferentes e a página do ato não reconhece o tipo.
+        const actType = safeActType === 'mp' ? 'medida-provisoria' : safeActType;
+        const typeLabel =
+          safeActType === 'in' ? 'IN'
+          : safeActType === 'on' ? 'ON'
+          : safeActType === 'mp' ? 'Medida Provisória'
+          : safeActType.charAt(0).toUpperCase() + safeActType.slice(1);
+        const fullNumber = `${typeLabel} ${number}/${year}`;
+        const fullNumberCandidates =
+          safeActType === 'mp' ? [fullNumber, `MP ${number}/${year}`] : [fullNumber];
+        const existing = await tx.legislativeAct.findFirst({
+          where: { fullNumber: { in: fullNumberCandidates } },
+          select: { id: true },
+        });
         if (!existing) {
+          // O `abstract` do DOU é o começo do corpo do ato (epígrafe + ementa +
+          // preâmbulo, truncado). Só aproveitamos o recorte da ementa quando ele
+          // termina no preâmbulo; do contrário fica o título até o scrape do
+          // texto integral (scrapeAndIndexAct) extrair a ementa oficial.
+          const extracted = extractEmenta(normalizeScrapedText(staging.abstract || ''));
+          const ementa = extracted?.complete ? extracted.ementa : normalizeScrapedText(cleanTitle);
           const newAct = await tx.legislativeAct.create({
             data: {
-              type: safeActType,
+              type: actType,
               number,
               year,
               fullNumber,
               title: cleanTitle,
-              ementa: staging.abstract || cleanTitle,
+              ementa,
               issuer,
               publishDate: parsedDate || new Date(),
-              hierarchyLevel: getHierarchyLevel(safeActType),
+              hierarchyLevel: getHierarchyLevel(actType),
               officialUrl: staging.url,
               createdBy: 'clipping-dou-approve',
             },

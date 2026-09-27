@@ -8,7 +8,7 @@ const { stagingMock, documentMock, legislativeActMock } = vi.hoisted(() => ({
     update: vi.fn(),
   },
   documentMock: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
-  legislativeActMock: { create: vi.fn(), findUnique: vi.fn() },
+  legislativeActMock: { create: vi.fn(), findFirst: vi.fn() },
 }));
 
 vi.mock('@/lib/api/handler', async () => {
@@ -71,7 +71,7 @@ describe('POST /api/admin/clipping-dou/[id]/approve', () => {
     vi.clearAllMocks();
     documentMock.create.mockResolvedValue({ id: 'doc-1' });
     documentMock.findFirst.mockResolvedValue({ id: 'doc-1' });
-    legislativeActMock.findUnique.mockResolvedValue(null);
+    legislativeActMock.findFirst.mockResolvedValue(null);
     legislativeActMock.create.mockResolvedValue({ id: 'act-1' });
     stagingMock.update.mockResolvedValue({});
   });
@@ -91,6 +91,49 @@ describe('POST /api/admin/clipping-dou/[id]/approve', () => {
           documentId: 'doc-1',
           reviewedBy: 'admin@test',
         }),
+      }),
+    );
+  });
+
+  it('MP entra como medida-provisoria, com a ementa recortada do abstract do DOU', async () => {
+    stagingMock.findUnique.mockResolvedValue({
+      ...fakeStaging,
+      title: 'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025',
+      abstract:
+        'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025 Dispõe sobre a tributação de aplicações financeiras e ativos virtuais no País. O PRESIDENTE DA REPÚBLICA, no uso da atribuição que lhe confere o art. 62 da Constituição, adota a seguinte Medida Provisória, com força de lei: Art. 1º ...',
+      editorialActType: 'mp',
+    });
+    const req = new NextRequest('http://x/y', { method: 'POST' });
+    const res = await POST(req, { params: Promise.resolve({ id: 'staging-1' }) });
+    expect(res.status).toBe(200);
+    expect(legislativeActMock.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { fullNumber: { in: ['Medida Provisória 1.303/2025', 'MP 1.303/2025'] } },
+      }),
+    );
+    expect(legislativeActMock.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: 'medida-provisoria',
+          fullNumber: 'Medida Provisória 1.303/2025',
+          ementa: 'Dispõe sobre a tributação de aplicações financeiras e ativos virtuais no País.',
+        }),
+      }),
+    );
+  });
+
+  it('abstract truncado antes do preâmbulo: ementa provisória é o título', async () => {
+    stagingMock.findUnique.mockResolvedValue({
+      ...fakeStaging,
+      title: 'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025',
+      abstract: 'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025 Dispõe sobre a tributação de aplicações...',
+      editorialActType: 'mp',
+    });
+    const req = new NextRequest('http://x/y', { method: 'POST' });
+    await POST(req, { params: Promise.resolve({ id: 'staging-1' }) });
+    expect(legislativeActMock.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ ementa: 'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025' }),
       }),
     );
   });
