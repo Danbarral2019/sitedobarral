@@ -22,6 +22,7 @@
  *   npx dotenv-cli -e .env.local -- npx tsx scripts/classificar-temas-acordaos-tcu.ts --min-no-voto=2 --dry-run
  */
 import { prisma } from '../lib/prisma';
+import { isRateLimitError } from '../lib/ai/error-detection';
 import {
   TEMAS,
   classificarPorLLM,
@@ -32,6 +33,11 @@ import {
 } from '../lib/tcu/tema-acordao';
 
 const LOTE = 25;
+
+function deveInterromper(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  return isRateLimitError(e) || /spending|credit balance|billing|not configured|\b401\b|\b403\b|authentication|api key/i.test(msg);
+}
 
 function flagNumero(nome: string, padrao: number): number {
   const arg = process.argv.find((a) => a.startsWith(`--${nome}=`));
@@ -160,6 +166,14 @@ async function main() {
     } catch (e) {
       // Um lote que falha não derruba a rodada; re-rodar repesca o que faltou.
       console.error(`  lote ${i / LOTE + 1}/${nLotes} — ERRO: ${(e as Error).message}`);
+      // Exceto quando o erro é de cota, gasto ou credencial: aí todos os lotes
+      // seguintes falhariam igual, e insistir só gasta chamadas contra um teto
+      // estourado (lição de 26/09/2026). generate() já fez o retry com backoff.
+      if (deveInterromper(e)) {
+        console.error(`\n  🛑 PARADO no lote ${i / LOTE + 1}/${nLotes}: erro de cota, gasto ou credencial. Re-rodar retoma do que faltou.`);
+        process.exitCode = 2;
+        break;
+      }
     }
   }
 
