@@ -34,7 +34,7 @@ Preencha `.env.local` com credenciais próprias. O arquivo não deve ser version
 |---|---|
 | `npm run dev` | servidor local |
 | `npm run build` | build de produção sem migração |
-| `npm run vercel-build` | geração Prisma, migrações pendentes e build na Vercel |
+| `npm run vercel-build` | geração Prisma, migrações pendentes (só no deploy de produção) e build na Vercel |
 | `npm run lint` | lint do produto |
 | `npx tsc --noEmit --incremental false` | verificação integral de tipos |
 | `npm run test:run` | testes Vitest |
