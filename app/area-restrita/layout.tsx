@@ -3,6 +3,7 @@ import {
   SidebarProvider,
   AreaRestritaSidebar,
   AreaRestritaShell,
+  PagamentoPendenteGuard,
 } from '@/components/area-restrita';
 
 export default function AreaRestritaLayout({
@@ -14,7 +15,9 @@ export default function AreaRestritaLayout({
     <SidebarProvider>
       <GlobalSearchShortcut />
       <AreaRestritaSidebar />
-      <AreaRestritaShell>{children}</AreaRestritaShell>
+      <AreaRestritaShell>
+        <PagamentoPendenteGuard>{children}</PagamentoPendenteGuard>
+      </AreaRestritaShell>
     </SidebarProvider>
   );
 }

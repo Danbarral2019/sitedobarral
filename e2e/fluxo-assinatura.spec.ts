@@ -131,13 +131,24 @@ test.describe('assinatura Stripe: webhook', () => {
       expect(sub.currentPeriodEnd.getTime()).toBeGreaterThan(Date.now() + 27 * 86_400_000);
     });
 
-    await test.step('invoice.payment_failed marca past_due e mantém as matrículas', async () => {
+    await test.step('invoice.payment_failed marca past_due e suspende o acesso', async () => {
       // O handler tenta abrir o portal de cobrança na Stripe; sem chave válida
       // a chamada falha e ele usa a URL de fallback.
       const response = await postWebhook(request, invoicePaymentFailed(subscriptionId));
       expect(response.status()).toBe(200);
       expect((await assinatura(subscriptionId)).status).toBe('past_due');
-      expect(await matriculas(user.id)).toHaveLength(idsCatalogo.length);
+
+      // Só a matrícula presencial fica, com o prazo do trial de volta.
+      const restantes = await matriculas(user.id);
+      expect(restantes.map((m) => m.id)).toEqual([presencial.id]);
+      expect(restantes[0].expiresAt).not.toBeNull();
+    });
+
+    await test.step('invoice.paid depois da falha reativa o acesso', async () => {
+      const response = await postWebhook(request, invoicePaid(subscriptionId));
+      expect(response.status()).toBe(200);
+      expect((await assinatura(subscriptionId)).status).toBe('active');
+      expect((await matriculas(user.id)).map((m) => m.courseId).sort()).toEqual(idsCatalogo);
     });
 
     await test.step('customer.subscription.deleted remove só as matrículas sem qrCodeId', async () => {
@@ -214,6 +225,35 @@ test.describe('assinatura Stripe: webhook', () => {
 
     const documentos = await page.context().request.get(`/api/documents?courseId=${cursoSoDoPlano.id}`);
     expect(documentos.status()).toBe(200);
+  });
+});
+
+test.describe('assinatura Stripe: pagamento pendente', () => {
+  test.afterAll(async () => {
+    await disconnectE2EPrisma();
+  });
+
+  test('pagamento recusado leva à tela que explica o motivo e pede regularização', async ({ page, request }) => {
+    const { user, customerId } = await criarAlunoPresencial('pagamento-pendente');
+    const subscriptionId = stripeId('sub');
+
+    await postWebhook(request, checkoutCompleted({ userId: user.id, plan: 'premium', subscriptionId, customerId }));
+    await postWebhook(request, invoicePaymentFailed(subscriptionId));
+
+    await isolateClientIp(page.context());
+    await authenticateAs(page.context(), { userId: user.id, role: 'student', email: user.email, name: user.name });
+
+    // Qualquer página da área restrita encaminha para a tela de pendência.
+    await page.goto('/area-restrita');
+    await expect(page).toHaveURL(/\/area-restrita\/pagamento-pendente/, { timeout: 60_000 });
+    await expect(page.getByRole('heading', { name: 'Pagamento não aprovado' })).toBeVisible();
+    await expect(page.getByText('suspenso').first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Regularizar pagamento' })).toHaveAttribute('href', '/api/conta/portal');
+
+    // Regularizado o pagamento, a tela deixa de valer e devolve à área restrita.
+    await postWebhook(request, invoicePaid(subscriptionId));
+    await page.goto('/area-restrita/pagamento-pendente');
+    await expect(page).toHaveURL(/\/area-restrita\/?$/, { timeout: 60_000 });
   });
 });
 

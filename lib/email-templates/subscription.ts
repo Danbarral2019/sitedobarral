@@ -139,22 +139,22 @@ export function renderCardFailedEmail(p: CardFailedParams): RenderedEmail {
 
   const contentHtml = `
     <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">N&atilde;o conseguimos processar seu pagamento</h2>
-    <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. A cobran&ccedil;a no seu cart&atilde;o n&atilde;o foi autorizada, e sua assinatura est&aacute; marcada como <strong>pendente</strong>.</p>
-    <p style="margin:0 0 14px 0;">Para manter o seu acesso, atualize os dados do seu cart&atilde;o ou escolha outro meio de pagamento no portal de cobran&ccedil;a.</p>
+    <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. A cobran&ccedil;a no seu cart&atilde;o n&atilde;o foi autorizada, e o acesso aos cursos do seu plano est&aacute; <strong>suspenso</strong> at&eacute; a regulariza&ccedil;&atilde;o.</p>
+    <p style="margin:0 0 14px 0;">Para regularizar, atualize os dados do seu cart&atilde;o ou escolha outro meio de pagamento no portal de cobran&ccedil;a.</p>
     ${renderButton('Atualizar meio de pagamento', p.billingPortalUrl)}
     <p style="margin:16px 0 0 0;font-size:13px;color:#6b6e72;">Assim que o pagamento for concluído, seu acesso ser&aacute; reativado automaticamente.</p>
   `;
 
   const html = wrapEmail({
-    previewText: 'Atualize seu meio de pagamento para manter o acesso.',
+    previewText: 'Acesso suspenso: atualize seu meio de pagamento para regularizar.',
     contentHtml,
   });
 
   const text = [
     `Olá${p.name ? ', ' + p.name : ''}.`,
     ``,
-    `A cobrança no seu cartão não foi autorizada e sua assinatura está pendente.`,
-    `Para manter o acesso, atualize os dados do cartão no portal de cobrança:`,
+    `A cobrança no seu cartão não foi autorizada, e o acesso aos cursos do seu plano está suspenso até a regularização.`,
+    `Para regularizar, atualize os dados do cartão no portal de cobrança:`,
     `${p.billingPortalUrl}`,
     ``,
     `Assim que o pagamento for concluído, o acesso será reativado automaticamente.`,
@@ -178,13 +178,13 @@ export function renderPixMandateFailedEmail(p: PixMandateFailedParams): Rendered
   const contentHtml = `
     <h2 style="margin:0 0 16px 0;font-family:Georgia,'Times New Roman',serif;color:#20364e;font-size:22px;">Autoriza&ccedil;&atilde;o de Pix expirada</h2>
     <p style="margin:0 0 14px 0;">Ol&aacute;${safeName ? ', ' + safeName : ''}. N&atilde;o conseguimos cobrar a mensalidade porque a autoriza&ccedil;&atilde;o recorrente de Pix expirou ou foi cancelada.</p>
-    <p style="margin:0 0 14px 0;">Para reativar sua assinatura, basta renovar a autoriza&ccedil;&atilde;o no portal de cobran&ccedil;a.</p>
+    <p style="margin:0 0 14px 0;">O acesso aos cursos do seu plano est&aacute; suspenso at&eacute; a regulariza&ccedil;&atilde;o. Para reativ&aacute;-lo, basta renovar a autoriza&ccedil;&atilde;o no portal de cobran&ccedil;a.</p>
     ${renderButton('Renovar autorização de Pix', p.billingPortalUrl)}
     <p style="margin:16px 0 0 0;font-size:13px;color:#6b6e72;">Voc&ecirc; tamb&eacute;m pode trocar por outro meio de pagamento no mesmo portal.</p>
   `;
 
   const html = wrapEmail({
-    previewText: 'Renove a autorização de Pix para manter o acesso.',
+    previewText: 'Acesso suspenso: renove a autorização de Pix para regularizar.',
     contentHtml,
   });
 
@@ -192,6 +192,7 @@ export function renderPixMandateFailedEmail(p: PixMandateFailedParams): Rendered
     `Olá${p.name ? ', ' + p.name : ''}.`,
     ``,
     `Não conseguimos cobrar sua mensalidade porque a autorização recorrente de Pix expirou ou foi cancelada.`,
+    `O acesso aos cursos do seu plano está suspenso até a regularização.`,
     `Renove a autorização (ou troque o meio de pagamento) no portal de cobrança:`,
     `${p.billingPortalUrl}`,
     ``,
