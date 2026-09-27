@@ -39,8 +39,9 @@ estado real, para que as próximas sessões partam de um quadro correto.
    `handleApiError` nem os wrappers `withAdminApi`/`withUserApi`/`withPublicApi`.
 3. Conferir também os crons: comparar a lista em `vercel.json` com o que o backlog diz estar pausado ou parado.
 4. Incorporar ao backlog o que surgiu depois de maio e não está lá, a partir dos handoffs e dos roadmaps
-   (ex.: teses do TCU, herança editorial, jurisprudência de tribunais, alvos citados do TCU, pendências do Gemini
-   com teto estourado em 26/09, PIX aguardando convite da Stripe). Só o que estiver documentado como pendente.
+   (ex.: teses do TCU, herança editorial, jurisprudência de tribunais, alvos citados do TCU, PIX aguardando convite
+   da Stripe). Só o que estiver documentado como pendente. O teto do Gemini, que estourou em 26/09, foi resolvido em
+   27/09: não registrar como pendência.
 5. Reorganizar o topo: um quadro curto "Estado em 27/09/2026" com o que está aberto por prioridade, antes das seções
    históricas. Manter o restante do arquivo, com as marcas de concluído.
 
