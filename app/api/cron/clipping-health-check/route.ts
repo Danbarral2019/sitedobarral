@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       const todaySend = await prisma.dailyClippingSend.findUnique({ where: { sentDate: sentDateKey } });
 
   if (!todaySend) {
-    alerts.push('Nenhum DailyClippingSend registrado para hoje. Cron daily-tcu-clipping pode não ter rodado.');
+    alerts.push('Nenhum DailyClippingSend registrado para hoje. Cron daily-clipping pode não ter rodado.');
   } else if (todaySend.status === 'failed') {
     alerts.push(`Envio de hoje falhou: ${todaySend.errorMessage || 'sem mensagem'}.`);
   } else if (todaySend.status === 'partial' && todaySend.totalSent === 0) {
