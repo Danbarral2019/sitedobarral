@@ -174,20 +174,21 @@ test.describe('assinatura Stripe: webhook', () => {
     expect((await matriculas(user.id)).map((m) => m.courseId)).toEqual([E2E_CATALOG_COURSE.id]);
   });
 
-  // Bug encontrado por este spec (ver o PR): ao assinar, createEnrollmentsForSubscription
-  // zera o expiresAt da matrícula presencial; no cancelamento ela é preservada por ter
-  // qrCodeId, mas fica sem prazo, e o trial de 1 mês vira acesso por tempo indeterminado.
-  // test.fail mantém a CI verde e passa a acusar quando o comportamento for corrigido.
+  // Ao assinar, o prazo presencial vai para trialExpiresAt; no cancelamento, volta
+  // a expiresAt. Sem isso, o trial de 1 mês virava acesso por tempo indeterminado.
   test('cancelamento devolve a matrícula presencial ao prazo do trial', async ({ request }) => {
-    test.fail(true, 'Bug conhecido: o trial por QR code perde o prazo depois de assinar e cancelar.');
-    const { user, presencial, customerId } = await criarAlunoPresencial('trial-apos-cancelamento');
+    const { user, presencial, trialAte, customerId } = await criarAlunoPresencial('trial-apos-cancelamento');
     const subscriptionId = stripeId('sub');
 
     await postWebhook(request, checkoutCompleted({ userId: user.id, plan: 'premium', subscriptionId, customerId }));
-    await postWebhook(request, subscriptionDeleted(subscriptionId));
+    const durante = await e2ePrisma().enrollment.findUniqueOrThrow({ where: { id: presencial.id } });
+    expect(durante.expiresAt).toBeNull();
+    expect(durante.trialExpiresAt?.getTime()).toBe(trialAte.getTime());
 
-    const daTurma = await e2ePrisma().enrollment.findUniqueOrThrow({ where: { id: presencial.id } });
-    expect(daTurma.expiresAt).not.toBeNull();
+    await postWebhook(request, subscriptionDeleted(subscriptionId));
+    const depois = await e2ePrisma().enrollment.findUniqueOrThrow({ where: { id: presencial.id } });
+    expect(depois.expiresAt?.getTime()).toBe(trialAte.getTime());
+    expect(depois.trialExpiresAt).toBeNull();
   });
 
   // Matrícula de assinante tem expiresAt nulo e isLifetime falso; o servidor a

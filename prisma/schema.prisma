@@ -459,6 +459,7 @@ model Enrollment {
   qrCodeId           String? // QR Code usado no primeiro acesso
   enrolledAt         DateTime  @default(now())
   expiresAt          DateTime? // Data de expiração (1 ano após criação do QR Code da turma)
+  trialExpiresAt     DateTime? // Prazo presencial guardado enquanto há assinatura (expiresAt fica nulo); restaurado no cancelamento
   isLifetime         Boolean   @default(false) // Acesso vitalício
   lifetimeUpgradedAt DateTime? // Data do upgrade para vitalício
   lifetimePrice      Float? // Valor pago pelo upgrade vitalício
