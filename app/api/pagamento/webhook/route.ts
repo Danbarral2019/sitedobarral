@@ -218,6 +218,18 @@ async function handleInvoicePaid(event: Stripe.Event) {
     data: { currentPeriodEnd: newPeriodEnd, status: 'active' },
   });
 
+  // Pagamento regularizado depois de uma falha: as matrículas removidas em
+  // invoice.payment_failed voltam. A chamada é idempotente, e por isso não
+  // depende do status anterior (customer.subscription.updated pode chegar
+  // antes e já ter marcado a assinatura como ativa).
+  if (sub.status !== 'canceled') {
+    await createEnrollmentsForSubscription({
+      userId: sub.userId,
+      plan: sub.plan as PlanType,
+      courseId: sub.courseId ?? undefined,
+    });
+  }
+
   if (sub.user?.email) {
     await trySendSubscriptionEmail(renderReceiptEmail, sub.user.email, {
       name: sub.user.name || '',
@@ -253,6 +265,11 @@ async function handleInvoicePaymentFailed(event: Stripe.Event) {
     data: { status: 'past_due' },
   });
 
+  // Regra de negócio: pagamento recusado suspende o acesso até a
+  // regularização. As matrículas da assinatura saem (as presenciais ficam, com
+  // o prazo do trial restaurado); invoice.paid as recria.
+  await removeEnrollmentsForSubscription(stripeSubscriptionId);
+
   if (sub.user?.email) {
     const renderFn = sub.paymentMethod === 'pix' ? renderPixMandateFailedEmail : renderCardFailedEmail;
     const billingPortalUrl = await resolveBillingPortalUrl(sub.userId);
@@ -262,7 +279,7 @@ async function handleInvoicePaymentFailed(event: Stripe.Event) {
     });
   }
 
-  apiLogger.warn({ stripeSubscriptionId }, 'Invoice payment failed — subscription past_due');
+  apiLogger.warn({ stripeSubscriptionId }, 'Invoice payment failed — subscription past_due, access suspended');
 }
 
 // ── Handler: customer.subscription.updated ────────────────────────────────

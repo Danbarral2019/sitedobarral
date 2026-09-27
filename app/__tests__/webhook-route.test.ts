@@ -333,6 +333,51 @@ describe('POST /api/pagamento/webhook', () => {
     });
     // Deve resolver a URL do portal de cobrança para o email
     expect(mockCreateBillingPortal).toHaveBeenCalledWith('user-1', expect.stringContaining('/area-restrita'));
+    // Pagamento recusado suspende o acesso até a regularização
+    expect(mockRemoveEnrollments).toHaveBeenCalledWith('sub_stripe_1');
+  });
+
+  it('recria as matrículas quando invoice.paid regulariza uma assinatura past_due', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('invoice.paid', {
+      id: 'in_regulariza_1',
+      amount_paid: 8990,
+      currency: 'brl',
+      parent: { subscription_details: { subscription: 'sub_stripe_1' } },
+    }));
+    mockSubscriptionFindUnique.mockResolvedValue({
+      userId: 'user-1',
+      stripeSubscriptionId: 'sub_stripe_1',
+      plan: 'premium',
+      courseId: null,
+      billingCycle: 'monthly',
+      status: 'past_due',
+      user: { email: 'user@test.com', name: 'User' },
+    });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockCreateEnrollments).toHaveBeenCalledWith({ userId: 'user-1', plan: 'premium', courseId: undefined });
+  });
+
+  it('não recria matrículas em invoice.paid de assinatura cancelada', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('invoice.paid', {
+      id: 'in_cancelada_1',
+      parent: { subscription_details: { subscription: 'sub_stripe_1' } },
+    }));
+    mockSubscriptionFindUnique.mockResolvedValue({
+      userId: 'user-1',
+      plan: 'basico',
+      courseId: '2',
+      billingCycle: 'monthly',
+      status: 'canceled',
+      user: null,
+    });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockCreateEnrollments).not.toHaveBeenCalled();
   });
 
   it('no-ops on invoice.payment_failed when subscription is unknown', async () => {

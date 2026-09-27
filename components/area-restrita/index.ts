@@ -13,3 +13,4 @@ export { AreaRestritaSidebar, SidebarMobileTrigger } from './AreaRestritaSidebar
 export { SidebarProvider, useSidebar } from './SidebarContext';
 export { AreaRestritaShell } from './AreaRestritaShell';
 export { AcervoAuthShell } from './AcervoAuthShell';
+export { PagamentoPendenteGuard } from './PagamentoPendenteGuard';

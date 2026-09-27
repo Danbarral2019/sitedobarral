@@ -166,7 +166,7 @@ Ver `.env.example` e `SETUP.md`. Chat RAG lê a `GEMINI_API_KEY` do ambiente (`.
 
 Padrões não-óbvios; o passo-a-passo completo se deriva do código apontado.
 
-- **Stripe Subscription Flow** (`lib/stripe.ts` lazy init `getStripe()`, `lib/enrollment-utils.ts`): `/planos` → `POST /api/pagamento/checkout` (Zod) → Checkout Session → callbacks `/assinatura/*` → webhook `/api/pagamento/webhook`. `checkout.session.completed`/`invoice.paid` cria/renova `Subscription`+`Enrollment`; `subscription.deleted`/`payment_failed` cancela e remove enrollments **sem `qrCodeId`** (preserva presenciais). Acesso via `hasActiveAccess()`. Webhook **idempotente** (`ProcessedWebhookEvent`).
+- **Stripe Subscription Flow** (`lib/stripe.ts` lazy init `getStripe()`, `lib/enrollment-utils.ts`): `/planos` → `POST /api/pagamento/checkout` (Zod) → Checkout Session → callbacks `/assinatura/*` → webhook `/api/pagamento/webhook`. `checkout.session.completed`/`invoice.paid` cria/renova `Subscription`+`Enrollment` (`invoice.paid` também recria as matrículas suspensas); `subscription.deleted` cancela e remove enrollments **sem `qrCodeId`** (preserva presenciais); `payment_failed` marca `past_due` e **suspende o acesso** (mesma remoção), e a área restrita encaminha o aluno para `/area-restrita/pagamento-pendente` (`PagamentoPendenteGuard`), que explica o motivo e leva ao portal de cobrança. Acesso via `hasActiveAccess()`. Webhook **idempotente** (`ProcessedWebhookEvent`).
 - **Busca Global com IA** (composição no frontend, hook `useGlobalSearch` c/ AbortController): 300ms debounce → `GET /api/area-restrita/global-search` (resultados tradicionais) · 1500ms/Enter → `POST /api/documents/query` (card "Análise IA"). Toggle IA no `GlobalSearchBar`; `AIAnswerCard` renderiza no `SearchResultsList`.
 - **Chat RAG** (`/api/documents/query`): Gemini (`gemini-2.5-flash`) com query + contexto → resposta estruturada com relevance scores → cache por query-hash (60s TTL) → fontes citadas.
 - **Error Handling** (Fase 8): rota lança erro semântico → `handleApiError()` classifica (Prisma/Zod/JWT → HTTP) → log estruturado → JSON padronizado.
@@ -218,7 +218,7 @@ Ver `eval/README.md`. ⚠️ **Trilha de tuning de retrieval FECHADA** (`docs/RO
 **Business Rules:**
 
 - Bibliografia SEMPRE pública. QR Code trial: 1 mês (enrollments antigos mantêm expiração original). Registro funciona com/sem QR (`qrCodeId` opcional).
-- Subscription ativa → enrollments sem `expiresAt` (Stripe gerencia). Cancelada → remove enrollments sem `qrCodeId` (preserva presenciais e lhes devolve o prazo do trial, guardado em `trialExpiresAt` ao assinar). Acesso = enrollment válido OU subscription ativa (verificar ambos).
+- Subscription ativa → enrollments sem `expiresAt` (Stripe gerencia). Pagamento recusado (`past_due`) → acesso suspenso até a regularização, com tela própria. Cancelada → remove enrollments sem `qrCodeId` (preserva presenciais e lhes devolve o prazo do trial, guardado em `trialExpiresAt` ao assinar). Acesso = enrollment válido OU subscription ativa (verificar ambos).
 - Stripe lazy init: `getStripe()` — NUNCA instanciar client no top-level. Webhook idempotente (`ProcessedWebhookEvent`, não reprocessar `event.id`).
 - Multi-course docs: um documento pode pertencer a vários cursos. Chat queries limitadas aos documentos do curso ativo.
 
