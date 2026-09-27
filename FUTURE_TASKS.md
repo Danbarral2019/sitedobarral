@@ -359,15 +359,20 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 
 ### P2. Verificação Manual Pós-Deploy [BLOQUEANTE]
 **Prioridade:** BLOQUEANTE
-**Status:** Pendente. **Conferência de 27/09/2026: ABERTO, em andamento.** O PR #208 acrescentou testes de navegador para fluxos críticos de acesso e o PR #211 deu ao CI um banco descartável da Neon; os seis primeiros fluxos abaixo (exceto PIX) estão sendo automatizados por outra sessão (`docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`). PIX depende do convite da Stripe; a renderização da newsletter em Gmail/Outlook continua manual.
+**Status:** Itens 1 a 5 com teste automático (set/2026), rodando no job `e2e` da CI em banco Neon descartável, com Redis local (emulador REST do Upstash) e eventos Stripe assinados localmente. Itens 6 e 7 continuam manuais.
 
-- [ ] Registro sem QR Code → verificação email → login → planos
-- [ ] Registro com QR Code → verificação → login → área restrita
-- [ ] Reenvio de verificação com token → funciona
-- [ ] Email de boas-vindas com acentos corretos
-- [ ] Checkout Stripe (cartão) → webhook → Subscription + Enrollment
-- [ ] Pix Automático Stripe → autorização → cobrança → webhook → Enrollment
-- [ ] Newsletter renderiza em Gmail/Outlook
+- [x] Registro sem QR Code → verificação email → login → planos (`e2e/fluxo-registro.spec.ts`)
+- [x] Registro com QR Code → verificação → login → área restrita com matrícula de 1 mês (`e2e/fluxo-registro.spec.ts`)
+- [x] Reenvio de verificação com token → o novo funciona e o antigo não (`e2e/fluxo-registro.spec.ts`)
+- [x] Email de boas-vindas com acentos corretos no HTML, no texto e no assunto entregues à Resend (`lib/__tests__/email-acentos.test.ts`)
+- [x] Checkout Stripe (cartão) → webhook → Subscription + Enrollment; cancelamento preserva matrícula presencial (`e2e/fluxo-assinatura.spec.ts`). A criação da sessão de checkout só roda com o secret `STRIPE_TEST_SECRET_KEY` (sk_test_) na CI; o formulário hospedado da Stripe não é automatizado.
+- [ ] Pix Automático Stripe → autorização → cobrança → webhook → Enrollment. Fora do escopo automatizado, porque depende do convite da Stripe (`NEXT_PUBLIC_PIX_ENABLED`).
+- [ ] Newsletter renderiza em Gmail/Outlook. Verificação visual, manual.
+
+**Achados dos testes, pendentes de decisão** (registrados como `test.fail`/`it.fails`, que acusam quando corrigidos):
+- Trial por QR code perde o prazo após assinar e cancelar: `createEnrollmentsForSubscription` zera o `expiresAt` da matrícula presencial e o cancelamento a preserva sem prazo.
+- Assinante não vê os cursos do plano no painel: `useEnrolledCourses` descarta matrícula com `expiresAt` nulo e `isLifetime` falso, que o servidor trata como ativa.
+- Versão em texto do email de boas-vindas traz "GUIA RAPIDO", sem acento.
 
 ---
 
