@@ -338,7 +338,7 @@ E o índice, junto dos que já existem no fim do model — a fila da Task 4 cons
 
 ```bash
 git show HEAD:prisma/schema.prisma > /tmp/schema-head.prisma
-npx prisma migrate diff --from-schema-datamodel /tmp/schema-head.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/migration.sql
+npx prisma migrate diff --from-schema /tmp/schema-head.prisma --to-schema prisma/schema.prisma --script > /tmp/migration.sql
 ```
 
 Criar `prisma/migrations/<AAAAMMDDHHMMSS>_add_reconferencia_pendente/migration.sql` com esse conteúdo. Conferir que o SQL contém `ADD COLUMN "reconferenciaPendente"` com `DEFAULT false` e **nenhum** `DROP`. Depois: `npx prisma generate`.
