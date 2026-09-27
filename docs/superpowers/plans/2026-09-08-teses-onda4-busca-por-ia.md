@@ -226,7 +226,7 @@ O `@unique` em `enunciadoId` é o que faz de "um chunk por enunciado" uma regra 
 
 ```bash
 git show HEAD:prisma/schema.prisma > /tmp/schema-head.prisma
-npx prisma migrate diff --from-schema-datamodel /tmp/schema-head.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/migration.sql
+npx prisma migrate diff --from-schema /tmp/schema-head.prisma --to-schema prisma/schema.prisma --script > /tmp/migration.sql
 ```
 
 Criar `prisma/migrations/<AAAAMMDDHHMMSS>_add_tese_enunciado_chunk/migration.sql` com esse conteúdo. Conferir que o SQL contém `CREATE TABLE "TeseEnunciadoChunk"` e **não** contém nenhum `DROP`. Depois rodar `npx prisma generate`.
