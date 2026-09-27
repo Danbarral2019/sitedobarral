@@ -14,6 +14,9 @@ export interface TribunalBrand {
 const BRANDS: Record<string, TribunalBrand> = {
   TCU: { code: 'TCU', fullName: 'Tribunal de Contas da União', color: '#1e3a8a' },
   'TCE-PE': { code: 'TCE-PE', fullName: 'Tribunal de Contas do Estado de Pernambuco', color: '#059669' },
+  'TCDF': { code: 'TCDF', fullName: 'Tribunal de Contas do Distrito Federal', color: '#0e7490' },
+  'TRF5': { code: 'TRF5', fullName: 'Tribunal Regional Federal da 5ª Região', color: '#9f1239' },
+  'TJDFT': { code: 'TJDFT', fullName: 'Tribunal de Justiça do Distrito Federal e dos Territórios', color: '#9f1239' },
   'TCE-RS': { code: 'TCE-RS', fullName: 'Tribunal de Contas do Estado do Rio Grande do Sul', color: '#b45309' },
   'TCE-SP': { code: 'TCE-SP', fullName: 'Tribunal de Contas do Estado de São Paulo', color: '#991b1b' },
   'TCE-PR': { code: 'TCE-PR', fullName: 'Tribunal de Contas do Estado do Paraná', color: '#6d28d9' },

@@ -22,6 +22,11 @@ export interface TribunalScraper {
    * sempre); o gatilho manual do admin continua podendo executá-lo.
    */
   disabled?: string;
+  /**
+   * Roda em execução própria (`?somente=<code>`), fora da rodada semanal
+   * comum. Para fontes que não cabem no maxDuration junto com as demais.
+   */
+  agendaPropria?: boolean;
   canHandle(tribunalCode: string): boolean;
   scrape(options: TribunalScrapeOptions): Promise<TribunalScrapeResult>;
   healthCheck(): Promise<ScraperHealthStatus>;
@@ -91,6 +96,9 @@ import { tceSCScraper } from './tce-sc';
 import { tceRJScraper } from './tce-rj';
 import { tceRSScraper } from './tce-rs';
 import { tcePEScraper } from './tce-pe';
+import { tcdfScraper } from './tcdf';
+import { trf5Scraper } from './trf5';
+import { tjdftScraper } from './tjdft';
 
 registerScraper(tceSPScraper);
 registerScraper(tcePRScraper);
@@ -99,3 +107,6 @@ registerScraper(tceSCScraper);
 registerScraper(tceRJScraper);
 registerScraper(tceRSScraper);
 registerScraper(tcePEScraper);
+registerScraper(tcdfScraper);
+registerScraper(trf5Scraper);
+registerScraper(tjdftScraper);

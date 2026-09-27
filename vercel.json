@@ -78,6 +78,14 @@
       "schedule": "0 7 * * 1"
     },
     {
+      "path": "/api/cron/sync-tribunal-decisions?somente=tcdf",
+      "schedule": "30 7 * * 3"
+    },
+    {
+      "path": "/api/cron/sync-tribunal-decisions?somente=trf5,tjdft",
+      "schedule": "30 7 * * 4"
+    },
+    {
       "path": "/api/cron/classify-conuni",
       "schedule": "0 7 1 * *"
     },

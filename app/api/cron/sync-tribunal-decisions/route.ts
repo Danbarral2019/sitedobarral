@@ -12,6 +12,9 @@ export const maxDuration = 300;
  * GET /api/cron/sync-tribunal-decisions
  * Cron semanal: executa todos os scrapers de tribunais
  * Schedule: "0 7 * * 1" (segunda-feira 7h UTC = 4h BR)
+ *
+ * `?somente=<code>[,<code>]` executa só esses scrapers. Scrapers com `agendaPropria`
+ * ficam fora da rodada comum e têm entrada própria no vercel.json.
  */
 export async function GET(request: NextRequest) {
   console.log('[Sync Tribunal Decisions] Iniciando sincronização...');
@@ -27,7 +30,12 @@ export async function GET(request: NextRequest) {
     // IA até este teto por execução (calibrada em 26/09/2026: 51/53 com o editor).
     definirOrcamentoIA(40);
 
-    const scrapers = getAllScrapers();
+    const somente = new URL(request.url).searchParams.get('somente');
+    const codigos = somente ? somente.split(',').map((c) => c.trim()).filter(Boolean) : null;
+    const scrapers = getAllScrapers().filter((s) => (codigos ? codigos.includes(s.code) : !s.agendaPropria));
+    if (codigos && scrapers.length !== codigos.length) {
+      return NextResponse.json({ error: `Scraper não encontrado em "${somente}"` }, { status: 400 });
+    }
     const results = [];
 
     for (const scraper of scrapers) {
