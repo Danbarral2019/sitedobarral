@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Serif_4, Inter, JetBrains_Mono, Lora } from "next/font/google";
+import { sourceSerif, inter, jetbrainsMono, lora } from "./fonts";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -11,41 +11,6 @@ import { LazyClientProviders } from "@/components/LazyClientProviders";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { getSiteUrl } from "@/lib/site-url";
-
-// Source Serif 4 — display + reading. Substitui Cinzel.
-// Subset "latin" cobre todos os acentos do português (ã, ç, ó etc.); latin-ext só adiciona caracteres
-// centro-europeus (polonês, tcheco) que não usamos — removido para cortar ~50% do payload da fonte.
-const sourceSerif = Source_Serif_4({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-serif",
-  display: "swap",
-});
-
-// Inter — UI/sans. Substitui Poppins.
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-// JetBrains Mono — números de artigo, citações técnicas, códigos.
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
-  display: "swap",
-});
-
-// Lora — fonte serifada para variante Planalto (documentos legislativos).
-const lora = Lora({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-lora",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),

@@ -136,6 +136,7 @@ export async function GET(request: NextRequest) {
 
 - **Versionamento — identificadores únicos:** ONs = `onNumber + onYear`; Pareceres = `title` (numeroCompleto). Usar no `findFirst`, não o id.
 - **Modelo Gemini:** usar `gemini-2.5-flash` (`PRIMARY_GEMINI_MODEL` em `lib/gemini/config.ts`). Em tarefas curtas (resumo/classificação) passar `thinkingBudget: 0` — senão o thinking do 2.5 consome ~95% do `maxOutputTokens` e trunca. (Os `gemini-2.0-flash*` foram desligados pela Google em 2026; histórico em `docs/ROADMAP_GEMINI_MODELO_25.md`.)
+- **Fontes:** auto-hospedadas em `app/fonts/` via `next/font/local` (um `.woff2` por subset, mesma `unicode-range` do Google Fonts). Não reintroduzir `next/font/google`: o download no build derrubou o `next build` duas vezes em 27/09/2026.
 
 ➡️ **Problemas comuns de ambiente/dev** (Prisma engine, MCP, build limpo, tags parse, hydration): ver `docs/TROUBLESHOOTING.md`.
 
