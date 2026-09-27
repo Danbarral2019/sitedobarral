@@ -36,6 +36,10 @@ export default defineConfig({
       'prisma',
       'scripts',
       'FUNCIONALIDADES_FUTURAS',
+      // Worktrees do Claude Code (.claude/worktrees/*) trazem node_modules e
+      // uma cópia inteira dos testes: sem isto a suíte roda ~8 mil testes
+      // em vez de ~3 mil (handoff de 2026-09-09).
+      '**/.claude/**',
     ],
   },
   resolve: {
