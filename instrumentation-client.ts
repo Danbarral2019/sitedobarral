@@ -10,9 +10,10 @@ Sentry.init({
   // Environment
   environment: process.env.NODE_ENV,
 
-  // Performance Monitoring
-  // Capture 5% of transactions for performance monitoring
-  tracesSampleRate: 0.05,
+  // Performance Monitoring desligado no navegador: o código de tracing é
+  // removido do bundle em next.config.ts (__SENTRY_TRACING__). Web Vitals
+  // vêm do Vercel Speed Insights; o tracing do servidor segue ativo.
+  tracesSampleRate: 0,
 
   // Session Replay disabled — adds ~60KB and blocked by CSP worker-src policy
   integrations: [],
