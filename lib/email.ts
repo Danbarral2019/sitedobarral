@@ -86,7 +86,10 @@ export async function sendEmail(options: EmailOptions): Promise<SendEmailResult>
 export async function sendVerificationEmail(
   email: string,
   name: string,
-  token: string
+  token: string,
+  // Prazo exibido no email; precisa coincidir com a expiração gravada pela rota
+  // (24 h no cadastro, 30 min no reenvio).
+  validade: string = '24 horas'
 ): Promise<boolean> {
   const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verificar-email?token=${token}`;
 
@@ -119,8 +122,8 @@ export async function sendVerificationEmail(
             </div>
 
             <div class="warning">
-              <strong>⏰ Link válido por 24 horas</strong><br>
-              Este link de verificação expira em 24 horas por questões de segurança.
+              <strong>⏰ Link válido por ${validade}</strong><br>
+              Este link de verificação expira em ${validade} por questões de segurança.
             </div>
 
             <p>Se o botão não funcionar, copie e cole este link no seu navegador:</p>
@@ -147,7 +150,7 @@ Obrigado por se cadastrar no site do Prof. Daniel Barral!
 Para ativar sua conta, acesse o link abaixo:
 ${verificationUrl}
 
-Este link é válido por 24 horas.
+Este link é válido por ${validade}.
 
 Se você não se cadastrou no nosso site, por favor ignore este email.
 
@@ -339,7 +342,7 @@ Bem-vindo(a), ${name}!
 
 Seu cadastro foi realizado com sucesso no site do Prof. Daniel Barral.
 
-GUIA RAPIDO:
+GUIA RÁPIDO:
 
 1. Acesse seus cursos - Na área restrita você encontra todos os materiais.
 2. Use o Assistente de IA - Tire dúvidas sobre licitações e contratos.
