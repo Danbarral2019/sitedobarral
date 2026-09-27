@@ -7,7 +7,7 @@
  * EMENTA_MINIMA caracteres (no TCE-RS a "ementa" é só metadado da consulta).
  *
  * Uso:
- *   npx dotenv -e .env.local -- npx tsx scripts/julgar-pendentes-tribunais.ts --saida <arquivo.json> [--limite N]
+ *   npx dotenv -e .env.local -- npx tsx scripts/julgar-pendentes-tribunais.ts --saida <arquivo.json> [--limite N] [--tribunal TRF5]
  *
  * Com --rejeitados-por-palavra-chave, julga em vez disso as decisões rejeitadas
  * só pelo scoring (sem passagem pela IA) cuja ementa menciona licitação.
@@ -31,19 +31,23 @@ async function main() {
   const saida = arg('--saida');
   if (!saida) throw new Error('Informe --saida <arquivo.json>');
   const limite = Number(arg('--limite')) || undefined;
+  const tribunal = arg('--tribunal');
 
   const rejeitadosKw = process.argv.includes('--rejeitados-por-palavra-chave');
   const pendentes = await prisma.tribunalDecision.findMany({
-    where: rejeitadosKw
-      ? {
-          approvalStatus: 'auto_rejected',
-          ementa: { contains: 'licita', mode: 'insensitive' },
-          NOT: { classificationReasoning: { contains: 'IA' } },
-        }
-      : { approvalStatus: 'pending' },
+    where: {
+      ...(tribunal ? { tribunalCode: tribunal } : {}),
+      ...(rejeitadosKw
+        ? {
+            approvalStatus: 'auto_rejected',
+            ementa: { contains: 'licita', mode: 'insensitive' },
+            NOT: { classificationReasoning: { contains: 'IA' } },
+          }
+        : { approvalStatus: 'pending' }),
+    },
     select: {
       id: true, tribunalCode: true, decisionType: true, decisionNumber: true, title: true,
-      ementa: true, relevanceScore: true, url: true, dataJulgamento: true,
+      ementa: true, fullText: true, relevanceScore: true, url: true, dataJulgamento: true,
     },
     orderBy: { createdAt: 'desc' },
     take: limite,
@@ -57,10 +61,10 @@ async function main() {
     const lote = julgaveis.slice(i, i + CONCORRENCIA);
     const julgamentos = await Promise.all(
       lote.map((d) =>
-        julgarAmbiguoComIA({ title: d.title, ementa: d.ementa, decisionType: d.decisionType, tribunalCode: d.tribunalCode }),
+        julgarAmbiguoComIA({ title: d.title, ementa: d.ementa, fullText: d.fullText, decisionType: d.decisionType, tribunalCode: d.tribunalCode }),
       ),
     );
-    lote.forEach((d, k) => resultado.push({ ...d, ia: julgamentos[k] }));
+    lote.forEach(({ fullText: _t, ...d }, k) => resultado.push({ ...d, ia: julgamentos[k] }));
     feitos += lote.length;
     if (feitos % 40 === 0) console.log(`  ${feitos}/${julgaveis.length}`);
   }
