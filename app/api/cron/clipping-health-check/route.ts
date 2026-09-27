@@ -73,12 +73,12 @@ export async function GET(request: NextRequest) {
       }
 
       const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
-      const subject = `[Clipping TCU] Alerta de saúde — ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}`;
-      const body = `<h2>Alerta clipping diário TCU</h2>
+      const subject = `[Clipping] Alerta de saúde — ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}`;
+      const body = `<h2>Alerta clipping diário</h2>
 <p>Detectamos ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}:</p>
 <ul>${alerts.map((a) => `<li>${a}</li>`).join('')}</ul>
-<p>Verifique <code>/admin/clipping</code> e os logs do cron <code>daily-tcu-clipping</code>.</p>`;
-      const text = `Alerta clipping diário TCU\n\n${alerts.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nVerifique /admin/clipping.`;
+<p>Verifique <code>/admin/clipping</code> e os logs do cron <code>daily-clipping</code>.</p>`;
+      const text = `Alerta clipping diário\n\n${alerts.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nVerifique /admin/clipping.`;
 
       await sendEmail({ to: adminEmail, subject, html: body, text });
 
