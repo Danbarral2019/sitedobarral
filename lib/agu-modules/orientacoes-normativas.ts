@@ -22,6 +22,7 @@ import {
 } from './helpers';
 import { findOrCreateWithVersioning } from './versioning';
 import { apiLogger } from "@/lib/logger";
+import { prisma } from '@/lib/prisma';
 
 /**
  * Interface para dados brutos de uma ON extraída do HTML
@@ -465,6 +466,14 @@ export type OrientacaoNormativaOverrides = Partial<{
 /**
  * Salva ou atualiza uma Orientação Normativa no banco com versionamento.
  *
+ * Só CRIA ONs novas. ON que já existe não é reescrita: enunciado, texto
+ * integral, link DOU e visibilidade vêm de curadoria, e mudança de redação só
+ * entra após revisão humana (o cron ons-monitor alerta; o
+ * backfill-ons-from-agu-page.ts aplica). Sem esta regra, o cron semanal ocultou
+ * 101 ONs, trocou o link DOU pela página /onsagu e o texto integral pelo
+ * enunciado raspado em 21/07/2026 (overrides `isPublic: false` + update
+ * integral do findOrCreateWithVersioning).
+ *
  * Deduplica por `onNumber + onYear` — nunca por título. O scraper expõe dois
  * campos parecidos (`titulo` canônico e `numero` abreviado) e deduplicar pelo
  * segundo gera registro duplicado (ver docs/audits/2026-07-15-lei-comentada-RESULTADOS.md).
@@ -485,6 +494,13 @@ export async function saveOrientacaoNormativaWithVersioning(
         success: false,
         error: 'Documento sem número ou ano válido'
       };
+    }
+
+    const existing = await prisma.document.findFirst({
+      where: { onNumber: aguDoc.numeroInt, onYear: aguDoc.ano },
+    });
+    if (existing) {
+      return { success: true, document: existing, isNew: false, hasChanges: false };
     }
 
     // Usa sistema de versionamento
