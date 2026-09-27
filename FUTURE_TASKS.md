@@ -605,7 +605,7 @@ Estudar viabilidade de criar aplicativo nativo ou usar PWA avançado:
 - [ ] Investigar 76 KB de "Minify JavaScript" — Vercel deveria minificar automaticamente; pode ser falso positivo ou third-party não minificado (ex: GTM)
 - [ ] Avaliar tornar JetBrains Mono lazy (usado em 25+ componentes, risco de regressão visual)
 - [ ] Re-rodar Lighthouse em ambiente sem Kaspersky para baseline limpo
-- [ ] Investigar restante de 280 KB de "Reduce unused JavaScript": após o code split do lei-14133-artigos, sobram ~200 KB ainda — provavelmente Stripe SDK, jspdf carregando antes do click, etc.
+- [x] Investigar restante de 280 KB de "Reduce unused JavaScript" — **medido em 2026-09-27 com `ANALYZE=true next build`**. A hipótese (Stripe SDK, jspdf) não procedia: nenhum dos dois entra no cliente (jspdf só em rotas de servidor, Stripe só via redirect). A home leva 4,78 KB próprios; o resto era o bundle compartilhado de 185 KB = React/Next (~132 KB) + **tracing do Sentry no navegador (~46 KB)**. Tracing removido só do bundle do cliente (`DefinePlugin __SENTRY_TRACING__=false` em `next.config.ts`; `tracesSampleRate: 0` em `instrumentation-client.ts`): **First Load JS 192 → 146 KB (−24%) em todas as páginas**. Web Vitals de usuários reais seguem no Vercel Speed Insights; captura de erros do Sentry e tracing do servidor intactos. O `bundleSizeOptimizations.excludeTracing` do Sentry foi descartado porque também desligaria o tracing do servidor. As flags `excludeReplay*` foram testadas e não mudam nada (o Replay já não entra no bundle).
 
 **Por que baixa prioridade:** A home pública é landing page. Aluno logado entra direto na área restrita, que já tem dynamic imports (T11) e bundle menor. O ganho percebido pelo público pagante é pequeno comparado ao custo.
 
