@@ -187,6 +187,19 @@ export function getActivePlan(
 }
 
 /**
+ * Assinatura com pagamento recusado (past_due) quando não há outra ativa.
+ * Nesse estado o acesso aos cursos do plano fica suspenso até a
+ * regularização (invoice.payment_failed remove as matrículas da assinatura).
+ */
+export function getPendingSubscription(
+  subscriptions: SubscriptionInfo[] | undefined
+): SubscriptionInfo | null {
+  if (!subscriptions || subscriptions.length === 0) return null;
+  if (subscriptions.some((s) => s.status === 'active')) return null;
+  return subscriptions.find((s) => s.status === 'past_due') ?? null;
+}
+
+/**
  * Verifica se o usuário deve receber notificação de expiração
  * (3 meses antes do vencimento)
  */

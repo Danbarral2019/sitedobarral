@@ -330,6 +330,36 @@ describe('lib/stripe', () => {
 
       expect(mockPrismaTransaction).toHaveBeenCalledTimes(1)
     })
+ 
+    it('guarda o prazo da matrícula presencial ao zerar expiresAt', async () => {
+      const { createEnrollmentsForSubscription } = await import('../stripe')
+      const trialAte = new Date('2026-10-27T12:00:00Z')
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue({
+              id: 'enr-qr',
+              userId: 'user-1',
+              courseId: '2',
+              qrCodeId: 'qr-abc',
+              expiresAt: trialAte,
+              trialExpiresAt: null,
+            }),
+            create: vi.fn(),
+            update: vi.fn().mockResolvedValue({}),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.create).not.toHaveBeenCalled()
+        expect(tx.enrollment.update).toHaveBeenCalledWith({
+          where: { id: 'enr-qr' },
+          data: { expiresAt: null, trialExpiresAt: trialAte },
+        })
+      })
+
+      await createEnrollmentsForSubscription({ userId: 'user-1', plan: 'basico', courseId: '2' })
+    })
   })
 
   describe('removeEnrollmentsForSubscription', () => {
@@ -395,6 +425,76 @@ describe('lib/stripe', () => {
       })
 
       await removeEnrollmentsForSubscription('stripe_sub_456')
+    })
+
+    it('restaura o prazo guardado da matrícula presencial', async () => {
+      const { removeEnrollmentsForSubscription } = await import('../stripe')
+      const trialAte = new Date('2026-10-27T12:00:00Z')
+
+      mockPrismaSubscriptionFindUnique.mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        plan: 'basico',
+        courseId: '2',
+      })
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue({
+              id: 'enr-qr',
+              userId: 'user-1',
+              courseId: '2',
+              qrCodeId: 'qr-abc',
+              expiresAt: null,
+              trialExpiresAt: trialAte,
+            }),
+            delete: vi.fn(),
+            update: vi.fn().mockResolvedValue({}),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.delete).not.toHaveBeenCalled()
+        expect(tx.enrollment.update).toHaveBeenCalledWith({
+          where: { id: 'enr-qr' },
+          data: { expiresAt: trialAte, trialExpiresAt: null },
+        })
+      })
+
+      await removeEnrollmentsForSubscription('stripe_sub_789')
+    })
+
+    it('não altera matrícula presencial sem prazo guardado (anterior à coluna)', async () => {
+      const { removeEnrollmentsForSubscription } = await import('../stripe')
+
+      mockPrismaSubscriptionFindUnique.mockResolvedValueOnce({
+        id: 'sub-1',
+        userId: 'user-1',
+        plan: 'basico',
+        courseId: '2',
+      })
+
+      mockPrismaTransaction.mockImplementationOnce(async (cb: (tx: unknown) => Promise<void>) => {
+        const tx = {
+          enrollment: {
+            findUnique: vi.fn().mockResolvedValue({
+              id: 'enr-qr',
+              userId: 'user-1',
+              courseId: '2',
+              qrCodeId: 'qr-abc',
+              expiresAt: null,
+              trialExpiresAt: null,
+            }),
+            delete: vi.fn(),
+            update: vi.fn(),
+          },
+        }
+        await cb(tx)
+        expect(tx.enrollment.delete).not.toHaveBeenCalled()
+        expect(tx.enrollment.update).not.toHaveBeenCalled()
+      })
+
+      await removeEnrollmentsForSubscription('stripe_sub_legado')
     })
   })
 })

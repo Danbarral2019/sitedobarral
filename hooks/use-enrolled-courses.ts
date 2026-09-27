@@ -17,8 +17,10 @@ export interface EnrolledCourse {
  * dashboard divergiam (4/3/2 cursos) por aplicarem critérios diferentes.
  *
  * Admin → catálogo completo.
- * Aluno → enrollment ativo (lifetime ou expiresAt no futuro) E courseId
- * existe em data/courses (descarta órfãos de cursos removidos).
+ * Aluno → enrollment ativo E courseId existe em data/courses (descarta
+ * órfãos de cursos removidos). Ativo segue o critério do servidor
+ * (hasCourseAccess em lib/auth.ts): vitalício, sem prazo (matrícula de
+ * assinatura, cujo fim a Stripe controla) ou com prazo no futuro.
  */
 export function useEnrolledCourses(): EnrolledCourse[] {
   const { user } = useAuth();
@@ -38,7 +40,7 @@ export function useEnrolledCourses(): EnrolledCourse[] {
 
     const now = new Date();
     return (user.enrollments ?? [])
-      .filter((e) => e.isLifetime || (e.expiresAt !== null && new Date(e.expiresAt) >= now))
+      .filter((e) => e.isLifetime || e.expiresAt === null || new Date(e.expiresAt) >= now)
       .map((e) => {
         const course = ALL_COURSES.find((c) => c.id === e.courseId);
         if (!course) return null;

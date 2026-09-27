@@ -13,6 +13,7 @@ import {
   shouldSendExpirationNotification,
   checkSubscriptionAccess,
   getActivePlan,
+  getPendingSubscription,
   Enrollment,
   AccessStatus,
   SubscriptionInfo,
@@ -379,5 +380,26 @@ describe('getActivePlan', () => {
       makeSub({ plan: 'basico', status: 'past_due' }),
     ];
     expect(getActivePlan(subs)).toBeNull();
+  });
+});
+
+describe('getPendingSubscription', () => {
+  it('retorna null sem subscriptions', () => {
+    expect(getPendingSubscription(undefined)).toBeNull();
+    expect(getPendingSubscription([])).toBeNull();
+  });
+
+  it('retorna a assinatura past_due quando não há outra ativa', () => {
+    const pendente = makeSub({ plan: 'premium', status: 'past_due' });
+    expect(getPendingSubscription([pendente])).toBe(pendente);
+  });
+
+  it('retorna null quando há assinatura ativa, mesmo com outra pendente', () => {
+    const subs = [makeSub({ status: 'past_due' }), makeSub({ status: 'active' })];
+    expect(getPendingSubscription(subs)).toBeNull();
+  });
+
+  it('ignora assinaturas canceladas', () => {
+    expect(getPendingSubscription([makeSub({ status: 'canceled' })])).toBeNull();
   });
 });
