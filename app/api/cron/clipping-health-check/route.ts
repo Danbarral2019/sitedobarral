@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       const todaySend = await prisma.dailyClippingSend.findUnique({ where: { sentDate: sentDateKey } });
 
   if (!todaySend) {
-    alerts.push('Nenhum DailyClippingSend registrado para hoje. Cron daily-tcu-clipping pode não ter rodado.');
+    alerts.push('Nenhum DailyClippingSend registrado para hoje. Cron daily-clipping pode não ter rodado.');
   } else if (todaySend.status === 'failed') {
     alerts.push(`Envio de hoje falhou: ${todaySend.errorMessage || 'sem mensagem'}.`);
   } else if (todaySend.status === 'partial' && todaySend.totalSent === 0) {
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       const body = `<h2>Alerta clipping diário TCU</h2>
 <p>Detectamos ${alerts.length} ${alerts.length === 1 ? 'problema' : 'problemas'}:</p>
 <ul>${alerts.map((a) => `<li>${a}</li>`).join('')}</ul>
-<p>Verifique <code>/admin/clipping</code> e os logs do cron <code>daily-tcu-clipping</code>.</p>`;
+<p>Verifique <code>/admin/clipping</code> e os logs do cron <code>daily-clipping</code>.</p>`;
       const text = `Alerta clipping diário TCU\n\n${alerts.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nVerifique /admin/clipping.`;
 
       await sendEmail({ to: adminEmail, subject, html: body, text });
