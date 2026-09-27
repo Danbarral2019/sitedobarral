@@ -185,4 +185,30 @@ Nos termos do art. 62 da Lei nº 14.133/2021, a habilitação...`;
     expect(r.promovido).toBe(false);
     expect(mockUpdate).toHaveBeenCalledTimes(1);
   });
+  // Carga de alvos citados (09/2026): com o teto do Gemini estourado, a carga
+  // não pode reenfileirar embeddings nem publicar nada. As duas opções
+  // existem para isso, e o padrão continua sendo o comportamento do cron.
+  it('enfileirarEmbedding: false não toca na fila de embeddings', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_COM_SECOES);
+    mockFindUnique.mockResolvedValue({ category: 'acordao-grafo', url: 'https://tcu/1', tags: null });
+
+    await catalogarAcordao(doc, { enfileirarEmbedding: false });
+
+    const data = mockUpdate.mock.calls[0][0].data;
+    expect(data.tcuTextoCompleto).toBe(TEXTO_COM_SECOES);
+    expect(data).not.toHaveProperty('embeddingStatus');
+    expect(data).not.toHaveProperty('extractedText');
+    expect(data).not.toHaveProperty('embeddingError');
+  });
+
+  it('promover: false deixa invisível o acórdão do grafo que cita lei de licitações', async () => {
+    mockRtfToText.mockResolvedValue(TEXTO_LICITACAO);
+    mockFindUnique.mockResolvedValue({ category: 'acordao-grafo', url: 'https://tcu/1', tags: null });
+
+    const r = await catalogarAcordao(doc, { promover: false });
+
+    expect(r.promovido).toBe(false);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockFindUnique).not.toHaveBeenCalled();
+  });
 });
