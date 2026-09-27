@@ -369,10 +369,7 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 - [ ] Pix Automático Stripe → autorização → cobrança → webhook → Enrollment. Fora do escopo automatizado, porque depende do convite da Stripe (`NEXT_PUBLIC_PIX_ENABLED`).
 - [ ] Newsletter renderiza em Gmail/Outlook. Verificação visual, manual.
 
-**Achado dos testes, pendente de decisão** (registrado como `test.fail`, que acusa quando corrigido):
-- Trial por QR code perde o prazo após assinar e cancelar: `createEnrollmentsForSubscription` zera o `expiresAt` da matrícula presencial e o cancelamento a preserva sem prazo.
-
-Corrigidos (set/2026): assinante sem cursos no painel, na API de documentos e em Meu Progresso (matrícula sem prazo tratada como ativa, como em `hasCourseAccess`); "GUIA RAPIDO" sem acento no email de boas-vindas; email de verificação reenviado prometendo 24 horas para token de 30 minutos.
+Corrigidos (set/2026): trial por QR code virava acesso sem prazo após assinar e cancelar (prazo presencial agora guardado em `Enrollment.trialExpiresAt` e restaurado no cancelamento; matrículas afetadas antes da coluna não são recuperáveis automaticamente); assinante sem cursos no painel, na API de documentos e em Meu Progresso (matrícula sem prazo tratada como ativa, como em `hasCourseAccess`); "GUIA RAPIDO" sem acento no email de boas-vindas; email de verificação reenviado prometendo 24 horas para token de 30 minutos.
 
 ---
 

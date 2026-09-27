@@ -218,7 +218,7 @@ Ver `eval/README.md`. ⚠️ **Trilha de tuning de retrieval FECHADA** (`docs/RO
 **Business Rules:**
 
 - Bibliografia SEMPRE pública. QR Code trial: 1 mês (enrollments antigos mantêm expiração original). Registro funciona com/sem QR (`qrCodeId` opcional).
-- Subscription ativa → enrollments sem `expiresAt` (Stripe gerencia). Cancelada → remove enrollments sem `qrCodeId` (preserva presenciais). Acesso = enrollment válido OU subscription ativa (verificar ambos).
+- Subscription ativa → enrollments sem `expiresAt` (Stripe gerencia). Cancelada → remove enrollments sem `qrCodeId` (preserva presenciais e lhes devolve o prazo do trial, guardado em `trialExpiresAt` ao assinar). Acesso = enrollment válido OU subscription ativa (verificar ambos).
 - Stripe lazy init: `getStripe()` — NUNCA instanciar client no top-level. Webhook idempotente (`ProcessedWebhookEvent`, não reprocessar `event.id`).
 - Multi-course docs: um documento pode pertencer a vários cursos. Chat queries limitadas aos documentos do curso ativo.
 

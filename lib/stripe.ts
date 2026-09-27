@@ -201,9 +201,11 @@ export async function createEnrollmentsForSubscription(params: {
           data: { userId, courseId: cId, expiresAt: null },
         })
       } else if (existing.expiresAt !== null) {
+        // O prazo da matrícula presencial (trial por QR code) fica guardado
+        // para ser restaurado se a assinatura for cancelada.
         await tx.enrollment.update({
           where: { id: existing.id },
-          data: { expiresAt: null },
+          data: { expiresAt: null, trialExpiresAt: existing.expiresAt },
         })
       }
     }
@@ -233,8 +235,16 @@ export async function removeEnrollmentsForSubscription(
         where: { userId_courseId: { userId, courseId: cId } },
       })
 
-      if (existing && existing.qrCodeId === null) {
+      if (!existing) continue
+
+      if (existing.qrCodeId === null) {
         await tx.enrollment.delete({ where: { id: existing.id } })
+      } else if (existing.trialExpiresAt) {
+        // Matrícula presencial volta ao prazo que tinha antes da assinatura.
+        await tx.enrollment.update({
+          where: { id: existing.id },
+          data: { expiresAt: existing.trialExpiresAt, trialExpiresAt: null },
+        })
       }
     }
   })
