@@ -7,7 +7,7 @@
 
 ## 📌 Estado em 27/09/2026
 
-Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef3a`), o histórico completo do git (PRs até #231), os handoffs `docs/HANDOFF-*.md`, os relatórios de `docs/audits/` e os roadmaps. Nada foi verificado no banco de produção nem em serviço externo: onde a conclusão depende do dado (conteúdo populado, execução de cron, configuração na Vercel ou na Stripe), o item ficou como **dúvida** e não como concluído. As seções históricas abaixo foram mantidas, com a marca `✅ CONCLUÍDO (data)` e a evidência nos itens resolvidos.
+Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef3a`), o histórico completo do git (PRs até #231), os handoffs `docs/HANDOFF-*.md`, os relatórios de `docs/audits/` e os roadmaps. Nada foi verificado no banco de produção nem em serviço externo: onde a conclusão depende do dado (conteúdo populado, execução de cron, configuração na Vercel ou na Stripe), o item ficou como **dúvida** e não como concluído. As seções históricas abaixo foram mantidas, com a marca `✅ CONCLUÍDO (data)` e a evidência nos itens resolvidos. As dúvidas levantadas na conferência foram respondidas pelo Daniel no mesmo dia, com consulta ao banco de produção; as respostas estão incorporadas abaixo e resumidas em "Decisões e verificações de 27/09/2026".
 
 ### Aberto, por prioridade
 
@@ -18,8 +18,10 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | P2. Verificação dos fluxos de lançamento | Aberto; testes E2E em construção em outra sessão | `docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`. Ficam fora dela a renderização da newsletter em Gmail/Outlook e o PIX |
 | PIX (Pix Automático) | Bloqueio externo | Aguarda convite da Stripe; código atrás de `NEXT_PUBLIC_PIX_ENABLED` (seção P1) |
 | Indexar 1.519 decisões de tribunal aprovadas e fora da busca semântica | Aberto; o teto do Gemini, estourado em 26/09/2026, foi resolvido em 27/09/2026 (informação do Daniel) | `scripts/indexar-decisoes-pendentes.ts` (PR #231) para no primeiro erro de cota e devolve o lote a `pending`; o cron `process-index-jobs` sozinho levaria ~50 dias. Antes de rodar, levantar volume e custo |
-| Newsletter de setembro/2026 | Não confirmada | `docs/audits/2026-09-newsletter-alert.md`: o check de 02/09 não alcançou `/api/newsletter-health` (403 do proxy da sessão), e o envio do dia 01/09 ficou sem verificação |
-| CNPJ no termo de uso | Não iniciado; depende de definição do objetivo | `docs/HANDOFF-2026-08-19-stj-e-clipping.md` §2(3): o Decreto nº 7.962, de 15 de março de 2013, exige CNPJ em destaque no comércio eletrônico |
+| CNPJ em destaque (art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013) | Parcial | O CNPJ 53.875.260/0001-77 está em `app/termos/page.tsx` e `app/privacidade/page.tsx`, mas não no rodapé nem em `app/(acervo)/planos/page.tsx` (grep de 27/09). Falta exibi-lo onde a contratação acontece, com fácil visualização |
+| Redes sociais (A2): reavaliar `social-publish` | Aberto | Só 2 posts no Instagram, ambos com falha, em outubro de 2025; nenhuma credencial válida comprovada. O cron roda todo dia útil sem nada a publicar. Pausar o cron até validar as credenciais e reavaliar a rotina, que interessa ao Daniel para a divulgação. Publicar com o "em breve" ligado não é intencional |
+| Aposentar `daily-tcu-clipping` e `sync-datajud` | Decidido; PR próprio | Decisão do Daniel em 27/09/2026: substituídos por `daily-clipping` (PR #119) e pelos Espelhos do STJ (PR #192) |
+| STJ: 264 julgados aprovados sem `summary` | Aprovado o gasto | Decisão do Daniel em 27/09/2026, com o teto do Gemini resolvido. Levantar custo antes de executar |
 
 **Média**
 
@@ -33,10 +35,11 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | Acórdãos citados que não existem no acervo (alvos citados do TCU) | Em andamento em outra sessão | PR #229 (rascunho). Não mexer nos arquivos dela |
 | Clipping com TCDF, TRF5 e TJDFT | Em andamento | PR #232 (rascunho) |
 | Bundle do navegador e `vitest` varrendo `.claude/` | Em andamento | PR #233 (rascunho); `vitest.config.ts` ainda não exclui `.claude/**` na `main` |
-| STJ: resíduos do conector | Aberto | `docs/HANDOFF-2026-08-19-stj-e-clipping.md` §8: 7 dumps de 2022 e 2023 perdidos por WAF (`npm run stj:coletar -- --tudo`), 264 aprovados sem `summary`, dois `scraperCode` para o mesmo conector, cobertura nunca medida, guard de mojibake sem fixture real. A primeira execução do `sync-stj` na Vercel (05/09) não foi conferida |
-| Eval: adaptador não espelha produção | Aberto | `baselineSearch` não aplica `detectQueryDomain`; as 10 anotações de jurisprudência do golden set são derivadas de metadados, sem conferência humana (`docs/HANDOFF-2026-08-18-stf-e-busca.md` §5) |
-| Glossário e FAQ: conteúdo | Frontend pronto; conteúdo não verificado | Ver seção "Glossário e FAQ" e A7 |
-| Onda 7.4 (A1 a A8): conteúdo e validação | Código entregue; população e validação não verificadas | Ver seção "Onda 7.4" |
+| STJ: demais resíduos do conector | Aberto; dumps de 2022 e 2023 sob demanda | `docs/HANDOFF-2026-08-19-stj-e-clipping.md` §8: 7 dumps de 2022 e 2023 perdidos por WAF (`npm run stj:coletar -- --tudo`), dois `scraperCode` para o mesmo conector, cobertura nunca medida, guard de mojibake sem fixture real. A primeira execução do `sync-stj` na Vercel (05/09) não foi conferida |
+| Eval: adaptador não espelha produção | Aberto | `baselineSearch` não aplica `detectQueryDomain`; as 10 anotações de jurisprudência do golden set são derivadas de metadados e a conferência humana está pendente (decisão de 27/09/2026) (`docs/HANDOFF-2026-08-18-stf-e-busca.md` §5) |
+| FAQ: faltam 4 perguntas | Parcial | 26 publicadas de 30 previstas (banco, 27/09/2026). Glossário cumprido: 95 termos públicos |
+| Onda 7.4: conteúdo e validação | Parcial | Banco em 27/09/2026: 1 quiz piloto com 5 questões; 2 badges concedidos; 0 referências cruzadas e 0 leituras sugeridas; nenhum `CourseVideo` e nenhum E2E do vídeo; anúncio do Planejamento nunca enviado (só newsletters mensais em `NewsletterSend`) e uma única sessão de planejamento. Ver seção "Onda 7.4" |
+| Stripe: resíduos da Fase 3 | Aberto | E-mail `dpo@profdanielbarral.com`, URLs de termos e privacidade no Customer Portal e portal em modo live: o banco não mostra a configuração (27/09/2026) |
 
 **Baixa**
 
@@ -45,13 +48,16 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | Rotas fora do padrão Fase 8 | Aberto (medido em 27/09) | 117 de 299 `route.ts` sem `handleApiError` nem `withAdminApi`/`withUserApi`/`withPublicApi`; 36 delas são crons que usam `withCronTelemetry`/`withCronRoute` (padrão próprio, com Sentry e `ScraperHealthLog`), de modo que as rotas não-cron fora do padrão são 81 |
 | `console.error` versus Sentry | Aberto (medido em 27/09) | 239 `console.error` para 41 `Sentry.capture*` em `app/`, `lib/`, `components/` e `hooks/`, sem testes (≈5,8:1) |
 | Chunk compartilhado de 402 KB na home | Aberto | `docs/audits/2026-08-31-desempenho-remedicao.md` |
-| Redirecionamento apex → www em um salto | Configuração da Vercel, fora do repositório | `docs/audits/2026-08-31-desempenho-remedicao.md` |
+| Redirecionamento apex → www em um salto | Aberto; configuração da Vercel, fora do repositório | Conferido em 27/09/2026: `http://profdanielbarral.com` → 308 → `https://profdanielbarral.com` → **307 (temporário)** → `https://www.profdanielbarral.com`. Ajustar no painel de domínios para um único redirecionamento permanente |
+| Check mensal da newsletter na nuvem | Aberto; configuração do ambiente | O alerta de 02/09 foi bloqueio de rede do ambiente; liberar os domínios do site na política de rede da sessão |
 | TCE-PE: `extractTextFromHTML` cola palavras na fronteira de bloco | Achado registrado, não corrigido | Commit do PR #218 |
 | T16. Teto de tamanho no RTF do clipping | Condicional | O teto de 20 MB existe no catálogo (`lib/tcu/inteiro-teor-fetch.ts:13`), mas não no clipping (`lib/clipping/dispositivo-extractor.ts:142`) |
 | Resíduos de higiene | Aberto | `scripts/import-tcu-precedentes.ts:436` ainda usa `claude-3-5-haiku-20241022`; `mailchimpId` sobrevive só na interface de `lib/newsletter.ts:15`; `scripts/migrate-mp-to-stripe.ts` permanece; 16 `.md` na raiz |
-| Tribunais: 21 pendentes após o julgamento por IA | Aberto | 3 dúvidas e 18 sem texto suficiente (PR #226) |
+| Tribunais: 21 pendentes após o julgamento por IA | Aberto | Todos de tribunais de contas estaduais: TCE-PE 15, TCE-RS 3, TCE-PR 2, TCE-SC 1 (banco, 27/09/2026); nenhum do STF |
+| T2b: 73 ONs sem link DOU específico | Polimento sem prazo | Núcleo encerrado por decisão de 27/09/2026 |
 | 1 PDF em `failed` na indexação | Aberto | `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(8) |
-| T10, T15 (Lighthouse), Q1, BIA-8 | Aberto ou condicional | Ver as seções respectivas |
+| T10, T15 (Lighthouse), Q1, BIA-8 | Aberto ou condicional | T10 e BIA-8 mantidos com prioridade baixa (27/09/2026); BIA-8 segue condicionada à régua da BIA-1 |
+| TCE-PE: passivo do inteiro teor | Sob demanda | Só 76 de 405 recuperáveis pela fonte (PR #218) |
 
 ### Crons: `vercel.json` × handlers (27/09/2026)
 
@@ -64,32 +70,32 @@ São 36 handlers em `app/api/cron/` e **todos** usam `withCronTelemetry`/`withCr
 | `sync-tcu-informativos` | parado 89 dias | **Agendado**, fonte trocada para CSV de dados abertos | PRs #31 (pausa) e #138 (retorno) |
 | `sync-tcu-manual` | parado 96 dias | Agendado; não estava quebrado (o TCU não publicava versão nova) | PR #31 |
 | `summarize-conuni` | não populava | Agendado semanalmente, lote 150 | PR #30; drenagem do passivo não verificada no banco |
-| `social-publish` | inexistente | Agendado, dias úteis 13h e 17h UTC | PR #110 |
-| `lms-inactivity` | pausado | **Continua pausado** | PR #25; ver dúvida |
-| `daily-tcu-clipping` | ativo | **Sem agendamento**, marcado `@deprecated` desde 24/05/2026, substituído por `daily-clipping` | Cabeçalho de `app/api/cron/daily-tcu-clipping/route.ts`; remoção prevista "após 2 semanas" não feita |
-| `sync-datajud` | ativo | **Sem agendamento** | STJ trocou DataJud por Espelhos (PR #192) |
+| `social-publish` | inexistente | Agendado, dias úteis 13h e 17h UTC, **sem nada a publicar**; pausar até validar credenciais | PR #110; decisão de 27/09/2026 |
+| `lms-inactivity` | pausado | **Continua pausado** por decisão: pré-lançamento, sem alunos a lembrar; reavaliar 60 dias após o lançamento | PR #25; decisão de 27/09/2026 |
+| `daily-tcu-clipping` | ativo | **Sem agendamento**, marcado `@deprecated` desde 24/05/2026, substituído por `daily-clipping` | Cabeçalho de `app/api/cron/daily-tcu-clipping/route.ts`; aposentar em PR próprio (decisão de 27/09/2026) |
+| `sync-datajud` | ativo | **Sem agendamento** | STJ trocou DataJud por Espelhos (PR #192); aposentar em PR próprio (decisão de 27/09/2026) |
 | `revalidate-acervo` | não citado | Sem agendamento, de uso manual | Cabeçalho da rota |
 
-### Dúvidas para o Daniel
+### Decisões e verificações de 27/09/2026
 
-Itens que dependem de decisão de produto ou de verificação fora do repositório; ficam listados também na descrição do PR desta atualização.
+Respostas do Daniel às dúvidas da conferência, com consulta ao banco de produção.
 
-1. **Onda 7.4, conteúdo (A1, A3, A5, A6, A7):** badges iniciais, quizzes piloto, cross-refs, leituras sugeridas e as 30 perguntas do FAQ foram populados? O código está no ar; o dado não foi conferido.
-2. **A2, redes sociais:** o cron `social-publish` está agendado. As credenciais `INSTAGRAM_*`/`LINKEDIN_*` foram validadas e houve posts piloto? Publicar em redes com o modo "em breve" ligado é intencional?
-3. **A4, vídeo no R2:** o E2E em produção (upload, matriculado assiste, não matriculado bloqueado, URL expira) foi feito? As gravações começaram?
-4. **A8, Planejamento:** o e-mail de anúncio (`POST /api/admin/planning/announce`) chegou a ser enviado?
-5. **`lms-inactivity`:** reativar, manter pausado ou declarar obsoleto?
-6. **`daily-tcu-clipping` e `sync-datajud`:** sem agendamento e substituídos (`daily-clipping`; STJ por Espelhos). Aposentar as rotas?
-7. **Stripe, resíduos da Fase 3:** e-mail `dpo@profdanielbarral.com`, URLs de `/termos` e `/privacidade` no Customer Portal e Customer Portal em modo live: feitos? O histórico da seção P1 ainda os mostra como pendentes.
-8. **T2b:** manter as 73 ONs sem link DOU específico e a revisão humana (`reviewed=true`) como pendências, ou encerrar?
-9. **T10 (app mobile) e BIA-8 (GraphRAG):** continuam no backlog?
-10. **Newsletter de setembro/2026:** foi enviada?
-11. **STF:** os 211 julgados pendentes de revisão de 18/08 foram absorvidos pelo julgamento por IA do PR #226 (459 pendentes tratados em 26/09)? O commit não separa por tribunal.
-12. **Golden set:** as 10 anotações de jurisprudência derivadas de metadados serão conferidas por você?
-13. **CNPJ no termo de uso:** qual é o objetivo (privacidade do endereço, retirada de páginas públicas mantendo onde a lei exige)?
-14. **Drop de `DocumentAnalysis` e `LessonComment` no banco:** o PR #106 removeu os models e deixou o `DROP TABLE` "pendente em produção"; depois veio a baseline de migrações. Confirmar se as tabelas foram de fato removidas.
-15. **Redirecionamento apex → www:** a mudança na configuração de domínio da Vercel foi feita?
-16. **Resíduos do STJ e do TCE-PE** (dumps de 2022 e 2023, 264 sem `summary`, passivo do inteiro teor do TCE-PE limitado a 76 de 405): vale gastar Gemini neles?
+1. **Onda 7.4, conteúdo:** glossário com 95 termos públicos (meta de 50 a 100 cumprida); FAQ com 26 de 30 perguntas; 1 quiz piloto com 5 questões; 2 badges concedidos (a tabela guarda concessões, o catálogo de tipos está no código); 0 referências cruzadas e 0 leituras sugeridas, pendentes.
+2. **A2, redes sociais:** 2 posts no Instagram, ambos com falha, em outubro de 2025; sem credencial válida comprovada. Pausar o `social-publish` até validar as credenciais e reavaliar a rotina, que interessa à divulgação. Publicar com o "em breve" ligado não é intencional.
+3. **A4, vídeo no R2:** nenhum `CourseVideo` no banco; E2E em produção e gravações pendentes.
+4. **A8, Planejamento:** o anúncio nunca foi enviado; continua existindo uma única sessão de planejamento, a de maio.
+5. **`lms-inactivity`:** manter pausado durante o pré-lançamento; reavaliar 60 dias depois do lançamento.
+6. **`daily-tcu-clipping` e `sync-datajud`:** aposentar as duas rotas em PR próprio.
+7. **Stripe, resíduos da Fase 3:** pendentes.
+8. **T2b:** núcleo encerrado; as 73 ONs sem link DOU específico ficam como polimento sem prazo.
+9. **T10 e BIA-8:** mantidos com prioridade baixa; BIA-8 condicionada à régua da BIA-1.
+10. **Newsletter:** setembro enviada em 01/09/2026, às 12h01 UTC, para 12 destinatários, sem falhas; agosto também saiu (13 envios). O alerta de 02/09 foi bloqueio de rede do ambiente da nuvem.
+11. **STF:** nenhum julgado pendente. Os 21 pendentes restantes do PR #226 são de tribunais de contas estaduais (TCE-PE 15, TCE-RS 3, TCE-PR 2, TCE-SC 1).
+12. **Golden set:** conferência das 10 anotações de jurisprudência fica pendente.
+13. **CNPJ:** a finalidade é cumprir o art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013. O CNPJ já está em `/termos` e `/privacidade`; falta exibi-lo com destaque no rodapé ou na página de planos.
+14. **`DocumentAnalysis` e `LessonComment`:** removidas do banco de produção.
+15. **Domínio:** dois saltos, o segundo temporário (307). Ajustar na Vercel para um redirecionamento permanente direto ao `www`.
+16. **Resíduos do STJ e do TCE-PE:** gastar Gemini com os 264 julgados do STJ sem resumo; os dumps de 2022 e 2023 e o inteiro teor do TCE-PE ficam sob demanda.
 
 ---
 
@@ -145,7 +151,7 @@ Complementar à auditoria de falhas silenciosas — investiga "o que está pesan
 1. Padrão Fase 8: **parcial.** O relatório de 19/05 registrou 280/280 após a Onda 4.2 (PRs #33 a #51, #64 a #68), mas rotas novas voltaram a nascer fora do padrão: hoje são 117 de 299 `route.ts` sem `handleApiError` nem os wrappers, das quais 36 são crons com `withCronTelemetry`/`withCronRoute`; restam 81 rotas não-cron. Try/catch não foi re-medido.
 2. Implementações concorrentes: admins de documentos ✅ (PRs #91, #105); admins TCU ✅ (PR #97); admins de analytics ✅ na prática, pois `/admin/analytics-hub` usa as três páginas como abas e as rotas antigas redirecionam (`next.config.ts:43-44`); AGU v1 × v4 ✅ (PRs #88, #89); classificadores TCU e DOU **obsoleto por decisão registrada** no PR #105 (pipelines distintos, não duplicação); hooks de busca ✅ (`use-search` removido no PR #105).
 3. `lib/ai/`: ✅ CONCLUÍDO (2026-05-17), PRs #52 a #63, #70, #71.
-4. Crons à toa: ✅ tratado; `process-index-jobs` e `compute-streaks` foram pausados (PR #25) e depois reativados com função real (PRs #184, #107); `lms-inactivity` segue pausado (dúvida nº 5).
+4. Crons à toa: ✅ tratado; `process-index-jobs` e `compute-streaks` foram pausados (PR #25) e depois reativados com função real (PRs #184, #107); `lms-inactivity` segue pausado por decisão de 27/09/2026 (reavaliar 60 dias após o lançamento).
 5. Features 80% prontas: decididas na Onda 7.4 (PR #106); ver seção própria.
 
 Wins rápidos: ✅ CONCLUÍDOS (2026-05-16): `gru1` (PR #22), Cache-Control por rota (PR #23), deps mortas (PR #24; `docx` mantido por estar em uso em `lib/planejamento/export/renderers/docx.ts`), pausa de crons (PR #25), órfãos e backups (PRs #26, #103).
@@ -275,7 +281,7 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridSearch` com `courseId: undefined` → o card de IA (e as fontes citadas) pode retornar documentos de cursos em que o aluno **NÃO** está matriculado. Não é o escopo do BIA-0b (a lista já pós-filtra por matrícula no endpoint `/global-search/hybrid`). Avaliar: (a) se há documentos restritos de fato expostos no card, (b) aplicar o mesmo pós-filtro por matrícula em `answerContext`/`documents/query`. Prioridade Média (risco de acesso, mas a maioria do acervo é `isCommon`/público).
 
 ### BIA-8. [EXPLORAÇÃO CONDICIONAL] GraphRAG sobre o acervo jurídico [a decidir]
-> **Conferência de 27/09/2026: ABERTO, condicional.** O gatilho (evidência da BIA-1 de erro relacional) não ocorreu, porque a régua ampliada não foi construída. Nota: o grafo de precedentes do TCU (`AcordaoCitacao`, julho/2026) é infraestrutura nova de grafo, usada pelas teses, não pelo RAG; o A/B dos acórdãos do grafo no retrieval foi refutado (PR #177).
+> **Conferência de 27/09/2026: ABERTO, condicional, prioridade baixa (decisão de 27/09/2026).** O gatilho (evidência da BIA-1 de erro relacional) não ocorreu, porque a régua ampliada não foi construída. Nota: o grafo de precedentes do TCU (`AcordaoCitacao`, julho/2026) é infraestrutura nova de grafo, usada pelas teses, não pelo RAG; o A/B dos acórdãos do grafo no retrieval foi refutado (PR #177).
 
 **⚠️ Condicionado à BIA-1 — NÃO construir no escuro.** O domínio jurídico é um grafo natural (leis → artigos → revoga/altera; pareceres → citam artigos; jurisprudência → aplica teses; súmulas → consolidam). GraphRAG (retrieval aumentado por grafo de conhecimento) permitiria raciocínio **multi-hop** e respostas cientes de relações (ex.: "parecer sobre o art. X considerando que foi alterado pelo decreto Y").
 **Por que condicional:** o retrieval está *near-ceiling* e as falhas atuais são teto-de-métrica + ranking de `Document`, **não** lacunas multi-hop (mesmo perfil de risco da 4.2/Fase 8 — ver `docs/ROADMAP_BUSCA_QUALIDADE.md`). O valor potencial é em **correção/raciocínio da RESPOSTA**, que a régua da BIA-1 vai começar a medir. **Só explorar se a BIA-1 mostrar que os erros de resposta são relacionais/multi-hop.**
@@ -341,7 +347,7 @@ Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridS
 
 </details>
 
-> **Conferência de 27/09/2026:** cartão LIVE mantido; PIX segue aguardando convite (bloqueio externo). Não há registro no repositório de que o e-mail `dpo@profdanielbarral.com`, as URLs de `/termos` e `/privacidade` no Customer Portal e o Customer Portal live tenham sido configurados: ficam como dúvida nº 7.
+> **Conferência de 27/09/2026:** cartão LIVE mantido; PIX segue aguardando convite (bloqueio externo). Não há registro no repositório de que o e-mail `dpo@profdanielbarral.com`, as URLs de `/termos` e `/privacidade` no Customer Portal e o Customer Portal live tenham sido configurados: seguem pendentes (confirmado em 27/09/2026: o banco não mostra essa configuração).
 >
 > **Nota (2026-07-11):** os checklists das Fases 2 e 3 acima ficaram como histórico. A virada LIVE + smoke E2E com cartão real já foram concluídos (ver Status no topo desta seção). O único item vivo é o PIX (bloqueio externo).
 
@@ -483,7 +489,7 @@ Leitura do texto integral das 7 mostrou que **NÃO** eram todas de pessoal (a av
 - **MANTIDAS (licitações — em escopo):** ON 01/2016 (cessão de uso via pregão), 02/2016 (dispensa p/ remanescente de obra, substituída pela ON 80/2024), 04/2016 (pesquisa de preços). E 06/2017 (competência da CNU — limítrofe/meta, mantida por ora).
 - **EXCLUÍDAS (tema de pessoal, fora de escopo — 2026-07-11):** ON 03/2016 (estágio probatório + licença gestante), 07/2017 (estágio probatório/Lei 8.112), 08/2018 (heteroidentificação de cotistas em concurso). Removidas via `scripts/delete-ons-cnu-pessoal.ts --apply` (mesmo critério das ON 104/106). Total de ONs públicas: 108 → **105**.
 
-> **Conferência de 27/09/2026:** núcleo concluído, como já registrado. Depois de julho vieram o cron mensal `ons-monitor` (PR #159, agendado), a exclusão das 5 fundamentações legadas (PR #160) e a integridade da Lei Comentada (PR #161). Continuam abertas, sem evidência em contrário, as 73 ONs sem link DOU específico e a revisão humana (`reviewed=true`): dúvida nº 8.
+> **Conferência de 27/09/2026:** núcleo concluído, como já registrado. Depois de julho vieram o cron mensal `ons-monitor` (PR #159, agendado), a exclusão das 5 fundamentações legadas (PR #160) e a integridade da Lei Comentada (PR #161). Continuam abertas, sem evidência em contrário, as 73 ONs sem link DOU específico e a revisão humana (`reviewed=true`). **Decisão de 27/09/2026:** núcleo encerrado; as 73 ONs ficam como polimento sem prazo.
 
 **Arquivos relevantes:** `scripts/scrape-ons-oficial.ts`, `scripts/fix-and-diff-ons.ts`, `scripts/apply-ons-update.ts`, `lib/agu-modules/orientacoes-normativas.ts`, `app/(acervo)/base-conhecimento/[categoria]/page.tsx`, banco (tabela `Document` filtrada por `category='orientacao-normativa'`).
 
@@ -548,7 +554,7 @@ Sidebar reduzido de 21 para 14 itens agrupando páginas relacionadas com tabs UR
 
 Decisões coletadas para 14 features dormentes da campanha de saneamento.
 
-> **Conferência de 27/09/2026.** A parte de código das ativações foi entregue entre 19 e 20/05/2026 (PRs #107 a #110); o que resta em cada item é conteúdo ou validação, que depende do banco e não foi verificado (dúvidas nº 1 a 4). Resumo: A1 código ✅ (cron `compute-streaks` agendado no PR #107, admin `/admin/badges` com 12 tipos no PR #109), badges e fluxo E2E não verificados; A2 código ✅ (cron `social-publish` no PR #110, agendado), credenciais e posts piloto não verificados; A3 admin de quiz existe (`app/admin/lms/[courseId]/lessons/[lessonId]/quiz/page.tsx`), quizzes não verificados; A4 código ✅ na `main` (commits de 10 e 11/07/2026, `components/lms/HostedVideoPlayer.tsx`, `app/admin/videos/upload/page.tsx`, `CourseVideo.storageType` em `prisma/schema.prisma:715`), E2E em produção e gravações não verificados; A5 e A6 editores existentes em `app/admin/lei-14133/comentada/` (PR #110 reverteu a duplicação do #109), curadoria não verificada; A7 frontend ✅ (`app/faq/page.tsx`, `app/admin/faq/page.tsx`, PR #107), 30 perguntas não verificadas; A8 banner ✅ (PR #108) e endpoint de anúncio ✅ (PR #110), envio não verificado.
+> **Conferência de 27/09/2026.** A parte de código das ativações foi entregue entre 19 e 20/05/2026 (PRs #107 a #110); o que resta em cada item é conteúdo ou validação. **Banco em 27/09/2026:** A1, 2 badges concedidos; A2, 2 posts no Instagram com falha (out/2025), cron a pausar até validar credenciais; A3, 1 quiz piloto com 5 questões; A4, nenhum `CourseVideo`, E2E e gravações pendentes; A5 e A6, zero registros; A7, 26 de 30 perguntas; A8, anúncio nunca enviado e uma única sessão de planejamento. Resumo: A1 código ✅ (cron `compute-streaks` agendado no PR #107, admin `/admin/badges` com 12 tipos no PR #109), badges e fluxo E2E não verificados; A2 código ✅ (cron `social-publish` no PR #110, agendado), credenciais e posts piloto não verificados; A3 admin de quiz existe (`app/admin/lms/[courseId]/lessons/[lessonId]/quiz/page.tsx`), quizzes não verificados; A4 código ✅ na `main` (commits de 10 e 11/07/2026, `components/lms/HostedVideoPlayer.tsx`, `app/admin/videos/upload/page.tsx`, `CourseVideo.storageType` em `prisma/schema.prisma:715`), E2E em produção e gravações não verificados; A5 e A6 editores existentes em `app/admin/lei-14133/comentada/` (PR #110 reverteu a duplicação do #109), curadoria não verificada; A7 frontend ✅ (`app/faq/page.tsx`, `app/admin/faq/page.tsx`, PR #107), 30 perguntas não verificadas; A8 banner ✅ (PR #108) e endpoint de anúncio ✅ (PR #110), envio não verificado.
 
 ### ✅ Dropadas (Onda 7.4 PR técnica)
 - **DocumentAnalysis** — drop model (vinculado a Sistema D removido na PR #9)
@@ -821,7 +827,7 @@ Código funcional arquivado em `FUNCIONALIDADES_FUTURAS/` para implementação f
 **Prioridade:** Média
 **Status:** Backend 100% completo (16 APIs, 3 models Prisma). Faltam páginas públicas.
 
-> **Conferência de 27/09/2026: frontend ✅ CONCLUÍDO; conteúdo não verificado.** Glossário: `app/(acervo)/glossario/page.tsx`, `app/(acervo)/glossario/[slug]/page.tsx` e admin em `app/admin/glossario/` (lista, novo, edição); a paginação veio no commit `abd8349` e o admin deixou de levar o Prisma ao navegador no PR #217. FAQ: `app/faq/page.tsx` com busca, accordion e feedback, e `app/admin/faq/page.tsx` com contadores de visualização e utilidade (PR #107). Não foi possível confirmar sem o banco se os 50 a 100 termos e as 30 a 50 perguntas iniciais existem (dúvida nº 1).
+> **Conferência de 27/09/2026: frontend ✅ CONCLUÍDO; conteúdo não verificado.** Glossário: `app/(acervo)/glossario/page.tsx`, `app/(acervo)/glossario/[slug]/page.tsx` e admin em `app/admin/glossario/` (lista, novo, edição); a paginação veio no commit `abd8349` e o admin deixou de levar o Prisma ao navegador no PR #217. FAQ: `app/faq/page.tsx` com busca, accordion e feedback, e `app/admin/faq/page.tsx` com contadores de visualização e utilidade (PR #107). **Banco em 27/09/2026:** 95 termos públicos no glossário (meta cumprida) e 26 perguntas no FAQ (faltam 4 para as 30).
 
 **Glossário — falta:**
 - [ ] Página `/glossario` (lista alfabética, busca, filtros por categoria, navegação A-Z)
