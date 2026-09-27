@@ -24,6 +24,7 @@ import {
   type ClippingItemRendered,
 } from '@/lib/email-templates/daily-clipping';
 import { fetchAllEligibleItems, type ClippingItem } from '@/lib/clipping/sources';
+import { applyGlobalCap } from '@/lib/clipping/global-cap';
 import {
   getSentIdsInWindow,
   buildSentItemsPayload,
@@ -35,7 +36,10 @@ const SEND_DELAY_MS = 600;
 const BR_TZ_OFFSET_HOURS = 3;
 
 // Defaults — overrideáveis por env (Fase 5)
-const DEFAULT_TRIBUNAIS = 'TCU';
+// TST fora: de 1.349 registros, 5 tratam de licitação (medido em 19/08/2026).
+// TCEs RS/SP/PR/SC/RJ/MG fora: nenhum julgado aprovado dos últimos 3 meses
+// entrou na janela de 14 dias (medido em 27/09/2026).
+const DEFAULT_TRIBUNAIS = 'TCU,TCE-PE,TCDF,STF,STJ,TRF5,TJDFT';
 const DEFAULT_WINDOW_DAYS = 14;
 const DEFAULT_MAX_PER_TRIBUNAL = 5;
 const DEFAULT_MAX_TOTAL = 15;
@@ -76,30 +80,6 @@ function getTcuReferenceWindow(now: Date): { since: Date; until: Date; reference
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Aplica cap global `MAX_TOTAL` priorizando maior relevanceScore. Mantém
- * agrupamento por tribunal mas remove itens excedentes.
- */
-function applyGlobalCap(groups: Map<string, ClippingItem[]>, maxTotal: number): Map<string, ClippingItem[]> {
-  let total = 0;
-  for (const items of groups.values()) total += items.length;
-  if (total <= maxTotal) return groups;
-
-  // Achata, ordena por relevância desc, pega top maxTotal, reagrupa
-  const flat: ClippingItem[] = [];
-  for (const items of groups.values()) flat.push(...items);
-  flat.sort((a, b) => (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0));
-  const kept = flat.slice(0, maxTotal);
-
-  const result = new Map<string, ClippingItem[]>();
-  for (const item of kept) {
-    const list = result.get(item.tribunalCode) || [];
-    list.push(item);
-    result.set(item.tribunalCode, list);
-  }
-  return result;
 }
 
 async function enrichTcuItem(item: ClippingItem): Promise<ClippingItemRendered> {
