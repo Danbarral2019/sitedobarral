@@ -126,10 +126,6 @@
       "schedule": "0 12 * * 1-5"
     },
     {
-      "path": "/api/cron/social-publish",
-      "schedule": "0 13,17 * * 1-5"
-    },
-    {
       "path": "/api/cron/clipping-health-check",
       "schedule": "0 14 * * 1-5"
     },

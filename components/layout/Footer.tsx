@@ -171,6 +171,23 @@ export const Footer = memo(function Footer() {
           <p className="text-sm font-sans text-brand-200">
             © {new Date().getFullYear()} Prof. Daniel Barral. Todos os direitos reservados.
           </p>
+          {/* Identificação do fornecedor exigida pelo art. 2º, I e II, do Decreto nº 7.962/2013 */}
+          <p className="text-sm mt-2 font-sans text-brand-100">
+            LICITAÇÃOPRO TREINAMENTOS AVANÇADOS EM PROCESSOS CONTRATUAIS LTDA.
+            <span className="hidden md:inline text-brand-300" aria-hidden="true"> · </span>
+            <span className="block md:inline whitespace-nowrap">CNPJ 53.875.260/0001-77</span>
+          </p>
+          <p className="text-xs mt-1 font-sans text-brand-200">
+            Rua 15, Lote 27, Setor Leste, Padre Bernardo-GO,{' '}
+            <span className="whitespace-nowrap">CEP 73700-000</span>
+            <span className="hidden md:inline text-brand-300" aria-hidden="true"> · </span>
+            <a
+              href="mailto:contato@profdanielbarral.com"
+              className="block md:inline hover:text-white transition-colors"
+            >
+              contato@profdanielbarral.com
+            </a>
+          </p>
           <p className="text-xs mt-2 text-brand-300 font-sans">
             Desenvolvido com dedicação para compartilhar conhecimento em Direito Administrativo
           </p>

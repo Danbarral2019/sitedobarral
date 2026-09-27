@@ -146,7 +146,7 @@ export function ClippingArchiveDetail({
           <p className="text-xs uppercase tracking-widest text-ink-muted mb-1">
             {showSiteHeader ? 'Prof. Daniel Barral' : 'Arquivo do Clipping'}
           </p>
-          <h1 className="text-2xl font-bold text-white m-0">Clipping Jurídico</h1>
+          <h1 className="text-2xl font-bold text-white m-0">Clipping</h1>
           <p className="text-sm text-ink-muted mt-1">
             Decisões publicadas em {dataRef} · {count} {count === 1 ? 'destaque' : 'destaques'}
             {tribunais > 1 ? ` · ${tribunais} tribunais` : ''}

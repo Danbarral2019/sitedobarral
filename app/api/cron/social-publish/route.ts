@@ -17,6 +17,13 @@ const PLATFORMS: Array<'instagram' | 'linkedin'> = ['instagram', 'linkedin'];
  *      em todas as plataformas (até MAX_NEW_PER_RUN)
  *
  * Limites são conservadores para respeitar rate limits do Instagram/LinkedIn.
+ *
+ * Pausado em 27/09/2026 (fora do `vercel.json`): os dois únicos posts, no
+ * Instagram em out/2025, falharam, e nenhuma credencial INSTAGRAM_* ou
+ * LINKEDIN_* foi validada desde então. Reativar quando um post publicado pelo
+ * admin (`/api/admin/social/publish`) sair com sucesso em cada plataforma
+ * ligada, e com o modo "em breve" desligado. A rota continua invocável à mão
+ * com CRON_SECRET.
  */
 export const GET = withCronRoute('social-publish', async () => {
   let itemsFound = 0;

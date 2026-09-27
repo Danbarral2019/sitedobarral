@@ -57,7 +57,7 @@ export default async function ClippingCancelarPage({ searchParams }: PageProps) 
           <h1 style={{ margin: '6px 0 12px', fontSize: 22, color: '#0f172a' }}>{heading}</h1>
           <div style={{ background: colors.bg, padding: '14px 16px', borderRadius: 8, color: colors.text, fontSize: 14, lineHeight: 1.55 }}>{message}</div>
           <p style={{ margin: '18px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.55 }}>
-            Esse cancelamento afeta apenas o <strong>clipping diário do TCU</strong>. Você continua recebendo a newsletter mensal e comunicações da plataforma.
+            Esse cancelamento afeta apenas o <strong>clipping diário</strong>. Você continua recebendo a newsletter mensal e comunicações da plataforma.
           </p>
           <p style={{ margin: '18px 0 0', fontSize: 13 }}>
             <Link href="/" style={{ color: '#1d4ed8', textDecoration: 'none', fontWeight: 600 }}>← Voltar para o site</Link>

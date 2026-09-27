@@ -34,6 +34,18 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
+  // Remove o tracing do Sentry só do bundle do navegador (−46 KB no First Load
+  // JS de todas as páginas, medido em 2026-09-27). Os Web Vitals de usuários
+  // reais já vêm do Vercel Speed Insights. O `bundleSizeOptimizations.excludeTracing`
+  // do Sentry não serve aqui porque vale também para o servidor, onde o tracing
+  // das rotas de API continua ligado (sentry.server/edge.config.ts).
+  webpack(config, { isServer, webpack }) {
+    if (!isServer) {
+      config.plugins.push(new webpack.DefinePlugin({ __SENTRY_TRACING__: false }));
+    }
+    return config;
+  },
+
   // Redirects para rotas consolidadas do admin
   async redirects() {
     return [
