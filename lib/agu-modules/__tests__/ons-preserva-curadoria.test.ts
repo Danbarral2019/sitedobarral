@@ -61,6 +61,17 @@ describe('saveOrientacaoNormativaWithVersioning — curadoria', () => {
     expect(mockFindFirst.mock.calls[0][0].where).toEqual({ onNumber: 56, onYear: 2018 });
   });
 
+  it('ON excluída a pedido (104/2026): não é recriada nem consultada', async () => {
+    mockFindFirst.mockResolvedValue(null);
+    const r = await saveOrientacaoNormativaWithVersioning(
+      { ...aguDoc, numeroInt: 104, ano: 2026 } as AGUDocument,
+      cronOverrides,
+    );
+    expect(mockFindFirst).not.toHaveBeenCalled();
+    expect(mockFindOrCreate).not.toHaveBeenCalled();
+    expect(r).toEqual({ success: true, isNew: false, hasChanges: false });
+  });
+
   it('ON nova: criada com os overrides do cron (privada até revisão)', async () => {
     mockFindFirst.mockResolvedValue(null);
     await saveOrientacaoNormativaWithVersioning(aguDoc, cronOverrides);

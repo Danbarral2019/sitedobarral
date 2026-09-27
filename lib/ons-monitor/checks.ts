@@ -32,7 +32,8 @@ export interface OnsDiff {
   ausentesDaPagina: string[];
 }
 
-/** ONs removidas a pedido (temas de pessoal) — não sinalizar como "novas". */
+/** ONs removidas a pedido (temas de pessoal) — não sinalizar como "novas" nem
+ *  deixar o cron import-documents recriá-las (lib/agu-modules/orientacoes-normativas.ts). */
 export const EXCLUIDAS = new Set(['104/2026', '106/2026']);
 
 /** ONs públicas que a página AGU sabidamente NÃO lista (revogadas/antigas da CNU) —
