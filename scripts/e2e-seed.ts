@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import {
   E2E_COURSE_ID,
   E2E_IDS,
+  E2E_QR_CODE,
   E2E_USERS,
   resolveE2EDatabaseUrl,
 } from '../e2e/fixtures/database';
@@ -113,6 +114,26 @@ export default async function seedE2E(): Promise<void> {
         courseId: E2E_COURSE_ID,
         isPublic: false,
         isCommon: false,
+      },
+    });
+
+    // QR code de turma presencial para o fluxo de registro com trial de 1 mês.
+    const umAno = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    await prisma.qRCode.upsert({
+      where: { code: E2E_QR_CODE.code },
+      create: {
+        id: E2E_QR_CODE.id,
+        code: E2E_QR_CODE.code,
+        courseId: E2E_QR_CODE.courseId,
+        turma: E2E_QR_CODE.turma,
+        validUntil: umAno,
+        maxUses: null,
+      },
+      update: {
+        courseId: E2E_QR_CODE.courseId,
+        turma: E2E_QR_CODE.turma,
+        validUntil: umAno,
+        maxUses: null,
       },
     });
   } finally {

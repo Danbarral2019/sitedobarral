@@ -84,6 +84,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
 
+    # Registro, login e reenvio de verificação limitam tentativas com Redis em
+    # modo fail-closed: sem Redis, respondem 429. O emulador REST do Upstash
+    # (serverless-redis-http) atende o mesmo protocolo do cliente de produção,
+    # sem credencial externa e sem tocar o Redis real.
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis-http:
+        image: hiett/serverless-redis-http:latest
+        ports:
+          - 8079:80
+        env:
+          SRH_MODE: env
+          SRH_TOKEN: e2e_token_somente_ci
+          SRH_CONNECTION_STRING: redis://redis:6379
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -161,6 +182,23 @@ jobs:
           # DATABASE_URL — não TEST_DATABASE_URL. É o mesmo banco descartável
           # que o passo já usa acima.
           DATABASE_URL: ${{ steps.banco.outputs.db_url }}
+
+      # Fluxos da checklist P2 de lançamento. Passo próprio porque só ele liga o
+      # Redis: com o rate limit ativo, os passos acima (vários acessos do mesmo
+      # IP) passariam a esbarrar nos limites por minuto das rotas públicas.
+      # Os eventos da Stripe são assinados localmente com segredo fixo de
+      # teste; STRIPE_TEST_SECRET_KEY é opcional e só habilita o teste que cria
+      # a sessão de checkout no modo teste da Stripe.
+      - name: Run launch flows (registro, verificação e assinatura)
+        run: >-
+          npm run test:e2e --
+          e2e/fluxo-registro.spec.ts
+          e2e/fluxo-assinatura.spec.ts
+        env:
+          TEST_DATABASE_URL: ${{ steps.banco.outputs.db_url }}
+          E2E_UPSTASH_REDIS_REST_URL: http://127.0.0.1:8079
+          E2E_UPSTASH_REDIS_REST_TOKEN: e2e_token_somente_ci
+          STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
 
       # Sempre, inclusive quando os testes falham: branch retida acumula
       # custo de armazenamento mesmo com o compute ocioso.
