@@ -11,6 +11,10 @@ import {
   uniqueEmail,
 } from './fixtures/fluxos';
 
+// O dev server compila cada rota no primeiro acesso, e estes fluxos passam por
+// várias rotas ainda frias; 30 s (padrão) estouravam na primeira tentativa.
+test.describe.configure({ timeout: 120_000 });
+
 /**
  * Checklist P2 (FUTURE_TASKS.md), itens de registro. O token de verificação é
  * lido do banco descartável; nenhum email sai do dev server (sem

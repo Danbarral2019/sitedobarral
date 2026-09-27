@@ -18,6 +18,10 @@ import {
   subscriptionDeleted,
 } from './fixtures/stripe';
 
+// O dev server compila cada rota no primeiro acesso, e estes fluxos passam por
+// várias rotas ainda frias; 30 s (padrão) estouravam na primeira tentativa.
+test.describe.configure({ timeout: 120_000 });
+
 /**
  * Checklist P2 (FUTURE_TASKS.md), item de pagamento. Os eventos da Stripe são
  * assinados localmente com o segredo de teste do dev server; nada é cobrado e
