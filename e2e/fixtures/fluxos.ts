@@ -6,6 +6,13 @@ import { hasE2ERedis, resolveE2EDatabaseUrl } from './database';
 
 export const E2E_PASSWORD = 'Senha-E2E-lancamento-1';
 
+/**
+ * Prazo para navegação até rota que o dev server talvez ainda não tenha
+ * compilado: a navegação do cliente só conclui quando a compilação termina, e
+ * com dois workers compilando ao mesmo tempo os 15 s padrão não bastavam.
+ */
+export const NAVEGACAO_FRIA = { timeout: 60_000 } as const;
+
 let prisma: PrismaClient | null = null;
 
 /**
@@ -68,7 +75,7 @@ export async function registerViaUi(
   await page.locator('#password').fill(E2E_PASSWORD);
   await page.locator('#confirmPassword').fill(E2E_PASSWORD);
   await page.getByRole('button', { name: 'Criar Conta' }).click();
-  await expect(page).toHaveURL(/\/registro\/confirmacao/);
+  await expect(page).toHaveURL(/\/registro\/confirmacao/, NAVEGACAO_FRIA);
 }
 
 export async function loginViaUi(page: Page, email: string): Promise<void> {
