@@ -55,11 +55,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ documents });
     }
 
-    // Para alunos, verificar se está matriculado E se o acesso não expirou
+    // Para alunos, verificar se está matriculado E se o acesso não expirou.
+    // Matrícula sem prazo é a de assinatura (a Stripe controla o fim), como em
+    // hasCourseAccess (lib/auth.ts).
     const now = new Date();
     const isEnrolled = user.enrollments.some(e =>
       e.courseId === courseId &&
-      (e.isLifetime || (e.expiresAt && e.expiresAt > now))
+      (e.isLifetime || e.expiresAt === null || e.expiresAt > now)
     );
 
     if (!isEnrolled) {

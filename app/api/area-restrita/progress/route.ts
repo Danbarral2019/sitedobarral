@@ -20,12 +20,13 @@ export async function GET(req: NextRequest) {
     return await withTiming(`lms.progress.user.${userId}`, async () => {
     // Buscar dados em paralelo
     const [enrollments, badges, certificates, streaks, recentActivity] = await Promise.all([
-      // Enrollments ativos
+      // Enrollments ativos (sem prazo = assinatura, como em hasCourseAccess)
       prisma.enrollment.findMany({
         where: {
           userId,
           OR: [
             { isLifetime: true },
+            { expiresAt: null },
             { expiresAt: { gte: new Date() } },
           ],
         },

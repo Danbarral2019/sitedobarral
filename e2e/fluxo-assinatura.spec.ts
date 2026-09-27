@@ -190,11 +190,10 @@ test.describe('assinatura Stripe: webhook', () => {
     expect(daTurma.expiresAt).not.toBeNull();
   });
 
-  // Bug encontrado por este spec (ver o PR): matrícula de assinante tem expiresAt nulo
-  // e isLifetime falso; o servidor a trata como ativa (checkAccessStatus), mas
-  // useEnrolledCourses a descarta, e o assinante não vê os cursos no painel.
+  // Matrícula de assinante tem expiresAt nulo e isLifetime falso; o servidor a
+  // trata como ativa (hasCourseAccess), e painel e API de documentos precisam
+  // seguir o mesmo critério.
   test('assinante vê os cursos do plano na área restrita', async ({ page, request }) => {
-    test.fail(true, 'Bug conhecido: useEnrolledCourses oculta matrículas de assinatura (expiresAt nulo).');
     const { user, customerId } = await criarAlunoPresencial('painel-assinante');
     const subscriptionId = stripeId('sub');
     const cursoSoDoPlano = courses.find((c) => c.id !== E2E_CATALOG_COURSE.id)!;
@@ -210,7 +209,10 @@ test.describe('assinatura Stripe: webhook', () => {
     });
     await page.goto('/area-restrita');
     await expect(page.getByRole('heading', { name: /Bem-vindo, Aluno/ }).first()).toBeVisible();
-    await expect(page.getByText(cursoSoDoPlano.title).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(cursoSoDoPlano.title).first()).toBeVisible();
+
+    const documentos = await page.context().request.get(`/api/documents?courseId=${cursoSoDoPlano.id}`);
+    expect(documentos.status()).toBe(200);
   });
 });
 

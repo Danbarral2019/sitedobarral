@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Envia email de verificação (gera link clicável)
-    const emailSent = await sendVerificationEmail(user.email, user.name, verificationToken);
+    const emailSent = await sendVerificationEmail(user.email, user.name, verificationToken, '30 minutos');
 
     if (!emailSent) {
       console.warn('⚠️ Não foi possível enviar o email de verificação, mas o código foi salvo.');

@@ -78,10 +78,7 @@ describe('emails do cadastro: acentuação', () => {
     expect(text).not.toMatch(MOJIBAKE);
   });
 
-  // Achado deste teste (ver o PR): a versão em texto do email de boas-vindas traz
-  // "GUIA RAPIDO", sem acento. it.fails mantém a suíte verde e passa a acusar
-  // quando o texto for corrigido; nesse momento, trocar por it().
-  it.fails('boas-vindas: título do guia na versão em texto leva acento', async () => {
+  it('boas-vindas: título do guia na versão em texto leva acento', async () => {
     await sendWelcomeEmail('aluno@example.test', NOME);
     expect(ultimoPayload().text).toContain('GUIA RÁPIDO');
   });
@@ -113,5 +110,18 @@ describe('emails do cadastro: acentuação', () => {
     expect(text).toContain('Este link é válido por 24 horas.');
     expect(html).not.toMatch(MOJIBAKE);
     expect(text).not.toMatch(MOJIBAKE);
+  });
+
+  // O reenvio (send-verification) grava token de 30 minutos; o email não pode
+  // prometer as 24 horas do cadastro.
+  it('verificação reenviada informa o prazo de 30 minutos', async () => {
+    await sendVerificationEmail('aluno@example.test', NOME, 'token-teste', '30 minutos');
+    const { html, text } = ultimoPayload();
+
+    expect(html).toContain('Link válido por 30 minutos');
+    expect(html).toContain('expira em 30 minutos');
+    expect(html).not.toContain('24 horas');
+    expect(text).toContain('Este link é válido por 30 minutos.');
+    expect(text).not.toContain('24 horas');
   });
 });
