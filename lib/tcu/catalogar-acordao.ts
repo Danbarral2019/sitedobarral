@@ -61,13 +61,44 @@ async function marcarFalha(id: string, erro: string): Promise<void> {
   });
 }
 
-export async function catalogarAcordao(doc: AcordaoParaCatalogar): Promise<ResultadoCatalogacao> {
+const FILA_DE_EMBEDDINGS = {
+  // Recoloca o acordao na fila de embeddings: ate 09/2026 o inteiro teor
+  // era gravado aqui mas o documento continuava 'completed' com o embedding
+  // da ementa, e a busca semantica nunca via o voto. extractedText precisa
+  // ir a null junto — processDocument so recalcula o texto-fonte quando ele
+  // esta vazio (ou com forceReprocess, que o cron nao usa).
+  extractedText: null,
+  embeddingStatus: 'pending',
+  embeddingError: null,
+} as const;
+
+export interface OpcoesCatalogacao {
+  /**
+   * Recoloca o acórdão na fila de embeddings (padrão: sim). A carga de alvos
+   * citados (scripts/ingerir-alvos-citados-tcu.ts) desliga: o cron
+   * process-index-jobs chamaria o Gemini, e a carga não pode gastar IA.
+   */
+  enfileirarEmbedding?: boolean;
+  /** Promove a acervo público o acórdão do grafo de licitação (padrão: sim). */
+  promover?: boolean;
+  /**
+   * Tempo limite do download do RTF (padrão: o de fetchInteiroTeor, 60 s).
+   * Medido em 27/09/2026: um RTF de 15 MB do Plenário levou 200 s para descer.
+   */
+  timeoutMs?: number;
+}
+
+export async function catalogarAcordao(
+  doc: AcordaoParaCatalogar,
+  opcoes: OpcoesCatalogacao = {}
+): Promise<ResultadoCatalogacao> {
+  const { enfileirarEmbedding = true, promover = true, timeoutMs } = opcoes;
   if (!doc.tcuLinkPDF) {
     await marcarFalha(doc.id, 'tcuLinkPDF ausente');
     return { status: 'falha', erro: 'tcuLinkPDF ausente' };
   }
 
-  const r = await fetchInteiroTeor(doc.tcuLinkPDF);
+  const r = await fetchInteiroTeor(doc.tcuLinkPDF, timeoutMs ? { timeoutMs } : undefined);
   if (!r.ok) {
     await marcarFalha(doc.id, r.erro);
     return { status: 'falha', erro: r.erro };
@@ -96,18 +127,11 @@ export async function catalogarAcordao(doc: AcordaoParaCatalogar): Promise<Resul
       tcuEnriquecimentoStatus: 'success',
       tcuEnriquecimentoErro: null,
       tcuEnriquecidoEm: new Date(),
-      // Recoloca o acordao na fila de embeddings: ate 09/2026 o inteiro teor
-      // era gravado aqui mas o documento continuava 'completed' com o embedding
-      // da ementa, e a busca semantica nunca via o voto. extractedText precisa
-      // ir a null junto — processDocument so recalcula o texto-fonte quando ele
-      // esta vazio (ou com forceReprocess, que o cron nao usa).
-      extractedText: null,
-      embeddingStatus: 'pending',
-      embeddingError: null,
+      ...(enfileirarEmbedding ? FILA_DE_EMBEDDINGS : {}),
     },
   });
 
-  const promovido = await promoverSeForDeLicitacao(doc.id, final);
+  const promovido = promover ? await promoverSeForDeLicitacao(doc.id, final) : false;
 
   return {
     status: analise.secoes === null ? 'ok-sem-secoes' : 'ok',
