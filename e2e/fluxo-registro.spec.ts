@@ -5,6 +5,7 @@ import {
   e2ePrisma,
   isolateClientIp,
   loginViaUi,
+  NAVEGACAO_FRIA,
   readVerificationToken,
   registerViaUi,
   requireRateLimitBackend,
@@ -61,11 +62,11 @@ test.describe('fluxos de registro e verificação de email', () => {
     // Login pela UI, em sessão limpa.
     await context.clearCookies();
     await loginViaUi(page, email);
-    await expect(page).toHaveURL(/\/area-restrita/);
+    await expect(page).toHaveURL(/\/area-restrita/, NAVEGACAO_FRIA);
 
     // Sem matrícula nem assinatura, o caminho seguinte é a página de planos.
     await page.getByRole('link', { name: 'Planos', exact: true }).first().click();
-    await expect(page).toHaveURL(/\/planos/);
+    await expect(page).toHaveURL(/\/planos/, NAVEGACAO_FRIA);
     await expect(page.getByRole('heading', { name: 'Planos de Assinatura' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Básico', exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Premium', exact: true })).toBeVisible();
@@ -104,7 +105,7 @@ test.describe('fluxos de registro e verificação de email', () => {
 
     await context.clearCookies();
     await loginViaUi(page, email);
-    await expect(page).toHaveURL(/\/area-restrita/);
+    await expect(page).toHaveURL(/\/area-restrita/, NAVEGACAO_FRIA);
     await expect(page.getByText(E2E_CATALOG_COURSE.title).first()).toBeVisible();
   });
 
@@ -132,7 +133,7 @@ test.describe('fluxos de registro e verificação de email', () => {
     await page.getByPlaceholder('Cole o token aqui').fill(tokenNovo);
     await page.getByRole('button', { name: 'Verificar', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Email Verificado com Sucesso!' })).toBeVisible();
-    await expect(page).toHaveURL(/\/area-restrita/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/area-restrita/, NAVEGACAO_FRIA);
     expect((await e2ePrisma().user.findUniqueOrThrow({ where: { email } })).emailVerified).toBe(true);
   });
 });
