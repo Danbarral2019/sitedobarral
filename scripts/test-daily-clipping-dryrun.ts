@@ -16,7 +16,7 @@ async function main() {
   }
 
   console.log('[dry-run] Configuração:');
-  console.log('  CLIPPING_TRIBUNAIS_ENABLED =', process.env.CLIPPING_TRIBUNAIS_ENABLED || '(default: TCU)');
+  console.log('  CLIPPING_TRIBUNAIS_ENABLED =', process.env.CLIPPING_TRIBUNAIS_ENABLED || '(default: TCU,TCE-PE,TCDF,STF,STJ,TRF5,TJDFT)');
   console.log('  CLIPPING_WINDOW_DAYS       =', process.env.CLIPPING_WINDOW_DAYS || '(default: 14)');
   console.log('  CLIPPING_MAX_ITEMS_PER_TRIBUNAL =', process.env.CLIPPING_MAX_ITEMS_PER_TRIBUNAL || '(default: 5)');
   console.log('  CLIPPING_MAX_ITEMS_TOTAL   =', process.env.CLIPPING_MAX_ITEMS_TOTAL || '(default: 15)');
