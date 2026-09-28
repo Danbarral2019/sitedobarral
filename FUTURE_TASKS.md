@@ -21,7 +21,7 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | CNPJ em destaque (art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013) | Parcial | O CNPJ 53.875.260/0001-77 está em `app/termos/page.tsx` e `app/privacidade/page.tsx`, mas não no rodapé nem em `app/(acervo)/planos/page.tsx` (grep de 27/09). Falta exibi-lo onde a contratação acontece, com fácil visualização |
 | Redes sociais (A2): reavaliar `social-publish` | Aberto | Só 2 posts no Instagram, ambos com falha, em outubro de 2025; nenhuma credencial válida comprovada. O cron roda todo dia útil sem nada a publicar. Pausar o cron até validar as credenciais e reavaliar a rotina, que interessa ao Daniel para a divulgação. Publicar com o "em breve" ligado não é intencional |
 | Aposentar `daily-tcu-clipping` e `sync-datajud` | Decidido; PR próprio | Decisão do Daniel em 27/09/2026: substituídos por `daily-clipping` (PR #119) e pelos Espelhos do STJ (PR #192) |
-| STJ: 264 julgados aprovados sem `summary` | Aprovado o gasto | Decisão do Daniel em 27/09/2026, com o teto do Gemini resolvido. Levantar custo antes de executar |
+| STJ: 264 julgados aprovados sem `summary` | ✅ CONCLUÍDO (2026-09-28) | `scripts/generate-decision-summaries.ts --tribunal STJ` rodado pelo Daniel em 28/09/2026 com `gemini-3-flash-preview`: 267 resumos gerados (o número subiu com a coleta desde 27/09), 0 falhas, 0 pulados; teste prévio de 3 itens com `--dry-run` |
 
 **Média**
 
@@ -96,7 +96,7 @@ Respostas do Daniel às dúvidas da conferência, com consulta ao banco de produ
 13. **CNPJ:** a finalidade é cumprir o art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013. O CNPJ já está em `/termos` e `/privacidade`; falta exibi-lo com destaque no rodapé ou na página de planos.
 14. **`DocumentAnalysis` e `LessonComment`:** removidas do banco de produção.
 15. **Domínio:** dois saltos, o segundo temporário (307). Ajustar na Vercel para um redirecionamento permanente direto ao `www`.
-16. **Resíduos do STJ e do TCE-PE:** gastar Gemini com os 264 julgados do STJ sem resumo; os dumps de 2022 e 2023 e o inteiro teor do TCE-PE ficam sob demanda.
+16. **Resíduos do STJ e do TCE-PE:** gastar Gemini com os 264 julgados do STJ sem resumo (✅ feito em 28/09/2026: 267 resumos, 0 falhas); os dumps de 2022 e 2023 e o inteiro teor do TCE-PE ficam sob demanda.
 
 ---
 
