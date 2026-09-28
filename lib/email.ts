@@ -188,7 +188,7 @@ export async function sendPasswordResetEmail(
           .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
           .button { display: inline-block; background: #20364e; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
           .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
-          .warning { background: #e9d8b8; border-left: 4px solid #8a6235; padding: 15px; margin: 20px 0; }
+          .warning { background: #e9d8b8; border-left: 4px solid #7b5427; padding: 15px; margin: 20px 0; }
         </style>
       </head>
       <body>
@@ -652,7 +652,7 @@ export async function sendTcuHighlightAlert(
   const n = highlights.length;
 
   const highlightCards = highlights.map(h => {
-    const scoreColor = h.score >= 85 ? '#20364e' : '#8a6235';
+    const scoreColor = h.score >= 85 ? '#20364e' : '#7b5427';
     const scoreBg = h.score >= 85 ? '#f7f6f3' : '#e9d8b8';
     const leiTags = h.leiConnections.length > 0
       ? h.leiConnections.map(c =>
@@ -786,15 +786,15 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
 
   const cards = visible
     .map((it) => {
-      const scoreColor = it.score >= 80 ? '#20364e' : it.score >= 70 ? '#3a5a73' : '#8a6235';
+      const scoreColor = it.score >= 80 ? '#20364e' : it.score >= 70 ? '#3a5a73' : '#7b5427';
       const scoreBg = it.score >= 80 ? '#f7f6f3' : it.score >= 70 ? '#eeeae4' : '#e9d8b8';
       const ambiguousBadge = it.ambiguous
-        ? `<span style="display:inline-block;background:#e9d8b8;color:#8a6235;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">ambíguo</span>`
+        ? `<span style="display:inline-block;background:#e9d8b8;color:#7b5427;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">ambíguo</span>`
         : '';
       const affectsTags = (it.affects || [])
         .map(
           (a) =>
-            `<span style="display:inline-block;background:#e9d8b8;color:#8a6235;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">${escapeHtml(a)}</span>`,
+            `<span style="display:inline-block;background:#e9d8b8;color:#7b5427;padding:3px 10px;border-radius:12px;font-size:12px;margin:2px;">${escapeHtml(a)}</span>`,
         )
         .join(' ');
 
@@ -802,7 +802,7 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
       <div style="background:white;border-radius:12px;padding:24px;margin:16px 0;border-left:4px solid ${scoreColor};box-shadow:0 1px 3px rgba(0,0,0,0.1);">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
           <div style="flex:1;">
-            <div style="font-size:11px;color:#8a6235;text-transform:uppercase;font-weight:600;margin-bottom:4px;">${escapeHtml(it.actType || 'ato')} · ${escapeHtml(it.issuer)} · ${escapeHtml(it.publishDate)}</div>
+            <div style="font-size:11px;color:#7b5427;text-transform:uppercase;font-weight:600;margin-bottom:4px;">${escapeHtml(it.actType || 'ato')} · ${escapeHtml(it.issuer)} · ${escapeHtml(it.publishDate)}</div>
             <h3 style="margin:0;color:#1a1c20;font-size:16px;">${escapeHtml(it.title)}</h3>
           </div>
           <span style="background:${scoreBg};color:${scoreColor};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:bold;white-space:nowrap;margin-left:12px;">${it.score}/100${ambiguousBadge}</span>
@@ -814,8 +814,8 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
         </div>
 
         <div style="background:#e9d8b8;padding:14px;border-radius:8px;margin:10px 0;border:1px solid #e9d8b8;">
-          <div style="font-weight:600;color:#8a6235;font-size:13px;margin-bottom:6px;">Por que está aqui</div>
-          <div style="color:#8a6235;font-size:14px;">${escapeHtml(it.reason)}</div>
+          <div style="font-weight:600;color:#7b5427;font-size:13px;margin-bottom:6px;">Por que está aqui</div>
+          <div style="color:#7b5427;font-size:14px;">${escapeHtml(it.reason)}</div>
         </div>
 
         ${affectsTags ? `<div style="margin:10px 0;">${affectsTags}</div>` : ''}
@@ -830,7 +830,7 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
 
   const moreFooter =
     remaining > 0
-      ? `<p style="text-align:center;color:#8a6235;font-size:13px;margin-top:16px;">...e mais ${remaining} norma(s) — <a href="${baseUrl}/admin/clipping-dou" style="color:#b07d3a;">ver na fila completa</a>.</p>`
+      ? `<p style="text-align:center;color:#7b5427;font-size:13px;margin-top:16px;">...e mais ${remaining} norma(s) — <a href="${baseUrl}/admin/clipping-dou" style="color:#b07d3a;">ver na fila completa</a>.</p>`
       : '';
 
   return `
@@ -849,7 +849,7 @@ export function renderDouEditorialAlertEmail(items: DouEditorialAlertItem[]): st
             <p style="margin:8px 0 0;opacity:0.9;font-size:15px;">${items.length} norma(s) nova(s) pra revisar</p>
           </div>
           <div style="background:#e9d8b8;padding:24px;border-radius:0 0 12px 12px;">
-            <p style="color:#8a6235;font-size:14px;">As normas abaixo foram identificadas pelo classificador editorial. Aprove ou rejeite na fila admin.</p>
+            <p style="color:#7b5427;font-size:14px;">As normas abaixo foram identificadas pelo classificador editorial. Aprove ou rejeite na fila admin.</p>
             ${cards}
             ${moreFooter}
             <div style="text-align:center;margin-top:24px;">
@@ -917,7 +917,7 @@ export async function sendTribunalHighlightAlert(
   const n = highlights.length;
 
   const highlightCards = highlights.map(h => {
-    const scoreColor = h.score >= 85 ? '#20364e' : '#8a6235';
+    const scoreColor = h.score >= 85 ? '#20364e' : '#7b5427';
     const scoreBg = h.score >= 85 ? '#f7f6f3' : '#e9d8b8';
     const leiTags = h.leiConnections.length > 0
       ? h.leiConnections.map(c =>
@@ -1512,7 +1512,7 @@ export async function sendCertificateRevocation(
 ): Promise<boolean> {
   const reasonHtml = reason
     ? `<p style="margin:18px 0 6px;font-size:13px;color:#3d4044;">Motivo informado:</p>
-       <p style="margin:0;font-size:14px;color:#1a1c20;font-style:italic;background:#f7f6f3;padding:12px 14px;border-radius:6px;border-left:3px solid #8a6235;">${reason}</p>`
+       <p style="margin:0;font-size:14px;color:#1a1c20;font-style:italic;background:#f7f6f3;padding:12px 14px;border-radius:6px;border-left:3px solid #7b5427;">${reason}</p>`
     : '';
   const reasonText = reason ? `\nMotivo: ${reason}\n` : '';
 
@@ -1522,7 +1522,7 @@ export async function sendCertificateRevocation(
     <style>
       body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
       .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-      .header { background: #8a6235; color: white; padding: 28px; text-align: center; border-radius: 10px 10px 0 0; }
+      .header { background: #7b5427; color: white; padding: 28px; text-align: center; border-radius: 10px 10px 0 0; }
       .content { background: #f7f6f3; padding: 28px; border: 1px solid #e8e6e1; border-top: 0; border-radius: 0 0 10px 10px; }
       .footer { text-align: center; margin-top: 24px; color: #6b6e72; font-size: 12px; }
     </style>

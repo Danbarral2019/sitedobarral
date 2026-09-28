@@ -82,13 +82,13 @@ const categoryColors: Record<string, string> = {
   'apostila': '#20364e',
   'parecer': '#20364e',
   'edital': '#20364e',
-  'artigo': '#8a6235',
-  'orientacao-normativa': '#8a6235',
+  'artigo': '#7b5427',
+  'orientacao-normativa': '#7b5427',
   'decor': '#20364e',
   'enunciado': '#20364e',
   'boa_pratica': '#20364e',
   'sumula': '#20364e',
-  'legislacao': '#8a6235',
+  'legislacao': '#7b5427',
   'outro': '#6b6e72',
 };
 
@@ -98,14 +98,14 @@ const tribunalColors: Record<string, string> = {
   'TCE-MG': '#20364e',
   'TCE-PR': '#20364e',
   'TCE-SC': '#20364e',
-  'TCE-RJ': '#8a6235',
-  'TCE-RS': '#8a6235',
+  'TCE-RJ': '#7b5427',
+  'TCE-RS': '#7b5427',
   'TCE-PE': '#20364e',
   'TCDF': '#20364e',
   'TRF5': '#20364e',
   'TJDFT': '#20364e',
-  'STJ': '#8a6235',
-  'STF': '#8a6235',
+  'STJ': '#7b5427',
+  'STF': '#7b5427',
   'CNJ': '#20364e',
   'TST': '#20364e',
 };
@@ -267,14 +267,14 @@ function renderAuthorContentSection(authorContent: MonthlyNewsletterData['author
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border:1px solid #e9d8b8;border-left:4px solid #b07d3a;border-radius:6px;background-color:#e9d8b8;">
         <tr>
           <td style="padding:14px 16px;">
-            <p style="margin:0 0 2px 0;font-size:11px;color:#8a6235;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#128221; Artigo no Blog</p>
+            <p style="margin:0 0 2px 0;font-size:11px;color:#7b5427;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#128221; Artigo no Blog</p>
             <h3 style="margin:0 0 6px 0;font-size:15px;color:#1a1c20;font-family:Arial,Helvetica,sans-serif;font-weight:600;">
               <a href="${baseUrl}/blog/${post.slug}" style="color:#1a1c20;text-decoration:none;">${post.title}</a>
             </h3>
             <p style="margin:0 0 8px 0;color:#6b6e72;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
               ${post.excerpt.substring(0, 180)}${post.excerpt.length > 180 ? '...' : ''}
             </p>
-            <a href="${baseUrl}/blog/${post.slug}" style="color:#8a6235;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Ler artigo &rarr;</a>
+            <a href="${baseUrl}/blog/${post.slug}" style="color:#7b5427;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Ler artigo &rarr;</a>
           </td>
         </tr>
       </table>`;
@@ -293,12 +293,12 @@ function renderAuthorContentSection(authorContent: MonthlyNewsletterData['author
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border:1px solid #e9d8b8;border-left:4px solid #b07d3a;border-radius:6px;background-color:#e9d8b8;">
         <tr>
           <td style="padding:14px 16px;">
-            <p style="margin:0 0 2px 0;font-size:11px;color:#8a6235;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#128218; ${typeName}</p>
+            <p style="margin:0 0 2px 0;font-size:11px;color:#7b5427;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#128218; ${typeName}</p>
             <h3 style="margin:0 0 6px 0;font-size:15px;color:#1a1c20;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${pub.title}</h3>
             <p style="margin:0 0 8px 0;color:#6b6e72;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
               ${pub.description.substring(0, 180)}${pub.description.length > 180 ? '...' : ''}
             </p>
-            ${pub.externalUrl ? `<a href="${pub.externalUrl}" style="color:#8a6235;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Acessar &rarr;</a>` : ''}
+            ${pub.externalUrl ? `<a href="${pub.externalUrl}" style="color:#7b5427;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Acessar &rarr;</a>` : ''}
           </td>
         </tr>
       </table>`;
@@ -310,9 +310,9 @@ function renderAuthorContentSection(authorContent: MonthlyNewsletterData['author
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border:1px solid #e9d8b8;border-left:4px solid #b07d3a;border-radius:6px;background-color:#e9d8b8;">
         <tr>
           <td style="padding:14px 16px;">
-            <p style="margin:0 0 2px 0;font-size:11px;color:#8a6235;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#127909; V&#237;deo</p>
+            <p style="margin:0 0 2px 0;font-size:11px;color:#7b5427;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">&#127909; V&#237;deo</p>
             <h3 style="margin:0 0 6px 0;font-size:15px;color:#1a1c20;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${video.title}</h3>
-            <a href="${video.youtubeUrl ?? ''}" style="color:#8a6235;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Assistir &rarr;</a>
+            <a href="${video.youtubeUrl ?? ''}" style="color:#7b5427;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif;text-decoration:none;">Assistir &rarr;</a>
           </td>
         </tr>
       </table>`;
@@ -471,10 +471,10 @@ function renderLegislativeChangesSection(changes: MonthlyNewsletterData['legisla
   let rows = '';
   for (const act of changes) {
     rows += `
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;border:1px solid #e9d8b8;border-left:4px solid #8a6235;border-radius:6px;background-color:#e9d8b8;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;border:1px solid #e9d8b8;border-left:4px solid #7b5427;border-radius:6px;background-color:#e9d8b8;">
         <tr>
           <td style="padding:14px 16px;">
-            <p style="margin:0 0 2px 0;font-size:11px;color:#8a6235;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">${act.fullNumber}</p>
+            <p style="margin:0 0 2px 0;font-size:11px;color:#7b5427;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">${act.fullNumber}</p>
             <h3 style="margin:0 0 6px 0;font-size:15px;color:#1a1c20;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${act.title}</h3>
             <p style="margin:0;color:#6b6e72;font-size:13px;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
               ${act.ementa.substring(0, 250)}${act.ementa.length > 250 ? '...' : ''}
