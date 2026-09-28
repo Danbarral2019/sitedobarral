@@ -4,8 +4,8 @@ export default function PublicacoesLoading() {
       <div className="max-w-6xl mx-auto">
         {/* Header Skeleton */}
         <div className="mb-12 animate-pulse">
-          <div className="h-12 bg-surface-deep rounded-[6px] w-80 mb-4"></div>
-          <div className="h-6 bg-surface-deep rounded w-96"></div>
+          <div className="h-12 bg-surface-deep rounded-[6px] w-full max-w-80 mb-4"></div>
+          <div className="h-6 bg-surface-deep rounded w-full max-w-96"></div>
         </div>
 
         {/* Filter Tabs Skeleton */}
