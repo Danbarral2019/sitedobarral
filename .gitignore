@@ -121,3 +121,6 @@ dev.log
 
 # Cache de textos do DOU usado por scripts/eval-dou-classificador.ts
 eval/reports/.dou-textos-cache.json
+
+# Diagnóstico local do find-ons-dou-urls.ts (--debug)
+docs/audits/debug-dou/
