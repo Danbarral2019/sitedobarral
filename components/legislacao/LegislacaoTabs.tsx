@@ -1,56 +1,13 @@
 'use client';
 
-import { Scale, Monitor, FileText, Lightbulb } from 'lucide-react';
 import type { LegislacaoTab } from '@/lib/legislacao/theme';
 import type { TabCounts } from '@/hooks/use-legislacao';
 
-interface TabDef {
-  key: LegislacaoTab;
-  label: string;
-  icon: typeof Scale;
-  activeColor: string;
-  activeBadge: string;
-  hoverText: string;
-  countKey: keyof TabCounts;
-}
-
-const TABS: TabDef[] = [
-  {
-    key: 'atos',
-    label: 'Atos Normativos',
-    icon: Scale,
-    activeColor: 'text-brand-700',
-    activeBadge: 'bg-brand-100 text-brand-700',
-    hoverText: 'hover:text-brand-700',
-    countKey: 'atos',
-  },
-  {
-    key: 'tic',
-    label: 'Contratações de TIC',
-    icon: Monitor,
-    activeColor: 'text-brand-700',
-    activeBadge: 'bg-brand-100 text-brand-700',
-    hoverText: 'hover:text-brand-700',
-    countKey: 'tic',
-  },
-  {
-    key: 'boas-praticas',
-    label: 'Outros Atos',
-    icon: FileText,
-    activeColor: 'text-emerald-700',
-    activeBadge: 'bg-emerald-100 text-emerald-700',
-    hoverText: 'hover:text-emerald-700',
-    countKey: 'boasPraticas',
-  },
-  {
-    key: 'orientacoes',
-    label: 'Orientações',
-    icon: Lightbulb,
-    activeColor: 'text-amber-accent-deep',
-    activeBadge: 'bg-amber-accent-soft text-amber-accent-deep',
-    hoverText: 'hover:text-amber-accent-deep',
-    countKey: 'orientacoes',
-  },
+const TABS: Array<{ key: LegislacaoTab; label: string; countKey: keyof TabCounts }> = [
+  { key: 'atos', label: 'Atos normativos', countKey: 'atos' },
+  { key: 'tic', label: 'Contratações de TIC', countKey: 'tic' },
+  { key: 'boas-praticas', label: 'Outros atos', countKey: 'boasPraticas' },
+  { key: 'orientacoes', label: 'Orientações', countKey: 'orientacoes' },
 ];
 
 interface LegislacaoTabsProps {
@@ -59,36 +16,38 @@ interface LegislacaoTabsProps {
   onSwitch: (tab: LegislacaoTab) => void;
 }
 
+/**
+ * Abas da listagem. No celular a faixa rola na horizontal, sem quebrar a
+ * página; a aba ativa leva sublinhado na cor da marca.
+ */
 export function LegislacaoTabs({ activeTab, counts, onSwitch }: LegislacaoTabsProps) {
   return (
-    <section className="container mx-auto px-4 max-w-6xl -mt-6">
-      <div className="flex gap-2 overflow-x-auto">
+    <nav className="border-b border-border-subtle bg-white">
+      <div
+        role="tablist"
+        aria-label="Seções da legislação"
+        className="container mx-auto px-4 max-w-6xl flex gap-1 overflow-x-auto"
+      >
         {TABS.map((tab) => {
-          const Icon = tab.icon;
           const isActive = activeTab === tab.key;
           return (
             <button
               key={tab.key}
+              role="tab"
+              aria-selected={isActive}
               onClick={() => onSwitch(tab.key)}
-              className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-6 py-3 rounded-t-[6px] font-bold text-sm transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-3 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                 isActive
-                  ? `bg-white ${tab.activeColor} border-2 border-b-0 border-border-subtle`
-                  : `bg-white/70 text-ink-secondary ${tab.hoverText} hover:bg-white/90 border-2 border-transparent`
+                  ? 'text-brand-700 border-brand-600'
+                  : 'text-ink-secondary border-transparent hover:text-brand-700'
               }`}
             >
-              <Icon className="w-4 h-4" />
               {tab.label}
-              <span
-                className={`px-2 py-0.5 rounded-full text-xs ${
-                  isActive ? tab.activeBadge : 'bg-surface-deep text-ink-secondary'
-                }`}
-              >
-                {counts[tab.countKey]}
-              </span>
+              <span className="ml-1.5 font-normal text-ink-muted">{counts[tab.countKey]}</span>
             </button>
           );
         })}
       </div>
-    </section>
+    </nav>
   );
 }

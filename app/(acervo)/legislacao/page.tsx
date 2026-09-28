@@ -1,7 +1,6 @@
 'use client';
 
 import { FileText } from 'lucide-react';
-import { HierarchyLegend } from '@/components/LegislativeActsPanel/HierarchyLegend';
 import { useLegislacao } from '@/hooks/use-legislacao';
 import { getTabTheme } from '@/lib/legislacao/theme';
 import { groupActsByHierarchy } from '@/lib/legislacao/grouping';
@@ -39,18 +38,11 @@ export default function LegislacaoPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <LegislacaoHero tab={l.activeTab} theme={theme} />
+      <LegislacaoHero theme={theme} />
       <LegislacaoTabs activeTab={l.activeTab} counts={l.tabCounts} onSwitch={l.switchTab} />
-      <LegislacaoHighlightCard />
 
       <section className="container mx-auto px-4 max-w-6xl py-8">
-        {l.activeTab === 'atos' && (
-          <div className="mb-6">
-            <HierarchyLegend />
-          </div>
-        )}
-
-        <div className="mb-8">
+        <div className="mb-6">
           <LegislacaoToolbar
             searchTerm={l.searchTerm}
             onSearchChange={l.setSearchTerm}
@@ -63,7 +55,8 @@ export default function LegislacaoPage() {
             onToggleFilters={() => l.setShowFilters(!l.showFilters)}
           />
 
-          {l.showFilters && (
+          {/* Filtros sempre à vista no computador; no celular, atrás do botão. */}
+          <div className={l.showFilters ? '' : 'hidden md:block'}>
             <LegislacaoFiltersPanel
               theme={theme}
               showTypeFilter={showHierarchyOption}
@@ -85,7 +78,7 @@ export default function LegislacaoPage() {
               hasActiveFilters={l.hasActiveFilters}
               onClear={l.clearFilters}
             />
-          )}
+          </div>
 
           {l.hasActiveFilters && (
             <LegislacaoActiveChips
@@ -114,7 +107,7 @@ export default function LegislacaoPage() {
             <p className="mt-4 text-ink-muted text-lg">{theme.loadingMessage}</p>
           </div>
         ) : l.acts.length === 0 ? (
-          <div className="text-center py-16 bg-surface-raised rounded-[6px] border-2 border-border-subtle">
+          <div className="text-center py-16 bg-surface-raised rounded-[6px] border border-border-subtle">
             <FileText className="w-16 h-16 text-ink-muted mx-auto mb-4" />
             <h3 className="text-xl font-bold text-ink-primary mb-2">
               {isBoasPraticas ? 'Nenhum ato normativo encontrado' : 'Nenhum ato encontrado'}
@@ -129,12 +122,12 @@ export default function LegislacaoPage() {
           </div>
         ) : (
           <>
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between gap-4 text-sm">
               <p className="text-ink-muted">
                 Mostrando <span className="font-semibold">{l.acts.length}</span> de{' '}
                 <span className="font-semibold">{l.total}</span> {itemsLabel}
               </p>
-              <p className="text-sm text-ink-muted">
+              <p className="text-ink-muted">
                 Página {l.page} de {l.totalPages}
               </p>
             </div>
@@ -143,29 +136,18 @@ export default function LegislacaoPage() {
               <div className="space-y-8">
                 {groupedActs.map(([level, levelActs]) => {
                   const meta = getHierarchyInfo(level);
-                  const headerEmoji = meta?.emoji ?? '📄';
                   const headerLabel = meta?.pluralLabel ?? 'Outros atos (sem nível definido)';
                   return (
                     <section key={level}>
-                      <h3 className="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-border-subtle">
-                        <span className="text-2xl" aria-hidden="true">
-                          {headerEmoji}
+                      <h2 className="flex items-baseline gap-3 pt-4 pb-1 border-b border-border-strong">
+                        <span className="text-lg font-semibold text-ink-primary">{headerLabel}</span>
+                        <span className="text-sm text-ink-muted">
+                          {levelActs.length} {levelActs.length === 1 ? 'ato' : 'atos'} nesta página
                         </span>
-                        <span className="text-xl font-bold text-ink-primary">{headerLabel}</span>
-                        <span className="text-sm font-normal text-ink-muted">
-                          ({levelActs.length} {levelActs.length === 1 ? 'ato' : 'atos'} nesta página)
-                        </span>
-                      </h3>
-                      <div className="space-y-4">
+                      </h2>
+                      <div>
                         {levelActs.map((act) => (
-                          <LegislativeActCard
-                            key={act.id}
-                            act={act}
-                            theme={theme}
-                            isExpanded={l.expandedAct === act.id}
-                            onToggle={() => l.toggleExpand(act.id)}
-                            tabIsBoasPraticasOrOrientacoes={isBoasPraticasOrOrientacoes}
-                          />
+                          <LegislativeActCard key={act.id} act={act} />
                         ))}
                       </div>
                     </section>
@@ -173,16 +155,9 @@ export default function LegislacaoPage() {
                 })}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="border-t border-border-subtle">
                 {l.acts.map((act) => (
-                  <LegislativeActCard
-                    key={act.id}
-                    act={act}
-                    theme={theme}
-                    isExpanded={l.expandedAct === act.id}
-                    onToggle={() => l.toggleExpand(act.id)}
-                    tabIsBoasPraticasOrOrientacoes={isBoasPraticasOrOrientacoes}
-                  />
+                  <LegislativeActCard key={act.id} act={act} />
                 ))}
               </div>
             )}
@@ -190,6 +165,8 @@ export default function LegislacaoPage() {
             <LegislacaoPagination page={l.page} totalPages={l.totalPages} onPageChange={l.setPage} />
           </>
         )}
+
+        <LegislacaoHighlightCard />
       </section>
     </main>
   );

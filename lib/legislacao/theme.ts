@@ -1,7 +1,7 @@
 /**
  * Tema visual da pagina /legislacao conforme aba ativa.
  *
- * 4 abas: 'atos' (blue) | 'tic' (cyan) | 'boas-praticas' (emerald) | 'orientacoes' (amber).
+ * 4 abas: 'atos' | 'tic' | 'boas-praticas' | 'orientacoes', todas na paleta da marca.
  * Centraliza as classes Tailwind que mudam por aba pra evitar ternarios verbosos
  * espalhados pelo componente.
  */
@@ -65,17 +65,16 @@ const THEMES: Record<LegislacaoTab, LegislacaoTheme> = {
   },
   'boas-praticas': {
     heroGradient: 'bg-brand-700',
-    heroSubtitle: 'text-emerald-100',
-    tabActiveText: 'text-emerald-700',
-    tabActiveBadge: 'bg-emerald-100 text-emerald-700',
-    tabHover: 'hover:text-emerald-700',
-    cardHoverBorder: 'hover:border-emerald-300 hover:shadow-lg',
-    themeChip: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    summaryGradient: 'from-emerald-50 via-brand-50 to-green-50',
+    heroSubtitle: 'text-brand-100',
+    tabActiveText: 'text-brand-700',
+    tabActiveBadge: 'bg-brand-100 text-brand-700',
+    tabHover: 'hover:text-brand-700',
+    cardHoverBorder: 'hover:border-brand-300 hover:shadow-lg',
+    themeChip: 'bg-brand-50 text-brand-700 border border-brand-200',
+    summaryGradient: 'from-brand-50 via-brand-50 to-brand-50',
     summaryHeader: 'bg-brand-600',
-    // emerald-600 dava 3,67:1 com texto branco; o 700 chega a 5,37:1.
-    primaryActionBg: 'bg-emerald-700 hover:bg-emerald-800',
-    spinnerBorder: 'border-emerald-600',
+    primaryActionBg: 'bg-brand-600 hover:bg-brand-700',
+    spinnerBorder: 'border-brand-600',
     loadingMessage: 'Carregando outros atos normativos...',
     pageTitle: 'Outros Atos Normativos',
     pageDescription: 'Outros atos normativos relacionados a licitações e contratos',
@@ -83,21 +82,19 @@ const THEMES: Record<LegislacaoTab, LegislacaoTheme> = {
       'Explore outros atos normativos de órgãos federais e estaduais relacionados a licitações e contratos administrativos.',
   },
   orientacoes: {
-    // Hero, cabeçalho do resumo e botão em petróleo, como nas demais abas.
-    // Sobre o âmbar (#b07d3a), o subtítulo em âmbar escuro ficava com 1,5:1 e
-    // o texto branco com 3,6:1; o DESIGN.md reserva o âmbar a referências,
-    // nunca a hero ou CTA. A aba mantém o âmbar no rótulo, nos chips e na borda.
+    // Âmbar fica reservado a referências (DESIGN.md), nunca a hero, aba ou
+    // botão: sobre ele o texto branco ficava com 3,6:1.
     heroGradient: 'bg-brand-700',
     heroSubtitle: 'text-brand-100',
-    tabActiveText: 'text-amber-accent-deep',
-    tabActiveBadge: 'bg-amber-accent-soft text-amber-accent-deep',
-    tabHover: 'hover:text-amber-accent-deep',
-    cardHoverBorder: 'hover:border-amber-accent hover:shadow-lg',
-    themeChip: 'bg-amber-accent-soft text-amber-accent-deep border border-amber-accent-soft',
-    summaryGradient: 'from-amber-accent-soft via-amber-accent-soft to-amber-accent-soft',
+    tabActiveText: 'text-brand-700',
+    tabActiveBadge: 'bg-brand-100 text-brand-700',
+    tabHover: 'hover:text-brand-700',
+    cardHoverBorder: 'hover:border-brand-300 hover:shadow-lg',
+    themeChip: 'bg-brand-50 text-brand-700 border border-brand-200',
+    summaryGradient: 'from-brand-50 via-brand-50 to-brand-50',
     summaryHeader: 'bg-brand-600',
     primaryActionBg: 'bg-brand-600 hover:bg-brand-700',
-    spinnerBorder: 'border-amber-accent',
+    spinnerBorder: 'border-brand-600',
     loadingMessage: 'Carregando orientações...',
     pageTitle: 'Orientações e Procedimentos',
     pageDescription: 'Orientações práticas e cadernos de logística do Portal de Compras',

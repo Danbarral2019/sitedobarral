@@ -39,32 +39,23 @@ export function LegislacaoActiveChips({
     <div className="flex flex-wrap items-center gap-2 mt-4">
       <span className="text-sm font-semibold text-ink-muted">Filtros:</span>
       {esferaFilter && (
-        <Chip label={getEsferaLabel(esferaFilter)} color="blue" onClear={onEsferaClear} />
+        <Chip label={getEsferaLabel(esferaFilter)} onClear={onEsferaClear} />
       )}
-      {typeFilter && <Chip label={getTypeLabel(typeFilter)} color="purple" onClear={onTypeClear} />}
-      {issuerFilter && <Chip label={issuerFilter} color="green" onClear={onIssuerClear} />}
-      {yearFilter && <Chip label={yearFilter} color="orange" onClear={onYearClear} />}
-      {themeFilter && <Chip label={getThemeLabel(themeFilter)} color="indigo" onClear={onThemeClear} />}
-      {searchTerm && <Chip label={`"${searchTerm}"`} color="gray" onClear={onSearchClear} />}
-      <button onClick={onClearAll} className="text-sm text-ink-muted hover:text-red-600 underline ml-2">
+      {typeFilter && <Chip label={getTypeLabel(typeFilter)} onClear={onTypeClear} />}
+      {issuerFilter && <Chip label={issuerFilter} onClear={onIssuerClear} />}
+      {yearFilter && <Chip label={yearFilter} onClear={onYearClear} />}
+      {themeFilter && <Chip label={getThemeLabel(themeFilter)} onClear={onThemeClear} />}
+      {searchTerm && <Chip label={`"${searchTerm}"`} onClear={onSearchClear} />}
+      <button onClick={onClearAll} className="text-sm text-ink-muted hover:text-ink-primary underline ml-2">
         Limpar todos
       </button>
     </div>
   );
 }
 
-const CHIP_COLORS: Record<string, string> = {
-  blue: 'bg-brand-50 text-brand-700 border-brand-200',
-  purple: 'bg-brand-50 text-brand-700 border-brand-200',
-  green: 'bg-green-50 text-green-700 border-green-200',
-  orange: 'bg-amber-accent-soft text-amber-accent-deep border-amber-accent-soft',
-  indigo: 'bg-brand-50 text-brand-700 border-brand-200',
-  gray: 'bg-surface-deep text-ink-secondary border-border-subtle',
-};
-
-function Chip({ label, color, onClear }: { label: string; color: string; onClear: () => void }) {
+function Chip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border ${CHIP_COLORS[color]}`}>
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-sm border bg-surface-raised text-ink-secondary border-border-subtle">
       {label}
       <button onClick={onClear} aria-label={`Remover filtro ${label}`}>
         <X className="w-3 h-3" />

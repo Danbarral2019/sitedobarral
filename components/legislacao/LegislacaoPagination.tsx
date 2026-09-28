@@ -9,11 +9,11 @@ interface LegislacaoPaginationProps {
 export function LegislacaoPagination({ page, totalPages, onPageChange }: LegislacaoPaginationProps) {
   if (totalPages <= 1) return null;
   return (
-    <div className="mt-12 flex justify-center items-center gap-2">
+    <div className="mt-8 flex justify-center items-center gap-2">
       <button
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="px-6 py-3 border-2 border-border-subtle rounded-[6px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-raised transition-colors"
+        className="px-4 py-2 border border-border-strong rounded-[6px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-raised transition-colors"
       >
         ← Anterior
       </button>
@@ -23,7 +23,7 @@ export function LegislacaoPagination({ page, totalPages, onPageChange }: Legisla
       <button
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
-        className="px-6 py-3 border-2 border-border-subtle rounded-[6px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-raised transition-colors"
+        className="px-4 py-2 border border-border-strong rounded-[6px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-raised transition-colors"
       >
         Próxima →
       </button>
