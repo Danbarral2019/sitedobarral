@@ -72,6 +72,9 @@ export function extractEmenta(rawText: string | null | undefined): EmentaExtract
 
   const complete = end > 0;
   let ementa = (complete ? rest.slice(0, end) : rest).trim();
+  // Links laterais do gov.br ("• Perguntas e Respostas • Apresentação da IN")
+  // grudam no fim da ementa quando o texto é achatado.
+  ementa = ementa.split(/\s•\s/)[0].trim();
   // Reticências de trecho truncado não fazem parte da ementa.
   ementa = ementa.replace(/\s*(?:\.{3,}|…)\s*$/, '').trim();
 
@@ -79,6 +82,14 @@ export function extractEmenta(rawText: string | null | undefined): EmentaExtract
   if (/^Art\.?\s*\d/.test(ementa)) return null;
   // Sem epígrafe e sem preâmbulo não há como saber onde a ementa começa/termina.
   if (!epigrafe && !complete) return null;
+  // Sem epígrafe, o texto pode começar no meio da ementa (texto integral
+  // truncado: "Lei nº 14.690, de 3 de outubro de 2023, para instituir...")
+  // ou na própria epígrafe em caixa mista ("Portaria SGD/MGI nº 3.656, de...").
+  // Ementa começa com verbo em maiúscula, nunca com minúscula nem com o nome
+  // de um ato.
+  if (!epigrafe && /^(?:[a-zà-ú]|Leis?\b|Decretos?\b|Medidas?\s+Provis|Portarias?\b|Instru[çc]|Resolu[çc])/.test(ementa)) {
+    return null;
+  }
 
   return { ementa, complete };
 }
@@ -99,4 +110,18 @@ export function looksLikeDefectiveEmenta(
   if (EPIGRAFE_RE.test(e)) return true;
   if (/(?:\.{3,}|…)$/.test(e)) return true;
   return PREAMBULO_RES.some((re) => re.test(e));
+}
+
+/**
+ * Indica se o texto integral abre com a epígrafe do ato numa linha própria
+ * ("MEDIDA PROVISÓRIA Nº 1.393, DE 25 DE SETEMBRO DE 2026"), em qualquer caixa.
+ * Texto do DOU que não abre assim foi truncado no download (a versão antiga de
+ * `stripDouBoilerplate` cortava no primeiro "Lei" da ementa).
+ */
+export function startsWithEpigrafe(content: string | null | undefined): boolean {
+  if (!content) return false;
+  const firstLine = content.trim().split('\n')[0].trim();
+  return /^(?:medida\s+provis[óo]ria|lei(?:\s+complementar)?|decreto(?:-lei)?|portaria|instru[çc][ãa]o\s+normativa|resolu[çc][ãa]o|ordem\s+de\s+servi[çc]o|orienta[çc][ãa]o\s+normativa)\b[^\n]*?\bn[ºo°.]?\s*[\d.\/-]+\s*,?\s+de\s+\d{1,2}[ºo°]?\s+de\s+[a-zç]+\s+de\s+\d{4}\.?\s*(?:\([^)]*\))?\s*$/i.test(
+    firstLine,
+  );
 }

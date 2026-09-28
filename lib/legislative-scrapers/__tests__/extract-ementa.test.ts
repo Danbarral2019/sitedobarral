@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractEmenta, looksLikeDefectiveEmenta } from '../extract-ementa';
+import { extractEmenta, looksLikeDefectiveEmenta, startsWithEpigrafe } from '../extract-ementa';
 
 const MP_ABSTRACT =
   'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025 Dispõe sobre a tributação de aplicações financeiras e ativos virtuais no País; e altera a Lei nº 10.892, de 13 de julho de 2004. O PRESIDENTE DA REPÚBLICA, no uso da atribuição que lhe confere o art. 62 da Constituição, adota a seguinte Medida Provisória, com força de lei: Art. 1º Esta Medida...';
@@ -64,6 +64,33 @@ describe('extractEmenta', () => {
     expect(r?.ementa).toBe('Altera o art. 1º do Decreto nº 11.462, de 31 de março de 2023.');
   });
 
+  it('texto truncado no meio da ementa (sem epígrafe) não vira ementa', () => {
+    // Casos reais: MP 1.393/2026 e Lei 15.473/2026 baixados do DOU antes da
+    // correção de stripDouBoilerplate.
+    expect(
+      extractEmenta(
+        'Lei nº 14.690, de 3 de outubro de 2023, para instituir a Modalidade Emergencial.\n\nO PRESIDENTE DA REPÚBLICA, no uso da atribuição',
+      ),
+    ).toBeNull();
+    expect(
+      extractEmenta('Leis nºs 9.818, de 23 de agosto de 1999, para fortalecer o crédito.\n\nO PRESIDENTE DA REPÚBLICA\n\nFaço saber'),
+    ).toBeNull();
+  });
+
+  it('epígrafe em caixa mista sem ementa não vira ementa', () => {
+    expect(
+      extractEmenta('Portaria SGD/MGI nº 3.656, de 16 de junho de 2026\n\nO SECRETÁRIO DE GOVERNO DIGITAL DO MINISTÉRIO, no uso das atribuições'),
+    ).toBeNull();
+  });
+
+  it('corta os links laterais do gov.br grudados na ementa', () => {
+    expect(
+      extractEmenta(
+        'INSTRUÇÃO NORMATIVA Nº 2, DE 6 DE DEZEMBRO DE 2016\n\nDispõe sobre a ordem cronológica de pagamento no âmbito do Sisg\n\n• Perguntas e Respostas\n\n• Apresentação da IN\n\nO SECRETÁRIO DE GESTÃO DO MINISTÉRIO, no uso das atribuições',
+      )?.ementa,
+    ).toBe('Dispõe sobre a ordem cronológica de pagamento no âmbito do Sisg');
+  });
+
   it('retorna null sem epígrafe nem preâmbulo, ou quando só sobra artigo', () => {
     expect(extractEmenta('Texto qualquer sem estrutura de ato normativo reconhecível')).toBeNull();
     expect(extractEmenta('LEI Nº 1, DE 1 DE JANEIRO DE 2000 Art. 1º Fica...')).toBeNull();
@@ -88,5 +115,20 @@ describe('looksLikeDefectiveEmenta', () => {
         'Altera o art. 1º do Decreto nº 11.462, de 31 de março de 2023, para dispor sobre o Sistema de Registro de Preços.',
       ),
     ).toBe(false);
+  });
+});
+
+describe('startsWithEpigrafe', () => {
+  it('reconhece epígrafe em qualquer caixa, com anotação entre parênteses', () => {
+    expect(startsWithEpigrafe('MEDIDA PROVISÓRIA Nº 1.393, DE 25 DE SETEMBRO DE 2026\n\nAltera a Lei')).toBe(true);
+    expect(startsWithEpigrafe('Portaria SGD/MGI nº 3.656, de 16 de junho de 2026\n\nO SECRETÁRIO')).toBe(true);
+    expect(
+      startsWithEpigrafe('PORTARIA SEGES/MGI Nº 1.363, DE 21 DE FEVEREIRO DE 2025 (Revoga a Portaria SEGES/ME nº 9.412)\n\nInstitui'),
+    ).toBe(true);
+  });
+
+  it('rejeita texto que abre no meio da ementa', () => {
+    expect(startsWithEpigrafe('Lei nº 14.690, de 3 de outubro de 2023, para instituir a Modalidade')).toBe(false);
+    expect(startsWithEpigrafe(null)).toBe(false);
   });
 });

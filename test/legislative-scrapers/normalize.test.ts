@@ -133,6 +133,25 @@ Este conteúdo não substitui o publicado na versão certificada.
     expect(out).not.toContain('Logo da Imprensa');
   });
 
+  it('epígrafe em caixa alta: corta na epígrafe, não no primeiro "Lei" da ementa', () => {
+    const mp = `Brasão do Brasil
+
+Diário Oficial da União
+
+ Órgão:
+ Atos do Poder Executivo
+
+MEDIDA PROVISÓRIA Nº 1.393, DE 25 DE SETEMBRO DE 2026
+
+Altera a Lei nº 14.690, de 3 de outubro de 2023, para instituir a Modalidade Emergencial.
+
+O PRESIDENTE DA REPÚBLICA, no uso da atribuição que lhe confere o art. 62 da Constituição:`;
+    const out = stripDouBoilerplate(mp);
+    expect(out.startsWith('MEDIDA PROVISÓRIA Nº 1.393, DE 25 DE SETEMBRO DE 2026')).toBe(true);
+    expect(out).toContain('Altera a Lei nº 14.690');
+    expect(out).not.toContain('Atos do Poder Executivo');
+  });
+
   it('preserva "Este conteúdo não substitui" (rodapé DOU legítimo)', () => {
     const out = stripDouBoilerplate(sample);
     expect(out).toContain('Este conteúdo não substitui');

@@ -287,6 +287,10 @@ export function dedupeBoilerplateFooter(text: string): string {
  *
  * É no-op quando o texto não contém os markers.
  */
+/** Linha que abre com a epígrafe do ato, em qualquer caixa. */
+const DOU_EPIGRAFE_LINE_RE =
+  /^[ \t]*(?:medida\s+provis[óo]ria|lei(?:\s+complementar)?|decreto(?:-lei)?|portaria|instru[çc][ãa]o\s+normativa|resolu[çc][ãa]o|ordem\s+de\s+servi[çc]o|orienta[çc][ãa]o\s+normativa)\b/im;
+
 export function stripDouBoilerplate(text: string): string {
   let result = text;
 
@@ -298,9 +302,16 @@ export function stripDouBoilerplate(text: string): string {
     const orgaoIdx = result.indexOf('Órgão:', brasaoIdx);
     if (orgaoIdx >= 0) {
       const afterOrgao = result.slice(orgaoIdx);
-      const match = afterOrgao.match(/(?:Instrução Normativa|Portaria|Decreto|Resolução|Lei)[\s\S]*/);
+      // A epígrafe abre uma linha própria e costuma vir em caixa alta
+      // ("MEDIDA PROVISÓRIA Nº 1.393, DE ...", "LEI Nº 15.473, DE ...").
+      // A busca antiga, sensível a caixa e sem "Medida Provisória", não casava
+      // essas epígrafes e cortava no primeiro "Lei" da ementa, perdendo a
+      // epígrafe e o verbo inicial ("Altera a").
+      const epigrafe = afterOrgao.match(DOU_EPIGRAFE_LINE_RE);
+      const match =
+        epigrafe ?? afterOrgao.match(/(?:Instrução Normativa|Portaria|Decreto|Resolução|Lei)[\s\S]*/);
       if (match) {
-        result = match[0];
+        result = epigrafe ? afterOrgao.slice(epigrafe.index ?? 0).trimStart() : match[0];
       }
     }
   }
