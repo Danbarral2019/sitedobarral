@@ -192,7 +192,7 @@ function filterBySourceTypes(
   // lei-article nunca vem do semanticSearch (é montado via legal-context).
   const allow = new Set(sourceTypes.filter((t) => t !== "lei-article"));
   if (allow.size === 0) return results;
-  return results.filter((r) => allow.has(r.sourceType));
+  return results.filter((r) => r.sourceType !== "tese" && allow.has(r.sourceType));
 }
 
 function toPlanningSources(
@@ -202,6 +202,9 @@ function toPlanningSources(
   const out: PlanningSectionSource[] = [];
 
   for (const h of hits) {
+    // O planejamento não liga o ramo das teses (`includeTeses`), e
+    // PlanningSectionSource não tem tipo para elas.
+    if (h.sourceType === "tese") continue;
     out.push({
       sourceType: h.sourceType,
       id: `${h.sourceType}:${h.documentId}:${h.chunkIndex}`,
