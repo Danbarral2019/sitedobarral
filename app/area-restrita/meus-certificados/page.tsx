@@ -123,7 +123,7 @@ export default function MeusCertificadosPage() {
             </p>
             <button
               onClick={() => router.push('/area-restrita')}
-              className="bg-amber-accent text-white px-6 py-3 rounded-[6px] font-bold hover:from-amber-accent hover:to-amber-accent transition-all border border-border-subtle"
+              className="bg-amber-accent text-ink-primary px-6 py-3 rounded-[6px] font-bold hover:from-amber-accent hover:to-amber-accent transition-all border border-border-subtle"
             >
               Explorar Cursos
             </button>
@@ -184,7 +184,7 @@ export default function MeusCertificadosPage() {
                             <button
                               onClick={() => handleDownload(cert)}
                               disabled={downloadingId === cert.id}
-                              className="inline-flex items-center gap-2 bg-amber-accent text-white px-4 py-2 rounded-[6px] font-medium text-sm hover:bg-amber-accent transition-colors disabled:opacity-50"
+                              className="inline-flex items-center gap-2 bg-amber-accent text-ink-primary px-4 py-2 rounded-[6px] font-medium text-sm hover:bg-amber-accent transition-colors disabled:opacity-50"
                             >
                               {downloadingId === cert.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                               Download PDF

@@ -128,7 +128,7 @@ export default function TestimonialsCarousel() {
               &quot;{testimonial.text}&quot;
             </p>
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 ${testimonial.color} rounded-full flex items-center justify-center text-white font-bold text-xl`}>
+              <div className="w-12 h-12 bg-brand-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
                 {testimonial.avatar}
               </div>
               <div>

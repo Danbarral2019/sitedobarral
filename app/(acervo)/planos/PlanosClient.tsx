@@ -138,7 +138,7 @@ export default function PlanosClient({ cursosVendaveis }: PlanosClientProps) {
               Anual
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                 isYearly
-                  ? 'bg-amber-accent text-amber-accent-deep'
+                  ? 'bg-amber-accent text-ink-primary'
                   : 'bg-amber-accent-soft text-amber-accent-deep'
               }`}>
                 2 meses grátis
@@ -326,7 +326,7 @@ export default function PlanosClient({ cursosVendaveis }: PlanosClientProps) {
             <button
               onClick={() => handleSubscribe('premium')}
               disabled={loading !== null || isLoading}
-              className="w-full bg-amber-accent hover:bg-amber-accent-deep text-ink-primary font-bold py-4 px-6 rounded-[6px] transition-colors disabled:bg-border-strong disabled:text-ink-muted disabled:cursor-not-allowed"
+              className="w-full bg-amber-accent hover:bg-amber-accent-deep text-ink-primary hover:text-white font-bold py-4 px-6 rounded-[6px] transition-colors disabled:bg-border-strong disabled:text-ink-muted disabled:cursor-not-allowed"
             >
               {loading === 'premium'
                 ? (paymentMethod === 'pix' ? 'Gerando PIX...' : 'Redirecionando...')

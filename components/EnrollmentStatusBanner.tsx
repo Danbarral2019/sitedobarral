@@ -145,7 +145,7 @@ export default function EnrollmentStatusBanner({ courseId }: EnrollmentStatusBan
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
               <Link
                 href={`/upgrade/${courseId}`}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-accent hover:bg-amber-accent-deep focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-accent"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-ink-primary bg-amber-accent hover:bg-amber-accent-deep hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-accent"
               >
                 ⭐ Upgrade para Vitalício
               </Link>

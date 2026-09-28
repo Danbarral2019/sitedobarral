@@ -205,8 +205,8 @@ export default function ActsFilters({
                   className={`px-2.5 py-1 text-xs rounded-full border transition-colors font-medium ${
                     themeFilter === tema.value
                       ? isBoasPraticas
-                        ? 'bg-emerald-600 text-white border-emerald-600'
-                        : 'bg-amber-accent text-white border-amber-accent'
+                        ? 'bg-emerald-700 text-white border-emerald-700'
+                        : 'bg-amber-accent text-ink-primary border-amber-accent'
                       : 'bg-white text-ink-muted border-border-subtle hover:border-border-strong'
                   }`}
                 >

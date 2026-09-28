@@ -121,7 +121,7 @@ export default function ActCard({ act, expandedAct, setExpandedAct, isBoasPratic
                 className={`inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-[6px] transition-colors ${
                   isBoasPraticas
                     ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
-                    : 'text-amber-accent-deep bg-amber-accent-soft hover:bg-amber-accent'
+                    : 'text-amber-accent-deep bg-amber-accent-soft hover:bg-amber-accent hover:text-ink-primary'
                 }`}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
