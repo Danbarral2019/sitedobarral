@@ -143,23 +143,23 @@ O sistema rejeita explicitamente três caricaturas: **info-produto** (gradients 
 A paleta é **restrita por escolha**, não por timidez. Azul petróleo (a marca do Prof. Daniel Barral) carrega ≤10% da área visível em qualquer tela; o âmbar quente aparece apenas onde há informação que precisa ser lida com atenção (jurisprudência citada, fonte oficial, marcador de versão). Tudo o mais é neutro tintado para o brand hue (chroma ≤0.01) — nunca preto puro, nunca branco puro.
 
 ### Primary
-- **Petróleo da Casa** (#20364e / `oklch(28% 0.04 240)`): a marca. Aparece em links, ícones de navegação, botões primários, ênfases de heading. Carrega ≤10% da área em qualquer tela.
-- **Petróleo Profundo** (#142230 / `oklch(20% 0.03 240)`): hover do primary, headers de página de detalhe, faixas de credibilidade institucional.
+- **Petróleo da Casa** (#20364e / `oklch(32.6% 0.051 252)`): a marca. Aparece em links, ícones de navegação, botões primários, ênfases de heading. Carrega ≤10% da área em qualquer tela.
+- **Petróleo Profundo** (#142230 / `oklch(24.6% 0.033 249)`): hover do primary, headers de página de detalhe, faixas de credibilidade institucional.
 
 ### Secondary
-- **Âmbar Acadêmico** (#b07d3a / `oklch(60% 0.09 75)`): o "lápis vermelho" do caderno. Aparece exclusivamente em **referências** — citações de jurisprudência, link "fonte oficial", marcador de "versão atualizada". Nunca decorativo.
-- **Âmbar Profundo** (#7b5427 / `oklch(48% 0.08 68)`): texto de marcador (sobre `amber-accent-soft`, 4,77:1). Escurecido em 28/09/2026: o valor anterior, #8a6235, dava 3,86:1 sobre o âmbar suave, abaixo do piso AA. Os templates de e-mail (`lib/email-templates/tokens.ts`, `lib/email-templates/newsletter.ts`, `lib/email.ts`) usam o mesmo valor.
-- **Âmbar Suave** (#e9d8b8 / `oklch(88% 0.04 80)`): fundo de chip/badge de citação.
+- **Âmbar Acadêmico** (#b07d3a / `oklch(62.8% 0.105 71)`): o "lápis vermelho" do caderno. Aparece exclusivamente em **referências** — citações de jurisprudência, link "fonte oficial", marcador de "versão atualizada". Nunca decorativo.
+- **Âmbar Profundo** (#7b5427 / `oklch(47.9% 0.080 68)`): texto de marcador (sobre `amber-accent-soft`, 4,77:1). Escurecido em 28/09/2026: o valor anterior, #8a6235, dava 3,86:1 sobre o âmbar suave, abaixo do piso AA. Os templates de e-mail (`lib/email-templates/tokens.ts`, `lib/email-templates/newsletter.ts`, `lib/email.ts`) usam o mesmo valor.
+- **Âmbar Suave** (#e9d8b8 / `oklch(88.8% 0.046 83)`): fundo de chip/badge de citação.
 
 ### Neutral
-- **Tinta Principal** (#1a1c20 / `oklch(15% 0.005 240)`): texto base. Quase preto, mas levemente azulado pela brand hue.
-- **Tinta Secundária** (#3d4044 / `oklch(30% 0.005 240)`): texto descritivo, ementas longas.
-- **Tinta Apagada** (#6b6e72 / `oklch(50% 0.005 240)`): metadado, datas, contagens, breadcrumbs.
-- **Página** (#fdfdfb / `oklch(99% 0.003 80)`): fundo principal da página. Off-white levemente quente, jamais `#fff`.
-- **Superfície Elevada** (#f7f6f3 / `oklch(96% 0.005 80)`): cards de conteúdo, sidebars sticky, painéis laterais.
-- **Superfície Profunda** (#eeeae4 / `oklch(92% 0.008 80)`): marcadores de seção dentro de leitura longa, separadores de capítulo.
-- **Borda Sutil** (#e8e6e1 / `oklch(91% 0.006 80)`): divisores horizontais, bordas de input em estado de repouso.
-- **Borda Forte** (#cdcac4 / `oklch(80% 0.008 80)`): bordas de input no hover, separadores de seção fortes.
+- **Tinta Principal** (#1a1c20 / `oklch(22.6% 0.008 264)`): texto base. Quase preto, mas levemente azulado pela brand hue.
+- **Tinta Secundária** (#3d4044 / `oklch(37.0% 0.008 256)`): texto descritivo, ementas longas.
+- **Tinta Apagada** (#6b6e72 / `oklch(53.7% 0.007 256)`): metadado, datas, contagens, breadcrumbs.
+- **Página** (#fdfdfb / `oklch(99.3% 0.003 106)`): fundo principal da página. Off-white levemente quente, jamais `#fff`.
+- **Superfície Elevada** (#f7f6f3 / `oklch(97.3% 0.004 91)`): cards de conteúdo, sidebars sticky, painéis laterais.
+- **Superfície Profunda** (#eeeae4 / `oklch(93.8% 0.009 78)`): marcadores de seção dentro de leitura longa, separadores de capítulo.
+- **Borda Sutil** (#e8e6e1 / `oklch(92.5% 0.007 89)`): divisores horizontais, bordas de input em estado de repouso.
+- **Borda Forte** (#cdcac4 / `oklch(84.0% 0.009 85)`): bordas de input no hover, separadores de seção fortes.
 
 ### Named Rules
 
@@ -201,8 +201,8 @@ A paleta é **restrita por escolha**, não por timidez. Azul petróleo (a marca 
 Sistema **flat-by-default**. Profundidade vem de **tonalidade** (página → superfície elevada → superfície profunda), não de sombra. Sombra é estado de interação, não decoração.
 
 ### Shadow Vocabulary
-- **Foco discreto** (`box-shadow: 0 0 0 3px oklch(60% 0.09 75 / 0.25)`): anel de foco em inputs, botões e links. Usa o âmbar acadêmico para puxar atenção sem destoar.
-- **Hover de card clicável** (`box-shadow: 0 1px 3px oklch(15% 0.005 240 / 0.06), 0 1px 2px oklch(15% 0.005 240 / 0.08)`): apenas em superfícies que de fato são clicáveis. Surpresa: o cursor mudou — a sombra confirma.
+- **Foco discreto** (`box-shadow: 0 0 0 3px oklch(62.8% 0.105 71 / 0.25)`): anel de foco em inputs, botões e links. Usa o âmbar acadêmico para puxar atenção sem destoar.
+- **Hover de card clicável** (`box-shadow: 0 1px 3px oklch(22.6% 0.008 264 / 0.06), 0 1px 2px oklch(22.6% 0.008 264 / 0.08)`): apenas em superfícies que de fato são clicáveis. Surpresa: o cursor mudou — a sombra confirma.
 
 ### Named Rules
 
