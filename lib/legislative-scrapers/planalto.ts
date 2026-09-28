@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
 import type { LegislativeScraper, ScraperResult } from './index';
 import { collapseWhitespace, detectCharsetFromResponse, blockAwareText } from './normalize';
+import { removerTextoRiscado } from './texto-riscado';
 
 /**
  * Patterns de URL do Planalto
@@ -140,12 +141,30 @@ export class PlanaltoScraper implements LegislativeScraper {
    * Extrai o conteúdo textual limpo do HTML
    */
   private extractContent(html: string): string {
+    const $ = this.loadClean(html);
+    const fullText = blockAwareText($.root()).length;
+
+    // Redação superada, riscada no texto compilado, não é texto vigente
+    // (ver texto-riscado.ts). Se o riscado for quase tudo, o ato inteiro foi
+    // revogado e o Planalto risca o corpo; aí o texto histórico fica.
+    removerTextoRiscado($);
+    if (blockAwareText($.root()).length < fullText * 0.2) {
+      return this.extractFrom(this.loadClean(html));
+    }
+    return this.extractFrom($);
+  }
+
+  private loadClean(html: string): cheerio.Root {
     const $ = cheerio.load(html);
 
     // Remover elementos indesejados
     ELEMENTS_TO_REMOVE.forEach(selector => {
       $(selector).remove();
     });
+    return $;
+  }
+
+  private extractFrom($: cheerio.Root): string {
 
     // O cheerio 0.22 (htmlparser2) não reconstrói o HTML malformado do
     // Planalto: no Código Civil compilado o texto vem depois de um </body>
