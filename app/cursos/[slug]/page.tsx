@@ -285,7 +285,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Coluna Principal */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-8 min-w-0">
               {/* Sobre o Curso */}
               <div className={`bg-white rounded-[6px] p-8 border-2 ${color.border} hover: transition-shadow`}>
                 <div className="flex items-center gap-3 mb-6">
@@ -334,7 +334,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
               {/* Conteúdo Programático (Preview de Módulos) */}
               {modules.length > 0 && (
-                <div className={`bg-white rounded-[6px] p-8 border-2 ${color.border} hover: transition-shadow`}>
+                <div className={`bg-white rounded-[6px] p-5 sm:p-8 border-2 ${color.border} hover: transition-shadow`}>
                   <div className="flex items-center gap-3 mb-6">
                     <div className={`w-12 h-12 ${color.solid} rounded-[6px] flex items-center justify-center`}>
                       <Layers className="w-6 h-6 text-white" />
@@ -358,7 +358,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                           <span className="text-white font-bold text-sm">{index + 1}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-ink-primary truncate">{mod.title}</h3>
+                          <h3 className="font-semibold text-ink-primary line-clamp-2 break-words">{mod.title}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <PlayCircle className={`w-3.5 h-3.5 ${color.text}`} />
                             <span className="text-xs text-ink-muted">
@@ -383,7 +383,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 min-w-0">
               <div className={`${color.solid} rounded-[6px] p-8 text-white sticky top-8`}>
                 <div className="text-center">
                   <h3 className="text-2xl font-bold mb-3">Já é Aluno?</h3>

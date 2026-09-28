@@ -61,6 +61,9 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
           line-height: 1.75;
           color: #374151;
           max-width: 100%;
+          /* URLs longas e linhas pontilhadas de omissão ("I - ......") não
+             têm ponto de quebra e empurravam a página no celular. */
+          overflow-wrap: break-word;
         }
 
         /* TÍTULOS - Hierarquia clara e espaçamento generoso */
