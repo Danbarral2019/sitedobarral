@@ -58,10 +58,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 // Mapeamento de cores por ID do curso - Paleta brand (azul petroleo)
-// Todos os cursos usam a paleta brand para manter consistência visual
+// Todos os cursos usam a paleta brand para manter consistência visual.
+// `solid` é fundo chapado (o DESIGN.md veda gradiente). Este campo já guardou
+// só as classes from-*/to-*, que sem a classe-base do gradiente não pintam
+// fundo nenhum: o texto branco do hero e do card lateral sumia na página.
 const getCourseColor = (courseId: string) => {
   const colorMap: Record<string, {
-    gradient: string;
+    solid: string;
     border: string;
     bg: string;
     bgLight: string;
@@ -69,7 +72,7 @@ const getCourseColor = (courseId: string) => {
     hover: string;
   }> = {
     '1': {
-      gradient: 'from-brand-500 to-brand-600',
+      solid: 'bg-brand-600',
       border: 'border-brand-300',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -77,7 +80,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-600',
     },
     '2': {
-      gradient: 'from-brand-600 to-brand-700',
+      solid: 'bg-brand-700',
       border: 'border-brand-400',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -85,7 +88,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-700',
     },
     '3': {
-      gradient: 'from-brand-600 to-brand-700',
+      solid: 'bg-brand-700',
       border: 'border-brand-500',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -93,7 +96,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-700',
     },
     '4': {
-      gradient: 'from-brand-600 to-brand-700',
+      solid: 'bg-brand-700',
       border: 'border-brand-600',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -101,7 +104,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-700',
     },
     '5': {
-      gradient: 'from-brand-700 to-brand-800',
+      solid: 'bg-brand-800',
       border: 'border-brand-700',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -109,7 +112,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-800',
     },
     '6': {
-      gradient: 'from-brand-800 to-brand-900',
+      solid: 'bg-brand-900',
       border: 'border-brand-800',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -117,7 +120,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-900',
     },
     '7': {
-      gradient: 'from-brand-500 to-brand-600',
+      solid: 'bg-brand-600',
       border: 'border-brand-500',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -125,7 +128,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-600',
     },
     '8': {
-      gradient: 'from-brand-600 to-brand-700',
+      solid: 'bg-brand-700',
       border: 'border-brand-600',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -133,7 +136,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-700',
     },
     '9': {
-      gradient: 'from-brand-700 to-brand-800',
+      solid: 'bg-brand-800',
       border: 'border-brand-700',
       bg: 'bg-brand-50',
       bgLight: 'bg-brand-100',
@@ -141,7 +144,7 @@ const getCourseColor = (courseId: string) => {
       hover: 'hover:bg-brand-800',
     },
     '10': {
-      gradient: 'from-brand-800 to-brand-900',
+      solid: 'bg-brand-900',
       border: 'border-brand-800',
       bg: 'bg-brand-100',
       bgLight: 'bg-brand-200',
@@ -217,7 +220,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
       <main className="min-h-screen bg-white">
       {/* Hero Section com Cor do Curso */}
-      <div className={`relative overflow-hidden ${color.gradient}`}>
+      <div className={`relative overflow-hidden ${color.solid}`}>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMTRjMy4zMTQgMCA2IDIuNjg2IDYgNnMtMi42ODYgNi02IDYtNi0yLjY4Ni02LTYgMi42ODYtNiA2LTZ6TTI0IDM4YzMuMzE0IDAgNiAyLjY4NiA2IDZzLTIuNjg2IDYtNiA2LTYtMi42ODYtNi02IDIuNjg2LTYgNi02eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
 
         <div className="container mx-auto px-4 py-8 relative">
@@ -286,7 +289,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {/* Sobre o Curso */}
               <div className={`bg-white rounded-[6px] p-8 border-2 ${color.border} hover: transition-shadow`}>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 ${color.gradient} rounded-[6px] flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${color.solid} rounded-[6px] flex items-center justify-center`}>
                     <Target className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-3xl font-bold text-ink-primary">Sobre o Curso</h2>
@@ -333,7 +336,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {modules.length > 0 && (
                 <div className={`bg-white rounded-[6px] p-8 border-2 ${color.border} hover: transition-shadow`}>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 ${color.gradient} rounded-[6px] flex items-center justify-center`}>
+                    <div className={`w-12 h-12 ${color.solid} rounded-[6px] flex items-center justify-center`}>
                       <Layers className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -351,7 +354,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                         key={mod.id}
                         className={`${color.bg} rounded-[6px] p-4 flex items-center gap-4 border border-white`}
                       >
-                        <div className={`w-10 h-10 ${color.gradient} rounded-[6px] flex items-center justify-center flex-shrink-0`}>
+                        <div className={`w-10 h-10 ${color.solid} rounded-[6px] flex items-center justify-center flex-shrink-0`}>
                           <span className="text-white font-bold text-sm">{index + 1}</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -381,7 +384,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className={`${color.gradient} rounded-[6px] p-8 text-white sticky top-8`}>
+              <div className={`${color.solid} rounded-[6px] p-8 text-white sticky top-8`}>
                 <div className="text-center">
                   <h3 className="text-2xl font-bold mb-3">Já é Aluno?</h3>
                   <p className="text-white/90 leading-relaxed mb-6 text-sm">
