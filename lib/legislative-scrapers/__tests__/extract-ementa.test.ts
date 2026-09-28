@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { extractEmenta, looksLikeDefectiveEmenta, startsWithEpigrafe } from '../extract-ementa';
+import {
+  extractEmenta,
+  looksLikeDefectiveEmenta,
+  startsWithEpigrafe,
+  isIdentificacaoDoAto,
+  epigrafeNumber,
+} from '../extract-ementa';
 
 const MP_ABSTRACT =
   'MEDIDA PROVISÓRIA Nº 1.303, DE 11 DE JUNHO DE 2025 Dispõe sobre a tributação de aplicações financeiras e ativos virtuais no País; e altera a Lei nº 10.892, de 13 de julho de 2004. O PRESIDENTE DA REPÚBLICA, no uso da atribuição que lhe confere o art. 62 da Constituição, adota a seguinte Medida Provisória, com força de lei: Art. 1º Esta Medida...';
@@ -164,5 +170,58 @@ describe('startsWithEpigrafe', () => {
       ),
     ).toBe(false);
     expect(startsWithEpigrafe(null)).toBe(false);
+  });
+});
+
+describe('casos reais das pendências de 28 de setembro de 2026', () => {
+  it('epígrafe sem espaço antes do Nº (Resolução CIIA-PAC/CC 3/2025)', () => {
+    const texto =
+      'RESOLUÇÃO CIIA - PAC/CCNº 3, DE 28 DE JULHO DE 2025\n\nDefine os produtos manufaturados sujeitos à margem de preferência.\n\nA COMISSÃO INTERMINISTERIAL DE INOVAÇÕES E AQUISIÇÕES DO PAC, no uso das atribuições';
+    expect(startsWithEpigrafe(texto)).toBe(true);
+    expect(extractEmenta(texto)?.ementa).toBe('Define os produtos manufaturados sujeitos à margem de preferência.');
+  });
+
+  it('preâmbulo com vírgula colada ("CRESCIMENTO,no uso") encerra a ementa', () => {
+    const texto =
+      'RESOLUÇÃO CIIA - PAC/CCNº 3, DE 28 DE JULHO DE 2025\n\nDefine os produtos manufaturados sujeitos à margem de preferência.\n\nA COMISSÃO INTERMINISTERIAL DE INOVAÇÕES E AQUISIÇÕES DO PROGRAMA DE ACELERAÇÃO DO CRESCIMENTO,no uso das atribuições que lhe confere o art. 2º, resolve:\n\nArt. 1º Ficam';
+    expect(extractEmenta(texto)?.ementa).toBe('Define os produtos manufaturados sujeitos à margem de preferência.');
+    // A ementa errada gravada por um instante em produção seria reconhecida como defeito.
+    expect(
+      looksLikeDefectiveEmenta(
+        'Define os produtos manufaturados. A COMISSÃO INTERMINISTERIAL DE INOVAÇÕES E AQUISIÇÕES DO PROGRAMA DE ACELERAÇÃO DO CRESCIMENTO,no uso das atribuições, resolve:',
+      ),
+    ).toBe(true);
+  });
+
+  it('preâmbulo em caixa mista de ato antigo (IN MP 12/1997)', () => {
+    expect(
+      extractEmenta(
+        'INSTRUÇÃO NORMATIVA N° 12, DE 05 DE SETEMBRO DE 1997\n\nDispõe sobre aquisição, utilização, controle e manutenção dos equipamentos de telefonia fixa e celular.\n\nO Ministro de Estado da Administração Federal e Reforma do Estado, no uso de suas atribuições, resolve:',
+      )?.ementa,
+    ).toBe('Dispõe sobre aquisição, utilização, controle e manutenção dos equipamentos de telefonia fixa e celular.');
+  });
+
+  it('ementa oficial curta não é defeito (Código Civil)', () => {
+    expect(looksLikeDefectiveEmenta('Institui o Código Civil.')).toBe(false);
+    expect(looksLikeDefectiveEmenta('Presidência')).toBe(true);
+  });
+
+  it('ato antigo sem ementa, com "N.º" e preâmbulo em caixa alta (IN MP 142/1983)', () => {
+    const texto =
+      'INSTRUÇÃO NORMATIVA N.º 142, DE 05 DE AGOSTO DE 1983\n\nO SECRETÁRIO-GERAL ADJUNTO DO DEPARTAMENTO ADMINISTRATIVO DO SERVIÇO PÚBLICO - DASP, TENDO EM VISTA O DISPOSTO NO DECRETO N.º 75.657, RESOLVE:\n\nArt. 1º Fica';
+    expect(startsWithEpigrafe(texto)).toBe(true);
+    expect(extractEmenta(texto)).toBeNull();
+    expect(epigrafeNumber(texto)).toBe('142');
+  });
+
+  it('identificação do ato no lugar da ementa (atos sem ementa oficial)', () => {
+    expect(isIdentificacaoDoAto('IN nº 142, de 5 de agosto de 1983')).toBe(true);
+    expect(isIdentificacaoDoAto('Portaria SGD/MGI nº 3.656, de 16 de junho de 2026')).toBe(true);
+    expect(isIdentificacaoDoAto('Institui o Código Civil.')).toBe(false);
+  });
+
+  it('número da epígrafe, para detectar texto cortado na citação de outro ato (Portaria 6.364/2026)', () => {
+    expect(epigrafeNumber('Portaria SEGES/MGI nº 9.510, de 28 de outubro de 2025.\n\nA SECRETÁRIA')).toBe('9510');
+    expect(epigrafeNumber('Lei nº 14.690, de 3 de outubro de 2023, para instituir')).toBeNull();
   });
 });
