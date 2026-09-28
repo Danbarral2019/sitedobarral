@@ -62,7 +62,7 @@ interface LegislacaoTabsProps {
 export function LegislacaoTabs({ activeTab, counts, onSwitch }: LegislacaoTabsProps) {
   return (
     <section className="container mx-auto px-4 max-w-6xl -mt-6">
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -70,7 +70,7 @@ export function LegislacaoTabs({ activeTab, counts, onSwitch }: LegislacaoTabsPr
             <button
               key={tab.key}
               onClick={() => onSwitch(tab.key)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-t-[6px] font-bold text-sm transition-colors ${
+              className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-6 py-3 rounded-t-[6px] font-bold text-sm transition-colors ${
                 isActive
                   ? `bg-white ${tab.activeColor} border-2 border-b-0 border-border-subtle`
                   : `bg-white/70 text-ink-secondary ${tab.hoverText} hover:bg-white/90 border-2 border-transparent`
