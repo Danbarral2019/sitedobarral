@@ -84,3 +84,26 @@ describe('PlanaltoScraper — pontilhados (regression Decreto 12.516/2025)', () 
     expect(out).not.toContain('etc [...]');
   });
 });
+
+describe('PlanaltoScraper: seletor que pega só uma tabela lateral (regression Código Civil compilado)', () => {
+  it('usa o corpo da página quando o bloco do seletor é menos da metade dele', async () => {
+    const artigos = Array.from(
+      { length: 40 },
+      (_, i) => `<p>Art. ${i + 1}. Texto do artigo ${i + 1} do código, com redação suficiente para compor o corpo da lei.</p>`,
+    ).join('\n');
+    const synthetic = `<html><body>
+      <table><tr><td>Presidência da República</td></tr></table>
+      <table><tr><td>Vigência. Mensagem de veto. Texto compilado. Vide Lei nº 10.825, de 2003. Vide Lei nº 11.127, de 2005. Vide Lei nº 14.195, de 2021. Produção de efeitos.</td></tr></table>
+      <p>LEI Nº 10.406, DE 10 DE JANEIRO DE 2002</p>
+      <p>Institui o Código Civil.</p>
+      ${artigos}
+    </body></html>`;
+    mockFetch(synthetic);
+    const scraper = new PlanaltoScraper();
+    const result = await scraper.scrape('https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm');
+
+    expect(result.success).toBe(true);
+    expect(result.content).toContain('Institui o Código Civil.');
+    expect(result.content).toContain('Art. 40.');
+  });
+});

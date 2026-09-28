@@ -21,6 +21,7 @@ import { formatLegalContent } from '@/lib/format-legal-content';
 import { getRelationsForAct } from '@/lib/legislative-acts/relations';
 import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';
 import { normalizeActType, getOfficialSourceLabel } from '@/lib/legislacao/labels';
+import { isIdentificacaoDoAto } from '@/lib/legislative-scrapers/extract-ementa';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -264,20 +265,23 @@ export default async function LegislativeActPage({ params }: PageProps) {
           />
         )}
 
-        {/* Ementa */}
-        <div className="bg-white rounded-[6px] p-8 mb-6 border border-border-subtle">
-          <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-4">
-            <FileText className="w-5 h-5 text-brand-600" />
-            Ementa
-          </h3>
-          {/* Ementa de ato normativo é leitura prolongada — mesma
-              tipografia do texto da lei. */}
-          <div className="font-reading text-ink-secondary max-w-[65ch]">
-            {normalizeTextContent(act.ementa).map((p, i) => (
-              <p key={i} className="mb-3 last:mb-0 text-justify hyphens-auto">{p}</p>
-            ))}
+        {/* Ementa. Ato sem ementa oficial guarda só a própria identificação
+            no campo (ex.: IN nº 142/1983); repeti-la sob "Ementa" seria falso. */}
+        {!isIdentificacaoDoAto(act.ementa) && (
+          <div className="bg-white rounded-[6px] p-8 mb-6 border border-border-subtle">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-4">
+              <FileText className="w-5 h-5 text-brand-600" />
+              Ementa
+            </h3>
+            {/* Ementa de ato normativo é leitura prolongada — mesma
+                tipografia do texto da lei. */}
+            <div className="font-reading text-ink-secondary max-w-[65ch]">
+              {normalizeTextContent(act.ementa).map((p, i) => (
+                <p key={i} className="mb-3 last:mb-0 text-justify hyphens-auto">{p}</p>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Resumo Didático (se existir) */}
         {act.summary && (

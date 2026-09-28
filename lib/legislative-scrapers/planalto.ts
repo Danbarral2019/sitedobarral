@@ -141,19 +141,25 @@ export class PlanaltoScraper implements LegislativeScraper {
       $(selector).remove();
     });
 
+    const bodyText = this.cleanText(blockAwareText($('body')));
+
     // Tentar cada seletor até encontrar conteúdo
     for (const selector of CONTENT_SELECTORS) {
       const element = $(selector);
       if (element.length > 0) {
         const text = this.cleanText(blockAwareText(element));
-        if (text.length > 100) {
+        // Bloco com menos da metade do corpo é cabeçalho ou tabela lateral
+        // ("Vigência", "Mensagem de veto"), não o texto do ato. Visto no
+        // Código Civil compilado: o seletor de tabela devolvia 378 caracteres
+        // e o texto da lei, solto no body, ficava de fora.
+        if (text.length > 100 && text.length >= bodyText.length * 0.5) {
           return text;
         }
       }
     }
 
     // Fallback: pegar todo o body
-    return this.cleanText(blockAwareText($('body')));
+    return bodyText;
   }
 
   /**

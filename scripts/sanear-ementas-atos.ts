@@ -13,6 +13,12 @@
  *      epígrafe e verbo inicial). Esses atos não recebem ementa recortada do
  *      texto ruim: com --apply o texto é baixado de novo (`scrapeAndIndexAct`),
  *      que também troca a ementa e reindexa.
+ *   1c. Texto do DOU cortado na citação de outro ato: a primeira linha é
+ *      epígrafe, mas de outro número ("Portaria SEGES/MGI nº 9.510" no texto da
+ *      Portaria 6.364/2026). Também baixado de novo.
+ *   1d. Ato sem texto integral (download anterior falhou): baixado de novo.
+ *   1e. Ato sem ementa oficial (epígrafe seguida do preâmbulo): o campo ementa
+ *      guarda a identificação do ato e a página omite o bloco. Não é pendência.
  *   2. Tipo `mp` → `medida-provisoria` e fullNumber "MP n/aaaa" → "Medida
  *      Provisória n/aaaa", igual ao cadastro manual. Se já existir ato com o
  *      fullNumber por extenso, o renome é pulado e reportado (duplicata a
@@ -31,6 +37,8 @@ import {
   extractEmenta,
   looksLikeDefectiveEmenta,
   startsWithEpigrafe,
+  isIdentificacaoDoAto,
+  epigrafeNumber,
 } from '../lib/legislative-scrapers/extract-ementa';
 import { scrapeAndIndexAct } from '../lib/legislative-scrapers/scrape-and-index';
 import { validateActContent } from '../lib/legislative-scrapers/validate-content';
@@ -45,9 +53,27 @@ interface Fix {
   rescrape: boolean;
 }
 
-/** Texto integral baixado do DOU que não abre na epígrafe: truncado no download. */
-function isTruncatedDouContent(act: { officialUrl: string | null; content: string | null }): boolean {
-  return Boolean(act.content && act.officialUrl && /in\.gov\.br/i.test(act.officialUrl) && !startsWithEpigrafe(act.content));
+/**
+ * Texto integral baixado do DOU truncado no download: não abre na epígrafe, ou
+ * abre na epígrafe de outro ato (corte na citação "Portaria ... nº 9.510").
+ */
+function isTruncatedDouContent(act: {
+  officialUrl: string | null;
+  content: string | null;
+  number: string | null;
+}): boolean {
+  if (!act.content || !act.officialUrl || !/in\.gov\.br/i.test(act.officialUrl)) return false;
+  if (!startsWithEpigrafe(act.content)) return true;
+  const n = epigrafeNumber(act.content);
+  const own = (act.number ?? '').replace(/\D/g, '');
+  return Boolean(n && own && n !== own);
+}
+
+/** Ato sem ementa oficial: o texto passa da epígrafe direto ao preâmbulo. */
+function hasNoOfficialEmenta(act: { ementa: string; content: string | null }): boolean {
+  return Boolean(
+    act.content && startsWithEpigrafe(act.content) && !extractEmenta(act.content) && isIdentificacaoDoAto(act.ementa),
+  );
 }
 
 function newEmentaFor(act: { title: string; ementa: string; content: string | null }): {
@@ -58,6 +84,9 @@ function newEmentaFor(act: { title: string; ementa: string; content: string | nu
     const fromContent = extractEmenta(act.content);
     if (fromContent?.complete) {
       const ementa = normalizeScrapedText(fromContent.ementa);
+      if (looksLikeDefectiveEmenta(ementa)) {
+        return { ementa: null, motivo: `recorte ainda parece trecho do corpo: "${ementa.slice(0, 120)}"` };
+      }
       const v = validateActContent({ content: act.content, ementa });
       const ementaErrors = v.errors.filter((e) => /ementa/i.test(e));
       if (ementaErrors.length === 0) return { ementa, motivo: 'recortada do texto integral' };
@@ -65,7 +94,7 @@ function newEmentaFor(act: { title: string; ementa: string; content: string | nu
     }
   }
   const fromSnippet = extractEmenta(act.ementa);
-  if (fromSnippet?.complete) {
+  if (fromSnippet?.complete && !looksLikeDefectiveEmenta(normalizeScrapedText(fromSnippet.ementa))) {
     return { ementa: normalizeScrapedText(fromSnippet.ementa), motivo: 'recortada do trecho do DOU' };
   }
   return {
@@ -90,6 +119,8 @@ async function main() {
       ementa: true,
       content: true,
       officialUrl: true,
+      number: true,
+      scrapeStatus: true,
     },
     orderBy: { createdAt: 'asc' },
   });
@@ -101,14 +132,22 @@ async function main() {
 
   const fixes: Fix[] = [];
   const pendencias: string[] = [];
+  const semEmenta: string[] = [];
 
   for (const act of acts) {
     const data: Record<string, unknown> = {};
     const notes: string[] = [];
-    const rescrape = isTruncatedDouContent(act);
+    const truncated = isTruncatedDouContent(act);
+    // `manual` = texto mantido à mão; o cron de atualização também o pula.
+    const missingContent = !act.content && Boolean(act.officialUrl) && act.scrapeStatus !== 'manual';
+    const rescrape = truncated || missingContent;
 
-    if (rescrape) {
+    if (truncated) {
       notes.push('texto integral do DOU truncado no início: será baixado de novo (ementa e índice refeitos a partir dele)');
+    } else if (missingContent) {
+      notes.push('sem texto integral: será baixado de novo da fonte oficial');
+    } else if (hasNoOfficialEmenta(act)) {
+      semEmenta.push(`${act.fullNumber}: sem ementa oficial; a página omite o bloco "Ementa"`);
     } else if (looksLikeDefectiveEmenta(act.ementa, act.title)) {
       const { ementa, motivo } = newEmentaFor(act);
       if (ementa && ementa !== act.ementa) {
@@ -145,6 +184,10 @@ async function main() {
   for (const f of fixes) {
     console.log(`• ${f.fullNumber} (${f.id})`);
     f.notes.forEach((n) => console.log(`    ${n}`));
+  }
+  if (semEmenta.length > 0) {
+    console.log(`\nℹ️  ${semEmenta.length} ato(s) sem ementa oficial (nada a corrigir):`);
+    semEmenta.forEach((p) => console.log(`    ${p}`));
   }
   if (pendencias.length > 0) {
     console.log(`\n⚠️  ${pendencias.length} pendência(s) sem correção automática:`);

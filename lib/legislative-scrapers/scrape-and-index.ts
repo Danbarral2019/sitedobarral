@@ -60,7 +60,11 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
   let newEmenta: string | null = null;
   if (looksLikeDefectiveEmenta(act.ementa, act.title)) {
     const extracted = extractEmenta(result.content);
-    if (extracted?.complete) newEmenta = normalizeScrapedText(extracted.ementa);
+    if (extracted?.complete) {
+      const candidate = normalizeScrapedText(extracted.ementa);
+      // Recorte que ainda parece trecho (preâmbulo embutido etc.) não substitui nada.
+      if (!looksLikeDefectiveEmenta(candidate)) newEmenta = candidate;
+    }
   }
 
   // 1.5. Validar formatação ANTES de salvar — evita poluir DB com mojibake,
