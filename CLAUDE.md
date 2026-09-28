@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Site profissional do Prof. Daniel Barral especializado em Direito Administrativo, Licitações e Contratos. Repositório de materiais jurídicos com acesso público e área restrita via QR code.
 
-**Tech Stack:** Next.js 15.5.15 (App Router) • React 19.1.2 • TypeScript 5 • Prisma ORM 7.4 (PrismaNeon) • PostgreSQL (Neon) + pgvector • Tailwind CSS 4 • Radix UI • JWT Auth • **Stripe** (cartão + PIX) • Resend Email • Sentry • Upstash Redis • IA multi-provider (`lib/ai/` — Anthropic Claude 4.5/4.6 + Google Gemini 2.5 + Cohere) • Playwright/PostgreSQL/GitHub/Gemini MCP
+**Tech Stack:** Next.js 15.5.25 (App Router) • React 19.1.2 • TypeScript 5 • Prisma ORM 7 (`@prisma/client` 7.4, CLI `prisma` 7.8; PrismaNeon) • PostgreSQL (Neon) + pgvector • Tailwind CSS 4 • Radix UI • JWT Auth • **Stripe** (cartão + PIX) • Resend Email • Sentry • Upstash Redis • IA multi-provider (`lib/ai/` — Anthropic Claude Sonnet 5 + Haiku 4.5, Google Gemini 3 Flash/2.5, Cohere) • Playwright/PostgreSQL/GitHub/Gemini MCP
 
 ## Quick Commands
 
@@ -52,11 +52,11 @@ npx tsx scripts/index-legislative-acts.ts              # indexa atos legislativo
 - `lib/agu-modules/` - AGU scrapers (ONs, Pareceres, DECOR, Súmulas)
 - `lib/lms/` - Helpers LMS analytics (query-timing, analytics-queries, progress-aggregation) — criado na Onda 4.6
 - `components/` - React components
-- `prisma/schema.prisma` - Database schema (~70 models)
+- `prisma/schema.prisma` - Database schema (76 models em set/2026)
 - `scripts/` - Admin/import/scraping scripts
 - `lib/email-templates/` - Templates HTML de newsletter
 
-**Key Models** (fonte de verdade: `prisma/schema.prisma` — ~70 models; ver o schema para o conjunto completo e campos). Por área:
+**Key Models** (fonte de verdade: `prisma/schema.prisma` — 76 models em set/2026; ver o schema para o conjunto completo e campos). Por área:
 - **Auth/Acesso:** `User`, `Enrollment` (trial 1 mês via QR ou Subscription), `Subscription` (Stripe), `QRCode`, `AccessLog`, `ProcessedWebhookEvent`.
 - **Conteúdo:** `Document` (+ `DocumentChunk` p/ embeddings, `DocumentVersion`, `DocumentMetaTcu/Dou`), `LegislativeAct` (+ `LegislativeActChunk`, `LegislativeActRelation`), `LeiArticle` (Lei 14.133, 195 arts. + embeddings/cross-refs), `BlogPost`, `FAQ`, `GlossaryTerm`, `DOUStagingDocument`.
 - **LMS:** `Module`, `Lesson` (+ progress/comments), `Quiz*`, `Certificate`, `Badge`, `UserStreak`, `CourseStatus`.
@@ -135,7 +135,9 @@ export async function GET(request: NextRequest) {
 ### Gotchas específicos do projeto
 
 - **Versionamento — identificadores únicos:** ONs = `onNumber + onYear`; Pareceres = `title` (numeroCompleto). Usar no `findFirst`, não o id.
-- **Modelo Gemini:** usar `gemini-2.5-flash` (`PRIMARY_GEMINI_MODEL` em `lib/gemini/config.ts`). Em tarefas curtas (resumo/classificação) passar `thinkingBudget: 0` — senão o thinking do 2.5 consome ~95% do `maxOutputTokens` e trunca. (Os `gemini-2.0-flash*` foram desligados pela Google em 2026; histórico em `docs/ROADMAP_GEMINI_MODELO_25.md`.)
+- **Modelo Gemini:** usar `PRIMARY_GEMINI_MODEL` de `lib/gemini/config.ts`, nunca nome de modelo hardcoded. O default é `gemini-3-flash-preview`, sobrescrito pela env `GEMINI_PRIMARY_MODEL`; conferir o valor da env antes de estimar custo. Exceção: o OCR (`lib/ai/ocr-pdf.ts`) usa `gemini-2.5-flash-lite`, porque o 3 Flash recusou transcrições com `RECITATION`. Em tarefas curtas (resumo/classificação) passar `thinkingBudget: 0`, senão o thinking consome quase todo o `maxOutputTokens` e trunca. (Os `gemini-2.0-flash*` foram desligados pela Google em 2026; histórico em `docs/ROADMAP_GEMINI_MODELO_25.md`.)
+- **Migrações Prisma:** `prisma migrate deploy` roda só no deploy de produção (`scripts/vercel-build.sh`, com uma nova tentativa após 20 s); migração de PR não revisado não pode chegar ao banco de produção. Na Vercel, a CLI usa `DATABASE_URL_UNPOOLED` (conexão direta), porque o advisory lock do migrate fica preso no pooler da Neon (`prisma.config.ts`); fora da Vercel, usa `DATABASE_URL`.
+- **Credenciais do banco na Vercel:** em Production, `DATABASE_URL` e `DATABASE_URL_UNPOOLED` são variáveis manuais do projeto (branch `main` da Neon, endpoint `ep-cool-cherry-acgzlqkn`). A integração do Neon fica ligada **só a Preview**, onde cria um branch `preview/...` para cada branch do Git. Não religar a integração a Production: ela injeta no deploy a própria `DATABASE_URL`, que sobrepõe a variável manual sem aparecer em `vercel env ls` nem em `vercel env pull`; em 27/09/2026, após a troca de senha, isso derrubou o login com `28P01` (`password authentication failed`) enquanto o valor listado estava correto. Na mesma data, o Build Command de produção recebeu override que pula o `migrate deploy`; conferir se ele já foi removido antes de fazer merge de PR com migração.
 - **Fontes:** auto-hospedadas em `app/fonts/` via `next/font/local` (um `.woff2` por subset, mesma `unicode-range` do Google Fonts). Não reintroduzir `next/font/google`: o download no build derrubou o `next build` duas vezes em 27/09/2026.
 
 ➡️ **Problemas comuns de ambiente/dev** (Prisma engine, MCP, build limpo, tags parse, hydration): ver `docs/TROUBLESHOOTING.md`.
@@ -158,7 +160,9 @@ Ver `.env.example` e `SETUP.md`. Chat RAG lê a `GEMINI_API_KEY` do ambiente (`.
 
 ## Development Status
 
-**Estado atual (jul/2026):** produto em produção. Assistente de IA usa **Claude Sonnet 5 + Citations API**; síntese (BIA-1) e cobertura de dados (BIA-5) melhoradas. **Trilha de tuning de retrieval FECHADA com evidência** — recall@5 ~65% é o teto do dataset; próximos ganhos vêm de answer-quality ou mais dados, não tuning (ver `docs/ROADMAP_BUSCA_QUALIDADE.md`).
+**Estado atual (set/2026):** produto em produção. Assistente de IA usa **Claude Sonnet 5 + Citations API**; síntese (BIA-1) e cobertura de dados (BIA-5) melhoradas. **Trilha de tuning de retrieval FECHADA com evidência** — recall@5 ~65% é o teto do dataset; próximos ganhos vêm de answer-quality ou mais dados, não tuning (ver `docs/ROADMAP_BUSCA_QUALIDADE.md`).
+- **Acervo (ago-set/2026):** teses do TCU com herança editorial e vitrine pública (`/teses`); jurisprudência do STF (coleta mensal manual, WAF), STJ (Espelhos de Acórdãos), TCDF, TRF5 e TJDFT, com julgamento por IA calibrada dos pendentes; acórdãos do grafo de precedentes que citam lei de licitações viram acervo público; inteiro teor do DECOR com OCR. Handoffs em `docs/HANDOFF-*.md`.
+- **Quadro de pendências:** topo de `FUTURE_TASKS.md` ("Estado em 27/09/2026"), conferido contra o código.
 - **Pagamentos:** Stripe **LIVE e cobrando por cartão** (smoke E2E validado jul/2026). Único gap = **PIX** (Pix Automático é "invite only"; código pronto atrás de `NEXT_PUBLIC_PIX_ENABLED`, aguarda convite da Stripe).
 - **Pré-lançamento:** coming-soon **ativado** (`COMING_SOON_ENABLED`). 
 - **Backlog:** `FUTURE_TASKS.md` · **Changelog:** `docs/PROJECT_HISTORY.md` + git.
@@ -169,7 +173,7 @@ Padrões não-óbvios; o passo-a-passo completo se deriva do código apontado.
 
 - **Stripe Subscription Flow** (`lib/stripe.ts` lazy init `getStripe()`, `lib/enrollment-utils.ts`): `/planos` → `POST /api/pagamento/checkout` (Zod) → Checkout Session → callbacks `/assinatura/*` → webhook `/api/pagamento/webhook`. `checkout.session.completed`/`invoice.paid` cria/renova `Subscription`+`Enrollment` (`invoice.paid` também recria as matrículas suspensas); `subscription.deleted` cancela e remove enrollments **sem `qrCodeId`** (preserva presenciais); `payment_failed` marca `past_due` e **suspende o acesso** (mesma remoção), e a área restrita encaminha o aluno para `/area-restrita/pagamento-pendente` (`PagamentoPendenteGuard`), que explica o motivo e leva ao portal de cobrança. Acesso via `hasActiveAccess()`. Webhook **idempotente** (`ProcessedWebhookEvent`).
 - **Busca Global com IA** (composição no frontend, hook `useGlobalSearch` c/ AbortController): 300ms debounce → `GET /api/area-restrita/global-search` (resultados tradicionais) · 1500ms/Enter → `POST /api/documents/query` (card "Análise IA"). Toggle IA no `GlobalSearchBar`; `AIAnswerCard` renderiza no `SearchResultsList`.
-- **Chat RAG** (`/api/documents/query`): Gemini (`gemini-2.5-flash`) com query + contexto → resposta estruturada com relevance scores → cache por query-hash (60s TTL) → fontes citadas.
+- **Chat RAG** (`/api/documents/query`): quota anti-abuso (`lib/cache/ai-quota.ts`) → `assembleAnswerContext` (`lib/rag/answerContext.ts`: expansão da query com cache de 24 h, busca híbrida, filtro por matrícula) → síntese com **Claude Sonnet 5 + Citations API** (`AI_SYNTHESIS_MODEL`, default `claude-sonnet-5`) em streaming SSE → fontes citadas. Fallback para Gemini (`PRIMARY_GEMINI_MODEL`, sem citações) se o Claude falhar antes de emitir tokens ou quando a quota manda degradar.
 - **Error Handling** (Fase 8): rota lança erro semântico → `handleApiError()` classifica (Prisma/Zod/JWT → HTTP) → log estruturado → JSON padronizado.
 - **Embeddings/pgvector** (`lib/embeddings/document-processor.ts`, `gemini-embeddings.ts`, `text-chunker.ts`): doc c/ `r2Key` → download R2 + extração; senão `content`/`description` (mín. 50 chars). Chunker legal (decor/parecer/on) vs genérico. Gemini `gemini-embedding-2-preview` (768d Matryoshka, batch 100; configurável via `EMBEDDING_MODEL`) → `DocumentChunk` `vector(768)`. Script `scripts/migrate-to-embeddings.ts` (`--dry-run`/`--limit`/`--category`/`--force`/`--concurrency`; sem `--force` só `pending`/`failed`).
 - **Vídeo LMS híbrido YouTube/R2** (2026-07): `CourseVideo.storageType` (`'youtube'|'r2'`) discrimina origem (youtube fields nuláveis). R2 = upload direto via presigned PUT (`/api/admin/videos/{presigned-url,confirm}`, admin) + playback com URL assinada 2h (`GET /api/area-restrita/videos/[id]/url` checa enrollment antes de `getSignedR2Url`). `LessonVideo.courseVideoId` referencia o mestre. `sizeBytes` é `String?` (evita BigInt na serialização). Superfícies públicas de embed filtram `storageType:'youtube'`.
@@ -195,9 +199,9 @@ Tasks e defaults:
 
 | Task | Provider | Modelo default |
 |---|---|---|
-| `search` / `chat` / `extraction` | gemini | `gemini-2.5-flash` |
+| `search` / `chat` / `extraction` | gemini | `PRIMARY_GEMINI_MODEL` (default `gemini-3-flash-preview`) |
 | `classification` / `summarization` | anthropic | `claude-haiku-4-5-20251001` |
-| `enhancement` | anthropic | `claude-sonnet-4-20250514` |
+| `enhancement` | anthropic | `claude-sonnet-5` |
 
 Override por env: `AI_<TASK>_PROVIDER` / `AI_<TASK>_MODEL` (ex.: `AI_SEARCH_MODEL=gemini-2.5-pro`). Embeddings ficam fora desta camada (`EMBEDDING_MODEL`). Inclui retry com backoff (429/5xx/rede) + logging pino. Auditoria em DB ainda não implementada (aguarda model `AuditLog`).
 

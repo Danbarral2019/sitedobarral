@@ -23,6 +23,7 @@ import {
 import { findOrCreateWithVersioning } from './versioning';
 import { apiLogger } from "@/lib/logger";
 import { prisma } from '@/lib/prisma';
+import { EXCLUIDAS } from '@/lib/ons-monitor/checks';
 
 /**
  * Interface para dados brutos de uma ON extraída do HTML
@@ -474,6 +475,9 @@ export type OrientacaoNormativaOverrides = Partial<{
  * enunciado raspado em 21/07/2026 (overrides `isPublic: false` + update
  * integral do findOrCreateWithVersioning).
  *
+ * ONs em `EXCLUIDAS` (removidas a pedido, tema de pessoal) nunca são criadas:
+ * as 104 e 106/2026, excluídas em junho, foram recriadas pelo cron em 21/07/2026.
+ *
  * Deduplica por `onNumber + onYear` — nunca por título. O scraper expõe dois
  * campos parecidos (`titulo` canônico e `numero` abreviado) e deduplicar pelo
  * segundo gera registro duplicado (ver docs/audits/2026-07-15-lei-comentada-RESULTADOS.md).
@@ -494,6 +498,10 @@ export async function saveOrientacaoNormativaWithVersioning(
         success: false,
         error: 'Documento sem número ou ano válido'
       };
+    }
+
+    if (EXCLUIDAS.has(`${aguDoc.numeroInt}/${aguDoc.ano}`)) {
+      return { success: true, isNew: false, hasChanges: false };
     }
 
     const existing = await prisma.document.findFirst({

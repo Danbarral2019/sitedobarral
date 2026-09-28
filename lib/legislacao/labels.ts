@@ -33,12 +33,35 @@ export const ESFERA_LABELS: Record<string, string> = {
 
 export const VALID_SORT_VALUES = new Set(['recent', 'oldest', 'hierarchy', 'number', 'alpha']);
 
+/**
+ * Abreviações usadas pelo classificador do DOU (`mp`) que designam o mesmo
+ * tipo canônico do acervo. Atos antigos do clipping ainda podem tê-las.
+ */
+const TYPE_ALIASES: Record<string, string> = {
+  mp: 'medida-provisoria',
+};
+
+export function normalizeActType(type: string): string {
+  return TYPE_ALIASES[type] || type;
+}
+
 export function getTypeLabel(type: string): string {
-  return TYPE_LABELS[type] || type;
+  const canonical = normalizeActType(type);
+  return TYPE_LABELS[canonical] || type;
 }
 
 export function getTypeColor(type: string): string {
-  return TYPE_COLORS[type] || 'bg-surface-deep text-ink-secondary border-border-subtle';
+  return TYPE_COLORS[normalizeActType(type)] || 'bg-surface-deep text-ink-secondary border-border-subtle';
+}
+
+/**
+ * Rótulo do link para o texto oficial conforme o portal de origem. O botão
+ * dizia sempre "Ver no Planalto", inclusive para atos vindos do DOU.
+ */
+export function getOfficialSourceLabel(url: string): string {
+  if (/planalto\.gov\.br/i.test(url)) return 'Ver no Planalto';
+  if (/in\.gov\.br/i.test(url)) return 'Ver no Diário Oficial';
+  return 'Ver fonte oficial';
 }
 
 export function getEsferaLabel(esfera: string): string {

@@ -105,6 +105,7 @@ export async function GET(request: NextRequest) {
             OR: [
               { expiresAt: { gt: new Date() } }, // Ainda não expirou
               { isLifetime: true }, // Acesso vitalício
+              { expiresAt: null }, // Assinatura ativa (a Stripe controla o fim)
             ],
           },
           include: {

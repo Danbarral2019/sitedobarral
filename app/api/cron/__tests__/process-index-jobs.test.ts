@@ -5,6 +5,8 @@ const {
   mockIndexJobFindMany,
   mockDocumentFindMany,
   mockTribunalDecisionFindMany,
+  mockLegislativeActFindMany,
+  mockProcessLegislativeAct,
   mockIndexJobUpdate,
   mockProcessDocument,
   mockProcessTribunalDecision,
@@ -16,6 +18,8 @@ const {
   mockIndexJobFindMany: vi.fn(),
   mockDocumentFindMany: vi.fn(),
   mockTribunalDecisionFindMany: vi.fn(),
+  mockLegislativeActFindMany: vi.fn(),
+  mockProcessLegislativeAct: vi.fn(),
   mockIndexJobUpdate: vi.fn(),
   mockProcessDocument: vi.fn(),
   mockProcessTribunalDecision: vi.fn(),
@@ -33,6 +37,7 @@ vi.mock('@/lib/prisma', () => ({
     },
     document: { findMany: (...args: any[]) => mockDocumentFindMany(...args) },
     tribunalDecision: { findMany: (...args: any[]) => mockTribunalDecisionFindMany(...args) },
+    legislativeAct: { findMany: (...args: any[]) => mockLegislativeActFindMany(...args) },
     glossaryTerm: { findUnique: (...args: any[]) => mockGlossaryFindUnique(...args) },
     blogPost: { findUnique: (...args: any[]) => mockBlogPostFindUnique(...args) },
     leiArticle: { findUnique: (...args: any[]) => mockLeiArticleFindUnique(...args) },
@@ -46,6 +51,10 @@ vi.mock('@/lib/embeddings/document-processor', () => ({
 
 vi.mock('@/lib/embeddings/tribunal-decision-processor', () => ({
   processTribunalDecision: (...args: any[]) => mockProcessTribunalDecision(...args),
+}));
+
+vi.mock('@/lib/embeddings/legislative-act-processor', () => ({
+  processLegislativeAct: (...args: any[]) => mockProcessLegislativeAct(...args),
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -81,6 +90,8 @@ beforeEach(() => {
   mockIndexJobFindMany.mockReset();
   mockDocumentFindMany.mockReset();
   mockTribunalDecisionFindMany.mockReset();
+  mockLegislativeActFindMany.mockReset();
+  mockProcessLegislativeAct.mockReset();
   mockIndexJobUpdate.mockReset();
   mockProcessDocument.mockReset();
   mockProcessTribunalDecision.mockReset();
@@ -93,6 +104,8 @@ beforeEach(() => {
   mockIndexJobFindMany.mockResolvedValue([]);
   mockDocumentFindMany.mockResolvedValue([]);
   mockTribunalDecisionFindMany.mockResolvedValue([]);
+  mockLegislativeActFindMany.mockResolvedValue([]);
+  mockProcessLegislativeAct.mockResolvedValue({ success: true, stats: { chunkCount: 4 } });
   mockGetProcessingStats.mockResolvedValue({ completed: 0, pending: 0, failed: 0 });
   mockProcessDocument.mockResolvedValue({ success: true, stats: { chunkCount: 3 } });
   mockProcessTribunalDecision.mockResolvedValue({ success: true, stats: { chunkCount: 2 } });
@@ -374,5 +387,29 @@ describe('GET — job processors: not-found e exceção', () => {
     const body = await res.json();
     expect(body.completed).toBe(1);
     expect(body.results[0].jobId).toBe('tribunal-td-ok');
+  });
+
+  it('ato normativo com texto e sem embeddings é indexado', async () => {
+    mockLegislativeActFindMany.mockResolvedValueOnce([{ id: 'act-1' }]);
+    const res = await GET(makeReq() as any);
+    const body = await res.json();
+    expect(mockLegislativeActFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ content: { not: null } }),
+        orderBy: { createdAt: 'asc' },
+      }),
+    );
+    expect(mockProcessLegislativeAct).toHaveBeenCalledWith('act-1');
+    expect(body.completed).toBe(1);
+    expect(body.results[0]).toMatchObject({ jobId: 'legislative-act-act-1', chunkCount: 4 });
+  });
+
+  it('ato normativo que falha entra como failed no summary', async () => {
+    mockLegislativeActFindMany.mockResolvedValueOnce([{ id: 'act-x' }]);
+    mockProcessLegislativeAct.mockRejectedValueOnce(new Error('quota'));
+    const res = await GET(makeReq() as any);
+    const body = await res.json();
+    expect(body.failed).toBe(1);
+    expect(body.results[0].error).toBe('quota');
   });
 });
