@@ -1,3 +1,5 @@
+import { startsWithEpigrafe } from './legislative-scrapers/extract-ementa';
+
 /**
  * Converts scraped legal text content into well-formatted markdown.
  * Handles texts from planalto.gov.br (with extra whitespace) and
@@ -71,7 +73,8 @@ export function formatLegalContent(rawContent: string): string {
     /^Presidência da República(\s|$)/i,
     /^Brasão das Armas/i,
     /^Casa Civil(\s|$)/i,
-    /^Secretaria (Especial|Geral|-)/i,
+    // "Secretaria-Geral" (cabeçalho atual do Planalto) não tem espaço.
+    /^Secretaria[\s-]/i,
     /^Subchefia/i,
   ];
   let startIdx = 0;
@@ -81,14 +84,35 @@ export function formatLegalContent(rawContent: string): string {
 
   let officialTitle: string | null = null;
   if (startIdx < rawParagraphs.length) {
-    if (/^(DECRETO|LEI|PORTARIA|INSTRUÇÃO NORMATIVA|MEDIDA PROVISÓRIA|RESOLUÇÃO|ORDEM DE SERVIÇO)\s+N[ºo°]\s/i.test(rawParagraphs[startIdx])) {
+    // Além da forma simples ("DECRETO Nº 12.807"), a epígrafe com sigla do
+    // órgão ("PORTARIA SGD/MGI Nº 3.656", "INSTRUÇÃO NORMATIVA CFA Nº 16"),
+    // em qualquer caixa. Sem isto a epígrafe colava no preâmbulo.
+    if (
+      /^(DECRETO|LEI|PORTARIA|INSTRUÇÃO NORMATIVA|MEDIDA PROVISÓRIA|RESOLUÇÃO|ORDEM DE SERVIÇO)\s+N[ºo°](\s|$)/i.test(rawParagraphs[startIdx]) ||
+      startsWithEpigrafe(rawParagraphs[startIdx])
+    ) {
       officialTitle = rawParagraphs[startIdx];
       startIdx++;
+      // O Planalto quebra a epígrafe em linhas ("LEI Nº 10.973, DE" /
+      // "2 DE DEZEMBRO DE 2004"), e a linha em caixa alta vira parágrafo
+      // próprio. Junta os pedaços curtos até a epígrafe terminar no ano.
+      while (
+        !/\d{4}\.?\s*(\([^)]*\))?$/.test(officialTitle) &&
+        startIdx < rawParagraphs.length &&
+        rawParagraphs[startIdx].length < 60 &&
+        /^[\dA-ZÇÃÕÁÉÍÓÚÂÊÔº°\s,.\-]+$/.test(rawParagraphs[startIdx])
+      ) {
+        officialTitle += ' ' + rawParagraphs[startIdx];
+        startIdx++;
+      }
     }
   }
 
   let filtered = rawParagraphs.slice(startIdx);
-  filtered = filtered.filter(p => !/^Vigência$/i.test(p));
+  // Anotações laterais do Planalto que o scraper traz como linhas soltas.
+  filtered = filtered.filter(
+    p => !/^(Vigência|Vigência encerrada|Mensagem de veto|Texto compilado|Exposição de motivos|Produção de efeitos?|Regulamento)$/i.test(p),
+  );
   // Remove asteriscos soltos (ruído do rodapé do DOU, ex.: "* ").
   filtered = filtered.filter(p => !/^\*+$/.test(p.trim()));
 
@@ -224,7 +248,8 @@ export function formatLegalContent(rawContent: string): string {
 
     // All-caps section names (DAS DISPOSIÇÕES PRELIMINARES, etc.)
     if (/^(DAS?\s|DOS?\s|DISPOSIÇÕES)/i.test(p) && p === p.toUpperCase() && p.length < 120) {
-      result.push('### ' + toTitleCase(p));
+      // Caixa original preservada: o texto oficial não é reescrito.
+      result.push('### ' + p);
       prevWasHeader = true;
       continue;
     }
@@ -264,7 +289,7 @@ export function formatLegalContent(rawContent: string): string {
       inSignatureZone = true;
     }
 
-    if (/^Este texto não substitui/i.test(p)) {
+    if (/^Este (texto|conteúdo) não substitui/i.test(p)) {
       result.push('> *' + p + '*');
       continue;
     }
@@ -272,7 +297,7 @@ export function formatLegalContent(rawContent: string): string {
     // All-caps short text within body (table headers, labels)
     // Skip inside signature zone — signatories must remain as-is for wrapSignature
     if (!inSignatureZone && p === p.toUpperCase() && p.length > 10 && p.length < 200 && /[A-Z]/.test(p)) {
-      result.push('**' + toTitleCase(p) + '**');
+      result.push('**' + p + '**');
       continue;
     }
 
@@ -293,7 +318,7 @@ export function formatLegalContent(rawContent: string): string {
 function wrapAlteracaoBlocks(paragraphs: string[]): string[] {
   // Detecta se há aspas curvas no texto. Se não houver, retorna sem modificação.
   const hasCurlyQuotes = paragraphs.some(p => /[“”]/.test(p));
-  if (!hasCurlyQuotes) return paragraphs;
+  if (!hasCurlyQuotes) return wrapStraightQuoteAlteracao(paragraphs);
 
   // Verifica balanceamento total: número de " deve ser igual a número de ".
   let opens = 0;
@@ -389,7 +414,7 @@ function isStructuralStart(line: string): boolean {
     /^(DECRETA|RESOLVE)\s*:?\s*$/i,
     /^ANEXO(\s|$)/,         // Case-sensitive
     /^Brasília,\s/i,
-    /^Este texto não substitui/i,
+    /^Este (texto|conteúdo) não substitui/i,
   ];
 
   if (patterns.some(p => p.test(line))) return true;
@@ -435,17 +460,37 @@ function wrapSignature(paragraphs: string[]): string[] {
 
   return [...before, ':::signature', ...sigBlock, ':::'];
 }
+/**
+ * Variante de `wrapAlteracaoBlocks` para aspas retas ("), usadas pelo DOU e
+ * por parte do Planalto. Aspas retas não distinguem abertura de fechamento,
+ * então o bloco abre num parágrafo que COMEÇA com aspa seguida de marcador
+ * estrutural ("Art. 31-A., "§ 2º, "CAPÍTULO, "I -, "a)) e fecha no primeiro
+ * parágrafo que TERMINA em aspa, com ou sem "(NR)". Sem isto, o texto que a
+ * MP 1.393/2026 insere na Lei 14.690 aparecia como dispositivo da própria MP.
+ * Bloco sem fechamento: devolve o original (fail-safe).
+ */
+function wrapStraightQuoteAlteracao(paragraphs: string[]): string[] {
+  const OPEN_RE = /^"\s*(?:Art\.?\s*\d|§\s*\d|Parágrafo único|CAP[ÍI]TULO\s|Se[çc][ãa]o\s|SE[ÇC][ÃA]O\s|T[ÍI]TULO\s|Subse[çc][ãa]o\s|SUBSE[ÇC][ÃA]O\s|[IVXLCDM]+\s*[-–]\s|[a-z]\)\s)/;
+  const CLOSE_RE = /"\s*(?:\(NR\))?\s*$/;
+  if (!paragraphs.some((p) => OPEN_RE.test(p))) return paragraphs;
 
-function toTitleCase(text: string): string {
-  const lowercase = ['da', 'das', 'de', 'do', 'dos', 'e', 'em', 'na', 'nas', 'no', 'nos', 'ou', 'para', 'por', 'com', 'a', 'o', 'à', 'ao'];
-  return text
-    .toLowerCase()
-    .split(' ')
-    .map((word, i) => {
-      if (i === 0 || !lowercase.includes(word)) {
-        return word.charAt(0).toUpperCase() + word.slice(1);
-      }
-      return word;
-    })
-    .join(' ');
+  const result: string[] = [];
+  let inBlock = false;
+  for (const p of paragraphs) {
+    let text = p;
+    if (!inBlock && OPEN_RE.test(text)) {
+      inBlock = true;
+      result.push(':::alteracao');
+      text = text.replace(/^"\s*/, '');
+    }
+    if (inBlock && CLOSE_RE.test(text)) {
+      // Tira só a aspa final; o "(NR)" continua para o destaque de nota.
+      result.push(text.replace(/"\s*(\(NR\))?\s*$/, (_m, nr) => (nr ? ` ${nr}` : '')).trim());
+      result.push(':::');
+      inBlock = false;
+      continue;
+    }
+    result.push(text);
+  }
+  return inBlock ? paragraphs : result;
 }

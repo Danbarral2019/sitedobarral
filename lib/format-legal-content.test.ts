@@ -328,15 +328,15 @@ describe('regressão: marcadores de diretiva não devem ser reformatados', () =>
       expect(out).toContain('## ANEXO I');
     });
 
-    it('marca seção all-caps (DAS/DOS/DISPOSIÇÕES) como h3 em title case', () => {
+    it('marca seção all-caps (DAS/DOS/DISPOSIÇÕES) como h3, preservando a caixa do original', () => {
       const out = formatLegalContent('DAS DISPOSIÇÕES PRELIMINARES');
-      expect(out).toMatch(/### Das Disposições Preliminares/);
+      expect(out).toContain('### DAS DISPOSIÇÕES PRELIMINARES');
     });
 
     it('destaca texto curto em caixa alta no corpo (rótulos/tabelas)', () => {
       const out = formatLegalContent('Texto introdutório normal aqui.\n\nTABELA DE PENALIDADES APLICÁVEIS');
-      // toTitleCase mantém preposições ("de") em minúsculo
-      expect(out).toContain('**Tabela de Penalidades Aplicáveis**');
+      // O texto oficial nunca é reescrito: caixa alta continua caixa alta.
+      expect(out).toContain('**TABELA DE PENALIDADES APLICÁVEIS**');
     });
 
     it('NÃO trata TÍTULO longo (>= 80 chars) como cabeçalho', () => {
@@ -449,3 +449,69 @@ describe('regressão: marcadores de diretiva não devem ser reformatados', () =>
       expect(out).toContain('alínea a do inciso II');
     });
   });
+
+describe('fidelidade ao texto oficial (revisão de design de 28 de setembro de 2026)', () => {
+  it('não reescreve siglas nem numerais romanos em caixa alta', () => {
+    const out = formatLegalContent('Texto.\n\nCAPÍTULO VIII-A\n\nDO CADASTRO NO SICAF E NO PNCP');
+    expect(out).toContain('CAPÍTULO VIII-A');
+    expect(out).toContain('SICAF');
+    expect(out).toContain('PNCP');
+    expect(out).not.toMatch(/Viii|Sicaf|Pncp/);
+  });
+
+  it('epígrafe com sigla do órgão vira título e não cola no preâmbulo', () => {
+    const out = formatLegalContent(
+      'INSTRUÇÃO NORMATIVA CFA Nº 16, DE 15 DE JUNHO DE 2026\n\nRegulamenta a dispensa.\n\nO PRESIDENTE DO CONSELHO FEDERAL DE ADMINISTRAÇÃO, no uso das atribuições, resolve:',
+    );
+    expect(out.startsWith('# INSTRUÇÃO NORMATIVA CFA Nº 16, DE 15 DE JUNHO DE 2026')).toBe(true);
+    const caixaMista = formatLegalContent('Portaria SGD/MGI nº 3.656, de 16 de junho de 2026\n\nO SECRETÁRIO DE GOVERNO DIGITAL, no uso das atribuições, resolve:');
+    expect(caixaMista.startsWith('# Portaria SGD/MGI nº 3.656, de 16 de junho de 2026')).toBe(true);
+  });
+
+  it('remove o cabeçalho "Secretaria-Geral" do Planalto e as anotações laterais', () => {
+    const out = formatLegalContent(
+      'Presidência da República\n\nSecretaria-Geral\n\nSubchefia para Assuntos Jurídicos\n\nLEI Nº 10.973, DE 2 DE DEZEMBRO DE 2004\n\nTexto compilado\n\nMensagem de veto\n\nDispõe sobre incentivos à inovação.',
+    );
+    expect(out).not.toContain('Secretaria-Geral');
+    expect(out).not.toContain('Texto compilado');
+    expect(out).not.toContain('Mensagem de veto');
+    expect(out.startsWith('# LEI Nº 10.973')).toBe(true);
+  });
+
+  it('rodapé "Este conteúdo não substitui" do DOU não vira texto normativo', () => {
+    const out = formatLegalContent('Art. 1º Texto.\n\nEste conteúdo não substitui o publicado na versão certificada.');
+    expect(out).toContain('> *Este conteúdo não substitui');
+  });
+
+  it('texto inserido entre aspas retas vira bloco de alteração (MP 1.393/2026)', () => {
+    const out = formatLegalContent(
+      [
+        'Art. 2º A Lei nº 14.690, de 3 de outubro de 2023, passa a vigorar com as seguintes alterações:',
+        '"Art. 28-A. O Conselho Monetário Nacional adotará medidas com o objetivo de:',
+        'I - promover a concessão responsável de crédito;',
+        'II - reduzir fatores de risco." (NR)',
+        'Art. 3º Esta Medida Provisória entra em vigor na data de sua publicação.',
+      ].join('\n\n'),
+    );
+    const bloco = out.match(/:::alteracao([\s\S]*?):::/);
+    expect(bloco).not.toBeNull();
+    expect(bloco![1]).toContain('Art. 28-A.');
+    expect(bloco![1]).toContain('II - reduzir fatores de risco.');
+    expect(bloco![1]).not.toContain('"');
+    expect(out).toContain(':nr[(NR)]');
+    // O artigo seguinte da própria MP fica fora do bloco.
+    expect(out.split(':::').pop()).toContain('Art. 3º');
+  });
+
+  it('aspa reta aberta sem fechamento: fail-safe', () => {
+    const out = formatLegalContent('"Art. 5º Texto inserido sem fechamento\n\nArt. 6º Outro.');
+    expect(out).not.toContain(':::alteracao');
+  });
+
+  it('junta a epígrafe quebrada em linhas pelo Planalto (Lei 10.973/2004, Código Civil)', () => {
+    const lei = formatLegalContent('LEI Nº 10.973, DE\n2 DE DEZEMBRO DE 2004\n\nDispõe sobre incentivos à inovação.');
+    expect(lei.startsWith('# LEI Nº 10.973, DE 2 DE DEZEMBRO DE 2004\n')).toBe(true);
+    const cc = formatLegalContent('LEI Nº\n10.406, DE 10 DE JANEIRO DE\n2002\n\nInstitui o Código Civil.');
+    expect(cc.startsWith('# LEI Nº 10.406, DE 10 DE JANEIRO DE 2002\n')).toBe(true);
+  });
+});
