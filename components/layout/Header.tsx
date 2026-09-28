@@ -120,18 +120,22 @@ function NavDropdown({ id, label, active, align, panelClassName, children }: Nav
         />
       </button>
 
-      <div
-        id={id}
-        hidden={!isOpen}
-        onClick={(event) => {
-          // Fecha já no clique, sem esperar a troca de rota (e também quando o
-          // link aponta para a página atual).
-          if ((event.target as Element).closest('a')) setOpenOn(null);
-        }}
-        className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} ${panelClassName} bg-surface-page rounded-[6px] py-2 z-[9999] border border-border-subtle`}
-      >
-        {children}
-      </div>
+      {/* Só existe no DOM enquanto aberto: oculto, repetiria em toda página os
+          títulos dos cursos e os rótulos do "Mais", e getByText(...).first()
+          nos testes de fluxo acharia o link invisível do cabeçalho. */}
+      {isOpen && (
+        <div
+          id={id}
+          onClick={(event) => {
+            // Fecha já no clique, sem esperar a troca de rota (e também quando o
+            // link aponta para a página atual).
+            if ((event.target as Element).closest('a')) setOpenOn(null);
+          }}
+          className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} ${panelClassName} bg-surface-page rounded-[6px] py-2 z-[9999] border border-border-subtle`}
+        >
+          {children}
+        </div>
+      )}
     </li>
   );
 }

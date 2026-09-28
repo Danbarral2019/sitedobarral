@@ -79,7 +79,9 @@ describe('Header', () => {
     const mais = screen.getByRole('button', { name: 'Mais' });
 
     expect(mais).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('link', { name: 'Glossário' })).not.toBeInTheDocument();
+    // Nem oculto: queryByText também acha elemento com `hidden`, e um rótulo
+    // repetido no cabeçalho desviava o getByText(...).first() dos testes de fluxo.
+    expect(screen.queryByText('Glossário')).not.toBeInTheDocument();
 
     await user.click(mais);
 
@@ -92,6 +94,7 @@ describe('Header', () => {
     const user = userEvent.setup();
     render(<Header />);
     const cursos = screen.getByRole('button', { name: 'Cursos' });
+    expect(screen.queryByText('Ver todos os cursos')).not.toBeInTheDocument();
 
     await user.click(cursos);
 
