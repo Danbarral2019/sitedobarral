@@ -227,7 +227,7 @@ export default async function Home() {
               </p>
               <Link
                 href="/contato?motivo=depoimento"
-                className="inline-flex items-center gap-2 bg-amber-accent text-white px-8 py-4 rounded-[6px] font-bold hover:from-amber-accent hover:to-amber-accent transition-all hover: transform hover:-translate-y-0.5 border border-border-subtle"
+                className="inline-flex items-center gap-2 bg-amber-accent text-ink-primary px-8 py-4 rounded-[6px] font-bold hover:from-amber-accent hover:to-amber-accent transition-all hover: transform hover:-translate-y-0.5 border border-border-subtle"
               >
                 <Star className="w-5 h-5 fill-white" />
                 Enviar Meu Depoimento

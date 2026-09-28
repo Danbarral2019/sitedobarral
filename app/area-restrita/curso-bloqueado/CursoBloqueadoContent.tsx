@@ -82,14 +82,14 @@ export default function CursoBloqueadoContent() {
         {/* Card principal */}
         <div className="bg-white rounded-[6px] border-2 border-border-subtle overflow-hidden">
           {/* Header */}
-          <div className="bg-amber-accent text-white p-8">
+          <div className="bg-amber-accent-deep text-white p-8">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
                 <Lock className="w-8 h-8" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold">Curso Bloqueado</h1>
-                <p className="text-amber-accent-deep">Você não está matriculado neste curso</p>
+                <p className="text-amber-accent-soft">Você não está matriculado neste curso</p>
               </div>
             </div>
           </div>

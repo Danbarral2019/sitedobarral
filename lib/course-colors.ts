@@ -17,7 +17,7 @@ export interface ColorScheme {
  * Progressão de azuis claros para escuros (10 variações)
  */
 export const COURSE_COLORS: ColorScheme[] = [
-  { gradient: 'bg-brand-400', border: 'border-brand-300', bg: 'bg-brand-50' },     // Curso 01 - Azul muito claro
+  { gradient: 'bg-brand-500', border: 'border-brand-300', bg: 'bg-brand-50' },     // Curso 01 - Azul claro (brand-400 dava 4,15:1 com texto branco)
   { gradient: 'bg-brand-500', border: 'border-brand-400', bg: 'bg-brand-50' },     // Curso 02 - Azul claro
   { gradient: 'bg-brand-600', border: 'border-brand-500', bg: 'bg-brand-50' },     // Curso 03 - Azul claro-médio
   { gradient: 'bg-brand-700', border: 'border-brand-600', bg: 'bg-brand-100' },    // Curso 04 - Azul médio

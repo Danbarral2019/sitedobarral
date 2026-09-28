@@ -46,7 +46,7 @@ export default function HomeHeroSearch({ className = '' }: HomeHeroSearchProps) 
       </div>
       <button
         type="submit"
-        className="bg-amber-accent text-brand-700 font-sans font-semibold px-6 py-3.5 rounded-[6px] hover:bg-amber-accent transition-colors whitespace-nowrap border border-border-subtle"
+        className="bg-amber-accent text-ink-primary font-sans font-semibold px-6 py-3.5 rounded-[6px] hover:bg-amber-accent transition-colors whitespace-nowrap border border-border-subtle"
       >
         <span className="sm:hidden">Buscar no acervo</span>
         <span className="hidden sm:inline">Buscar</span>

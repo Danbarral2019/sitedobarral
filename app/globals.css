@@ -30,7 +30,9 @@
   /* ---- Âmbar acadêmico (NOVO — "Lápis Vermelho") ---- */
   /* Aparece apenas em referências e fontes oficiais */
   --amber-accent: #b07d3a;
-  --amber-accent-deep: #8a6235;
+  /* Escurecido em 28/09/2026 (era #8a6235, 3,86:1 sobre o âmbar suave, abaixo
+     do piso AA de 4,5:1). #7b5427 mantém matiz e croma e chega a 4,77:1. */
+  --amber-accent-deep: #7b5427;
   --amber-accent-soft: #e9d8b8;
 
   /* ---- Compat com tokens antigos (deprecado, manter durante transição) ---- */
@@ -73,7 +75,7 @@
 
   /* ---- Âmbar acadêmico (NOVO) ---- */
   --color-amber-accent: #b07d3a;
-  --color-amber-accent-deep: #8a6235;
+  --color-amber-accent-deep: #7b5427;
   --color-amber-accent-soft: #e9d8b8;
 
   /* ---- primary-* e accent-* (RESGATE) ----

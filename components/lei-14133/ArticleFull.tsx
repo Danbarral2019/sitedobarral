@@ -219,7 +219,7 @@ export function ArticleFull({ numero, ementa, counts, withDropCap, comLink = tru
         {acordaos > 0 && (
           <Link
             href={`/lei-14133?artigo=${numero}#jurisprudencia`}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-accent-soft text-ink-primary font-sans font-medium rounded hover:bg-amber-accent hover:text-surface-page transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-accent-soft text-ink-primary font-sans font-medium rounded hover:bg-amber-accent transition-colors"
           >
             <Scale className="w-3 h-3" aria-hidden="true" />
             {acordaos} {acordaos === 1 ? 'acórdão' : 'acórdãos'}
@@ -228,7 +228,7 @@ export function ArticleFull({ numero, ementa, counts, withDropCap, comLink = tru
         {pareceresOns > 0 && (
           <Link
             href={`/lei-14133?artigo=${numero}#pareceres`}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-accent-soft text-ink-primary font-sans font-medium rounded hover:bg-amber-accent hover:text-surface-page transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-accent-soft text-ink-primary font-sans font-medium rounded hover:bg-amber-accent transition-colors"
           >
             <FileText className="w-3 h-3" aria-hidden="true" />
             {pareceresOns} {pareceresOns === 1 ? 'parecer/ON' : 'pareceres/ONs'}

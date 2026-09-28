@@ -118,7 +118,7 @@ export default function CertificateCard({ courseId }: CertificateCardProps) {
           <button
             onClick={handleDownload}
             disabled={isDownloading}
-            className="inline-flex items-center gap-2 bg-amber-accent text-white px-4 py-2 rounded-[6px] font-medium text-sm hover:bg-amber-accent transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 bg-amber-accent text-ink-primary px-4 py-2 rounded-[6px] font-medium text-sm hover:bg-amber-accent transition-colors disabled:opacity-50"
           >
             {isDownloading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
