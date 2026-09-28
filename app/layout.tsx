@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { sourceSerif, inter, jetbrainsMono, lora } from "./fonts";
+import { sourceSerif, inter, jetbrainsMono } from "./fonts";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -112,7 +112,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
       </head>
-      <body className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} ${lora.variable} font-sans antialiased`}>
+      <body className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <Analytics />
         <VercelAnalytics />
         <SpeedInsights />

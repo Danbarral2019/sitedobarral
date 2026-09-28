@@ -515,3 +515,45 @@ describe('fidelidade ao texto oficial (revisão de design de 28 de setembro de 2
     expect(cc.startsWith('# LEI Nº 10.406, DE 10 DE JANEIRO DE 2002\n')).toBe(true);
   });
 });
+
+describe('notas do texto compilado', () => {
+  it('nota isolada volta para o fim do dispositivo, como diretiva discreta', () => {
+    const out = formatLegalContent(
+      [
+        'VI - estímulo à atividade de inovação nas empresas;',
+        '(Incluído pela Lei nº 13.243, de 2016)',
+        'VII - promoção da competitividade empresarial;',
+      ].join('\n\n'),
+    );
+    expect(out).toContain('VI - estímulo à atividade de inovação nas empresas; :anotacao[(Incluído pela Lei nº 13.243, de 2016)]');
+    expect(out).not.toMatch(/^\(Incluído/m);
+  });
+
+  it('notas em sequência e nota já no fim do parágrafo', () => {
+    const seq = formatLegalContent('Art. 5º Texto do artigo.\n\n(Redação dada pela Lei nº 13.465, de 2017) (Vide ADIN 5771)');
+    expect(seq).toContain('Texto do artigo. :anotacao[(Redação dada pela Lei nº 13.465, de 2017) (Vide ADIN 5771)]');
+    const semDada = formatLegalContent('Art. 1º Esta Lei estabelece medidas.\n\n(Redação pela Lei nº 13.243, de 2016)');
+    expect(semDada).toContain('medidas. :anotacao[(Redação pela Lei nº 13.243, de 2016)]');
+    const inline = formatLegalContent('§ 1º Texto do parágrafo. (Vide Decreto nº 3.917, de 2001).');
+    expect(inline).toContain('Texto do parágrafo. :anotacao[(Vide Decreto nº 3.917, de 2001).]');
+  });
+
+  it('"(Revogado)." e "(VETADO)" sozinhos são texto do dispositivo, não nota', () => {
+    const out = formatLegalContent('Art. 12. (VETADO)\n\nArt. 13. (Revogado).');
+    expect(out).not.toContain(':anotacao');
+  });
+
+  it('nota depois de heading não vira subtítulo e não impede o subtítulo seguinte', () => {
+    const out = formatLegalContent(
+      ['CAPÍTULO II-A', '(Incluído pela Lei nº 13.243, de 2016)', 'Do Estímulo à Inovação', 'Art. 19. Texto.'].join('\n\n'),
+    );
+    expect(out).toContain(':anotacao[(Incluído pela Lei nº 13.243, de 2016)]');
+    expect(out).not.toContain('#### (Incluído');
+    expect(out).toContain('#### Do Estímulo à Inovação');
+  });
+
+  it('parênteses que não são nota ficam intactos', () => {
+    const out = formatLegalContent('I - valor mensal:\n\n(Valor mensal do serviço multiplicado pelo número de meses do contrato).');
+    expect(out).not.toContain(':anotacao');
+  });
+});
