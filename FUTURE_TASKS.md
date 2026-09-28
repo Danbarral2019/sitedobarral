@@ -18,10 +18,10 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | P2. Verificação dos fluxos de lançamento | Aberto; testes E2E em construção em outra sessão | `docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`. Ficam fora dela a renderização da newsletter em Gmail/Outlook e o PIX |
 | PIX (Pix Automático) | Bloqueio externo | Aguarda convite da Stripe; código atrás de `NEXT_PUBLIC_PIX_ENABLED` (seção P1) |
 | Indexar 1.519 decisões de tribunal aprovadas e fora da busca semântica | Aberto; o teto do Gemini, estourado em 26/09/2026, foi resolvido em 27/09/2026 (informação do Daniel) | `scripts/indexar-decisoes-pendentes.ts` (PR #231) para no primeiro erro de cota e devolve o lote a `pending`; o cron `process-index-jobs` sozinho levaria ~50 dias. Antes de rodar, levantar volume e custo |
-| CNPJ em destaque (art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013) | Parcial | O CNPJ 53.875.260/0001-77 está em `app/termos/page.tsx` e `app/privacidade/page.tsx`, mas não no rodapé nem em `app/(acervo)/planos/page.tsx` (grep de 27/09). Falta exibi-lo onde a contratação acontece, com fácil visualização |
-| Redes sociais (A2): reavaliar `social-publish` | Aberto | Só 2 posts no Instagram, ambos com falha, em outubro de 2025; nenhuma credencial válida comprovada. O cron roda todo dia útil sem nada a publicar. Pausar o cron até validar as credenciais e reavaliar a rotina, que interessa ao Daniel para a divulgação. Publicar com o "em breve" ligado não é intencional |
-| Aposentar `daily-tcu-clipping` e `sync-datajud` | Decidido; PR próprio | Decisão do Daniel em 27/09/2026: substituídos por `daily-clipping` (PR #119) e pelos Espelhos do STJ (PR #192) |
-| STJ: 264 julgados aprovados sem `summary` | Aprovado o gasto | Decisão do Daniel em 27/09/2026, com o teto do Gemini resolvido. Levantar custo antes de executar |
+| CNPJ em destaque (art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013) | ✅ CONCLUÍDO (2026-09-27) | PR #238: razão social, CNPJ e endereço no rodapé de todas as páginas, inclusive `/planos` (`components/layout/Footer.tsx`). Registro original: O CNPJ 53.875.260/0001-77 está em `app/termos/page.tsx` e `app/privacidade/page.tsx`, mas não no rodapé nem em `app/(acervo)/planos/page.tsx` (grep de 27/09). Falta exibi-lo onde a contratação acontece, com fácil visualização |
+| Redes sociais (A2): reavaliar `social-publish` | Pausa ✅ CONCLUÍDA (2026-09-27, PR #236); reavaliação da rotina em aberto | Cron fora do `vercel.json`, com o critério de reativação no cabeçalho de `app/api/cron/social-publish/route.ts`. Registro original: Só 2 posts no Instagram, ambos com falha, em outubro de 2025; nenhuma credencial válida comprovada. O cron roda todo dia útil sem nada a publicar. Pausar o cron até validar as credenciais e reavaliar a rotina, que interessa ao Daniel para a divulgação. Publicar com o "em breve" ligado não é intencional |
+| Aposentar `daily-tcu-clipping` e `sync-datajud` | ✅ CONCLUÍDO (2026-09-27) | PR #237: rotas e `lib/tribunal-scrapers/datajud.ts` removidos. Registro original: Decisão do Daniel em 27/09/2026: substituídos por `daily-clipping` (PR #119) e pelos Espelhos do STJ (PR #192) |
+| STJ: 264 julgados aprovados sem `summary` | ✅ CONCLUÍDO (2026-09-28) | `scripts/generate-decision-summaries.ts --tribunal STJ` rodado pelo Daniel em 28/09/2026 com `gemini-3-flash-preview`: 267 resumos gerados (o número subiu com a coleta desde 27/09), 0 falhas, 0 pulados; teste prévio de 3 itens com `--dry-run` |
 
 **Média**
 
@@ -71,10 +71,10 @@ São 36 handlers em `app/api/cron/` e **todos** usam `withCronTelemetry`/`withCr
 | `sync-tcu-informativos` | parado 89 dias | **Agendado**, fonte trocada para CSV de dados abertos | PRs #31 (pausa) e #138 (retorno) |
 | `sync-tcu-manual` | parado 96 dias | Agendado; não estava quebrado (o TCU não publicava versão nova) | PR #31 |
 | `summarize-conuni` | não populava | Agendado semanalmente, lote 150 | PR #30; drenagem do passivo não verificada no banco |
-| `social-publish` | inexistente | Agendado, dias úteis 13h e 17h UTC, **sem nada a publicar**; pausar até validar credenciais | PR #110; decisão de 27/09/2026 |
+| `social-publish` | inexistente | **Pausado** em 27/09/2026 (fora do `vercel.json`) até validar as credenciais; antes rodava dias úteis 13h e 17h UTC sem nada a publicar | PRs #110 e #236 |
 | `lms-inactivity` | pausado | **Continua pausado** por decisão: pré-lançamento, sem alunos a lembrar; reavaliar 60 dias após o lançamento | PR #25; decisão de 27/09/2026 |
-| `daily-tcu-clipping` | ativo | **Sem agendamento**, marcado `@deprecated` desde 24/05/2026, substituído por `daily-clipping` | Cabeçalho de `app/api/cron/daily-tcu-clipping/route.ts`; aposentar em PR próprio (decisão de 27/09/2026) |
-| `sync-datajud` | ativo | **Sem agendamento** | STJ trocou DataJud por Espelhos (PR #192); aposentar em PR próprio (decisão de 27/09/2026) |
+| `daily-tcu-clipping` | ativo | **Aposentado** em 27/09/2026; estava sem agendamento e `@deprecated` desde 24/05/2026, substituído por `daily-clipping` | PR #237 |
+| `sync-datajud` | ativo | **Aposentado** em 27/09/2026; estava sem agendamento | STJ trocou DataJud por Espelhos (PR #192); rota removida no PR #237 |
 | `revalidate-acervo` | não citado | Sem agendamento, de uso manual | Cabeçalho da rota |
 
 ### Decisões e verificações de 27/09/2026
@@ -82,21 +82,21 @@ São 36 handlers em `app/api/cron/` e **todos** usam `withCronTelemetry`/`withCr
 Respostas do Daniel às dúvidas da conferência, com consulta ao banco de produção.
 
 1. **Onda 7.4, conteúdo:** glossário com 95 termos públicos (meta de 50 a 100 cumprida); FAQ com 26 de 30 perguntas; 1 quiz piloto com 5 questões; 2 badges concedidos (a tabela guarda concessões, o catálogo de tipos está no código); 0 referências cruzadas e 0 leituras sugeridas, pendentes.
-2. **A2, redes sociais:** 2 posts no Instagram, ambos com falha, em outubro de 2025; sem credencial válida comprovada. Pausar o `social-publish` até validar as credenciais e reavaliar a rotina, que interessa à divulgação. Publicar com o "em breve" ligado não é intencional.
+2. **A2, redes sociais:** 2 posts no Instagram, ambos com falha, em outubro de 2025; sem credencial válida comprovada. Pausar o `social-publish` até validar as credenciais e reavaliar a rotina, que interessa à divulgação. Publicar com o "em breve" ligado não é intencional. (✅ Pausa feita em 27/09/2026, PR #236.)
 3. **A4, vídeo no R2:** nenhum `CourseVideo` no banco; E2E em produção e gravações pendentes.
 4. **A8, Planejamento:** o anúncio nunca foi enviado; continua existindo uma única sessão de planejamento, a de maio.
 5. **`lms-inactivity`:** manter pausado durante o pré-lançamento; reavaliar 60 dias depois do lançamento.
-6. **`daily-tcu-clipping` e `sync-datajud`:** aposentar as duas rotas em PR próprio.
+6. **`daily-tcu-clipping` e `sync-datajud`:** aposentar as duas rotas em PR próprio. (✅ Feito em 27/09/2026, PR #237.)
 7. **Stripe, resíduos da Fase 3:** pendentes.
 8. **T2b:** núcleo encerrado; as 73 ONs sem link DOU específico ficam como polimento sem prazo.
 9. **T10 e BIA-8:** mantidos com prioridade baixa; BIA-8 condicionada à régua da BIA-1.
 10. **Newsletter:** setembro enviada em 01/09/2026, às 12h01 UTC, para 12 destinatários, sem falhas; agosto também saiu (13 envios). O alerta de 02/09 foi bloqueio de rede do ambiente da nuvem.
 11. **STF:** nenhum julgado pendente. Os 21 pendentes restantes do PR #226 são de tribunais de contas estaduais (TCE-PE 15, TCE-RS 3, TCE-PR 2, TCE-SC 1).
 12. **Golden set:** conferência das 10 anotações de jurisprudência fica pendente.
-13. **CNPJ:** a finalidade é cumprir o art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013. O CNPJ já está em `/termos` e `/privacidade`; falta exibi-lo com destaque no rodapé ou na página de planos.
+13. **CNPJ:** a finalidade é cumprir o art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013. O CNPJ já está em `/termos` e `/privacidade`; falta exibi-lo com destaque no rodapé ou na página de planos. (✅ Feito em 27/09/2026, PR #238: rodapé de todas as páginas.)
 14. **`DocumentAnalysis` e `LessonComment`:** removidas do banco de produção.
 15. **Domínio:** dois saltos, o segundo temporário (307). Ajustar na Vercel para um redirecionamento permanente direto ao `www`.
-16. **Resíduos do STJ e do TCE-PE:** gastar Gemini com os 264 julgados do STJ sem resumo; os dumps de 2022 e 2023 e o inteiro teor do TCE-PE ficam sob demanda.
+16. **Resíduos do STJ e do TCE-PE:** gastar Gemini com os 264 julgados do STJ sem resumo (✅ feito em 28/09/2026: 267 resumos, 0 falhas); os dumps de 2022 e 2023 e o inteiro teor do TCE-PE ficam sob demanda.
 
 ---
 
