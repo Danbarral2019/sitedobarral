@@ -107,3 +107,35 @@ describe('PlanaltoScraper: seletor que pega só uma tabela lateral (regression C
     expect(result.content).toContain('Art. 40.');
   });
 });
+
+describe('PlanaltoScraper: HTML malformado do Planalto (regression Código Civil e Lei 10.973/2004)', () => {
+  const artigos = Array.from(
+    { length: 30 },
+    (_, i) => `<p>Art. ${i + 1}. Texto do artigo ${i + 1}, com redação suficiente para compor o corpo da lei.</p>`,
+  ).join('\n');
+
+  it('lê o texto que vem depois de um </body> prematuro', async () => {
+    mockFetch(`<html><head><title>L10406compilada</title><style><!-- x {} --></style></head>
+      <body><div><center><table><tr><td><p>Presidência da República</p></td></tr></table></center></div>
+      <p>LEI Nº 10.406, DE 10 DE JANEIRO DE 2002</p></body></html>
+      <p>Institui o Código Civil.</p>${artigos}`);
+    const result = await new PlanaltoScraper().scrape('https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm');
+
+    expect(result.success).toBe(true);
+    expect(result.content).toContain('Institui o Código Civil.');
+    expect(result.content).toContain('Art. 30.');
+    expect(result.content).not.toContain('L10406compilada');
+  });
+
+  it('lê página sem <html>, <head> nem <body>', async () => {
+    mockFetch(`    <title>L10973</title>
+      <div align="center"><center><table><tr><td><p>Presidência da República</p></td></tr></table></center></div>
+      <p>LEI Nº 10.973, DE 2 DE DEZEMBRO DE 2004</p>${artigos}`);
+    const result = await new PlanaltoScraper().scrape('https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l10.973.htm');
+
+    expect(result.success).toBe(true);
+    expect(result.content).toContain('LEI Nº 10.973');
+    expect(result.content).toContain('Art. 30.');
+    expect(result.content).not.toContain('L10973\n');
+  });
+});
