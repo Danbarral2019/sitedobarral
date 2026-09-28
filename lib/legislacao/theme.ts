@@ -73,7 +73,8 @@ const THEMES: Record<LegislacaoTab, LegislacaoTheme> = {
     themeChip: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     summaryGradient: 'from-emerald-50 via-brand-50 to-green-50',
     summaryHeader: 'bg-brand-600',
-    primaryActionBg: 'bg-emerald-600 hover:bg-emerald-700',
+    // emerald-600 dava 3,67:1 com texto branco; o 700 chega a 5,37:1.
+    primaryActionBg: 'bg-emerald-700 hover:bg-emerald-800',
     spinnerBorder: 'border-emerald-600',
     loadingMessage: 'Carregando outros atos normativos...',
     pageTitle: 'Outros Atos Normativos',
@@ -82,16 +83,20 @@ const THEMES: Record<LegislacaoTab, LegislacaoTheme> = {
       'Explore outros atos normativos de órgãos federais e estaduais relacionados a licitações e contratos administrativos.',
   },
   orientacoes: {
-    heroGradient: 'bg-amber-accent',
-    heroSubtitle: 'text-amber-accent-deep',
+    // Hero, cabeçalho do resumo e botão em petróleo, como nas demais abas.
+    // Sobre o âmbar (#b07d3a), o subtítulo em âmbar escuro ficava com 1,5:1 e
+    // o texto branco com 3,6:1; o DESIGN.md reserva o âmbar a referências,
+    // nunca a hero ou CTA. A aba mantém o âmbar no rótulo, nos chips e na borda.
+    heroGradient: 'bg-brand-700',
+    heroSubtitle: 'text-brand-100',
     tabActiveText: 'text-amber-accent-deep',
     tabActiveBadge: 'bg-amber-accent-soft text-amber-accent-deep',
     tabHover: 'hover:text-amber-accent-deep',
     cardHoverBorder: 'hover:border-amber-accent hover:shadow-lg',
     themeChip: 'bg-amber-accent-soft text-amber-accent-deep border border-amber-accent-soft',
     summaryGradient: 'from-amber-accent-soft via-amber-accent-soft to-amber-accent-soft',
-    summaryHeader: 'bg-amber-accent',
-    primaryActionBg: 'bg-amber-accent hover:bg-amber-accent',
+    summaryHeader: 'bg-brand-600',
+    primaryActionBg: 'bg-brand-600 hover:bg-brand-700',
     spinnerBorder: 'border-amber-accent',
     loadingMessage: 'Carregando orientações...',
     pageTitle: 'Orientações e Procedimentos',

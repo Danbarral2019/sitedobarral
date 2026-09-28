@@ -53,7 +53,7 @@ export function LegislativeActCard({
               </span>
               {act.hierarchyLevel && (
                 <span
-                  className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded text-ink-muted bg-surface-deep border border-border-subtle"
+                  className="px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded text-ink-secondary bg-surface-deep border border-border-subtle"
                   title={`Nível hierárquico ${act.hierarchyLevel} — ${lvlMeta?.description ?? ''}`}
                 >
                   nv. {act.hierarchyLevel}
@@ -192,7 +192,7 @@ export function LegislativeActCard({
                 href={act.pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-[6px] hover:bg-green-700 transition-colors font-semibold"
+                className="flex items-center gap-2 px-4 py-2.5 bg-green-700 text-white rounded-[6px] hover:bg-green-800 transition-colors font-semibold"
               >
                 <Download className="w-5 h-5" />
                 Download PDF
