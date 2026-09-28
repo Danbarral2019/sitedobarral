@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { processDocument, getProcessingStats } from '@/lib/embeddings/document-processor';
 import { processTribunalDecision } from '@/lib/embeddings/tribunal-decision-processor';
+import { processLegislativeAct } from '@/lib/embeddings/legislative-act-processor';
 import { apiLogger } from '@/lib/logger';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 
@@ -301,10 +302,30 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'asc' },
     });
 
+    // 4c. Atos normativos com texto integral e sem embeddings. O scrape do ato
+    // indexa na hora, mas quando a indexação falha (cota do Gemini, timeout) o
+    // ato ficava fora da busca por IA até alguém rodar o script manual. Sem
+    // `content` não indexa: a ementa sozinha pode ser o trecho do DOU.
+    const pendingActs = await prisma.legislativeAct.findMany({
+      where: {
+        content: { not: null },
+        OR: [
+          { embeddingStatus: null },
+          { embeddingStatus: 'pending' },
+        ],
+      },
+      select: { id: true },
+      take: Math.max(
+        0,
+        MAX_JOBS_PER_RUN - pendingJobs.length - pendingDocuments.length - pendingDecisions.length,
+      ),
+      orderBy: { createdAt: 'asc' },
+    });
+
     const totalPending =
-      pendingJobs.length + pendingDocuments.length + pendingDecisions.length;
+      pendingJobs.length + pendingDocuments.length + pendingDecisions.length + pendingActs.length;
     console.log(
-      `📋 Found ${pendingJobs.length} jobs + ${pendingDocuments.length} pending documents + ${pendingDecisions.length} pending tribunal decisions`,
+      `📋 Found ${pendingJobs.length} jobs + ${pendingDocuments.length} pending documents + ${pendingDecisions.length} pending tribunal decisions + ${pendingActs.length} pending legislative acts`,
     );
 
     if (totalPending === 0) {
@@ -447,6 +468,41 @@ export async function GET(req: NextRequest) {
           console.log(
             `❌ Tribunal decision ${decision.id}: ${(result as { error?: string }).error}`,
           );
+        }
+      });
+    }
+
+    // 7b. Atos normativos pendentes, no mesmo esquema de batches.
+    for (let i = 0; i < pendingActs.length; i += BATCH_SIZE) {
+      if (Date.now() - batchStartTime > TIME_BUDGET_MS) {
+        console.warn(
+          `⏰ Time budget exhausted; skipping ${pendingActs.length - i} remaining legislative acts`,
+        );
+        break;
+      }
+      const batch = pendingActs.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(act =>
+          processLegislativeAct(act.id).catch(err => ({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+          })),
+        ),
+      );
+      batchResults.forEach((result, idx) => {
+        const act = batch[idx];
+        const chunkCount = (result as { stats?: { chunkCount?: number } }).stats?.chunkCount;
+        results.push({
+          jobId: `legislative-act-${act.id}`,
+          documentId: act.id,
+          status: result.success ? 'completed' : 'failed',
+          error: (result as { error?: string }).error,
+          chunkCount,
+        });
+        if (result.success) {
+          console.log(`✅ Legislative act ${act.id} (${chunkCount} chunks)`);
+        } else {
+          console.log(`❌ Legislative act ${act.id}: ${(result as { error?: string }).error}`);
         }
       });
     }

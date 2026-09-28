@@ -5,7 +5,29 @@ import {
   getEsferaLabel,
   formatLegislativeDate,
   isValidSort,
+  normalizeActType,
+  getOfficialSourceLabel,
 } from '../labels';
+
+describe('normalizeActType', () => {
+  it('converte a abreviação do DOU no tipo canônico', () => {
+    expect(normalizeActType('mp')).toBe('medida-provisoria');
+    expect(getTypeLabel('mp')).toBe('Medida Provisória');
+    expect(getTypeColor('mp')).toBe(getTypeColor('medida-provisoria'));
+  });
+
+  it('mantém tipos canônicos', () => {
+    expect(normalizeActType('decreto')).toBe('decreto');
+  });
+});
+
+describe('getOfficialSourceLabel', () => {
+  it('nomeia o portal de origem', () => {
+    expect(getOfficialSourceLabel('https://www.planalto.gov.br/ccivil_03/mpv/x.htm')).toBe('Ver no Planalto');
+    expect(getOfficialSourceLabel('https://www.in.gov.br/web/dou/-/medida-provisoria-1')).toBe('Ver no Diário Oficial');
+    expect(getOfficialSourceLabel('https://www.gov.br/compras/pt-br/legislacao/x')).toBe('Ver fonte oficial');
+  });
+});
 
 describe('getTypeLabel', () => {
   it('retorna label conhecido', () => {

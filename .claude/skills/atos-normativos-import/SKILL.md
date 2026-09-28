@@ -29,6 +29,7 @@ Estes pontos JÁ chamam `validateActContent` automaticamente. NÃO precisa repet
 | Admin update-content | `[id]/update-content/route.ts` | sim |
 | Admin import CSV | `import/route.ts` (ementa) | sim |
 | `scrapeAndIndexAct` | `lib/legislative-scrapers/scrape-and-index.ts` | sim |
+| Clipping DOU (aprovação) | `app/api/admin/clipping-dou/[id]/approve/route.ts` (ementa recortada do `abstract` por `extractEmenta`; o scrape seguinte troca pela ementa do texto integral) | via `scrapeAndIndexAct` |
 
 Se você for chamar `prisma.legislativeAct.create/update` direto em script novo, OBRIGATÓRIO chamar `validateActContent` antes — senão a guarda some.
 
@@ -131,6 +132,15 @@ npx tsx scripts/inspect-content-formatting.ts
 Esperado: o ato novo aparece SEM problemas detectados.
 
 Se aparecer: voltar pra etapa 3-4, normalizar, re-validar, re-save.
+
+## Ementa: nunca gravar o `abstract` do DOU
+
+O `abstract` da busca do in.gov.br é o começo do corpo do ato (epígrafe + ementa + preâmbulo + art. 1º, truncado), não a ementa. Use `extractEmenta()` (`lib/legislative-scrapers/extract-ementa.ts`), que recorta o trecho entre a epígrafe e o preâmbulo e só dá `complete: true` quando achou o preâmbulo. `scrapeAndIndexAct` substitui automaticamente ementa que `looksLikeDefectiveEmenta()` reconhece como trecho ou título. Para saneamento em lote dos atos já gravados (inclusive tipo `mp` → `medida-provisoria`):
+
+```sh
+npx tsx scripts/sanear-ementas-atos.ts          # dry-run
+npx tsx scripts/sanear-ementas-atos.ts --apply
+```
 
 ## Procedimento de auditoria periódica
 
