@@ -63,7 +63,7 @@ describe('reconciliarTeses', () => {
   // ATENÇÃO ao alcance deste teste. O Prisma aqui é um dublê: ele anota que a
   // ordem de apagar foi dada, com qual lista de preservados, e devolve o número
   // que o próprio teste mandou devolver. Nenhuma linha existe, nenhum SQL roda.
-  // Ele prova que o código pede a coisa certa — NÃO prova que o banco apaga as
+  // Ele prova que o código pede a coisa certa; NÃO prova que o banco apaga as
   // linhas certas. Quem prova isso é e2e/teses-reconciliacao.spec.ts.
   it('preserva os chunks das teses válidas e apaga o resto', async () => {
     mockFindMany.mockResolvedValue([

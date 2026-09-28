@@ -2252,7 +2252,7 @@ model TeseTrechoFonte {
   @@index([origemDocumentId])
 }
 
-/// Um chunk por enunciado (spec §9). Enunciados são curtos — não há divisão a
+/// Um chunk por enunciado (spec §9). Enunciados são curtos: não há divisão a
 /// fazer, e dividir separaria a súmula do seu próprio prefixo de procedência.
 /// A tabela é separada de DocumentChunk porque o ramo da busca precisa de JOIN
 /// na tabela-mãe para aplicar o predicado da §6.

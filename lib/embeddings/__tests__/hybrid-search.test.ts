@@ -118,7 +118,7 @@ describe('hybridSearch — merge RRF de vetor + FTS', () => {
   });
 });
 
-describe('hybridSearch — repasse das opções de teses', () => {
+describe('hybridSearch: repasse das opções de teses', () => {
   it('encaminha includeTeses e tesesVisibilidade ao vector search', async () => {
     await hybridSearch({ query: 'q', useCache: false, skipFts: true, includeTeses: true, tesesVisibilidade: 'acervo' });
 

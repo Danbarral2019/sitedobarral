@@ -13,7 +13,7 @@
  * Ver o passo "Run isolated database scenarios" em .github/workflows/test.yml.
  */
 
-/** Mesmo host e mesmo nome de banco — credenciais e parâmetros podem diferir. */
+/** Mesmo host e mesmo nome de banco; credenciais e parâmetros podem diferir. */
 function mesmoBanco(a: string, b: string): boolean {
   try {
     const ua = new URL(a);
@@ -26,8 +26,8 @@ function mesmoBanco(a: string, b: string): boolean {
 
 /**
  * Com as duas variáveis apontando para o mesmo banco, o único destino possível
- * das escritas é o banco descartável que o operador escolheu de propósito — no
- * CI, a branch efêmera da Neon; localmente, o que ele tiver montado para isto.
+ * das escritas é o banco descartável que o operador escolheu de propósito (no
+ * CI, a branch efêmera da Neon; localmente, o que ele tiver montado para isto).
  */
 export function bancoDescartavelOk(): boolean {
   const doPrisma = process.env.DATABASE_URL;

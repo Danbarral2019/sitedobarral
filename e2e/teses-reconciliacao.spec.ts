@@ -32,7 +32,7 @@ test.describe('reconciliação do índice das teses', () => {
         numeroAlvo: NUMERO_ALVO,
         anoAlvo: ANO_ALVO,
         chave: `${NUMERO_ALVO}/${ANO_ALVO}`,
-        assunto: 'Assunto de teste — reconciliação',
+        assunto: 'Assunto de teste: reconciliação',
         confianca: 'alta',
         versaoMotor: 1,
         dossieTrechos: 1,
@@ -88,7 +88,7 @@ test.describe('reconciliação do índice das teses', () => {
   });
 
   test.afterAll(async () => {
-    // Se a guarda barrou o `beforeAll`, nada foi criado — e a limpeza não pode
+    // Se a guarda barrou o `beforeAll`, nada foi criado, e a limpeza não pode
     // ser a primeira escrita a escapar para o banco errado.
     if (!bancoDescartavelOk()) return;
     // Cascade cuida de TeseEnunciado, TeseTrechoFonte e TeseEnunciadoChunk.

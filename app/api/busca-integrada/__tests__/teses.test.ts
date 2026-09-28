@@ -55,7 +55,7 @@ function chamadaDasTeses(): Record<string, unknown> {
   return chamada[0] as Record<string, unknown>;
 }
 
-describe('/api/busca-integrada — teses', () => {
+describe('/api/busca-integrada: teses', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.verifyAuth.mockResolvedValue({ valid: false });

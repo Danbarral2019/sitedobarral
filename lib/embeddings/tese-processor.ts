@@ -4,7 +4,7 @@
  * A elegibilidade é conferida AQUI, antes de gastar embedding, com o mesmo
  * predicado dos outros três consumidores. O ramo SQL da busca repete a parte
  * grosseira; a integralidade da evidência não cabe em SQL e é este gate que a
- * garante — um chunk só existe para enunciado íntegro.
+ * garante: um chunk só existe para enunciado íntegro.
  */
 import { prisma } from '@/lib/prisma';
 import { generateBatchEmbeddings, embeddingToSql } from './gemini-embeddings';

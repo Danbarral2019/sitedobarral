@@ -674,7 +674,7 @@ function BuscaIntegradaContent() {
               </section>
             )}
 
-            {/* Teses do TCU — cada uma com o precedente e o trecho do voto que
+            {/* Teses do TCU: cada uma com o precedente e o trecho do voto que
                 a sustenta, no mesmo cartão das páginas de teses. O link leva à
                 tese dentro da página do acórdão, que pode ter mais de uma. */}
             {(results.results.teses?.length ?? 0) > 0 && shouldShowSection('teses') && (

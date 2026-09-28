@@ -422,7 +422,7 @@ describe('GET — job processors: not-found e exceção', () => {
   });
 });
 
-describe('GET /api/cron/process-index-jobs — reconciliação das teses', () => {
+describe('GET /api/cron/process-index-jobs: reconciliação das teses', () => {
   it('reconcilia o índice das teses a cada rodada', async () => {
     const res = await GET(makeReq() as any);
     expect(res.status).toBe(200);

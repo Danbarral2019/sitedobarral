@@ -52,7 +52,7 @@ describe('chaveVisibilidadeTeses', () => {
   });
 });
 
-describe('semanticSearch — ramo das teses', () => {
+describe('semanticSearch: ramo das teses', () => {
   it('fica desligado quando o chamador não pede', async () => {
     await semanticSearch('qualificação técnica', { useCache: false });
     expect(ultimoSql()).not.toMatch(/"TeseEnunciadoChunk"/);

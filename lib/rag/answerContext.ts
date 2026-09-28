@@ -246,7 +246,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     }
 
     // 5c. A evidência acompanha a tese (spec §9; ver lib/rag/evidencia-da-tese.ts).
-    // Só age quando a busca trouxe tese, o que exige `includeTeses` — hoje a
+    // Só age quando a busca trouxe tese, o que exige `includeTeses`. Hoje a
     // rota do assistente não liga esse ramo, e a decisão de ligar depende da
     // medição de eval/teses. Sem tese no resultado, nada é consultado.
     const evidencia = await anexarEvidenciaDasTeses(searchResponse.results);

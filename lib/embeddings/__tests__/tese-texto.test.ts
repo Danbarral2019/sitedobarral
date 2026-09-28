@@ -26,7 +26,7 @@ describe('textoEmbeddavel', () => {
   });
 
   // §4.3: nunca afirmar colegiado que não se sabe. No nível 3 a linha do
-  // acórdão termina no ano, e não ganha "colegiado desconhecido" — isso poria
+  // acórdão termina no ano, e não ganha "colegiado desconhecido": isso poria
   // a palavra "desconhecido" dentro do vetor, competindo com o conteúdo.
   it('omite o colegiado quando não se sabe qual é', () => {
     const texto = textoEmbeddavel({ ...base, colegiadoAlvo: null, acordaoKey: null, origemIdentidade: null });

@@ -60,7 +60,7 @@ beforeEach(() => {
   mocks.trechoFindMany.mockResolvedValue([]);
 });
 
-describe('assembleAnswerContext — teses', () => {
+describe('assembleAnswerContext: teses', () => {
   it('a tese entra no prompt com o trecho do citante, e o citante entra junto', async () => {
     mocks.hybridSearch.mockResolvedValue({ results: [tese], totalFound: 1, cached: false, topVectorSimilarity: 0.9 });
     mocks.trechoFindMany.mockResolvedValue([{
