@@ -64,22 +64,25 @@ export const Header = memo(function Header() {
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+          {/* Menu horizontal só a partir de xl: com 12 itens e o botão da área do
+              aluno, ele não cabe abaixo de 1280 px e empurrava "Área do Aluno"
+              para fora da tela. Os ícones entram só em 2xl, onde há folga. */}
+          <div className="hidden xl:flex items-center gap-x-4 2xl:gap-x-5">
             <Link
               href="/"
               aria-current={isActive('/') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <Home className="w-4 h-4" />
+              <Home className="hidden 2xl:block w-4 h-4" />
               <span>Início</span>
             </Link>
 
             <Link
               href="/sobre"
               aria-current={isActive('/sobre') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/sobre') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/sobre') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <User className="w-4 h-4" />
+              <User className="hidden 2xl:block w-4 h-4" />
               <span>Sobre</span>
             </Link>
 
@@ -88,9 +91,9 @@ export const Header = memo(function Header() {
                 onClick={() => setIsCoursesOpen(!isCoursesOpen)}
                 aria-expanded={isCoursesOpen}
                 aria-haspopup="true"
-                className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/cursos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+                className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/cursos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="hidden 2xl:block w-4 h-4" />
                 <span>Cursos</span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isCoursesOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -122,89 +125,89 @@ export const Header = memo(function Header() {
             <Link
               href="/base-conhecimento"
               aria-current={isActive('/base-conhecimento') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/base-conhecimento') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/base-conhecimento') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <Library className="w-4 h-4" />
+              <Library className="hidden 2xl:block w-4 h-4" />
               <span>Base de Conhecimento</span>
             </Link>
 
             <Link
               href="/legislacao"
               aria-current={isActive('/legislacao') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/legislacao') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/legislacao') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <Scale className="w-4 h-4" />
+              <Scale className="hidden 2xl:block w-4 h-4" />
               <span>Legislação</span>
             </Link>
 
             <Link
               href="/jurisprudencia"
               aria-current={isActive('/jurisprudencia') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/jurisprudencia') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/jurisprudencia') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <Gavel className="w-4 h-4" />
+              <Gavel className="hidden 2xl:block w-4 h-4" />
               <span>Jurisprudência</span>
             </Link>
 
             <Link
               href="/teses"
               aria-current={isActive('/teses') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/teses') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/teses') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <ScrollText className="w-4 h-4" />
+              <ScrollText className="hidden 2xl:block w-4 h-4" />
               <span>Teses</span>
             </Link>
 
             <Link
               href="/blog"
               aria-current={isActive('/blog') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="hidden 2xl:block w-4 h-4" />
               <span>Blog</span>
             </Link>
 
             <Link
               href="/glossario"
               aria-current={isActive('/glossario') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/glossario') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/glossario') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <BookMarked className="w-4 h-4" />
+              <BookMarked className="hidden 2xl:block w-4 h-4" />
               <span>Glossário</span>
             </Link>
 
             <Link
               href="/faq"
               aria-current={isActive('/faq') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/faq') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/faq') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <HelpCircle className="w-4 h-4" />
+              <HelpCircle className="hidden 2xl:block w-4 h-4" />
               <span>FAQ</span>
             </Link>
 
             <Link
               href="/planos"
               aria-current={isActive('/planos') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <CreditCard className="w-4 h-4" />
+              <CreditCard className="hidden 2xl:block w-4 h-4" />
               <span>Planos</span>
             </Link>
 
             <Link
               href="/contato"
               aria-current={isActive('/contato') ? 'page' : undefined}
-              className={`flex items-center space-x-1 transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
             >
-              <Mail className="w-4 h-4" />
+              <Mail className="hidden 2xl:block w-4 h-4" />
               <span>Contato</span>
             </Link>
 
             <Link
               href="/login"
-              className="flex items-center space-x-1 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-[6px] text-white transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
+              className="flex items-center gap-x-1 whitespace-nowrap bg-white/10 hover:bg-white/20 px-4 py-2 rounded-[6px] text-white transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
             >
-              <LogIn className="w-4 h-4" />
+              <LogIn className="hidden 2xl:block w-4 h-4" />
               <span>Área do Aluno</span>
             </Link>
           </div>
@@ -212,7 +215,7 @@ export const Header = memo(function Header() {
           <button
             type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 flex-shrink-0 text-white"
+            className="xl:hidden p-2 flex-shrink-0 text-white"
             aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -220,7 +223,7 @@ export const Header = memo(function Header() {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-brand-500 bg-brand-600">
+          <div className="xl:hidden py-4 border-t border-brand-500 bg-brand-600">
             {[
               { href: '/', label: 'Início' },
               { href: '/sobre', label: 'Sobre o Professor' },
