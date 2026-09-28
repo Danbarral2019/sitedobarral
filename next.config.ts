@@ -21,6 +21,13 @@ const nextConfig: NextConfig = {
   // Tree-shake barrel exports de pacotes pesados
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'date-fns'],
+    // Compila num processo à parte, que devolve a memória antes do lint e da
+    // checagem de tipos. Com a função `webpack` abaixo, o Next 15 só usa esse
+    // worker se a flag estiver explícita. Sem ela, essa fase chegava a ~7,8 GB
+    // num build a frio (medido em 2026-09-28), no limite da máquina de 8 GB da
+    // Vercel, que estourou (exit 137) quando uma mudança no layout raiz
+    // invalidou o cache de todas as páginas; com ela, ~3,8 GB.
+    webpackBuildWorker: true,
   },
 
   // Otimização de imagens

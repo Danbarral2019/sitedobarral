@@ -14,7 +14,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:smoke": "playwright test e2e/public-smoke.spec.ts",
+    "test:e2e:smoke": "playwright test e2e/public-smoke.spec.ts e2e/cabecalho.spec.ts",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
     "smoke:coming-soon": "node scripts/smoke-test-coming-soon.mjs",

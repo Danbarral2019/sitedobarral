@@ -2,44 +2,152 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, memo, useEffect, useRef } from 'react';
+import { useState, memo, useEffect, useRef, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Home, User, FileText, Mail, LogIn, BookOpen, Scale, CreditCard, Gavel, BookMarked, Library, HelpCircle, ScrollText } from 'lucide-react';
+import { Menu, X, ChevronDown, LogIn } from 'lucide-react';
 import { courses } from '@/data/courses';
+
+// Itens que ficam à vista na barra a partir de lg. A barra completa (13 itens,
+// com ícones) ocupava cerca de 1490 px e transbordava abaixo de 1536 px; os
+// itens institucionais foram para o menu "Mais", e o rodapé também os lista.
+const PRIMARY_LINKS = [
+  { href: '/base-conhecimento', label: 'Base de Conhecimento' },
+  { href: '/legislacao', label: 'Legislação' },
+  { href: '/jurisprudencia', label: 'Jurisprudência' },
+  { href: '/teses', label: 'Teses' },
+  { href: '/planos', label: 'Planos' },
+];
+
+const MORE_LINKS = [
+  { href: '/sobre', label: 'Sobre' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/glossario', label: 'Glossário' },
+  { href: '/faq', label: 'FAQ' },
+  { href: '/contato', label: 'Contato' },
+];
+
+const MOBILE_LINKS = [
+  { href: '/', label: 'Início' },
+  { href: '/sobre', label: 'Sobre o Professor' },
+  { href: '/cursos', label: 'Cursos' },
+  { href: '/base-conhecimento', label: 'Base de Conhecimento' },
+  { href: '/legislacao', label: 'Legislação' },
+  { href: '/jurisprudencia', label: 'Jurisprudência' },
+  { href: '/teses', label: 'Teses' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/glossario', label: 'Glossário' },
+  { href: '/faq', label: 'FAQ' },
+  { href: '/planos', label: 'Planos' },
+  { href: '/contato', label: 'Contato' },
+];
+
+const focusRing =
+  'focus-visible:ring-2 focus-visible:ring-surface-page focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600';
+
+const navItemClass = (active: boolean) =>
+  `rounded font-sans text-sm transition-colors ${focusRing} ${active ? 'text-surface-page font-semibold' : 'text-surface-page/90 hover:text-surface-page'}`;
+
+const dropdownLinkClass = (active: boolean) =>
+  `block px-4 py-2 text-sm hover:bg-brand-50 hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600 ${active ? 'font-semibold text-brand-700' : 'text-ink-secondary'}`;
+
+interface NavDropdownProps {
+  id: string;
+  label: string;
+  active: boolean;
+  align: 'left' | 'right';
+  panelClassName: string;
+  children: ReactNode;
+}
+
+// Disclosure de navegação (padrão WAI-ARIA): o botão expõe aria-expanded e o
+// painel é uma lista comum de links, percorrida com Tab.
+function NavDropdown({ id, label, active, align, panelClassName, children }: NavDropdownProps) {
+  const pathname = usePathname();
+  // Guarda a rota em que o painel foi aberto: ao navegar (inclusive pelo botão
+  // Voltar), a rota muda e o painel fecha sozinho.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const isOpen = openOn === pathname;
+  const containerRef = useRef<HTMLLIElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpenOn(null);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenOn(null);
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <li
+      ref={containerRef}
+      className="relative"
+      onBlur={(event) => {
+        // Fecha quando o Tab leva o foco para fora. Foco que vai para o body
+        // (relatedTarget nulo) fica a cargo do clique fora, para não esconder o
+        // painel entre o mousedown e o click num link dele.
+        const next = event.relatedTarget as Node | null;
+        if (next && !event.currentTarget.contains(next)) setOpenOn(null);
+      }}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={id}
+        onClick={() => setOpenOn(isOpen ? null : pathname)}
+        className={`flex items-center gap-1 ${navItemClass(active)}`}
+      >
+        {label}
+        <ChevronDown
+          aria-hidden="true"
+          className={`w-4 h-4 transition-transform motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {/* Só existe no DOM enquanto aberto: oculto, repetiria em toda página os
+          títulos dos cursos e os rótulos do "Mais", e getByText(...).first()
+          nos testes de fluxo acharia o link invisível do cabeçalho. */}
+      {isOpen && (
+        <div
+          id={id}
+          onClick={(event) => {
+            // Fecha já no clique, sem esperar a troca de rota (e também quando o
+            // link aponta para a página atual).
+            if ((event.target as Element).closest('a')) setOpenOn(null);
+          }}
+          className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} ${panelClassName} bg-surface-page rounded-[6px] py-2 z-[9999] border border-border-subtle`}
+        >
+          {children}
+        </div>
+      )}
+    </li>
+  );
+}
 
 export const Header = memo(function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCoursesOpen, setIsCoursesOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const coursesDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
-
-  // Evita hydration mismatch
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Fecha dropdown quando clicar fora
-  useEffect(() => {
-    // Guard against SSR
-    if (typeof window === 'undefined') return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (coursesDropdownRef.current && !coursesDropdownRef.current.contains(event.target as Node)) {
-        setIsCoursesOpen(false);
-      }
-    };
-
-    if (isCoursesOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isCoursesOpen]);
 
   return (
     <header className="bg-brand-600 border border-border-subtle">
@@ -49,8 +157,8 @@ export const Header = memo(function Header() {
       >
         Pular para o conteúdo principal
       </a>
-      <nav className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-20 sm:h-24">
+      <nav aria-label="Navegação principal" className="container mx-auto px-4">
+        <div className="flex justify-between items-center gap-x-4 h-20 sm:h-24">
           <Link href="/" className="flex items-center flex-shrink-0" aria-label="Página inicial - Prof. Daniel Barral">
             <div className="w-20 h-20 sm:w-24 sm:h-24 relative flex-shrink-0">
               <Image
@@ -64,200 +172,111 @@ export const Header = memo(function Header() {
             </div>
           </Link>
 
-          {/* Menu horizontal só a partir de xl: com 12 itens e o botão da área do
-              aluno, ele não cabe abaixo de 1280 px e empurrava "Área do Aluno"
-              para fora da tela. Os ícones entram só em 2xl, onde há folga. */}
-          <div className="hidden xl:flex items-center gap-x-4 2xl:gap-x-5">
-            <Link
-              href="/"
-              aria-current={isActive('/') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <Home className="hidden 2xl:block w-4 h-4" />
-              <span>Início</span>
-            </Link>
-
-            <Link
-              href="/sobre"
-              aria-current={isActive('/sobre') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/sobre') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <User className="hidden 2xl:block w-4 h-4" />
-              <span>Sobre</span>
-            </Link>
-
-            <div className="relative" ref={coursesDropdownRef} suppressHydrationWarning>
-              <button
-                onClick={() => setIsCoursesOpen(!isCoursesOpen)}
-                aria-expanded={isCoursesOpen}
-                aria-haspopup="true"
-                className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/cursos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
+          <div className="flex items-center gap-x-3 lg:gap-x-5 xl:gap-x-6">
+            <ul className="hidden lg:flex items-center lg:gap-x-5 xl:gap-x-6">
+              <NavDropdown
+                id="cabecalho-menu-cursos"
+                label="Cursos"
+                active={isActive('/cursos')}
+                align="left"
+                panelClassName="w-80 max-h-96 overflow-y-auto"
               >
-                <BookOpen className="hidden 2xl:block w-4 h-4" />
-                <span>Cursos</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isCoursesOpen ? 'rotate-180' : ''}`} />
-              </button>
+                <Link
+                  href="/cursos"
+                  aria-current={pathname === '/cursos' ? 'page' : undefined}
+                  className="block px-4 py-2 text-sm font-semibold text-brand-600 hover:bg-brand-50 hover:text-brand-700 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600"
+                >
+                  Ver todos os cursos
+                </Link>
+                <div className="border-t border-border-subtle my-2"></div>
+                <ul>
+                  {courses.map((course) => {
+                    const href = `/cursos/${course.slug}`;
+                    return (
+                      <li key={course.id}>
+                        <Link
+                          href={href}
+                          aria-current={isActive(href) ? 'page' : undefined}
+                          className={dropdownLinkClass(isActive(href))}
+                        >
+                          {course.title}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </NavDropdown>
 
-              {isMounted && isCoursesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-[6px] py-2 max-h-96 overflow-y-auto z-[9999] border border-border-subtle">
+              {PRIMARY_LINKS.map(({ href, label }) => (
+                <li key={href}>
                   <Link
-                    href="/cursos"
-                    className="block px-4 py-2 text-sm font-semibold text-brand-600 hover:bg-brand-50 hover:text-brand-700"
-                    onClick={() => setIsCoursesOpen(false)}
+                    href={href}
+                    aria-current={isActive(href) ? 'page' : undefined}
+                    className={navItemClass(isActive(href))}
                   >
-                    Ver todos os cursos
+                    {label}
                   </Link>
-                  <div className="border-t my-2"></div>
-                  {courses.map((course) => (
-                    <Link
-                      key={course.id}
-                      href={`/cursos/${course.slug}`}
-                      className="block px-4 py-2 text-sm text-ink-secondary hover:bg-brand-50 hover:text-brand-600"
-                      onClick={() => setIsCoursesOpen(false)}
-                    >
-                      {course.title}
-                    </Link>
+                </li>
+              ))}
+
+              <NavDropdown
+                id="cabecalho-menu-mais"
+                label="Mais"
+                active={MORE_LINKS.some(({ href }) => isActive(href))}
+                align="right"
+                panelClassName="w-48"
+              >
+                <ul>
+                  {MORE_LINKS.map(({ href, label }) => (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        aria-current={isActive(href) ? 'page' : undefined}
+                        className={dropdownLinkClass(isActive(href))}
+                      >
+                        {label}
+                      </Link>
+                    </li>
                   ))}
-                </div>
-              )}
-            </div>
+                </ul>
+              </NavDropdown>
+            </ul>
 
-            <Link
-              href="/base-conhecimento"
-              aria-current={isActive('/base-conhecimento') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/base-conhecimento') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <Library className="hidden 2xl:block w-4 h-4" />
-              <span>Base de Conhecimento</span>
-            </Link>
-
-            <Link
-              href="/legislacao"
-              aria-current={isActive('/legislacao') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/legislacao') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <Scale className="hidden 2xl:block w-4 h-4" />
-              <span>Legislação</span>
-            </Link>
-
-            <Link
-              href="/jurisprudencia"
-              aria-current={isActive('/jurisprudencia') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/jurisprudencia') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <Gavel className="hidden 2xl:block w-4 h-4" />
-              <span>Jurisprudência</span>
-            </Link>
-
-            <Link
-              href="/teses"
-              aria-current={isActive('/teses') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/teses') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <ScrollText className="hidden 2xl:block w-4 h-4" />
-              <span>Teses</span>
-            </Link>
-
-            <Link
-              href="/blog"
-              aria-current={isActive('/blog') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/blog') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <FileText className="hidden 2xl:block w-4 h-4" />
-              <span>Blog</span>
-            </Link>
-
-            <Link
-              href="/glossario"
-              aria-current={isActive('/glossario') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/glossario') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <BookMarked className="hidden 2xl:block w-4 h-4" />
-              <span>Glossário</span>
-            </Link>
-
-            <Link
-              href="/faq"
-              aria-current={isActive('/faq') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/faq') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <HelpCircle className="hidden 2xl:block w-4 h-4" />
-              <span>FAQ</span>
-            </Link>
-
-            <Link
-              href="/planos"
-              aria-current={isActive('/planos') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/planos') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <CreditCard className="hidden 2xl:block w-4 h-4" />
-              <span>Planos</span>
-            </Link>
-
-            <Link
-              href="/contato"
-              aria-current={isActive('/contato') ? 'page' : undefined}
-              className={`flex items-center gap-x-1 whitespace-nowrap transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 rounded ${isActive('/contato') ? 'text-white font-semibold' : 'text-white/90 hover:text-white'}`}
-            >
-              <Mail className="hidden 2xl:block w-4 h-4" />
-              <span>Contato</span>
-            </Link>
-
+            {/* Fica na barra em todas as larguras, inclusive com o menu móvel. */}
             <Link
               href="/login"
-              className="flex items-center gap-x-1 whitespace-nowrap bg-white/10 hover:bg-white/20 px-4 py-2 rounded-[6px] text-white transition-colors font-sans text-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600"
+              className={`flex items-center gap-x-1 flex-shrink-0 bg-surface-page/10 hover:bg-surface-page/20 px-3 sm:px-4 py-2 rounded-[6px] text-surface-page transition-colors font-sans text-sm ${focusRing}`}
             >
-              <LogIn className="hidden 2xl:block w-4 h-4" />
+              <LogIn aria-hidden="true" className="w-4 h-4" />
               <span>Área do Aluno</span>
             </Link>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="xl:hidden p-2 flex-shrink-0 text-white"
-            aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`lg:hidden p-2 flex-shrink-0 rounded text-surface-page ${focusRing}`}
+              aria-label={isMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={isMenuOpen}
+              aria-controls="cabecalho-menu-movel"
+            >
+              {isMenuOpen ? <X aria-hidden="true" className="w-6 h-6" /> : <Menu aria-hidden="true" className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {isMenuOpen && (
-          <div className="xl:hidden py-4 border-t border-brand-500 bg-brand-600">
-            {[
-              { href: '/', label: 'Início' },
-              { href: '/sobre', label: 'Sobre o Professor' },
-              { href: '/cursos', label: 'Cursos' },
-              { href: '/base-conhecimento', label: 'Base de Conhecimento' },
-              { href: '/legislacao', label: 'Legislação' },
-              { href: '/jurisprudencia', label: 'Jurisprudência' },
-              { href: '/teses', label: 'Teses' },
-              { href: '/blog', label: 'Blog' },
-              { href: '/glossario', label: 'Glossário' },
-              { href: '/faq', label: 'FAQ' },
-              { href: '/planos', label: 'Planos' },
-              { href: '/contato', label: 'Contato' },
-            ].map(({ href, label }) => (
+          <div id="cabecalho-menu-movel" className="lg:hidden py-4 border-t border-brand-500 bg-brand-600">
+            {MOBILE_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 aria-current={isActive(href) ? 'page' : undefined}
-                className={`block py-3 px-2 rounded transition-colors font-sans ${isActive(href) ? 'text-white font-semibold bg-brand-500' : 'text-white/90 hover:text-white hover:bg-brand-500'}`}
+                className={`block py-3 px-2 rounded transition-colors font-sans ${isActive(href) ? 'text-surface-page font-semibold bg-brand-500' : 'text-surface-page/90 hover:text-surface-page hover:bg-brand-500'}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {label}
               </Link>
             ))}
-            <div className="mt-4 pt-4 border-t border-brand-500">
-              <Link
-                href="/login"
-                className="flex items-center justify-center space-x-2 py-3 px-4 bg-white/10 hover:bg-white/20 rounded-[6px] text-white transition-colors font-sans"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Área do Aluno</span>
-              </Link>
-            </div>
           </div>
         )}
       </nav>
