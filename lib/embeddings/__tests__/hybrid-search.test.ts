@@ -117,3 +117,36 @@ describe('hybridSearch — merge RRF de vetor + FTS', () => {
     expect(res.results.map((r) => r.documentId)).toContain('d1');
   });
 });
+
+describe('hybridSearch — repasse das opções de teses', () => {
+  it('encaminha includeTeses e tesesVisibilidade ao vector search', async () => {
+    await hybridSearch({ query: 'q', useCache: false, skipFts: true, includeTeses: true, tesesVisibilidade: 'acervo' });
+
+    const calledOptions = mockSemanticSearch.mock.calls[0][1] as Record<string, unknown>;
+    expect(calledOptions.includeTeses).toBe(true);
+    expect(calledOptions.tesesVisibilidade).toBe('acervo');
+  });
+
+  it('encaminha as mesmas opções na busca com queries expandidas', async () => {
+    mockMultiQuerySearch.mockResolvedValue([]);
+    await hybridSearch({
+      query: 'q',
+      expandedQueries: ['q', 'q2'],
+      useCache: false,
+      skipFts: true,
+      includeTeses: true,
+      tesesVisibilidade: 'vitrine',
+    });
+
+    const calledOptions = mockMultiQuerySearch.mock.calls[0][1] as Record<string, unknown>;
+    expect(calledOptions.includeTeses).toBe(true);
+    expect(calledOptions.tesesVisibilidade).toBe('vitrine');
+  });
+
+  it('não liga o ramo quando o chamador não pede', async () => {
+    await hybridSearch({ query: 'q', useCache: false, skipFts: true });
+
+    const calledOptions = mockSemanticSearch.mock.calls[0][1] as Record<string, unknown>;
+    expect(calledOptions.includeTeses).toBeFalsy();
+  });
+});

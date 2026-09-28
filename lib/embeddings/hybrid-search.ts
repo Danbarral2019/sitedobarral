@@ -36,6 +36,10 @@ export interface HybridSearchOptions {
   skipLegislativeActBranch?: boolean;
   /** Filtra o ramo TribunalDecisionChunk por tribunalCode específico (ex.: 'TST'). */
   tribunalCodeFilter?: string;
+  /** Inclui o ramo TeseEnunciadoChunk no vector search. Default false. */
+  includeTeses?: boolean;
+  /** Recorte visível das teses. Encaminhado para vector-search.SearchOptions. */
+  tesesVisibilidade?: 'vitrine' | 'acervo';
   /**
    * Pula o ramo Full-Text Search (BM25/tsvector). Quando true, o resultado vem
    * apenas do vector, sem fusão RRF. Útil para scopes de pesquisa que devem
@@ -100,6 +104,8 @@ export async function hybridSearch(
     skipDocumentBranch,
     skipLegislativeActBranch,
     tribunalCodeFilter,
+    includeTeses,
+    tesesVisibilidade,
     skipFts = false,
     rerank = false,
     embeddingColumn,
@@ -120,6 +126,8 @@ export async function hybridSearch(
     skipDocumentBranch,
     skipLegislativeActBranch,
     tribunalCodeFilter,
+    includeTeses,
+    tesesVisibilidade,
     embeddingColumn,
     queryDimension,
   };
