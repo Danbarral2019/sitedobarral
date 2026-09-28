@@ -1,6 +1,28 @@
 import { startsWithEpigrafe } from './legislative-scrapers/extract-ementa';
 
 /**
+ * Nota de alteração do texto compilado do Planalto: "(Incluído pela Lei nº
+ * 13.243, de 2016)", "(Redação dada pela ...)", "(Redação pela ...)", "(Vide ...)",
+ * "(Vigência)".
+ * O particípio exige complemento: "(Revogado)." e "(VETADO)" sozinhos são o
+ * próprio texto do dispositivo, não nota.
+ */
+const NOTA = String.raw`\((?:(?:Inclu[íi]d|Acrescid|Revogad|Renumerad|Alterad|Suprimid|Transformad|Convertid|Restabelecid|Revigorad|Vetad|Mantid|Declarad|Regulamentad|Promulgad)[oa]s?\s+[^()]+|Reda[çc][ãa]o\s+(?:dada\s+)?[^()]+|Vide\s+[^()]+|Vig[êe]ncia(?: encerrada)?|Regulamento|Produ[çc][ãa]o de efeitos?)(?:\([^()]*\)[^()]*)*\)`;
+const NOTAS_ISOLADAS_RE = new RegExp(`^${NOTA}(?:\\s*${NOTA})*\\.?$`, 'i');
+const NOTAS_NO_FIM_RE = new RegExp(`\\s((?:${NOTA}\\s*)+\\.?)$`, 'i');
+
+/** Envolve as notas em diretiva própria, que a página mostra em corpo menor. */
+function marcarNotas(notas: string): string {
+  return /[[\]]/.test(notas) ? notas : `:anotacao[${notas}]`;
+}
+
+function marcarNotasNoFim(p: string): string {
+  const m = p.match(NOTAS_NO_FIM_RE);
+  if (!m || m.index === undefined) return p;
+  return p.slice(0, m.index) + ' ' + marcarNotas(m[1].trim());
+}
+
+/**
  * Converts scraped legal text content into well-formatted markdown.
  * Handles texts from planalto.gov.br (with extra whitespace) and
  * SEGES/MGI portals (cleaner format).
@@ -213,6 +235,21 @@ export function formatLegalContent(rawContent: string): string {
     p = p.replace(/\s{2,}/g, ' ').trim();
     if (!p) continue;
 
+    // Nota de alteração isolada numa linha: no Planalto ela segue o dispositivo
+    // na mesma linha, então volta para o fim do parágrafo anterior. Depois de
+    // heading ou marcador de bloco, fica sozinha. `prevWasHeader` não muda,
+    // para o nome do capítulo seguinte ainda virar subtítulo.
+    if (NOTAS_ISOLADAS_RE.test(p)) {
+      const nota = marcarNotas(p);
+      const last = result[result.length - 1];
+      if (last !== undefined && !prevWasHeader && !/^(#|:::|> )/.test(last)) {
+        result[result.length - 1] = last + ' ' + nota;
+      } else {
+        result.push(nota);
+      }
+      continue;
+    }
+
     // --- Structural headers ---
 
     if (isStructuralLabel(p, 'CAPÍTULO')) {
@@ -301,7 +338,7 @@ export function formatLegalContent(rawContent: string): string {
       continue;
     }
 
-    result.push(p);
+    result.push(marcarNotasNoFim(p));
   }
 
   // H — Envolver assinatura final (Brasília + assinantes) em :::signature

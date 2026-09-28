@@ -302,7 +302,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
         {/* Conteúdo Completo */}
         {act.content ? (
-          <div className="bg-white rounded-[6px] p-8 border border-border-subtle">
+          <div className="bg-white rounded-[6px] px-4 py-6 sm:p-8 border border-border-subtle">
             <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-6">
               <Scale className="w-5 h-5 text-brand-600" />
               Texto Integral
