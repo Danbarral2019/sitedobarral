@@ -3,6 +3,7 @@ import { prisma } from '../lib/prisma';
 import { persistirDestilacao } from '../lib/tcu/persistir-tese';
 import type { TeseDestilada } from '../lib/tcu/destilar-tese';
 import type { DossieUso } from '../lib/tcu/trechos-de-citacao';
+import { bancoDescartavelOk, exigirBancoDescartavel } from './fixtures/banco-descartavel';
 
 // Alvo isolado dos demais cenários e2e — números fora da faixa de qualquer
 // acórdão real do dataset.
@@ -10,52 +11,8 @@ const NUMERO_ALVO = 9999;
 const ANO_ALVO = 2026;
 
 // Este teste chama `persistirDestilacao` diretamente (não via HTTP), então
-// depende de `DATABASE_URL` — não de `TEST_DATABASE_URL` — apontando para o
-// banco descartável: é o que `lib/prisma` lê ao montar o client. Ver o passo
-// "Run isolated database scenarios" em .github/workflows/test.yml.
-//
-// É o único spec de `e2e/` que fala com o banco fora do navegador, e por isso
-// escapa da guarda de `e2e/fixtures/database.ts`: aquela função só decide o
-// que vai para `webServer.env`, e devolve `TEST_DATABASE_URL` sem sequer olhar
-// para `DATABASE_URL`. Neste projeto a `DATABASE_URL` local aponta para
-// PRODUÇÃO — então quem definisse apenas `TEST_DATABASE_URL` para rodar os
-// cenários isolados veria este spot escrever no banco de verdade. A guarda
-// abaixo pertence a este arquivo, e não ao helper compartilhado: endurecer o
-// helper quebraria a execução local dos outros specs, que nunca tocam
-// `DATABASE_URL`.
-
-/** Mesmo host e mesmo nome de banco — credenciais e parâmetros podem diferir. */
-function mesmoBanco(a: string, b: string): boolean {
-  try {
-    const ua = new URL(a);
-    const ub = new URL(b);
-    return ua.hostname.toLowerCase() === ub.hostname.toLowerCase() && ua.pathname === ub.pathname;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Aborta o spec quando as duas variáveis não concordam. Com elas apontando
- * para o mesmo banco, o único destino possível das escritas é o banco
- * descartável que o operador escolheu de propósito — no CI, a branch efêmera
- * da Neon; localmente, o que ele tiver montado para isto.
- */
-function bancoDescartavelOk(): boolean {
-  const doPrisma = process.env.DATABASE_URL;
-  const doTeste = process.env.TEST_DATABASE_URL;
-  return Boolean(doPrisma && doTeste && mesmoBanco(doPrisma, doTeste));
-}
-
-function exigirBancoDescartavel(): void {
-  if (!bancoDescartavelOk()) {
-    throw new Error(
-      'Spec recusado: este arquivo escreve no banco via `lib/prisma`, que lê DATABASE_URL. ' +
-        'Defina DATABASE_URL e TEST_DATABASE_URL apontando para o MESMO banco descartável antes de rodá-lo. ' +
-        'Sem isso, a DATABASE_URL local deste projeto aponta para produção.',
-    );
-  }
-}
+// depende de `DATABASE_URL` apontando para o banco descartável. A guarda e o
+// motivo dela estão em `e2e/fixtures/banco-descartavel.ts`.
 
 test.describe('herança editorial entre versões de uma tese', () => {
   test.beforeAll(async () => {

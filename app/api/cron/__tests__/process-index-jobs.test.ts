@@ -14,6 +14,7 @@ const {
   mockGlossaryFindUnique,
   mockBlogPostFindUnique,
   mockLeiArticleFindUnique,
+  mockReconciliarTeses,
 } = vi.hoisted(() => ({
   mockIndexJobFindMany: vi.fn(),
   mockDocumentFindMany: vi.fn(),
@@ -27,6 +28,7 @@ const {
   mockGlossaryFindUnique: vi.fn(),
   mockBlogPostFindUnique: vi.fn(),
   mockLeiArticleFindUnique: vi.fn(),
+  mockReconciliarTeses: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -55,6 +57,10 @@ vi.mock('@/lib/embeddings/tribunal-decision-processor', () => ({
 
 vi.mock('@/lib/embeddings/legislative-act-processor', () => ({
   processLegislativeAct: (...args: any[]) => mockProcessLegislativeAct(...args),
+}));
+
+vi.mock('@/lib/embeddings/tese-reconciliacao', () => ({
+  reconciliarTeses: (...args: any[]) => mockReconciliarTeses(...args),
 }));
 
 vi.mock('@/lib/logger', () => ({
@@ -99,6 +105,7 @@ beforeEach(() => {
   mockGlossaryFindUnique.mockReset();
   mockBlogPostFindUnique.mockReset();
   mockLeiArticleFindUnique.mockReset();
+  mockReconciliarTeses.mockReset();
 
   // Defaults
   mockIndexJobFindMany.mockResolvedValue([]);
@@ -113,6 +120,7 @@ beforeEach(() => {
   mockGlossaryFindUnique.mockResolvedValue({ id: 'g1', term: 'Licitação', definition: 'def', category: 'geral' });
   mockBlogPostFindUnique.mockResolvedValue({ id: 'b1', title: 'Post' });
   mockLeiArticleFindUnique.mockResolvedValue({ id: 'l1', numero: '75' });
+  mockReconciliarTeses.mockResolvedValue({ indexados: 0, apagados: 0, falhas: 0 });
 });
 
 // Helper: monta um IndexJob pendente
@@ -411,5 +419,19 @@ describe('GET — job processors: not-found e exceção', () => {
     const body = await res.json();
     expect(body.failed).toBe(1);
     expect(body.results[0].error).toBe('quota');
+  });
+});
+
+describe('GET /api/cron/process-index-jobs — reconciliação das teses', () => {
+  it('reconcilia o índice das teses a cada rodada', async () => {
+    const res = await GET(makeReq() as any);
+    expect(res.status).toBe(200);
+    expect(mockReconciliarTeses).toHaveBeenCalledTimes(1);
+  });
+
+  it('uma falha na reconciliação não derruba o resumo da rodada', async () => {
+    mockReconciliarTeses.mockRejectedValue(new Error('banco indisponível'));
+    const res = await GET(makeReq() as any);
+    expect(res.status).toBe(200);
   });
 });
