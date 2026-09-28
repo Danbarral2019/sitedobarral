@@ -113,6 +113,50 @@ describe('listarAcervo', () => {
   });
 });
 
+describe('listarPorIds', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('não consulta o banco sem ids', async () => {
+    const { listarPorIds } = await import('./consultas');
+    expect(await listarPorIds([], true)).toEqual([]);
+    expect(mockEnunciados).not.toHaveBeenCalled();
+  });
+
+  it('sem acesso ativo, relê pelo predicado da vitrine', async () => {
+    const { listarPorIds } = await import('./consultas');
+    mockEnunciados.mockResolvedValue([]);
+    await listarPorIds(['e1'], false);
+    const where = mockEnunciados.mock.calls[0][0].where;
+    expect(where.id).toEqual({ in: ['e1'] });
+    expect(where.publicado).toBe(true);
+    expect(where.vitrinePublica).toBe(true);
+    expect(where.destilacao.acordaoKey).toEqual({ not: null });
+  });
+
+  it('com acesso ativo, relê pelo predicado do acervo', async () => {
+    const { listarPorIds } = await import('./consultas');
+    mockEnunciados.mockResolvedValue([]);
+    await listarPorIds(['e1'], true);
+    const where = mockEnunciados.mock.calls[0][0].where;
+    expect(where.publicado).toBe(true);
+    expect(where.vitrinePublica).toBeUndefined();
+    expect(where.destilacao.acordaoKey).toBeUndefined();
+  });
+
+  it('devolve na ordem de relevância recebida, não na do banco', async () => {
+    const { listarPorIds } = await import('./consultas');
+    mockEnunciados.mockResolvedValue([enunciadoDb({ id: 'e1' }), enunciadoDb({ id: 'e2' })]);
+    const cards = await listarPorIds(['e2', 'e1'], true);
+    expect(cards.map((c) => c.enunciadoId)).toEqual(['e2', 'e1']);
+  });
+
+  it('descarta enunciado com evidência incompleta', async () => {
+    const { listarPorIds } = await import('./consultas');
+    mockEnunciados.mockResolvedValue([enunciadoDb({ trechosFonte: [0, 1] })]);
+    expect(await listarPorIds(['e1'], true)).toEqual([]);
+  });
+});
+
 describe('buscarPorChave', () => {
   beforeEach(() => vi.clearAllMocks());
 
