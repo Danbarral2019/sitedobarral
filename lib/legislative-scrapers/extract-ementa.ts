@@ -33,6 +33,14 @@ const PREAMBULO_RES: RegExp[] = [
 const ANOTACAO_INICIAL_RE =
   /^(?:Exposi[çc][ãa]o\s+de\s+motivos|Mensagem\s+de\s+veto|Vig[êe]ncia(?:\s+encerrada)?|Produ[çc][ãa]o\s+de\s+efeitos?|Texto\s+compilado|Convers[ãa]o(?:\s+na\s+Lei[^A-Z]{0,40}\d{4})?|Convertid[ao]\s+na\s+Lei[^A-Z]{0,40}\d{4}|Regulamento|Promulga[çc][ãa]o\s+partes\s+vetadas|\([^)]{0,200}\))[\s.;,]*/i;
 
+/** Começo em minúscula ou citação numerada de ato ("Leis nºs 9.818", "Portaria SGD/MGI nº 3.656"). */
+const LEADING_CITATION_RE =
+  /^(?:[a-zà-ú]|(?:Leis?|Decretos?|Medidas?\s+Provis[óo]rias?|Portarias?|Instru[çc][õoã]\S*\s+Normativas?|Resolu[çc][õoã]\S*)\s+(?:[\w/.-]+\s+){0,2}n[ºo°]s?\s*[\d.])/;
+
+/** Começo que nenhuma ementa tem, na falta de epígrafe: minúscula ou nome de ato normativo. */
+const LEADING_FRAGMENT_RE =
+  /^(?:[a-zà-ú]|Leis?\b|Decretos?\b|Medidas?\s+Provis|Portarias?\b|Instru[çc]|Resolu[çc])/;
+
 export interface EmentaExtraction {
   /** Ementa recortada (whitespace colapsado). */
   ementa: string;
@@ -53,8 +61,18 @@ export function extractEmenta(rawText: string | null | undefined): EmentaExtract
   if (!rawText) return null;
   const text = collapse(rawText);
 
-  const epigrafe = EPIGRAFE_RE.exec(text);
-  let rest = epigrafe ? text.slice(epigrafe.index + epigrafe[0].length) : text;
+  // Epígrafe em caixa alta em qualquer ponto; na falta dela, a primeira linha
+  // do texto quando é epígrafe em caixa mista ("Portaria MGI Nº 5.112, DE 24
+  // DE junho DE 2026", comum no DOU).
+  const upper = EPIGRAFE_RE.exec(text);
+  const firstLine = rawText.trim().split('\n')[0].trim();
+  const mixedCaseLine = !upper && startsWithEpigrafe(rawText) ? collapse(firstLine) : null;
+  const epigrafe = Boolean(upper || mixedCaseLine);
+  let rest = upper
+    ? text.slice(upper.index + upper[0].length)
+    : mixedCaseLine
+      ? text.slice(mixedCaseLine.length)
+      : text;
   rest = rest.trim();
 
   // Remove anotações laterais que precedem a ementa.
@@ -70,6 +88,8 @@ export function extractEmenta(rawText: string | null | undefined): EmentaExtract
     if (m && (end === -1 || m.index < end)) end = m.index;
   }
 
+  // Preâmbulo logo após a epígrafe: o ato não tem ementa.
+  if (end === 0) return null;
   const complete = end > 0;
   let ementa = (complete ? rest.slice(0, end) : rest).trim();
   // Links laterais do gov.br ("• Perguntas e Respostas • Apresentação da IN")
@@ -87,7 +107,7 @@ export function extractEmenta(rawText: string | null | undefined): EmentaExtract
   // ou na própria epígrafe em caixa mista ("Portaria SGD/MGI nº 3.656, de...").
   // Ementa começa com verbo em maiúscula, nunca com minúscula nem com o nome
   // de um ato.
-  if (!epigrafe && /^(?:[a-zà-ú]|Leis?\b|Decretos?\b|Medidas?\s+Provis|Portarias?\b|Instru[çc]|Resolu[çc])/.test(ementa)) {
+  if (!epigrafe && LEADING_FRAGMENT_RE.test(ementa)) {
     return null;
   }
 
@@ -109,6 +129,11 @@ export function looksLikeDefectiveEmenta(
   if (title && collapse(title).toLowerCase() === e.toLowerCase()) return true;
   if (EPIGRAFE_RE.test(e)) return true;
   if (/(?:\.{3,}|…)$/.test(e)) return true;
+  // Começo em minúscula ou com citação numerada de ato é recorte de texto
+  // truncado ("Lei nº 14.690, de 3 de outubro de 2023, para instituir...") ou
+  // a própria epígrafe em caixa mista. Nome de ato sem número é aceito:
+  // "Lei de Introdução às Normas...", "Instrução Normativa (IN), destinada...".
+  if (LEADING_CITATION_RE.test(e)) return true;
   return PREAMBULO_RES.some((re) => re.test(e));
 }
 
@@ -121,7 +146,7 @@ export function looksLikeDefectiveEmenta(
 export function startsWithEpigrafe(content: string | null | undefined): boolean {
   if (!content) return false;
   const firstLine = content.trim().split('\n')[0].trim();
-  return /^(?:medida\s+provis[óo]ria|lei(?:\s+complementar)?|decreto(?:-lei)?|portaria|instru[çc][ãa]o\s+normativa|resolu[çc][ãa]o|ordem\s+de\s+servi[çc]o|orienta[çc][ãa]o\s+normativa)\b[^\n]*?\bn[ºo°.]?\s*[\d.\/-]+\s*,?\s+de\s+\d{1,2}[ºo°]?\s+de\s+[a-zç]+\s+de\s+\d{4}\.?\s*(?:\([^)]*\))?\s*$/i.test(
+  return /^(?:medida\s+provis[óo]ria|lei(?:\s+complementar)?|decreto(?:-lei)?|portaria|instru[çc][ãa]o\s+normativa|resolu[çc][ãa]o|ordem\s+de\s+servi[çc]o|orienta[çc][ãa]o\s+normativa)\b[^\n,]{0,80}?\bn[ºo°.]?\s*[\d.\/-]+\s*,?\s+de\s+\d{1,2}[ºo°]?\s+de\s+[a-zç]+\s+de\s+\d{4}\.?\s*(?:\([^)]*\))?\s*$/i.test(
     firstLine,
   );
 }

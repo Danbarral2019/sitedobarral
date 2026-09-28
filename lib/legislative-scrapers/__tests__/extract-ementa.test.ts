@@ -77,6 +77,15 @@ describe('extractEmenta', () => {
     ).toBeNull();
   });
 
+  it('epígrafe em caixa mista na primeira linha delimita a ementa', () => {
+    // Casos reais: Portaria MGI 5.112/2026 e IN SPOA/SE/MAPA 25/2026.
+    expect(
+      extractEmenta(
+        'Portaria MGI Nº 5.112, DE 24 DE junho DE 2026\n\nInstitui o Comitê Ministerial de Governança.\n\nA MINISTRA DE ESTADO DA GESTÃO E DA INOVAÇÃO EM SERVIÇOS PÚBLICOS, no uso das atribuições',
+      ),
+    ).toEqual({ ementa: 'Institui o Comitê Ministerial de Governança.', complete: true });
+  });
+
   it('epígrafe em caixa mista sem ementa não vira ementa', () => {
     expect(
       extractEmenta('Portaria SGD/MGI nº 3.656, de 16 de junho de 2026\n\nO SECRETÁRIO DE GOVERNO DIGITAL DO MINISTÉRIO, no uso das atribuições'),
@@ -109,6 +118,25 @@ describe('looksLikeDefectiveEmenta', () => {
     expect(looksLikeDefectiveEmenta('Dispõe sobre a tributação de aplicações financeiras e...')).toBe(true);
   });
 
+  it('detecta ementa recortada de texto truncado ou igual à epígrafe', () => {
+    // Gravadas em produção pela versão anterior do saneamento.
+    expect(
+      looksLikeDefectiveEmenta(
+        'Lei nº 14.690, de 3 de outubro de 2023, para instituir a Modalidade Emergencial de Renegociação de Dívidas.',
+      ),
+    ).toBe(true);
+    expect(looksLikeDefectiveEmenta('Leis nºs 9.818, de 23 de agosto de 1999, e 12.712, de 30 de agosto de 2012.')).toBe(true);
+    expect(looksLikeDefectiveEmenta('Portaria SGD/MGI nº 3.656, de 16 de junho de 2026')).toBe(true);
+    expect(looksLikeDefectiveEmenta('outubro de 1991, 10.176, de 11 de janeiro de 2001, e 11.077, de 30 de dezembro de 2004,')).toBe(true);
+  });
+
+  it('aceita ementa que começa com nome de ato sem número', () => {
+    expect(looksLikeDefectiveEmenta('Lei de Introdução às Normas do Direito Brasileiro (antiga Lei de Introdução ao Código Civil).')).toBe(false);
+    expect(
+      looksLikeDefectiveEmenta('Instrução Normativa (IN), destinada a proporcionar aos Órgãos Integrantes do SISG orientação nos procedimentos.'),
+    ).toBe(false);
+  });
+
   it('aceita ementa oficial', () => {
     expect(
       looksLikeDefectiveEmenta(
@@ -129,6 +157,12 @@ describe('startsWithEpigrafe', () => {
 
   it('rejeita texto que abre no meio da ementa', () => {
     expect(startsWithEpigrafe('Lei nº 14.690, de 3 de outubro de 2023, para instituir a Modalidade')).toBe(false);
+    // Caso real (Lei 15.503/2026): a linha termina em outra citação datada.
+    expect(
+      startsWithEpigrafe(
+        'Lei nº 9.503, de 23 de setembro de 1997 (Código de Trânsito Brasileiro), a Lei nº 11.484, de 31 de maio de 2007\n\nArt. 1º',
+      ),
+    ).toBe(false);
     expect(startsWithEpigrafe(null)).toBe(false);
   });
 });
