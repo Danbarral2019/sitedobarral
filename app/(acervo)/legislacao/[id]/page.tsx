@@ -1,11 +1,10 @@
+import { cache } from 'react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import {
-  Calendar,
   Scale,
-  Building,
   ExternalLink,
   Download,
   FileText,
@@ -22,6 +21,15 @@ import { getRelationsForAct } from '@/lib/legislative-acts/relations';
 import { RelationHistory } from '@/components/LegislativeActsPanel/RelationHistory';
 import { normalizeActType, getOfficialSourceLabel } from '@/lib/legislacao/labels';
 import { isIdentificacaoDoAto } from '@/lib/legislative-scrapers/extract-ementa';
+import {
+  subtituloDoAto,
+  dataDoAto,
+  dataPorExtenso,
+  dataDePublicacao,
+  orgaoEmissor,
+  rotuloArtigo,
+  ementaNoTexto,
+} from '@/lib/legislacao/cabecalho';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -33,17 +41,16 @@ interface Annex {
   type: string;
 }
 
-async function getLegislativeAct(id: string) {
+// `cache`: generateMetadata e a página leem o ato na mesma requisição com uma
+// só consulta. A contagem de visualização fica só na página; antes as duas
+// chamadas incrementavam, e cada acesso contava duas vezes.
+const getLegislativeAct = cache(async (id: string) => {
   const act = await prisma.legislativeAct.findUnique({
     where: { id },
   });
 
   if (act) {
-    await prisma.legislativeAct.update({
-      where: { id },
-      data: { viewCount: { increment: 1 } },
-    });
-    return act;
+    return { ...act, fromDocument: false };
   }
 
   // Fallback: check Document table (for boas-praticas items)
@@ -77,11 +84,12 @@ async function getLegislativeAct(id: string) {
       annexesJson: null,
       createdAt: doc.uploadedAt,
       updatedAt: doc.uploadedAt,
+      fromDocument: true,
     };
   }
 
   return null;
-}
+});
 
 const TYPE_LABELS: Record<string, string> = {
   'decreto': 'Decreto',
@@ -95,18 +103,6 @@ const TYPE_LABELS: Record<string, string> = {
   'resolucao': 'Resolução',
 };
 
-const TYPE_COLORS: Record<string, string> = {
-  'decreto': 'bg-brand-100 text-brand-800 border-brand-300',
-  'portaria': 'bg-green-100 text-green-800 border-green-300',
-  'in': 'bg-brand-100 text-brand-800 border-brand-300',
-  'ordem-servico': 'bg-amber-accent-soft text-amber-accent-deep border-amber-accent',
-  'lei': 'bg-red-100 text-red-800 border-red-300',
-  'medida-provisoria': 'bg-amber-accent-soft text-amber-accent-deep border-amber-accent',
-  'boa_pratica': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  'orientacao_procedimento': 'bg-amber-accent-soft text-amber-accent-deep border-amber-accent',
-  'resolucao': 'bg-brand-100 text-brand-800 border-brand-300',
-};
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const act = await getLegislativeAct(resolvedParams.id);
@@ -117,8 +113,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const subtitulo = subtituloDoAto(act.title);
   return {
-    title: `${act.fullNumber} - ${act.title}`,
+    title: subtitulo ? `${act.fullNumber}: ${subtitulo}` : act.fullNumber,
     description: act.summary || act.ementa.substring(0, 160),
   };
 }
@@ -131,9 +128,31 @@ export default async function LegislativeActPage({ params }: PageProps) {
     notFound();
   }
 
+  if (!act.fromDocument) {
+    await prisma.legislativeAct.update({
+      where: { id: act.id },
+      data: { viewCount: { increment: 1 } },
+    });
+  }
+
   const actType = normalizeActType(act.type);
   const typeLabel = TYPE_LABELS[actType] || act.type.toUpperCase();
-  const typeColor = TYPE_COLORS[actType] || 'bg-surface-deep text-ink-secondary border-border-subtle';
+  // O tipo só entra como sobretítulo quando o número não o diz ("IN" →
+  // "Instrução Normativa"; "Lei 8.666/1993" já diz "Lei").
+  const showTypeLabel = !act.fullNumber.toLowerCase().startsWith(typeLabel.toLowerCase());
+  const subtitulo = subtituloDoAto(act.title);
+  const orgao = orgaoEmissor(act.issuer);
+  const assinatura = dataDoAto(act.number, [act.title, act.content]);
+  const publicacao = dataDePublicacao(act, assinatura);
+  const metadados: Array<{ rotulo: string; valor: string }> = [
+    ...(orgao ? [{ rotulo: 'Órgão emissor', valor: orgao }] : []),
+    ...(assinatura ? [{ rotulo: 'Data do ato', valor: dataPorExtenso(assinatura) }] : []),
+    ...(publicacao ? [{ rotulo: 'Publicação', valor: dataPorExtenso(publicacao) }] : []),
+    ...(act.effectiveDate ? [{ rotulo: 'Vigência', valor: dataPorExtenso(act.effectiveDate) }] : []),
+  ];
+  // A ementa já abre o texto integral, logo abaixo do título do ato; o bloco
+  // próprio só aparece quando o texto não a traz.
+  const showEmenta = !isIdentificacaoDoAto(act.ementa) && !ementaNoTexto(act.ementa, act.content);
 
   // Parse leiArticles JSON string to array
   const leiArticlesArray: string[] = getLeiArticles(act);
@@ -172,59 +191,33 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Header */}
-        <div className="bg-white rounded-[6px] p-8 mb-6 border border-border-subtle">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${typeColor}`}>
-                  {typeLabel}
-                </span>
-                <span className="text-sm text-ink-muted flex items-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  {act.viewCount} visualizações
-                </span>
-              </div>
-              <h1 className="text-3xl font-bold text-ink-primary mb-2">
-                {act.fullNumber}
-              </h1>
-              <h2 className="text-xl text-ink-secondary mb-4">
-                {act.title}
-              </h2>
-            </div>
+        <header className="bg-white rounded-[6px] px-4 py-6 sm:p-8 mb-6 border border-border-subtle">
+          <div className="flex items-center justify-between gap-4 mb-2 text-sm text-ink-muted">
+            <span className="font-medium">{showTypeLabel ? typeLabel : null}</span>
+            <span className="flex items-center gap-1.5">
+              <Eye className="w-4 h-4" aria-hidden="true" />
+              {act.viewCount.toLocaleString('pt-BR')} visualizações
+            </span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-ink-primary">
+            {act.fullNumber}
+          </h1>
+          {subtitulo && (
+            <p className="text-lg text-ink-secondary mt-2 max-w-[65ch]">
+              {subtitulo}
+            </p>
+          )}
 
-          {/* Metadata */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-surface-raised rounded-[6px]">
-            <div className="flex items-start gap-3">
-              <Building className="w-5 h-5 text-ink-muted mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs text-ink-muted uppercase tracking-wide">Órgão Emissor</p>
-                <p className="text-sm font-medium text-ink-primary">{act.issuer}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-ink-muted mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs text-ink-muted uppercase tracking-wide">Publicação</p>
-                <p className="text-sm font-medium text-ink-primary">
-                  {new Date(act.publishDate).toLocaleDateString('pt-BR')}
-                </p>
-              </div>
-            </div>
-
-            {act.effectiveDate && (
-              <div className="flex items-start gap-3">
-                <Scale className="w-5 h-5 text-ink-muted mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-ink-muted uppercase tracking-wide">Vigência</p>
-                  <p className="text-sm font-medium text-ink-primary">
-                    {new Date(act.effectiveDate).toLocaleDateString('pt-BR')}
-                  </p>
+          {metadados.length > 0 && (
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 mt-6 pt-6 border-t border-border-subtle">
+              {metadados.map(({ rotulo, valor }) => (
+                <div key={rotulo}>
+                  <dt className="text-xs font-medium text-ink-muted">{rotulo}</dt>
+                  <dd className="text-sm text-ink-primary mt-0.5">{valor}</dd>
                 </div>
-              </div>
-            )}
-          </div>
+              ))}
+            </dl>
+          )}
 
           {/* Links */}
           {(act.officialUrl || act.pdfUrl) && (
@@ -236,7 +229,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-[6px] hover:bg-brand-700 transition-colors"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-4 h-4" aria-hidden="true" />
                   {getOfficialSourceLabel(act.officialUrl)}
                 </a>
               )}
@@ -245,15 +238,15 @@ export default async function LegislativeActPage({ params }: PageProps) {
                   href={act.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-[6px] hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-border-strong text-ink-primary rounded-[6px] hover:bg-surface-raised transition-colors"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4" aria-hidden="true" />
                   Baixar PDF
                 </a>
               )}
             </div>
           )}
-        </div>
+        </header>
 
         {/* Relações com outros atos — exibidas no topo para destaque imediato
             (revogações, alterações, regulamentações etc.). Só renderiza se houver. */}
@@ -266,13 +259,14 @@ export default async function LegislativeActPage({ params }: PageProps) {
         )}
 
         {/* Ementa. Ato sem ementa oficial guarda só a própria identificação
-            no campo (ex.: IN nº 142/1983); repeti-la sob "Ementa" seria falso. */}
-        {!isIdentificacaoDoAto(act.ementa) && (
-          <div className="bg-white rounded-[6px] p-8 mb-6 border border-border-subtle">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-4">
-              <FileText className="w-5 h-5 text-brand-600" />
+            no campo (ex.: IN nº 142/1983); repeti-la sob "Ementa" seria falso.
+            Com texto integral que já a traz, o bloco seria repetição. */}
+        {showEmenta && (
+          <div className="bg-white rounded-[6px] px-4 py-6 sm:p-8 mb-6 border border-border-subtle">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-4">
+              <FileText className="w-5 h-5 text-brand-600" aria-hidden="true" />
               Ementa
-            </h3>
+            </h2>
             {/* Ementa de ato normativo é leitura prolongada — mesma
                 tipografia do texto da lei. */}
             <div className="font-reading text-ink-secondary max-w-[65ch]">
@@ -288,10 +282,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
           <div className="bg-brand-50 rounded-[6px] overflow-hidden mb-6 border border-border-subtle">
             {/* Header destacado */}
             <div className="bg-brand-600 px-6 py-4">
-              <h3 className="flex items-center gap-3 text-lg font-bold text-white">
-                <BookOpen className="w-6 h-6" />
+              <h2 className="flex items-center gap-3 text-lg font-bold text-white">
+                <BookOpen className="w-6 h-6" aria-hidden="true" />
                 Resumo Didático
-              </h3>
+              </h2>
             </div>
             {/* Conteúdo com Markdown */}
             <div className="p-6">
@@ -303,10 +297,10 @@ export default async function LegislativeActPage({ params }: PageProps) {
         {/* Conteúdo Completo */}
         {act.content ? (
           <div className="bg-white rounded-[6px] px-4 py-6 sm:p-8 border border-border-subtle">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-6">
-              <Scale className="w-5 h-5 text-brand-600" />
+            <h2 className="flex items-center gap-2 text-lg font-bold text-ink-primary mb-6">
+              <Scale className="w-5 h-5 text-brand-600" aria-hidden="true" />
               Texto Integral
-            </h3>
+            </h2>
             <MarkdownContent
               content={formatLegalContent(act.content)}
               variant="planalto"
@@ -388,22 +382,23 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
         {/* Artigos Relacionados da Lei 14.133 */}
         {leiArticlesArray.length > 0 && (
-          <div className="bg-amber-accent-soft border-l-4 border-amber-accent rounded-[6px] p-6 mt-6">
-            <h3 className="text-lg font-bold text-amber-accent-deep mb-3">
-              🔗 Artigos Relacionados da Lei 14.133/2021
-            </h3>
-            <div className="flex flex-wrap gap-2">
+          <section className="bg-white rounded-[6px] px-4 py-6 sm:p-8 mt-6 border border-border-subtle">
+            <h2 className="text-lg font-bold text-ink-primary mb-3">
+              Artigos relacionados da Lei 14.133/2021
+            </h2>
+            <ul className="flex flex-wrap gap-2">
               {leiArticlesArray.map((articleNum) => (
-                <Link
-                  key={articleNum}
-                  href={`/artigos?numero=${articleNum}`}
-                  className="inline-flex items-center px-3 py-1 bg-white border border-amber-accent rounded-[6px] text-ink-primary hover:bg-amber-accent-soft transition-colors text-sm font-medium"
-                >
-                  Art. {articleNum}º
-                </Link>
+                <li key={articleNum}>
+                  <Link
+                    href={`/artigo/${encodeURIComponent(articleNum)}`}
+                    className="inline-flex items-center px-3 py-1 border border-border-subtle rounded-[6px] text-sm font-medium text-brand-700 hover:bg-surface-raised hover:border-border-strong transition-colors"
+                  >
+                    {rotuloArtigo(articleNum)}
+                  </Link>
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </section>
         )}
       </div>
     </div>
