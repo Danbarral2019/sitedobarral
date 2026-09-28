@@ -66,12 +66,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Google Fonts — Cache First
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(cacheFirst(request, ASSETS_CACHE));
-    return;
-  }
-
   // Static brand/image assets — Cache First
   if (url.pathname.startsWith('/brand/') || url.pathname.startsWith('/icons/') || url.pathname.startsWith('/images/')) {
     event.respondWith(cacheFirst(request, ASSETS_CACHE));
