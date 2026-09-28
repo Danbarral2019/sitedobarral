@@ -39,7 +39,7 @@ Preencha `.env.local` com credenciais próprias. O arquivo não deve ser version
 | `npx tsc --noEmit --incremental false` | verificação integral de tipos |
 | `npm run test:run` | testes Vitest |
 | `npm run test:coverage` | testes com cobertura e limites mínimos |
-| `npm run test:e2e:smoke` | smoke público em navegador |
+| `npm run test:e2e:smoke` | smoke público e cabeçalho responsivo em navegador |
 | `npm run test:e2e` | cenários críticos com dados sintéticos |
 | `npm run analyze` | build com Bundle Analyzer |
 
