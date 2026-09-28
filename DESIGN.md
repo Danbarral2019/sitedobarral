@@ -148,7 +148,7 @@ A paleta é **restrita por escolha**, não por timidez. Azul petróleo (a marca 
 
 ### Secondary
 - **Âmbar Acadêmico** (#b07d3a / `oklch(60% 0.09 75)`): o "lápis vermelho" do caderno. Aparece exclusivamente em **referências** — citações de jurisprudência, link "fonte oficial", marcador de "versão atualizada". Nunca decorativo.
-- **Âmbar Profundo** (#7b5427 / `oklch(48% 0.08 68)`): texto de marcador (sobre `amber-accent-soft`, 4,77:1). Escurecido em 28/09/2026: o valor anterior, #8a6235, dava 3,86:1 sobre o âmbar suave, abaixo do piso AA. Os templates de e-mail (`lib/email-templates/tokens.ts`, `lib/email.ts`) ainda usam #8a6235.
+- **Âmbar Profundo** (#7b5427 / `oklch(48% 0.08 68)`): texto de marcador (sobre `amber-accent-soft`, 4,77:1). Escurecido em 28/09/2026: o valor anterior, #8a6235, dava 3,86:1 sobre o âmbar suave, abaixo do piso AA. Os templates de e-mail (`lib/email-templates/tokens.ts`, `lib/email-templates/newsletter.ts`, `lib/email.ts`) usam o mesmo valor.
 - **Âmbar Suave** (#e9d8b8 / `oklch(88% 0.04 80)`): fundo de chip/badge de citação.
 
 ### Neutral

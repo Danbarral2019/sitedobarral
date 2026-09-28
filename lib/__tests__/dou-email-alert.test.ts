@@ -70,12 +70,19 @@ describe('renderDouEditorialAlertEmail', () => {
     expect(html).toContain('#3a5a73');
   });
 
+  it('mostra as tags de "afeta" quando há itens', () => {
+    const html = renderDouEditorialAlertEmail([sample()]);
+    // contraparte positiva do teste abaixo: sem ela, uma troca de cor faria a
+    // asserção negativa passar sem testar nada
+    expect(html).toContain('background:#e9d8b8;color:#7b5427;padding:3px 10px');
+  });
+
   it('omite as tags de "afeta" quando affects está vazio ou ausente', () => {
     const vazio = renderDouEditorialAlertEmail([sample({ affects: [] })]);
     const ausente = renderDouEditorialAlertEmail([sample({ affects: undefined })]);
     // sem tags de afeta (o container só aparece quando há tags)
-    expect(vazio).not.toContain('background:#e9d8b8;color:#8a6235;padding:3px 10px');
-    expect(ausente).not.toContain('background:#e9d8b8;color:#8a6235;padding:3px 10px');
+    expect(vazio).not.toContain('background:#e9d8b8;color:#7b5427;padding:3px 10px');
+    expect(ausente).not.toContain('background:#e9d8b8;color:#7b5427;padding:3px 10px');
   });
 
   it('usa "ato" como fallback quando actType está ausente', () => {

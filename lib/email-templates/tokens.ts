@@ -44,7 +44,7 @@ export const EMAIL_COLOR = {
   /** Âmbar. Só em referência a fonte oficial — nunca em CTA. */
   ambar: '#b07d3a',
   /** Âmbar profundo: texto âmbar sobre fundo claro, com contraste AA. */
-  ambarProfundo: '#8a6235',
+  ambarProfundo: '#7b5427',
   /** Âmbar suave: fundo de marcador de fonte. */
   ambarSuave: '#e9d8b8',
 
