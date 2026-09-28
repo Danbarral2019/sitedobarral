@@ -31,6 +31,11 @@ export function subtituloDoAto(title: string | null | undefined): string | null 
     /^((?:lei|decreto|portaria|in|instru[çc][ãa]o|resolu[çc][ãa]o|mp|medida|ordem|orienta[çc][ãa]o)\b.*?\bde\s+\d{1,2}[ºo°]?\s+de\s+[a-zç]+\s+de\s+\d{4})\.?\s*(?:\((.+)\)|[—–-]\s+(.+))?$/i,
   );
   if (id) return id[2] ?? id[3] ?? null;
+  // Epígrafe truncada no cadastro ("DECRETO Nº 1.819, DE 16 DE FEVEREIRO DE"):
+  // tipo seguido de "nº" e número também só identifica o ato.
+  if (/^(?:lei|decreto(?:-lei)?|portaria|instru[çc][ãa]o normativa|resolu[çc][ãa]o|medida provis[óo]ria|in|mp)\b[^()—–]{0,40}?\bn\.?\s*[ºo°]\.?\s*[\d.]+/i.test(t) && !/[()—–]/.test(t)) {
+    return null;
+  }
   return t;
 }
 

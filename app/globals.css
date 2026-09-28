@@ -78,6 +78,12 @@
   --color-amber-accent-deep: #7b5427;
   --color-amber-accent-soft: #e9d8b8;
 
+  /* ---- Estado de erro / ato revogado (NOVO) ----
+     Texto sobre o fundo suave: contraste 10,5:1. */
+  --color-status-error: #8c2f26;
+  --color-status-error-soft: #f6e6e3;
+  --color-status-error-border: #e2b8b1;
+
   /* ---- primary-* e accent-* (RESGATE) ----
      Estas escalas viviam em tailwind.config.ts, que NÃO é carregado:
      no Tailwind 4 o config JS só é lido via diretiva @config, ausente

@@ -30,6 +30,7 @@ import {
   rotuloArtigo,
   ementaNoTexto,
 } from '@/lib/legislacao/cabecalho';
+import { referenciaDoRevogador } from '@/lib/legislacao/revogacao';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -150,6 +151,20 @@ export default async function LegislativeActPage({ params }: PageProps) {
     ...(publicacao ? [{ rotulo: 'Publicação', valor: dataPorExtenso(publicacao) }] : []),
     ...(act.effectiveDate ? [{ rotulo: 'Vigência', valor: dataPorExtenso(act.effectiveDate) }] : []),
   ];
+  // Ato revogador citado na nota ("Revogado pelo Decreto nº 11.531, de 2023"),
+  // quando está na base, vira link no aviso.
+  const refRevogador = act.revoked ? referenciaDoRevogador(act.revokedNote) : null;
+  const revogador = refRevogador
+    ? await prisma.legislativeAct.findFirst({
+        where: {
+          type: refRevogador.tipo,
+          year: refRevogador.ano,
+          number: { in: [refRevogador.numero, refRevogador.numero.replace(/\./g, '')] },
+        },
+        select: { id: true, fullNumber: true },
+      })
+    : null;
+
   // A ementa já abre o texto integral, logo abaixo do título do ato; o bloco
   // próprio só aparece quando o texto não a traz.
   const showEmenta = !isIdentificacaoDoAto(act.ementa) && !ementaNoTexto(act.ementa, act.content);
@@ -159,7 +174,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
 
   // Buscar relações entre atos (revoga/altera/regulamenta/etc.)
   // Se vier do fallback Document (não LegislativeAct), retorna vazio sem custo significativo
-  const relations = await getRelationsForAct(act.id);
+  const relations = await getRelationsForAct(act.id, { hideRejected: true });
   const hasRelations = relations.alters.length > 0 || relations.alteredBy.length > 0;
 
   return (
@@ -174,19 +189,26 @@ export default async function LegislativeActPage({ params }: PageProps) {
           Voltar para Legislação
         </Link>
 
-        {/* Banner de ato revogado — o ato continua acessível por link direto,
-            mas com aviso destacado (não aparece em buscas/listagens públicas). */}
+        {/* Aviso de ato revogado: o ato continua acessível por link direto,
+            mas não aparece em buscas nem listagens públicas. */}
         {act.revoked && (
-          <div className="mb-6 rounded-[6px] border-2 border-red-300 bg-red-50 p-5 flex items-start gap-3">
-            <span className="text-2xl leading-none" aria-hidden="true">🚫</span>
-            <div>
-              <p className="font-bold text-red-800">Ato revogado</p>
-              <p className="text-sm text-red-700 mt-1">
-                {act.revokedNote
-                  ? act.revokedNote
-                  : 'Este ato normativo foi revogado e não está mais em vigor. Mantido na base apenas para consulta histórica.'}
-              </p>
-            </div>
+          <div
+            role="note"
+            className="mb-6 rounded-[6px] border border-status-error-border bg-status-error-soft px-4 py-4 sm:px-6 text-status-error"
+          >
+            <p className="font-semibold">Ato revogado</p>
+            <p className="text-sm mt-1">
+              {act.revokedNote ? act.revokedNote.trim().replace(/\.?$/, '.') : 'Este ato normativo foi revogado e não está mais em vigor.'}
+              {' '}Mantido na base para consulta histórica.
+              {revogador && (
+                <>
+                  {' '}
+                  <Link href={`/legislacao/${revogador.id}`} className="font-semibold underline underline-offset-2">
+                    Ver o {revogador.fullNumber}
+                  </Link>
+                </>
+              )}
+            </p>
           </div>
         )}
 
