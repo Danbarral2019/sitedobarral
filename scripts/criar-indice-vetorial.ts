@@ -44,7 +44,7 @@ const prisma = new PrismaClient({ adapter, log: ['error'] });
 
 /**
  * Todas as buscas usam `<=>` (distância de cosseno) — ver vector-search.ts nos
- * três ramos e legal-context.ts. A operator class TEM que casar com o operador,
+ * quatro ramos e legal-context.ts. A operator class TEM que casar com o operador,
  * senão o planner ignora o índice em silêncio e nada muda.
  */
 const OPERATOR_CLASS = 'vector_cosine_ops';
@@ -58,7 +58,12 @@ const OPERATOR_CLASS = 'vector_cosine_ops';
 const M = 16;
 const EF_CONSTRUCTION = 64;
 
-const TABELAS = ['DocumentChunk', 'LegislativeActChunk', 'TribunalDecisionChunk'] as const;
+/**
+ * `TeseEnunciadoChunk` (spec §9 das teses) tem um chunk por enunciado, na casa
+ * das centenas: o scan exato ainda é barato ali. Entra na lista para que o
+ * índice exista antes de o acervo crescer, e não por latência medida hoje.
+ */
+const TABELAS = ['DocumentChunk', 'LegislativeActChunk', 'TribunalDecisionChunk', 'TeseEnunciadoChunk'] as const;
 
 interface Estado {
   tabela: string;

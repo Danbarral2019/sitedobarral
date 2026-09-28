@@ -6,9 +6,11 @@ import Link from 'next/link';
 import {
   Search, Gavel, Scale, FileText, Lock, ArrowRight,
   X, Loader2, AlertCircle, BookOpen, Sparkles, Database, MessageCircle,
-  Newspaper, HelpCircle, Landmark
+  Newspaper, HelpCircle, Landmark, Quote
 } from 'lucide-react';
 import { AnaliseIADemo } from '@/components/busca/AnaliseIADemo';
+import CartaoTese from '@/components/teses/CartaoTese';
+import type { TeseCard } from '@/lib/teses/consultas';
 
 interface SearchResults {
   query: string;
@@ -63,6 +65,8 @@ interface SearchResults {
       dataJulgamento: string | null;
       url: string | null;
     }>;
+    /** Teses do TCU, já no recorte visível a este leitor (spec §9). */
+    teses?: TeseCard[];
     blogPosts: Array<{
       id: string;
       slug: string;
@@ -98,7 +102,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'informativo': 'Informativos de Licitação TCU',
 };
 
-type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'juris' | 'glossary' | 'blog' | 'faq';
+type TabType = 'all' | 'lei' | 'acts' | 'docs' | 'teses' | 'juris' | 'glossary' | 'blog' | 'faq';
 
 function BuscaIntegradaContent() {
   const searchParams = useSearchParams();
@@ -149,6 +153,7 @@ function BuscaIntegradaContent() {
       results.results.articles.length +
       results.results.acts.length +
       results.results.documents.length +
+      (results.results.teses?.length || 0) +
       (results.results.decisions?.length || 0) +
       (results.results.blogPosts?.length || 0) +
       (results.results.faqs?.length || 0)
@@ -157,11 +162,12 @@ function BuscaIntegradaContent() {
 
   // Tab counts
   const tabCounts = useMemo(() => {
-    if (!results) return { lei: 0, acts: 0, docs: 0, juris: 0, glossary: 0, blog: 0, faq: 0 };
+    if (!results) return { lei: 0, acts: 0, docs: 0, teses: 0, juris: 0, glossary: 0, blog: 0, faq: 0 };
     return {
       lei: results.results.articles.length,
       acts: results.results.acts.length,
       docs: results.results.documents.length,
+      teses: results.results.teses?.length || 0,
       juris: results.results.decisions?.length || 0,
       glossary: results.results.glossaryTerms.length,
       blog: results.results.blogPosts?.length || 0,
@@ -301,6 +307,20 @@ function BuscaIntegradaContent() {
                 >
                   <FileText className="w-4 h-4" />
                   Documentos ({tabCounts.docs})
+                </button>
+              )}
+
+              {tabCounts.teses > 0 && (
+                <button
+                  onClick={() => setActiveTab('teses')}
+                  className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-4 flex items-center gap-2 ${
+                    activeTab === 'teses'
+                      ? 'border-brand-600 text-brand-600'
+                      : 'border-transparent text-ink-muted hover:text-ink-primary hover:border-border-subtle'
+                  }`}
+                >
+                  <Quote className="w-4 h-4" />
+                  Teses do TCU ({tabCounts.teses})
                 </button>
               )}
 
@@ -651,6 +671,29 @@ function BuscaIntegradaContent() {
                     </div>
                   </div>
                 )}
+              </section>
+            )}
+
+            {/* Teses do TCU: cada uma com o precedente e o trecho do voto que
+                a sustenta, no mesmo cartão das páginas de teses. O link leva à
+                tese dentro da página do acórdão, que pode ter mais de uma. */}
+            {(results.results.teses?.length ?? 0) > 0 && shouldShowSection('teses') && (
+              <section className="bg-white rounded-[6px] border-2 border-border-subtle p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Quote className="w-8 h-8 text-brand-600" />
+                  <h2 className="text-2xl font-bold text-ink-primary">
+                    Teses do TCU
+                  </h2>
+                  <span className="ml-auto px-3 py-1 bg-brand-100 text-brand-700 rounded-[3px] text-sm font-bold">
+                    {results.results.teses!.length} {results.results.teses!.length === 1 ? 'tese' : 'teses'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {results.results.teses!.map((tese) => (
+                    <CartaoTese key={tese.enunciadoId} tese={tese} ancora />
+                  ))}
+                </div>
               </section>
             )}
 

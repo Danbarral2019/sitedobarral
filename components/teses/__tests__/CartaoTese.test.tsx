@@ -65,4 +65,23 @@ describe('CartaoTese', () => {
     render(<CartaoTese tese={semUrl} />);
     expect(screen.getByRole('link', { name: /100\/2020/ }).getAttribute('href')).toBe('https://p/100');
   });
+
+  it('o artigo carrega a âncora do enunciado', () => {
+    const { container } = render(<CartaoTese tese={base} />);
+    expect(container.querySelector('article')?.id).toBe('e1');
+  });
+
+  it('sem `ancora`, o precedente leva à página do acórdão', () => {
+    render(<CartaoTese tese={base} />);
+    const link = screen.getByRole('link', { name: /Acórdão 1441\/2016/ });
+    expect(link.getAttribute('href')).toBe('/teses/1441-2016-plenario');
+  });
+
+  // Vindo da busca, o leitor precisa cair na tese que procurou, e não no topo
+  // de uma página que pode ter várias (spec §9).
+  it('com `ancora`, o precedente leva à tese dentro da página do acórdão', () => {
+    render(<CartaoTese tese={base} ancora />);
+    const link = screen.getByRole('link', { name: /Acórdão 1441\/2016/ });
+    expect(link.getAttribute('href')).toBe('/teses/1441-2016-plenario#e1');
+  });
 });

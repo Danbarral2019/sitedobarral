@@ -2201,6 +2201,7 @@ model TeseEnunciado {
   reconferenciaPendente Boolean @default(false)
 
   trechos TeseTrechoFonte[]
+  chunk   TeseEnunciadoChunk?
 
   @@index([destilacaoId])
   @@index([veredito])
@@ -2249,6 +2250,20 @@ model TeseTrechoFonte {
   @@unique([enunciadoId, ordem])
   @@index([enunciadoId])
   @@index([origemDocumentId])
+}
+
+/// Um chunk por enunciado (spec §9). Enunciados são curtos: não há divisão a
+/// fazer, e dividir separaria a súmula do seu próprio prefixo de procedência.
+/// A tabela é separada de DocumentChunk porque o ramo da busca precisa de JOIN
+/// na tabela-mãe para aplicar o predicado da §6.
+model TeseEnunciadoChunk {
+  id          String        @id @default(uuid())
+  enunciadoId String        @unique
+  enunciado   TeseEnunciado @relation(fields: [enunciadoId], references: [id], onDelete: Cascade)
+  content     String        @db.Text
+  embedding   Unsupported("vector(768)")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 /// Uma divergencia apontada nos votos: outro precedente indicado como o de

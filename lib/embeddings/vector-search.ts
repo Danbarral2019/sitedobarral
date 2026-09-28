@@ -23,6 +23,19 @@ export function resolveEmbeddingColumn(col: string | undefined): 'embedding' | '
   return col === 'embedding1536' ? 'embedding1536' : 'embedding';
 }
 
+/**
+ * Componente de visibilidade das teses na chave de cache. É parte da
+ * identidade do resultado, não um pós-filtro: sem ele, a consulta de quem tem
+ * acesso ativo gravaria no cache um resultado com o acervo, e o próximo
+ * anônimo com a mesma pergunta receberia esse resultado (spec §9).
+ */
+export function chaveVisibilidadeTeses(
+  o: { includeTeses?: boolean; tesesVisibilidade?: 'vitrine' | 'acervo' },
+): 'off' | 'vitrine' | 'acervo' {
+  if (!o.includeTeses) return 'off';
+  return o.tesesVisibilidade === 'acervo' ? 'acervo' : 'vitrine';
+}
+
 // ===========================
 // Types
 // ===========================
@@ -42,7 +55,7 @@ export interface SearchResult {
   tags?: string[];
   leiArticles?: string | null;
   uploadedAt?: string;
-  sourceType: 'document' | 'legislative-act' | 'tribunal-decision'; // Tipo de fonte
+  sourceType: 'document' | 'legislative-act' | 'tribunal-decision' | 'tese'; // Tipo de fonte
   // Para legislative-act: nível na hierarquia legal (1=Lei, 2=Decreto,
   // 3=Portaria, 4=IN, 5=Ordem). Usado pra ordenação e boost. Null pros demais.
   hierarchyLevel?: number | null;
@@ -61,6 +74,18 @@ export interface SearchOptions {
   skipDocumentBranch?: boolean;       // Omitir o ramo DocumentChunk (default: false)
   skipLegislativeActBranch?: boolean; // Omitir o ramo LegislativeActChunk (default: false)
   tribunalCodeFilter?: string;        // Filtrar TribunalDecisionChunk por tribunalCode
+  /**
+   * Inclui o ramo TeseEnunciadoChunk. Opt-in, no mesmo desenho de
+   * includeTribunalDecisions: nenhum chamador existente muda de comportamento
+   * ao subir esta feature.
+   */
+  includeTeses?: boolean;
+  /**
+   * Recorte visível das teses. 'vitrine' = só as promovidas ao público;
+   * 'acervo' = tudo que está publicado. Quem decide é o chamador, a partir do
+   * acesso do usuário, e não da rota (spec §9).
+   */
+  tesesVisibilidade?: 'vitrine' | 'acervo';
   /**
    * Exclui sumulas do TST com situacao CANCELADA/REVISTA do resultado, evitando
    * que precedentes superados apareçam na resposta IA. Default: true.
@@ -157,7 +182,7 @@ export async function semanticSearch(
   const tbKey = options.tribunalBoost
     ? `${options.tribunalBoost.code}@${options.tribunalBoost.factor}`
     : '';
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:tb=${tbKey}:ew=${ewKey}`;
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:ts=${chaveVisibilidadeTeses(options)}:tb=${tbKey}:ew=${ewKey}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -276,13 +301,15 @@ async function executeVectorSearch(
     tribunalCodeFilter,
     tribunalBoost,
     extraWhere,
+    includeTeses = false,
+    tesesVisibilidade = 'vitrine',
   } = options;
 
   const includeDocBranch = !skipDocumentBranch;
   const includeLegActBranch = !skipLegislativeActBranch;
 
   // Early return se todos os ramos estão excluídos
-  if (!includeDocBranch && !includeLegActBranch && !includeTribunalDecisions) {
+  if (!includeDocBranch && !includeLegActBranch && !includeTribunalDecisions && !includeTeses) {
     return { results: [], query, totalFound: 0 };
   }
 
@@ -491,6 +518,58 @@ async function executeVectorSearch(
     unions.push(`(SELECT * FROM decision_scores WHERE similarity >= $${decThresholdIdx} ORDER BY similarity DESC LIMIT $${decLimitIdx})`);
   }
 
+  // ---- Ramo D: TeseEnunciadoChunk ----
+  // Só na coluna de 768 dimensões: a tabela das teses nasceu sem a
+  // `embedding1536` do A/B da Fase 4.1, e comparar vetores de dimensões
+  // diferentes é erro no pgvector.
+  if (includeTeses && vcol === 'embedding') {
+    // O predicado da §6 traduzido uma única vez (fonte: lib/tcu/elegibilidade-tese.ts,
+    // WHERE_ELEGIVEL_BASE e WHERE_ELEGIVEL_VITRINE; lib/teses/consultas.ts para
+    // `publicado` e `vitrinePublica`). A integralidade da evidência NÃO cabe em
+    // SQL (compara contagem contra campo Json) e por isso é o gate da indexação
+    // que a garante: um chunk só existe para enunciado íntegro. Este WHERE é a
+    // segunda tranca, para o dado que mudou entre a indexação e a leitura.
+    let teseWhere = `te.veredito = 'fiel' AND te."retiradoEm" IS NULL AND td.atual = true AND te.publicado = true`;
+    if (tesesVisibilidade !== 'acervo') {
+      teseWhere += ` AND te."vitrinePublica" = true AND td."acordaoKey" IS NOT NULL`;
+    }
+
+    const teseThresholdIdx = nextParam();
+    params.push(threshold);
+    const teseLimitIdx = nextParam();
+    params.push(limit * 2);
+
+    ctes.push(`tese_scores AS (
+      SELECT
+        te.id as document_id,
+        CONCAT('Acórdão ', td."numeroAlvo", '/', td."anoAlvo") as document_title,
+        'tese' as category,
+        tec.content as chunk_content,
+        0 as chunk_index,
+        1 - (tec.embedding <=> '${embeddingStr}'::vector) as similarity,
+        NULL as url,
+        NULL as course_id,
+        true as is_common,
+        NULL as tags,
+        NULL as lei_articles,
+        NULL::int as hierarchy_level,
+        'tese' as source_type,
+        te."atualizadoEm" as uploaded_at
+      FROM "TeseEnunciadoChunk" tec
+      JOIN "TeseEnunciado" te ON tec."enunciadoId" = te.id
+      JOIN "TeseDestilacao" td ON te."destilacaoId" = td.id
+      WHERE ${teseWhere}
+    )`);
+
+    unions.push(`(SELECT * FROM tese_scores WHERE similarity >= $${teseThresholdIdx} ORDER BY similarity DESC LIMIT $${teseLimitIdx})`);
+  }
+
+  // Todos os ramos pedidos podem ter sido descartados acima (o das teses fora
+  // da coluna de 768 dimensões), e um WITH sem CTE é SQL inválido.
+  if (unions.length === 0) {
+    return { results: [], query, totalFound: 0 };
+  }
+
   // ---- Final limit ----
   const finalLimitParamIdx = nextParam();
   params.push(limit * 4);
@@ -585,7 +664,7 @@ async function executeVectorSearch(
       tags: bestChunk.tags ? safeParseArray(bestChunk.tags) : undefined,
       leiArticles: bestChunk.lei_articles,
       uploadedAt: bestChunk.uploaded_at ? new Date(bestChunk.uploaded_at).toISOString() : undefined,
-      sourceType: bestChunk.source_type as 'document' | 'legislative-act' | 'tribunal-decision',
+      sourceType: bestChunk.source_type as SearchResult['sourceType'],
       hierarchyLevel: (bestChunk as { hierarchy_level?: number | null }).hierarchy_level ?? null,
     });
   }

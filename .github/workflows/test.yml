@@ -175,12 +175,13 @@ jobs:
           e2e/course-expiration.spec.ts
           e2e/document-download.spec.ts
           e2e/heranca-editorial.spec.ts
+          e2e/teses-reconciliacao.spec.ts
         env:
           TEST_DATABASE_URL: ${{ steps.banco.outputs.db_url }}
-          # heranca-editorial.spec.ts chama `persistirDestilacao` diretamente
-          # (não via HTTP), e essa função passa por `lib/prisma`, que lê
-          # DATABASE_URL — não TEST_DATABASE_URL. É o mesmo banco descartável
-          # que o passo já usa acima.
+          # heranca-editorial.spec.ts e teses-reconciliacao.spec.ts chamam
+          # funções de `lib/` diretamente (não via HTTP), e elas passam por
+          # `lib/prisma`, que lê DATABASE_URL, e não TEST_DATABASE_URL. É o
+          # mesmo banco descartável que o passo já usa acima.
           DATABASE_URL: ${{ steps.banco.outputs.db_url }}
 
       # Fluxos da checklist P2 de lançamento. Passo próprio porque só ele liga o

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { processDocument, getProcessingStats } from '@/lib/embeddings/document-processor';
 import { processTribunalDecision } from '@/lib/embeddings/tribunal-decision-processor';
 import { processLegislativeAct } from '@/lib/embeddings/legislative-act-processor';
+import { reconciliarTeses } from '@/lib/embeddings/tese-reconciliacao';
 import { apiLogger } from '@/lib/logger';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 
@@ -229,6 +230,24 @@ async function processJob(job: {
   }
 }
 
+/**
+ * Reconciliação do índice das teses (spec §9). Roda em toda rodada, com ou sem
+ * fila nas demais tabelas, e fora do orçamento de tempo delas: o delete precisa
+ * acontecer mesmo quando o tempo acabou, porque chunk órfão continua sendo
+ * recuperado e citado. O custo é pequeno (no máximo 50 embeddings de uma frase).
+ * Uma falha aqui não derruba o resumo do que já foi processado.
+ */
+async function reconciliarIndiceDasTeses(): Promise<void> {
+  try {
+    const teses = await reconciliarTeses();
+    console.log(
+      `🧾 Teses: ${teses.indexados} indexadas, ${teses.apagados} chunks apagados, ${teses.falhas} falhas`,
+    );
+  } catch (erro) {
+    apiLogger.error({ err: erro }, 'falha na reconciliação do índice das teses');
+  }
+}
+
 // ===========================
 // API Route
 // ===========================
@@ -329,6 +348,10 @@ export async function GET(req: NextRequest) {
     );
 
     if (totalPending === 0) {
+      // Sem fila nas outras tabelas a reconciliação roda do mesmo jeito: é
+      // nela que o chunk da tese que perdeu elegibilidade é apagado, e isso não
+      // pode esperar aparecer um documento pendente.
+      await reconciliarIndiceDasTeses();
       responseBody = {
         success: true,
         message: 'No pending jobs',
@@ -506,6 +529,10 @@ export async function GET(req: NextRequest) {
         }
       });
     }
+
+    // 7c. Reconciliação do índice das teses: por último, depois do orçamento de
+    // tempo dos demais (ver `reconciliarIndiceDasTeses`).
+    await reconciliarIndiceDasTeses();
 
     // 8. Return summary
     const summary = {

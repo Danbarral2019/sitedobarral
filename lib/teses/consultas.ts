@@ -149,6 +149,25 @@ export function listarAcervo(): Promise<TeseCard[]> {
   return listar({ ...WHERE_ELEGIVEL_BASE, publicado: true });
 }
 
+/**
+ * As teses que a busca por IA encontrou, relidas pelo predicado canônico e na
+ * ordem de relevância recebida (spec §9).
+ *
+ * A busca vetorial já filtra por elegibilidade e visibilidade, mas o que chega
+ * à tela passa por aqui de novo: é a mesma porta das outras superfícies, e é
+ * aqui que a integralidade da evidência é conferida, o que o SQL da busca não
+ * consegue fazer. Um id fora do recorte do leitor simplesmente não volta.
+ */
+export async function listarPorIds(ids: string[], comAcessoAtivo: boolean): Promise<TeseCard[]> {
+  if (ids.length === 0) return [];
+  const recorte = comAcessoAtivo
+    ? { ...WHERE_ELEGIVEL_BASE, publicado: true }
+    : { ...WHERE_ELEGIVEL_VITRINE, publicado: true, vitrinePublica: true };
+  const cards = await listar({ ...recorte, id: { in: ids } });
+  const posicao = new Map(ids.map((id, i) => [id, i]));
+  return cards.sort((a, b) => (posicao.get(a.enunciadoId) ?? 0) - (posicao.get(b.enunciadoId) ?? 0));
+}
+
 export async function buscarPorChave(chave: string, comAcessoAtivo: boolean): Promise<DetalheAcordao | null> {
   const partes = chave.split('-');
   const numeroAlvo = parseInt(partes[0], 10);

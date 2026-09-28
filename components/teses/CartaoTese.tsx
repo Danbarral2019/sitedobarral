@@ -10,8 +10,12 @@ import type { TeseCard } from '@/lib/teses/consultas';
  * vem com a contagem de votos que o sustentam, e sem identidade não vem. A
  * segunda é a evidência (§7.1): o primeiro trecho-fonte fica visível, não atrás
  * de um clique, e todo trecho leva ao inteiro teor do acórdão que o escreveu.
+ *
+ * O `id` do artigo é a âncora do enunciado: a página de um acórdão pode ter
+ * mais de uma tese, e quem chega da busca precisa cair na que procurou (§9).
+ * Com `ancora`, o link do precedente aponta para ela.
  */
-export default function CartaoTese({ tese }: { tese: TeseCard }) {
+export default function CartaoTese({ tese, ancora = false }: { tese: TeseCard; ancora?: boolean }) {
   const [primeiro, ...demais] = tese.trechos;
 
   const procedencia =
@@ -22,12 +26,15 @@ export default function CartaoTese({ tese }: { tese: TeseCard }) {
         : 'Colegiado não identificado';
 
   return (
-    <article className="bg-white rounded-[6px] border border-border-subtle p-5 hover:border-brand-300 transition-colors">
+    <article
+      id={tese.enunciadoId}
+      className="scroll-mt-24 bg-white rounded-[6px] border border-border-subtle p-5 hover:border-brand-300 transition-colors"
+    >
       <p className="text-ink-primary leading-relaxed">{tese.enunciado}</p>
 
       <div className="flex items-center gap-2 mt-3 flex-wrap text-sm">
         <Link
-          href={`/teses/${tese.chaveUrl}`}
+          href={ancora ? `/teses/${tese.chaveUrl}#${tese.enunciadoId}` : `/teses/${tese.chaveUrl}`}
           className="font-semibold text-brand-700 hover:text-brand-600 transition-colors"
         >
           {`Acórdão ${tese.numeroAlvo}/${tese.anoAlvo}`}

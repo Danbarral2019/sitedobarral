@@ -28,6 +28,7 @@ import {
   buildLegalSources,
 } from '@/lib/legal-context';
 import { filterByEnrollment } from '@/lib/search/hybrid-documents';
+import { anexarEvidenciaDasTeses, costurarEvidencia } from './evidencia-da-tese';
 import { hashQueryStr, diversifyResults, generateExcerpt } from './util';
 import { detectQueryDomain, type QueryScope } from './domain-detection';
 import type { AssembleAnswerInput, AnswerContext, DocumentResult } from './types';
@@ -244,6 +245,55 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       apiLogger.debug({ complementary: complementaryResults.length, candidates: priorityDocs.length }, 'Complementary sources found');
     }
 
+    // 5c. A evidência acompanha a tese (spec §9; ver lib/rag/evidencia-da-tese.ts).
+    // Só age quando a busca trouxe tese, o que exige `includeTeses`. Hoje a
+    // rota do assistente não liga esse ramo, e a decisão de ligar depende da
+    // medição de eval/teses. Sem tese no resultado, nada é consultado.
+    const evidencia = await anexarEvidenciaDasTeses(searchResponse.results);
+    const resultadosComEvidencia = costurarEvidencia(searchResponse.results, evidencia.trechos);
+    let citantesDasTeses: SearchResult[] = [];
+    const idsJaNoResultado = new Set([
+      ...semanticDocIds,
+      ...complementaryResults.map(r => r.documentId),
+    ]);
+    const idsCitantesFaltando = evidencia.documentIdsCitantes.filter(id => !idsJaNoResultado.has(id));
+    if (idsCitantesFaltando.length > 0) {
+      // O citante entra com a relevância da tese que ele sustenta, para ficar
+      // ao lado dela na ordenação; a regra de matrícula (6, abaixo) vale igual.
+      const similaridadePorCitante = new Map<string, number>();
+      for (const t of evidencia.trechos) {
+        const tese = searchResponse.results.find(r => r.documentId === t.enunciadoId);
+        if (t.origemDocumentId && tese) {
+          similaridadePorCitante.set(
+            t.origemDocumentId,
+            Math.max(similaridadePorCitante.get(t.origemDocumentId) ?? 0, tese.similarity),
+          );
+        }
+      }
+      const citantes = await prisma.document.findMany({
+        where: { id: { in: idsCitantesFaltando } },
+        select: {
+          id: true, title: true, category: true, description: true, url: true,
+          courseId: true, isCommon: true, tags: true, leiArticlesArr: true,
+        },
+      });
+      citantesDasTeses = citantes.map(doc => ({
+        documentId: doc.id,
+        documentTitle: doc.title,
+        category: doc.category,
+        similarity: similaridadePorCitante.get(doc.id) ?? 0,
+        chunkContent: doc.description || doc.title,
+        chunkIndex: 0,
+        url: doc.url || undefined,
+        courseId: doc.courseId || undefined,
+        isCommon: doc.isCommon,
+        tags: doc.tags ? JSON.parse(doc.tags) : undefined,
+        leiArticles:
+          doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : null,
+        sourceType: 'document' as const,
+      }));
+    }
+
     // 6. Separate results by type
     // BIA-0c: pós-filtro por matrícula. Quando enrolledCourseIds é fornecido
     // (rota de produção), remove documentos restritos de cursos não matriculados
@@ -252,7 +302,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     // formattedResults) num só ponto. Atos/lei/jurisprudência (sem courseId) e
     // documentos comuns/sem curso são mantidos por filterByEnrollment. Omitido
     // no eval → sem filtro (preserva a medição de retrieval).
-    const combinedResults = [...searchResponse.results, ...complementaryResults];
+    const combinedResults = [...resultadosComEvidencia, ...complementaryResults, ...citantesDasTeses];
     const allResults = enrolledCourseIds
       ? filterByEnrollment(combinedResults, enrolledCourseIds)
       : combinedResults;

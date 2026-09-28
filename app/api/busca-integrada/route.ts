@@ -14,6 +14,8 @@ import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 import { dedupeByDocument } from '@/lib/search/hybrid-documents';
 import { mesclarSemDuplicar, contarNovos } from '@/lib/search/mesclar-semantica';
 import { prisma } from '@/lib/prisma';
+import { listarPorIds, type TeseCard } from '@/lib/teses/consultas';
+import { visibilidadeDasTeses } from '@/lib/teses/visibilidade';
 import { apiLogger } from '@/lib/logger';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { ValidationError } from '@/lib/errors/api-error';
@@ -75,10 +77,16 @@ export async function GET(request: NextRequest) {
     // Não vaza acervo pago: esta rota devolve título, descrição e categoria —
     // nunca o trecho do chunk. Documento restrito encontrado aqui aparece
     // marcado como restrito, igual ao que o full-text já fazia.
-    const docsSemanticos = await buscarSemanticos(query, {
-      userCourseId,
-      isAdmin: authResult.user?.role === 'admin',
-    }).catch(() => []);
+    const [docsSemanticos, teses] = await Promise.all([
+      buscarSemanticos(query, {
+        userCourseId,
+        isAdmin: authResult.user?.role === 'admin',
+      }).catch(() => []),
+      buscarTeses(query, hasAiAccess).catch((err) => {
+        apiLogger.warn({ err, query }, 'busca integrada: busca das teses falhou');
+        return [] as TeseCard[];
+      }),
+    ]);
 
     // Artigos da Lei 14.133 (busca local em dados estáticos)
     const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10);
@@ -140,6 +148,7 @@ export async function GET(request: NextRequest) {
           publishDate: data.publish_date,
         })),
         documents: documentosFinais,
+        teses,
         decisions: decisionResults.map(({ data }) => ({
           id: data.id,
           tribunalCode: data.tribunal_code,
@@ -230,4 +239,32 @@ async function buscarSemanticos(
       requiresEnrollment: !hasAccess,
     }];
   });
+}
+
+/**
+ * As teses do TCU encontradas por similaridade semântica (spec §9).
+ *
+ * Chamada própria, e não um ramo a mais na de `buscarSemanticos`: lá os
+ * resultados disputam o mesmo limite, e a tese, curta e escrita como súmula,
+ * tende a pontuar alto e tomar o lugar dos documentos. Aqui ela só disputa
+ * com outras teses.
+ *
+ * A visibilidade vem do leitor. `hasAiAccess` é a regra canônica de acesso
+ * ativo (matrícula válida, assinatura ou admin), a mesma da página do acórdão.
+ */
+async function buscarTeses(query: string, comAcessoAtivo: boolean): Promise<TeseCard[]> {
+  const { results } = await hybridSearch({
+    query,
+    limit: 8,
+    includeTeses: true,
+    tesesVisibilidade: visibilidadeDasTeses(comAcessoAtivo),
+    skipDocumentBranch: true,
+    skipLegislativeActBranch: true,
+    // O full-text não conhece as teses; aqui ele só traria documentos.
+    skipFts: true,
+    useCache: true,
+  });
+
+  const ids = results.filter((r) => r.sourceType === 'tese').map((r) => r.documentId);
+  return listarPorIds(ids, comAcessoAtivo);
 }
