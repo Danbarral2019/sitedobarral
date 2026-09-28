@@ -217,9 +217,14 @@ export async function detectAndSaveRelationsHybrid(
 
 export async function getRelationsForAct(
   actId: string,
-  opts: { onlyConfirmed?: boolean } = {},
+  opts: { onlyConfirmed?: boolean; hideRejected?: boolean } = {},
 ): Promise<RelationsForAct> {
-  const reviewFilter = opts.onlyConfirmed ? { reviewStatus: 'confirmed' } : {};
+  // `hideRejected`: a página pública não mostra o que a revisão já descartou.
+  const reviewFilter = opts.onlyConfirmed
+    ? { reviewStatus: 'confirmed' }
+    : opts.hideRejected
+      ? { reviewStatus: { not: 'rejected' } }
+      : {};
 
   const [alters, alteredBy] = await Promise.all([
     prisma.legislativeActRelation.findMany({

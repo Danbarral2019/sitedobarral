@@ -20,6 +20,8 @@ describe('subtituloDoAto', () => {
     expect(subtituloDoAto('DECRETO Nº 11.345, DE 1º DE JANEIRO DE 2023')).toBeNull();
     expect(subtituloDoAto('DECRETO Nº\n7.404,\nDE 23 DE DEZEMBRO DE 2010.')).toBeNull();
     expect(subtituloDoAto('Lei nº 8.212, de 24 de julho de 1991')).toBeNull();
+    expect(subtituloDoAto('DECRETO Nº 1.819, DE 16 DE FEVEREIRO DE')).toBeNull();
+    expect(subtituloDoAto('PORTARIA Nº 295, de 26 DE SETEMBRO')).toBeNull();
   });
   it('epígrafe com apelido fica só com o apelido', () => {
     expect(subtituloDoAto('Lei nº 10.973, de 2 de dezembro de 2004 — Lei da Inovação')).toBe('Lei da Inovação');

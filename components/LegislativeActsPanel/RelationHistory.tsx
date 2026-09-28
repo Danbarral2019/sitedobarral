@@ -1,7 +1,10 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { subtituloDoAto } from '@/lib/legislacao/cabecalho';
 import type { RelationView } from '@/lib/legislative-acts/relations';
 
-const TYPE_LABELS: Record<string, string> = {
+/** Verbo da relação visto de cada lado: "regulamenta X" / "regulamentado por X". */
+const ACTIVE_LABELS: Record<string, string> = {
   revoga: 'revoga',
   altera: 'altera',
   regulamenta: 'regulamenta',
@@ -9,12 +12,12 @@ const TYPE_LABELS: Record<string, string> = {
   modifica: 'modifica',
 };
 
-const TYPE_COLORS: Record<string, string> = {
-  revoga: 'bg-red-100 text-red-700 border-red-300',
-  altera: 'bg-amber-accent-soft text-amber-accent-deep border-amber-accent',
-  regulamenta: 'bg-brand-100 text-brand-700 border-brand-300',
-  complementa: 'bg-green-100 text-green-700 border-green-300',
-  modifica: 'bg-brand-100 text-brand-700 border-brand-300',
+const PASSIVE_LABELS: Record<string, string> = {
+  revoga: 'revogado por',
+  altera: 'alterado por',
+  regulamenta: 'regulamentado por',
+  complementa: 'complementado por',
+  modifica: 'modificado por',
 };
 
 /**
@@ -92,112 +95,94 @@ export interface RelationHistoryProps {
   currentHierarchyLevel?: number;
 }
 
+/**
+ * Relações do ato com outros atos da base, para a página pública.
+ *
+ * As relações vêm do detector automático e, em sua maioria, ainda não passaram
+ * por revisão; o estado de revisão é assunto interno e não aparece item a
+ * item. A página avisa uma vez que as relações foram identificadas no texto.
+ * Relação hierarquicamente atípica (IN "altera" lei) é quase sempre falso
+ * positivo do detector e fica fora da lista pública.
+ */
 export function RelationHistory({ alters, alteredBy, currentHierarchyLevel }: RelationHistoryProps) {
   // Mesmo par (este ato, outro ato) pode ter múltiplas relations no DB quando
   // o detector encontrou verbos diferentes em trechos distintos do texto-fonte
   // (ex: ato cita Lei 14.133 dizendo "regulamenta" no preâmbulo e "complementa"
   // numa cláusula posterior). Deduplicar por outro-ato e manter o relationType
   // de maior especificidade (revoga > altera > modifica > regulamenta > complementa).
-  alters = dedupeRelations(alters, 'source');
-  alteredBy = dedupeRelations(alteredBy, 'target');
+  alters = dedupeRelations(alters, 'source').filter(
+    (rel) => !isAtypical(rel.relationType, currentHierarchyLevel, rel.targetAct?.hierarchyLevel),
+  );
+  alteredBy = dedupeRelations(alteredBy, 'target').filter(
+    (rel) => !isAtypical(rel.relationType, rel.sourceAct?.hierarchyLevel, currentHierarchyLevel),
+  );
 
-  if (alters.length === 0 && alteredBy.length === 0) {
-    return (
-      <div className="bg-surface-raised border border-border-subtle rounded-[6px] p-6 my-6">
-        <p className="text-sm text-ink-muted italic">
-          Sem relações detectadas com outros atos normativos da base.
-        </p>
-      </div>
-    );
-  }
+  if (alters.length === 0 && alteredBy.length === 0) return null;
 
   return (
-    <div className="bg-white border-2 border-border-subtle rounded-[6px] p-6 my-6 space-y-6">
+    <section className="bg-white border border-border-subtle rounded-[6px] px-4 py-6 sm:p-8 mb-6">
+      <h2 className="text-lg font-bold text-ink-primary">Relações com outros atos</h2>
+      <p className="text-sm text-ink-muted mt-1">
+        Identificadas automaticamente no texto dos atos. Confira no texto oficial.
+      </p>
+
       {alters.length > 0 && (
-        <section>
-          <h3 className="font-heading font-semibold text-lg text-ink-primary mb-3">
-            ✏️ Este ato afeta os seguintes atos:
-          </h3>
-          <p className="text-xs text-ink-muted mb-3 font-sans">
-            Inclui revogações, alterações, regulamentações, complementações e modificações — o tipo
-            específico é indicado pelo selo colorido em cada item.
-          </p>
-          <ul className="space-y-3">
-            {alters.map((rel) => (
-              <RelationItem
-                key={rel.id}
-                rel={rel}
-                otherAct={rel.targetAct!}
-                atypical={isAtypical(rel.relationType, currentHierarchyLevel, rel.targetAct?.hierarchyLevel)}
-              />
-            ))}
-          </ul>
-        </section>
+        <RelationGroup title="Atos afetados por este">
+          {alters.map((rel) => (
+            <RelationItem
+              key={rel.id}
+              verb={ACTIVE_LABELS[rel.relationType] ?? rel.relationType}
+              otherAct={rel.targetAct!}
+            />
+          ))}
+        </RelationGroup>
       )}
 
       {alteredBy.length > 0 && (
-        <section>
-          <h3 className="font-heading font-semibold text-lg text-ink-primary mb-3">
-            📌 Este ato é afetado pelos seguintes atos:
-          </h3>
-          <p className="text-xs text-ink-muted mb-3 font-sans">
-            Inclui atos que revogam, alteram, regulamentam, complementam ou modificam este — o tipo
-            específico é indicado pelo selo colorido em cada item.
-          </p>
-          <ul className="space-y-3">
-            {alteredBy.map((rel) => (
-              <RelationItem
-                key={rel.id}
-                rel={rel}
-                otherAct={rel.sourceAct!}
-                atypical={isAtypical(rel.relationType, rel.sourceAct?.hierarchyLevel, currentHierarchyLevel)}
-              />
-            ))}
-          </ul>
-        </section>
+        <RelationGroup title="Atos que afetam este">
+          {alteredBy.map((rel) => (
+            <RelationItem
+              key={rel.id}
+              verb={PASSIVE_LABELS[rel.relationType] ?? rel.relationType}
+              otherAct={rel.sourceAct!}
+            />
+          ))}
+        </RelationGroup>
       )}
+    </section>
+  );
+}
+
+function RelationGroup({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="mt-5">
+      <h3 className="text-sm font-semibold text-ink-secondary mb-2">{title}</h3>
+      <ul className="divide-y divide-border-subtle border-y border-border-subtle">{children}</ul>
     </div>
   );
 }
 
 function RelationItem({
-  rel,
+  verb,
   otherAct,
-  atypical,
 }: {
-  rel: RelationView;
+  verb: string;
   otherAct: { id: string; fullNumber: string; title: string };
-  atypical: boolean;
 }) {
-  const typeColor = TYPE_COLORS[rel.relationType] ?? 'bg-surface-deep text-ink-secondary border-border-subtle';
+  // Título que só repete a epígrafe não acrescenta nada ao número.
+  const subtitulo = subtituloDoAto(otherAct.title);
   return (
-    <li className={`border rounded-[6px] p-3 transition-colors ${atypical ? 'border-amber-accent bg-amber-accent-soft/50 hover:border-amber-accent' : 'border-border-subtle hover:border-brand-300'}`}>
-      <div className="flex items-start gap-2 flex-wrap">
-        <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded border ${typeColor}`}>
-          {TYPE_LABELS[rel.relationType] ?? rel.relationType}
-        </span>
-        {atypical && (
-          <span
-            className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-amber-accent-soft text-ink-primary border-amber-accent"
-            title="Relação hierarquicamente atípica: o ato de origem está em nível inferior ao ato afetado. Pode ser falso positivo do detector — verifique no texto."
-          >
-            ⚠️ atípico
-          </span>
-        )}
-        {rel.reviewStatus === 'pending' && (
-          <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded border bg-amber-accent-soft text-ink-primary border-amber-accent">
-            ⏳ pendente revisão
-          </span>
-        )}
+    <li className="py-2.5 flex flex-col sm:flex-row sm:items-baseline gap-x-3 gap-y-0.5">
+      <span className="text-sm text-ink-muted sm:w-36 shrink-0">{verb}</span>
+      <span className="min-w-0">
         <Link
           href={`/legislacao/${otherAct.id}`}
-          className="font-sans font-semibold text-brand-700 hover:underline"
+          className="font-semibold text-brand-700 hover:underline"
         >
           {otherAct.fullNumber}
         </Link>
-      </div>
-      <p className="text-sm text-ink-secondary mt-1 font-sans">{otherAct.title}</p>
-      <p className="text-xs text-ink-muted italic mt-1 font-sans">&ldquo;{rel.excerpt}&rdquo;</p>
+        {subtitulo && <span className="text-sm text-ink-secondary">{' · '}{subtitulo}</span>}
+      </span>
     </li>
   );
 }
