@@ -33,7 +33,9 @@
  *   npx tsx scripts/find-ons-dou-urls.ts --only 33/2011  # uma ON só
  *   npx tsx scripts/find-ons-dou-urls.ts --manual docs/audits/ons-manual.json
  *   npx tsx scripts/find-ons-dou-urls.ts --apply [--input <relatorio.json>]
- *   Flags: --headed (mostra o navegador), --no-wayback, --no-search
+ *   Flags: --headed (mostra o navegador), --no-wayback, --no-search,
+ *          --debug (mostra o que a busca do DOU devolveu e salva HTML/captura
+ *          em docs/audits/debug-dou/; usar com --only)
  *
  * Saída: docs/audits/<data>-ons-dou-urls-t2b.{json,md}
  * --apply relê o JSON do dry-run, revalida cada URL ao vivo e só então grava
@@ -83,6 +85,8 @@ function arg(name: string): string | undefined {
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
 const flag = (name: string) => process.argv.includes(name);
+const DEBUG = process.argv.includes('--debug');
+const DEBUG_DIR = path.join(process.cwd(), 'docs', 'audits', 'debug-dou');
 
 function normalize(s: string): string {
   return s
@@ -105,7 +109,8 @@ function overlap(enunciado: string | null, pageText: string): number | null {
 
 /** Slug do ato no in.gov.br compatível com número/ano (pré-filtro; a prova é a validação). */
 function slugMatches(url: string, n: number, year: number): boolean {
-  const re = new RegExp(`/orientacao-normativa(?:-agu)?-n-0*${n}-de-\\d{1,2}-de-[a-z]+-de-${year}(?:-\\d+)?/?$`, 'i');
+  // Tolera variações do título no DOU: "ORIENTAÇÃO NORMATIVA [AGU|CGU/AGU|...] Nº N".
+  const re = new RegExp(`/orientacao-normativa(?:-[a-z]+)*-n[o]?-0*${n}-de-\\d{1,2}o?-de-[a-z]+-de-${year}(?:-\\d+)?/?$`, 'i');
   return re.test(url.split(/[?#]/)[0]);
 }
 
@@ -134,6 +139,7 @@ async function searchDou(page: Page, n: number, year: number): Promise<string[]>
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
     await collect();
+    await debugSnapshot(page, `${n}-${year}-url-${queries.indexOf(q)}`, found);
 
     if (![...found].some((u) => slugMatches(u, n, year))) {
       // Fluxo de UI: a busca não responde de forma confiável à query string.
@@ -145,12 +151,30 @@ async function searchDou(page: Page, n: number, year: number): Promise<string[]>
         await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {});
         await page.waitForTimeout(2500);
         await collect();
+        await debugSnapshot(page, `${n}-${year}-ui-${queries.indexOf(q)}`, found);
+      } else if (DEBUG) {
+        console.log('   [debug] campo de busca não encontrado (seletores input[name="q"], #search-bar, [type=search])');
       }
     }
     if ([...found].some((u) => slugMatches(u, n, year))) break;
     await sleep(THROTTLE_MS);
   }
   return [...found].filter((u) => slugMatches(u, n, year));
+}
+
+/** --debug: mostra o que a busca devolveu e salva HTML + captura em docs/audits/debug-dou/. */
+async function debugSnapshot(page: Page, tag: string, found: Set<string>) {
+  if (!DEBUG) return;
+  fs.mkdirSync(DEBUG_DIR, { recursive: true });
+  const title = await page.title().catch(() => '');
+  const anchors = await page.$$eval('a[href]', (as) => as.length).catch(() => 0);
+  const texto = ((await page.innerText('body').catch(() => '')) || '').replace(/\s+/g, ' ');
+  console.log(`   [debug] ${tag}: url=${page.url()}`);
+  console.log(`   [debug] título="${title}" · links=${anchors} · links DOU coletados=${found.size}`);
+  for (const u of [...found].slice(0, 15)) console.log(`   [debug]   ${u}`);
+  console.log(`   [debug] texto: ${texto.slice(0, 600)}`);
+  fs.writeFileSync(path.join(DEBUG_DIR, `${tag}.html`), await page.content());
+  await page.screenshot({ path: path.join(DEBUG_DIR, `${tag}.png`), fullPage: true }).catch(() => {});
 }
 
 async function searchWayback(n: number, year: number): Promise<string[]> {
@@ -306,13 +330,12 @@ async function dryRun(browser: Browser, outBase: string) {
     if (!achou) {
       const motivo = base.candidatosTestados.length
         ? `candidatos reprovados na validação: ${falhas.join(' | ')}`
-        : on.onYear < 2017
-          ? 'nenhum candidato: ato anterior às páginas HTML do DOU (in.gov.br/web/dou); exige localizar a página do jornal (pesquisa.in.gov.br) e passar via --manual'
-          : `nenhum candidato na busca do DOU nem na Wayback${falhas.length ? ` (${falhas.join(' | ')})` : ''}`;
+        : `nenhum candidato na busca do DOU nem na Wayback${falhas.length ? ` (${falhas.join(' | ')})` : ''}` +
+          (on.onYear < 2017 ? '; se o ato não tiver página HTML no DOU, localizar a página do jornal (pesquisa.in.gov.br) e passar via --manual' : '');
       results.push({ ...base, motivo });
     }
     const last = results[results.length - 1];
-    console.log(`${label.padEnd(14)} ${last.status.padEnd(9)} ${last.url ?? last.motivo}`);
+    console.log(`${label.padEnd(14)} ${last.status.padEnd(9)} ${last.url ? `${last.url} [${last.fonte}]` : last.motivo}`);
   }
 
   await page.close();
