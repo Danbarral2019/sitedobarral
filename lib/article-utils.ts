@@ -55,9 +55,9 @@ export function getArticleBadgeClasses(numero: string, isPrimary: boolean = fals
   if (isPrimary) {
     const colorClasses = {
       blue: 'bg-brand-600 text-white',
-      green: 'bg-green-600 text-white',
-      yellow: 'bg-amber-accent text-white',
-      orange: 'bg-amber-accent text-white',
+      green: 'bg-green-700 text-white',
+      yellow: 'bg-amber-accent text-ink-primary',
+      orange: 'bg-amber-accent text-ink-primary',
       red: 'bg-red-600 text-white',
       purple: 'bg-brand-600 text-white',
       gray: 'bg-brand-800 text-white',

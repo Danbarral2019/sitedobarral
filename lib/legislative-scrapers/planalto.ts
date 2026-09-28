@@ -41,6 +41,12 @@ const CONTENT_SELECTORS = [
  * Elementos a serem removidos do conteúdo
  */
 const ELEMENTS_TO_REMOVE = [
+  // head/title/meta/link: sem eles o texto do documento inteiro ($.root())
+  // não carrega o <title> nem CSS como se fossem texto do ato.
+  'head',
+  'title',
+  'meta',
+  'link',
   'script',
   'style',
   'nav',
@@ -141,25 +147,29 @@ export class PlanaltoScraper implements LegislativeScraper {
       $(selector).remove();
     });
 
-    const bodyText = this.cleanText(blockAwareText($('body')));
+    // O cheerio 0.22 (htmlparser2) não reconstrói o HTML malformado do
+    // Planalto: no Código Civil compilado o texto vem depois de um </body>
+    // prematuro, e a página da Lei 10.973/2004 nem tem <body>. O texto de
+    // $('body') perdia a lei inteira; o do documento todo, não.
+    const docText = this.cleanText(blockAwareText($.root()));
 
     // Tentar cada seletor até encontrar conteúdo
     for (const selector of CONTENT_SELECTORS) {
       const element = $(selector);
       if (element.length > 0) {
         const text = this.cleanText(blockAwareText(element));
-        // Bloco com menos da metade do corpo é cabeçalho ou tabela lateral
+        // Bloco com menos da metade do documento é cabeçalho ou tabela lateral
         // ("Vigência", "Mensagem de veto"), não o texto do ato. Visto no
         // Código Civil compilado: o seletor de tabela devolvia 378 caracteres
         // e o texto da lei, solto no body, ficava de fora.
-        if (text.length > 100 && text.length >= bodyText.length * 0.5) {
+        if (text.length > 100 && text.length >= docText.length * 0.5) {
           return text;
         }
       }
     }
 
-    // Fallback: pegar todo o body
-    return bodyText;
+    // Fallback: o documento inteiro
+    return docText;
   }
 
   /**

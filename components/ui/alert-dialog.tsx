@@ -42,9 +42,9 @@ export function AlertDialog({
   };
 
   const variantStyles = {
-    danger: 'from-red-600 to-red-700 hover:from-red-700 hover:to-red-800',
-    warning: 'from-amber-accent to-amber-accent hover:from-amber-accent hover:to-amber-accent',
-    info: 'from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800',
+    danger: 'bg-red-600 hover:bg-red-700',
+    warning: 'bg-amber-accent-deep hover:bg-amber-accent-deep/90',
+    info: 'bg-brand-600 hover:bg-brand-700',
   };
 
   return (

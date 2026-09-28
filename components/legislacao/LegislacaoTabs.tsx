@@ -73,14 +73,14 @@ export function LegislacaoTabs({ activeTab, counts, onSwitch }: LegislacaoTabsPr
               className={`flex items-center gap-2 px-6 py-3 rounded-t-[6px] font-bold text-sm transition-colors ${
                 isActive
                   ? `bg-white ${tab.activeColor} border-2 border-b-0 border-border-subtle`
-                  : `bg-white/70 text-ink-muted ${tab.hoverText} hover:bg-white/90 border-2 border-transparent`
+                  : `bg-white/70 text-ink-secondary ${tab.hoverText} hover:bg-white/90 border-2 border-transparent`
               }`}
             >
               <Icon className="w-4 h-4" />
               {tab.label}
               <span
                 className={`px-2 py-0.5 rounded-full text-xs ${
-                  isActive ? tab.activeBadge : 'bg-surface-deep text-ink-muted'
+                  isActive ? tab.activeBadge : 'bg-surface-deep text-ink-secondary'
                 }`}
               >
                 {counts[tab.countKey]}

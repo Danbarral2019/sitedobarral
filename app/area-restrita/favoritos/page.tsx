@@ -493,7 +493,7 @@ export default function FavoritosPage() {
                                       onClick={() => toggleAnnotation(fav.id, fav.annotation)}
                                       className={`p-2 rounded-[6px] transition-colors ${
                                         fav.annotation
-                                          ? 'text-amber-accent-deep bg-amber-accent-soft hover:bg-amber-accent'
+                                          ? 'text-amber-accent-deep bg-amber-accent-soft hover:bg-amber-accent hover:text-ink-primary'
                                           : 'text-ink-muted hover:text-amber-accent-deep hover:bg-amber-accent-soft'
                                       }`}
                                       title={fav.annotation ? 'Editar anotacao' : 'Adicionar anotacao'}
