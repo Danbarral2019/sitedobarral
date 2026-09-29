@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { generateQueryEmbedding, embeddingToSql } from './gemini-embeddings';
 import { withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import type { Prisma } from '@prisma/client';
+import { atoVisivelSql } from '@/lib/legislacao/visibilidade';
 
 // ===========================
 // Whitelist: coluna de vetor (anti-injeção)
@@ -434,7 +435,7 @@ async function executeVectorSearch(
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
-        AND la."revoked" = false
+        AND ${atoVisivelSql('la')}
     )`);
 
     // Tiebreaker de hierarquia SÓ aqui (intra-atos): decide quais atos entram no

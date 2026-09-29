@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
+import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
 
 /**
  * GET /api/legislative-acts
@@ -116,8 +117,9 @@ async function fetchAtosNormativos(params: AtosParams) {
   const { type, issuer, year, search, articleNumber, esfera, theme, page, limit, skip, ticOnly, sort } = params;
 
   // Construir where clause
-  // revoked: false → atos totalmente revogados não aparecem nas visões públicas
-  const where: Record<string, unknown> = { revoked: false };
+  // Atos revogados não aparecem nas visões públicas, salvo os de consulta
+  // corrente (ver lib/legislacao/visibilidade.ts).
+  const where: Record<string, unknown> = { ...ATO_VISIVEL };
 
   if (type) where.type = type;
   if (issuer) where.issuer = issuer;
@@ -161,6 +163,7 @@ async function fetchAtosNormativos(params: AtosParams) {
         officialUrl: true,
         pdfUrl: true,
         viewCount: true,
+        revoked: true,
         esfera: true,
         themes: true,
         createdAt: true,
@@ -182,8 +185,8 @@ async function fetchAtosNormativos(params: AtosParams) {
 
   // Buscar estatísticas de filtros disponíveis (respeitando filtro TIC)
   const statsWhere: Record<string, unknown> = ticOnly
-    ? { revoked: false, themes: { contains: '"tic"' } }
-    : { revoked: false };
+    ? { ...ATO_VISIVEL, themes: { contains: '"tic"' } }
+    : { ...ATO_VISIVEL };
   const [typeStats, issuerStats, yearStats, esferaStats] = await Promise.all([
     prisma.legislativeAct.groupBy({
       by: ['type'],

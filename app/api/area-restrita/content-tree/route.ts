@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { courses } from '@/data/courses';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
+import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
 
 // Categorias que devem ser agrupadas sob "Pareceres"
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
       })(),
 
       // 6. Legislative Acts count (exclui revogados das visões públicas)
-      prisma.legislativeAct.count({ where: { revoked: false } }),
+      prisma.legislativeAct.count({ where: ATO_VISIVEL }),
 
       // 7. LMS modules count by course
       prisma.module.groupBy({

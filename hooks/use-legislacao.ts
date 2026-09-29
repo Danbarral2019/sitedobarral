@@ -22,6 +22,7 @@ export interface LegislativeAct {
   officialUrl: string | null;
   pdfUrl?: string | null;
   viewCount?: number;
+  revoked?: boolean;
   esfera?: string;
   themes?: string[];
   url?: string;
