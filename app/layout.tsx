@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import Analytics from "@/components/Analytics";
 import { LazyClientProviders } from "@/components/LazyClientProviders";
+import StyledJsxRegistry from "@/components/StyledJsxRegistry";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { getSiteUrl } from "@/lib/site-url";
@@ -117,18 +118,20 @@ export default function RootLayout({
         <Analytics />
         <VercelAnalytics />
         <SpeedInsights />
-        <ToastProviderWrapper>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <div id="main-content" className="flex-1">
-              {children}
+        <StyledJsxRegistry>
+          <ToastProviderWrapper>
+            <div className="min-h-screen flex flex-col">
+              <Header />
+              <div id="main-content" className="flex-1">
+                {children}
+              </div>
+              <Footer />
             </div>
-            <Footer />
-          </div>
-          <Toaster />
-          <ScrollToTop />
-          <LazyClientProviders />
-        </ToastProviderWrapper>
+            <Toaster />
+            <ScrollToTop />
+            <LazyClientProviders />
+          </ToastProviderWrapper>
+        </StyledJsxRegistry>
       </body>
     </html>
   );
