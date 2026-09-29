@@ -243,7 +243,7 @@ export default function PrivacidadePage() {
                 Podemos atualizar esta Política periodicamente. Mudanças relevantes serão
                 comunicadas por e-mail aos titulares com pelo menos <strong>30 dias de
                 antecedência</strong>. A versão mais recente está sempre disponível em{' '}
-                <Link href="/privacidade" className="text-brand-600 hover:underline">
+                <Link href="/privacidade" className="text-brand-600 hover:underline break-words">
                   {siteUrl.host}/privacidade
                 </Link>
                 .

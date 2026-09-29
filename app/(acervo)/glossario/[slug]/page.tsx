@@ -73,7 +73,7 @@ export default async function TermPage({ params }: { params: Promise<{ slug: str
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="bg-white rounded-[6px] border p-8 mb-6">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex flex-wrap items-start justify-between gap-y-2 mb-4">
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-ink-primary mb-3">
                 {term.term}
