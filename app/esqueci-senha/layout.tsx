@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
-  title: 'Área do Aluno',
+  title: 'Esqueci Minha Senha',
 };
 
-export default function LoginLayout({
+export default function EsqueciSenhaLayout({
   children,
 }: {
   children: React.ReactNode;

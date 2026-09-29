@@ -11,11 +11,12 @@ import { LazyClientProviders } from "@/components/LazyClientProviders";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { getSiteUrl } from "@/lib/site-url";
+import { TITLE_TEMPLATE } from "@/lib/site-metadata";
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
   title: {
-    template: '%s | Prof. Daniel Barral',
+    template: TITLE_TEMPLATE,
     default: 'Prof. Daniel Barral - Especialista em Licitações e Contratos',
   },
   manifest: '/manifest.webmanifest',

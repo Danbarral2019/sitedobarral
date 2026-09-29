@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -20,14 +21,21 @@ interface RelatedTerm {
   category?: string;
 }
 
-// Sem isto o termo herda o canonical '/glossario' do layout, e os buscadores
-// tratam todas as páginas de termo como cópias da listagem.
+// Sem isto o termo herda título e canonical do layout ('/glossario'), e os
+// buscadores tratam todas as páginas de termo como cópias da listagem.
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  return { alternates: { canonical: `/glossario/${slug}` } };
+  const term = await getTermBySlug(slug);
+  return {
+    ...(term && { title: term.term, description: term.shortDef || undefined }),
+    alternates: { canonical: `/glossario/${slug}` },
+  };
 }
 
-async function getTermBySlug(slug: string) {
+// `cache`: generateMetadata e a página leem o termo na mesma requisição com
+// uma só chamada. A API incrementa viewCount a cada GET; sem o cache, cada
+// acesso contaria duas vezes.
+const getTermBySlug = cache(async (slug: string) => {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/glossary/${slug}`, {
@@ -44,7 +52,7 @@ async function getTermBySlug(slug: string) {
     console.error('Error fetching term:', error);
     return null;
   }
-}
+});
 
 export default async function TermPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

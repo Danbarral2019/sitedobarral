@@ -1,4 +1,9 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Pagamento Não Concluído',
+};
 
 export default function AssinaturaCanceladoPage() {
   return (

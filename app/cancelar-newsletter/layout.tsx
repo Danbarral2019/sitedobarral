@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
-  title: 'Área do Aluno',
+  title: 'Cancelar Inscrição na Newsletter',
 };
 
-export default function LoginLayout({
+export default function CancelarNewsletterLayout({
   children,
 }: {
   children: React.ReactNode;

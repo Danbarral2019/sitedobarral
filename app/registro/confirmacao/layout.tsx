@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
-  title: 'Área do Aluno',
+  title: 'Conta Criada',
 };
 
-export default function LoginLayout({
+export default function RegistroConfirmacaoLayout({
   children,
 }: {
   children: React.ReactNode;
