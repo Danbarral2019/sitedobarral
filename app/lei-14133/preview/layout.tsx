@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
-  title: 'Área do Aluno',
+  title: 'Lei 14.133/2021 (prévia)',
 };
 
-export default function LoginLayout({
+export default function Lei14133PreviewLayout({
   children,
 }: {
   children: React.ReactNode;

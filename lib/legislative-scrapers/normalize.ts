@@ -113,6 +113,19 @@ export function collapseWhitespace(text: string): string {
 }
 
 /**
+ * Separa "caput" colado às palavras vizinhas.
+ *
+ * Em textos do DOU o termo vem em itálico e, extraído como texto, perde os
+ * espaços em volta: "do inciso I docaputdo art. 7º", "ocaputserá" (visto na
+ * Lei 15.503/2026, importada em 26 de setembro de 2026). Nenhuma palavra do
+ * português contém "caput", então a letra minúscula colada antes ou depois é
+ * sempre de outra palavra. Maiúsculas não são tocadas (títulos em caixa alta).
+ */
+export function separarCaputColado(text: string): string {
+  return text.replace(/(\p{Ll})caput/gu, '$1 caput').replace(/caput(\p{Ll})/gu, 'caput $1');
+}
+
+/**
  * Remove caracteres invisíveis que sobrevivem a collapseWhitespace mas poluem
  * busca, quebram word-break do CSS e atrapalham diff entre versões.
  *

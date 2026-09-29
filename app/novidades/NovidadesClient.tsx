@@ -19,8 +19,8 @@ interface NovidadesClientProps {
     id: string;
     title: string;
     tribunalCode: string;
-    summary: string | null;
-    ementa: string;
+    /** Trecho já recortado no servidor (ver trechoDaDecisao em page.tsx). */
+    trecho: string;
     createdAt: Date;
   }>;
   blogPosts: Array<{
@@ -234,9 +234,7 @@ export default function NovidadesClient({
                   </span>
                 </div>
                 <h4 className="font-semibold text-ink-primary text-sm leading-relaxed">{decision.title}</h4>
-                <p className="text-sm text-ink-muted mt-1 line-clamp-3">
-                  {decision.summary || decision.ementa.substring(0, 250)}{(!decision.summary && decision.ementa.length > 250) ? '...' : ''}
-                </p>
+                <p className="text-sm text-ink-muted mt-1 line-clamp-3">{decision.trecho}</p>
                 <p className="text-xs text-ink-muted mt-2">{formatDate(decision.createdAt)}</p>
               </div>
             ))}

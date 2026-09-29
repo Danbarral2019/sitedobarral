@@ -10,6 +10,7 @@ import {
   dedupeBoilerplateFooter,
   normalizeScrapedText,
   detectCharsetFromResponse,
+  separarCaputColado,
 } from '../../lib/legislative-scrapers/normalize';
 
 function buf(str: string): ArrayBuffer {
@@ -319,6 +320,24 @@ describe('stripGovbrUiNoise', () => {
     const out = stripGovbrUiNoise(input);
     expect(out).toContain('marcador único');
     expect(out).toContain('segundo bullet');
+  });
+});
+
+describe('separarCaputColado', () => {
+  it('separa caput colado antes e depois (DOU)', () => {
+    expect(separarCaputColado('do inciso I docaputdo art. 7º')).toBe('do inciso I do caput do art. 7º');
+    expect(separarCaputColado('de que trata ocaputpoderão')).toBe('de que trata o caput poderão');
+    expect(separarCaputColado('referidos ocaput, o prazo')).toBe('referidos o caput, o prazo');
+    expect(separarCaputColado('previsto nocaputdeste artigo')).toBe('previsto no caput deste artigo');
+  });
+
+  it('não altera caput já separado nem palavras sem o termo', () => {
+    const texto = 'art. 84, caput, inciso IV; capturar e capitular; do caput do art. 7º';
+    expect(separarCaputColado(texto)).toBe(texto);
+  });
+
+  it('não toca caixa alta', () => {
+    expect(separarCaputColado('TÍTULO CAPUTXYZ')).toBe('TÍTULO CAPUTXYZ');
   });
 });
 

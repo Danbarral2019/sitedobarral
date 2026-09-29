@@ -2,6 +2,11 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { verifyUnsubscribeToken } from '@/lib/clipping/unsubscribe-token';
 import { isAdminRecipientId } from '@/lib/clipping/recipients';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Cancelar Inscrição no Clipping',
+};
 
 export const dynamic = 'force-dynamic';
 

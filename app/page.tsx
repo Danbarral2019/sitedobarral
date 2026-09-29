@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ArrowRight, BookOpen, Star, Scale, BookMarked, FileCheck, Landmark, ScrollText, Gavel, FileText, Building2 } from 'lucide-react';
 import NewsletterForm from '@/components/NewsletterForm';
@@ -15,6 +16,14 @@ import {
 
 // Revalidate every 1 hour so novidades section stays fresh
 export const revalidate = 3600;
+
+// O canonical do layout raiz é um URL, que o Next resolve com o pathname da
+// rota. Quando a home é regenerada (ISR), esse pathname pode chegar como
+// "/index", e o canonical saía .../index em produção. A string '/' não
+// depende do pathname e resolve sempre para a raiz do site.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 // Lazy load do carrossel de depoimentos (otimização de performance)
 const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCarousel'), {

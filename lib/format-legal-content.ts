@@ -1,4 +1,5 @@
 import { startsWithEpigrafe } from './legislative-scrapers/extract-ementa';
+import { separarCaputColado } from './legislative-scrapers/normalize';
 
 /**
  * Nota de alteração do texto compilado do Planalto: "(Incluído pela Lei nº
@@ -226,8 +227,9 @@ export function formatLegalContent(rawContent: string): string {
       prevWasHeader = false;
       continue;
     }
-    // E — caput em itálico (word boundary)
-    p = p.replace(/\bcaput\b/g, '*caput*');
+    // E — caput em itálico (word boundary). Atos já importados do DOU trazem o
+    // termo colado às palavras vizinhas ("docaputdo"); separar antes do itálico.
+    p = separarCaputColado(p).replace(/\bcaput\b/g, '*caput*');
     // C — [...] (com ou sem espaços) vira :omitido
     p = p.replace(/\[\s*\.{3,}\s*\]/g, ':omitido');
     // D — (NR) no fim do parágrafo vira diretiva inline

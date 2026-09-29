@@ -1,6 +1,11 @@
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import ValidarAcessoForm from './ValidarAcessoForm';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Primeiro Acesso',
+};
 
 /**
  * Valida QR Code no servidor

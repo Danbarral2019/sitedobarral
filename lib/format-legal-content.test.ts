@@ -23,6 +23,19 @@ describe('formatLegalContent', () => {
       expect(output).toContain('capturar');
       expect(output).toContain('capitular');
     });
+
+    it('separa caput colado às palavras vizinhas (atos importados do DOU)', () => {
+      // Casos reais da Lei 15.503/2026 em produção.
+      expect(formatLegalContent('A alínea "j" do inciso I docaputdo art. 7º da Lei nº 12.087.')).toContain(
+        'do inciso I do *caput* do art. 7º',
+      );
+      expect(formatLegalContent('As entidades de que trata ocaputserão credenciadas.')).toContain(
+        'de que trata o *caput* serão credenciadas',
+      );
+      expect(formatLegalContent('Nos termos referidos ocaput, o prazo é de 30 dias.')).toContain(
+        'referidos o *caput*, o prazo',
+      );
+    });
   });
 
   describe('[...] → :omitido', () => {

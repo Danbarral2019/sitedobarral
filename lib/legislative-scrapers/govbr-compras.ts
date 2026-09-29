@@ -7,7 +7,7 @@
 
 import * as cheerio from 'cheerio';
 import { computeHash } from './change-detector';
-import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace, detectCharsetFromResponse, blockAwareText } from './normalize';
+import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace, detectCharsetFromResponse, blockAwareText, separarCaputColado } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
 
 /**
@@ -222,6 +222,6 @@ export class GovBrComprasScraper implements LegislativeScraper {
    * Limpa e normaliza o texto extraído
    */
   private cleanText(text: string): string {
-    return collapseWhitespace(text);
+    return separarCaputColado(collapseWhitespace(text));
   }
 }

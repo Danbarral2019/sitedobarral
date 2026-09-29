@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 import { getSiteUrl } from '@/lib/site-url';
+import { artigoIndexavel, urlDoArtigo } from '@/lib/lei-14133/metadados-artigo';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,8 +122,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { numero: true, updatedAt: true },
     });
 
-    articlePages = articles.map((article) => ({
-      url: absoluteUrl(`/artigo/${article.numero}`),
+    // /artigo/N redireciona; o sitemap aponta direto para a URL canônica do artigo.
+    articlePages = articles.filter((article) => artigoIndexavel(article.numero)).map((article) => ({
+      url: absoluteUrl(urlDoArtigo(article.numero)),
       lastModified: article.updatedAt,
       changeFrequency: 'monthly',
       priority: 0.7,
