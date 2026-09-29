@@ -26,6 +26,7 @@ export function LegislativeActResultCard({ act, query }: LegislativeActResultCar
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-ink-primary text-sm">
             {highlightText(act.fullNumber, query)}
+            {act.revoked && <span className="ml-2 text-xs font-semibold text-status-error">Revogado</span>}
           </h4>
           <p className="text-sm text-ink-muted mt-1 line-clamp-3">
             {highlightText(act.ementa.slice(0, 250), query)}

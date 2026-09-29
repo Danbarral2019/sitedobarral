@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { generateQueryEmbedding, embeddingToSql } from './gemini-embeddings';
 import { withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import type { Prisma } from '@prisma/client';
-import { atoVisivelSql } from '@/lib/legislacao/visibilidade';
+import { atoVisivelSql, ressalvaDeRevogacaoSql } from '@/lib/legislacao/visibilidade';
 
 // ===========================
 // Whitelist: coluna de vetor (anti-injeção)
@@ -421,7 +421,9 @@ async function executeVectorSearch(
         la.id as document_id,
         la."fullNumber" as document_title,
         la.type as category,
-        lc.content as chunk_content,
+        -- Ato revogado ainda visível (Lei 8.666/1993): o trecho leva a ressalva,
+        -- para o assistente não o tratar como norma em vigor.
+        ${ressalvaDeRevogacaoSql('la')} || lc.content as chunk_content,
         lc."chunkIndex" as chunk_index,
         (1 - (lc.${vcol} <=> '${embeddingStr}'::vector)) as similarity,
         la."officialUrl" as url,

@@ -151,6 +151,8 @@ export interface LegislativeActResult {
   leiArticles: string[];
   officialUrl?: string | null;
   pdfUrl?: string | null;
+  /** Revogado ainda visível (Lei 8.666/1993): o card mostra a marca. */
+  revoked?: boolean;
 }
 
 export interface FAQResult {

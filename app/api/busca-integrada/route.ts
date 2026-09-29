@@ -146,6 +146,7 @@ export async function GET(request: NextRequest) {
           type: data.type,
           issuer: data.issuer,
           publishDate: data.publish_date,
+          revoked: data.revoked,
         })),
         documents: documentosFinais,
         teses,

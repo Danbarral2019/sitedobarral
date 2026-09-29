@@ -11,6 +11,7 @@ import { generateQueryEmbedding, embeddingToSql } from '@/lib/embeddings/gemini-
 import { getLeiArticles } from '@/lib/lei-articles';
 import { getHierarchyInfo } from '@/lib/legislative-acts/hierarchy';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
+import { atoVisivelSql, ressalvaDeRevogacao } from '@/lib/legislacao/visibilidade';
 
 // ===========================
 // Types
@@ -199,12 +200,16 @@ export async function findRelatedActs(
     official_url: string | null;
     lei_articles: string | null;
     hierarchy_level: number;
+    revoked: boolean;
+    revoked_note: string | null;
   }>>(`
     SELECT "fullNumber" as full_number, ementa, "officialUrl" as official_url,
-           to_jsonb("leiArticlesArr")::text as lei_articles, "hierarchyLevel" as hierarchy_level
+           to_jsonb("leiArticlesArr")::text as lei_articles, "hierarchyLevel" as hierarchy_level,
+           revoked, "revokedNote" as revoked_note
     FROM "LegislativeAct"
     WHERE (${articleConditions})
       AND "fullNumber" NOT IN (${excludeTitles})
+      AND ${atoVisivelSql()}
     LIMIT ${limit * 3}
   `);
 
@@ -219,7 +224,7 @@ export async function findRelatedActs(
     const matchCount = actArticles.filter(a => articleNumbers.includes(a)).length;
     return {
       title: act.full_number,
-      ementa: act.ementa,
+      ementa: ressalvaDeRevogacao(act.revoked, act.revoked_note) + act.ementa,
       url: act.official_url || '',
       leiArticles: actArticles,
       hierarchyLevel: act.hierarchy_level,
