@@ -11,7 +11,8 @@ import type { Metadata } from 'next';
 export const TITLE_TEMPLATE = '%s | Prof. Daniel Barral';
 
 /**
- * Páginas de conta, pagamento e descadastro: fora do índice, links seguidos.
+ * Páginas de conta, pagamento, descadastro e protótipos: fora do índice,
+ * links seguidos.
  *
  * O `noindex` só funciona se o buscador puder rastrear a página. Bloqueada no
  * robots.txt, ela não é lida, e a URL pode aparecer nos resultados sem o
