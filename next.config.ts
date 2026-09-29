@@ -1,10 +1,19 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from "@sentry/nextjs";
+import { HTML_LIMITED_BOT_UA_RE } from 'next/dist/shared/lib/router/utils/html-bots';
 
 const nextConfig: NextConfig = {
   // Source maps apenas server-side (Sentry via hideSourceMaps, não expõe no browser)
   productionBrowserSourceMaps: false,
+
+  // Nas páginas com `generateMetadata`, o Next envia <title>, descrição e
+  // canonical depois do <head>, no corpo do HTML, e só os põe no <head> para
+  // os robôs desta lista. A lista padrão não inclui o Googlebot (que executa
+  // JavaScript), e o Google só aceita o canonical declarado no <head>. Mantém
+  // a lista do Next (importada, para acompanhar as atualizações) e acrescenta
+  // o Googlebot.
+  htmlLimitedBots: new RegExp(`${HTML_LIMITED_BOT_UA_RE.source}|Googlebot`, 'i'),
 
   typescript: {
     ignoreBuildErrors: false,
