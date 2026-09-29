@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { getSiteUrl } from '@/lib/site-url';
+import { artigosIndexaveis, urlDoArtigo } from '@/lib/lei-14133/metadados-artigo';
 
 /**
  * GET /sitemap-artigos.xml
@@ -10,9 +10,10 @@ export async function GET() {
   const baseUrl = getSiteUrl();
 
   // Gera URLs para todos os artigos
-  const articleUrls = Object.keys(LEI_14133_ARTIGOS).map((numero) => {
+  // /artigo/N redireciona; o sitemap aponta direto para a URL canônica do artigo.
+  const articleUrls = artigosIndexaveis().map((numero) => {
     return `  <url>
-    <loc>${new URL(`/artigo/${numero}`, baseUrl).toString()}</loc>
+    <loc>${new URL(urlDoArtigo(numero), baseUrl).toString()}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
