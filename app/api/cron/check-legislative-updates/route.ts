@@ -115,6 +115,8 @@ export async function GET(request: NextRequest) {
                 content: result.content,
                 contentHash: result.hash,
                 changeDetectedAt: new Date(),
+                // Texto novo, índice velho: o cron process-index-jobs refaz.
+                embeddingStatus: 'pending',
               }),
             },
           });
