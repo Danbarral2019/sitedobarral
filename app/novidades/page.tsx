@@ -46,6 +46,15 @@ function parseMonth(mes?: string): { year: number; month: number } {
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
 }
 
+// Três linhas de text-sm na coluna max-w-4xl comportam cerca de 370
+// caracteres; 500 sobra folga sem mudar o que o line-clamp exibe.
+const LIMITE_RESUMO = 500;
+
+function trechoDaDecisao(summary: string | null, ementa: string): string {
+  if (summary) return summary.length > LIMITE_RESUMO ? summary.slice(0, LIMITE_RESUMO) : summary;
+  return ementa.length > 250 ? `${ementa.substring(0, 250)}...` : ementa;
+}
+
 export default async function NovidadesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const { year, month } = parseMonth(params.mes);
@@ -138,6 +147,15 @@ export default async function NovidadesPage({ searchParams }: { searchParams: Pr
     // Database unavailable (e.g. CI build)
   }
 
+  // A lista mostra de cada decisão só o resumo (limitado a três linhas) ou os
+  // 250 primeiros caracteres da ementa. Enviar os textos inteiros ao cliente
+  // levava a página a 6,8 MB de HTML em setembro de 2026 (1.494 decisões,
+  // ementas de até 46 mil caracteres); agora vai só o trecho exibido.
+  const decisoes = tribunalDecisions.map(({ summary, ementa, ...resto }) => ({
+    ...resto,
+    trecho: trechoDaDecisao(summary, ementa),
+  }));
+
   // Group documents by category
   const documentsByCategory: Record<string, typeof documents> = {};
   for (const doc of documents) {
@@ -154,7 +172,7 @@ export default async function NovidadesPage({ searchParams }: { searchParams: Pr
       year={year}
       month={month}
       documentsByCategory={documentsByCategory}
-      tribunalDecisions={tribunalDecisions}
+      tribunalDecisions={decisoes}
       blogPosts={blogPosts}
       publications={publications}
       videos={videos}
