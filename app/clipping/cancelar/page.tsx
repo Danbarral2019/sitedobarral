@@ -3,9 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { verifyUnsubscribeToken } from '@/lib/clipping/unsubscribe-token';
 import { isAdminRecipientId } from '@/lib/clipping/recipients';
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/lib/site-metadata';
 
 export const metadata: Metadata = {
   title: 'Cancelar Inscrição no Clipping',
+  robots: NOINDEX,
 };
 
 export const dynamic = 'force-dynamic';

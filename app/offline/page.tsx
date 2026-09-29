@@ -1,8 +1,10 @@
 import { ReloadButton } from './ReloadButton';
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/lib/site-metadata';
 
 export const metadata: Metadata = {
   title: 'Sem Conexão',
+  robots: NOINDEX,
 };
 
 export default function OfflinePage() {

@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/lib/site-metadata';
 
 export const metadata: Metadata = {
   title: 'Pagamento Pendente',
+  robots: NOINDEX,
 };
 
 export default function AssinaturaPendentePage() {
