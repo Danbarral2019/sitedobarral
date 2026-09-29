@@ -189,8 +189,9 @@ export default async function LegislativeActPage({ params }: PageProps) {
           Voltar para Legislação
         </Link>
 
-        {/* Aviso de ato revogado: o ato continua acessível por link direto,
-            mas não aparece em buscas nem listagens públicas. */}
+        {/* Aviso de ato revogado. O ato continua acessível por link direto;
+            nas buscas e listagens públicas, só o de consulta corrente
+            (`revokedVisible`, ver lib/legislacao/visibilidade.ts). */}
         {act.revoked && (
           <div
             role="note"
@@ -199,7 +200,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
             <p className="font-semibold">Ato revogado</p>
             <p className="text-sm mt-1">
               {act.revokedNote ? act.revokedNote.trim().replace(/\.?$/, '.') : 'Este ato normativo foi revogado e não está mais em vigor.'}
-              {' '}Mantido na base para consulta histórica.
+              {' '}Mantido na base para consulta.
               {revogador && (
                 <>
                   {' '}

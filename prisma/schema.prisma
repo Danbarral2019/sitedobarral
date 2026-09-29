@@ -830,6 +830,9 @@ model LegislativeAct {
   // manual: as relações 'revoga' têm muito falso positivo (revogação parcial).
   revoked     Boolean @default(false)
   revokedNote String? // Texto opcional p/ o banner (ex: "Revogado pelo Decreto 11.951/2024")
+  // Revogado, mas ainda de consulta corrente (Lei 8.666/1993, que rege os
+  // contratos da transição): segue na listagem e na busca, com o aviso.
+  revokedVisible Boolean @default(false)
 
   // Scraping e atualização automática
   contentHash      String? // Hash MD5 para detectar mudanças no texto

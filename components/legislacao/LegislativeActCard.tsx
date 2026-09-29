@@ -73,8 +73,11 @@ export function LegislativeActCard({ act }: LegislativeActCardProps) {
         <p className="text-sm text-ink-secondary mt-1 line-clamp-2 max-w-[75ch]">{ementa}</p>
       )}
 
-      {(meta.length > 0 || act.leiArticles.length > 0) && (
+      {(act.revoked || meta.length > 0 || act.leiArticles.length > 0) && (
         <p className="text-sm text-ink-muted mt-1.5">
+          {/* Só chega à listagem o revogado de consulta corrente (Lei 8.666/1993). */}
+          {act.revoked && <span className="font-semibold text-status-error">Revogado</span>}
+          {act.revoked && (meta.length > 0 || act.leiArticles.length > 0) && ' · '}
           {meta.join(' · ')}
           {meta.length > 0 && act.leiArticles.length > 0 && ' · '}
           {act.leiArticles.length > 0 && artigosDaLei(act.leiArticles)}
