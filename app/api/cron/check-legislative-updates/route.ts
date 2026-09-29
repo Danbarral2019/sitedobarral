@@ -12,14 +12,23 @@ import { apiLogger } from '@/lib/logger';
  * GET /api/cron/check-legislative-updates
  *
  * Cron job para verificar automaticamente atualizações em atos normativos.
- * - Processa até 10 atos por execução
- * - Verifica apenas atos não checados há 7+ dias
- * - Adiciona delay de 2s entre requisições para evitar rate limiting
- *
- * Configurar no Vercel Cron ou outro serviço:
- * Schedule: 0 3 * * 1 (toda segunda-feira às 3h)
+ * - Roda todo dia (vercel.json) e confere até LOTE atos não checados há 7+
+ *   dias, os mais antigos primeiro, dentro de PRAZO_MS. Com ~280 atos, o
+ *   acervo inteiro é conferido em cerca de uma semana. Antes eram 10 atos por
+ *   semana: cada ato era revisto a cada seis meses, e alteração de IN ou
+ *   portaria demorava meses para chegar ao site.
+ * - Delay de 2s entre requisições para evitar rate limiting
  */
+export const maxDuration = 300;
+
+/** Atos por execução; o prazo abaixo interrompe antes, se o lote demorar. */
+const LOTE = 40;
+/** Margem de 60 s sob o maxDuration para a segunda passagem e a resposta. */
+const PRAZO_MS = 240_000;
+
 export async function GET(request: NextRequest) {
+  const inicio = Date.now();
+  const dentroDoPrazo = () => Date.now() - inicio < PRAZO_MS;
   // Verificar autenticação via CRON_SECRET (fora do telemetry)
   const authError = verifyCronAuth(request);
   if (authError) return authError;
@@ -49,7 +58,7 @@ export async function GET(request: NextRequest) {
         content: true,
         contentHash: true,
       },
-      take: 10, // Limitar a 10 por execução
+      take: LOTE,
       orderBy: [
         { lastScrapedAt: 'asc' }, // Mais antigos primeiro
       ],
@@ -66,8 +75,17 @@ export async function GET(request: NextRequest) {
     }[] = [];
 
     for (const act of actsToCheck) {
+      // Os que ficarem de fora seguem os mais antigos e entram na próxima execução.
+      if (!dentroDoPrazo()) break;
+
       // Verificar se temos scraper para esta URL
       if (!act.officialUrl || !canScrapeUrl(act.officialUrl)) {
+        // Registra a tentativa: sem isso o ato fica para sempre no topo da
+        // fila (mais antigo primeiro) e ocupa uma vaga do lote a cada execução.
+        await prisma.legislativeAct.update({
+          where: { id: act.id },
+          data: { lastScrapedAt: new Date(), scrapeError: 'URL sem scraper' },
+        });
         results.push({
           id: act.id,
           fullNumber: act.fullNumber,
@@ -177,6 +195,7 @@ export async function GET(request: NextRequest) {
       console.log(`[Cron Legislative] Preenchendo backlog: ${backlogActs.length} atos sem conteúdo`);
 
       for (const act of backlogActs) {
+        if (!dentroDoPrazo()) break;
         try {
           const res = await scrapeAndIndexAct(act.id);
           backlogResults.push({ id: act.id, fullNumber: act.fullNumber, ...res });
@@ -219,10 +238,10 @@ export async function GET(request: NextRequest) {
         backlogResults,
       };
       return {
-        itemsFound: (stats as { checked?: number }).checked ?? 0,
-        itemsNew: (stats as { updated?: number }).updated ?? 0,
-        itemsError: (stats as { errors?: number }).errors ?? 0,
-        metadata: { backlogResults: backlogResults.length },
+        itemsFound: stats.total,
+        itemsNew: stats.changed,
+        itemsError: stats.failed,
+        metadata: { backlogResults: backlogResults.length, pendentesNoLote: actsToCheck.length - results.length },
       };
     });
     return NextResponse.json(responseBody);

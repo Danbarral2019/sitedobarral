@@ -37,6 +37,7 @@ interface SearchResults {
       type: string;
       issuer: string;
       publishDate: string;
+      revoked?: boolean;
     }>;
     documents: Array<{
       id: string;
@@ -559,6 +560,9 @@ function BuscaIntegradaContent() {
                             {act.type.toUpperCase()}
                           </div>
                           <div className="text-center text-xs text-ink-muted mt-1">{act.fullNumber}</div>
+                          {act.revoked && (
+                            <div className="text-center text-xs font-semibold text-status-error mt-0.5">Revogado</div>
+                          )}
                         </div>
                         <div className="flex-1">
                           <h3 className="font-bold text-ink-primary mb-1 group-hover:text-brand-700 transition-colors">

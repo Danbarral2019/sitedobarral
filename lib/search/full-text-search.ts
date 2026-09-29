@@ -74,6 +74,7 @@ interface LegislativeActRow {
   lei_articles: string | null;
   official_url: string | null;
   pdf_url: string | null;
+  revoked: boolean;
   rank: number;
 }
 
@@ -251,6 +252,7 @@ export async function searchLegislativeActs(
       to_jsonb("leiArticlesArr")::text as lei_articles,
       "officialUrl" as official_url,
       "pdfUrl" as pdf_url,
+      revoked,
       ts_rank(search_vector, ${buildTsQueryExpr(1)}) as rank
     FROM "LegislativeAct"
     WHERE search_vector @@ ${buildTsQueryExpr(1)}

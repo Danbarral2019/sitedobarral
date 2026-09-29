@@ -32,6 +32,7 @@ import { anexarEvidenciaDasTeses, costurarEvidencia } from './evidencia-da-tese'
 import { hashQueryStr, diversifyResults, generateExcerpt } from './util';
 import { detectQueryDomain, type QueryScope } from './domain-detection';
 import type { AssembleAnswerInput, AnswerContext, DocumentResult } from './types';
+import { ATO_VISIVEL, ressalvaDeRevogacao } from '@/lib/legislacao/visibilidade';
 
 /**
  * Executa retrieval + montagem de contexto + construção do prompt para uma
@@ -383,8 +384,8 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     if (filters.ticMode) {
       try {
         const ticActs = await prisma.legislativeAct.findMany({
-          where: { themes: { contains: '"tic"' } },
-          select: { fullNumber: true, ementa: true, officialUrl: true, leiArticlesArr: true },
+          where: { ...ATO_VISIVEL, themes: { contains: '"tic"' } },
+          select: { fullNumber: true, ementa: true, officialUrl: true, leiArticlesArr: true, revoked: true, revokedNote: true },
           orderBy: { hierarchyLevel: 'asc' },
           take: 10,
         });
@@ -393,7 +394,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
             ticActs.map(act => {
               const arts = getLeiArticles(act);
               const artsStr = arts.length > 0 ? ` (Art. ${arts.join(', ')})` : '';
-              return `**${act.fullNumber}**${artsStr}\n${act.ementa}`;
+              return `**${act.fullNumber}**${artsStr}\n${ressalvaDeRevogacao(act.revoked, act.revokedNote)}${act.ementa}`;
             }).join('\n\n');
           apiLogger.debug({ ticActsCount: ticActs.length }, 'TIC context enriched');
         }

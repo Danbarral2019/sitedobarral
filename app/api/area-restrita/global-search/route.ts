@@ -342,6 +342,7 @@ export async function GET(request: NextRequest) {
                 leiArticles: parseLeiArticles(act.lei_articles),
                 officialUrl: act.official_url,
                 pdfUrl: act.pdf_url,
+                revoked: act.revoked,
               } as LegislativeActResult,
             });
           });

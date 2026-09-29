@@ -13,3 +13,19 @@ export function atoVisivelSql(alias?: string): string {
   const col = (c: string) => (alias ? `${alias}."${c}"` : `"${c}"`);
   return `NOT (${col('revoked')} AND NOT ${col('revokedVisible')})`;
 }
+
+/**
+ * Ressalva que acompanha o texto de ato revogado no contexto do assistente e
+ * nos resultados de busca, para o ato visível (Lei 8.666/1993) não ser lido
+ * como norma em vigor. Vazia para ato vigente.
+ */
+export function ressalvaDeRevogacao(revoked: boolean, nota: string | null | undefined): string {
+  if (!revoked) return '';
+  const n = nota?.trim().replace(/\.$/, '');
+  return n ? `[Ato revogado: ${n}.] ` : '[Ato revogado.] ';
+}
+
+/** A mesma ressalva em SQL, seguida de quebra de linha; '' para ato vigente. */
+export function ressalvaDeRevogacaoSql(alias: string): string {
+  return `CASE WHEN ${alias}."revoked" THEN '[Ato revogado' || COALESCE(': ' || NULLIF(RTRIM(TRIM(${alias}."revokedNote"), '.'), ''), '') || '.]' || E'\\n' ELSE '' END`;
+}
