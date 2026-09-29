@@ -142,13 +142,17 @@ export class PlanaltoScraper implements LegislativeScraper {
    */
   private extractContent(html: string): string {
     const $ = this.loadClean(html);
-    const fullText = blockAwareText($.root()).length;
+    // Só caracteres visíveis: a indentação e as quebras do HTML do Planalto
+    // pesavam mais que o texto e escondiam o ato riscado por inteiro
+    // (Decreto 11.317/2022 caía de 2.225 para 208 caracteres).
+    const visiveis = (root: cheerio.Root) => blockAwareText(root.root()).replace(/\s+/g, '').length;
+    const fullText = visiveis($);
 
     // Redação superada, riscada no texto compilado, não é texto vigente
     // (ver texto-riscado.ts). Se o riscado for quase tudo, o ato inteiro foi
     // revogado e o Planalto risca o corpo; aí o texto histórico fica.
     removerTextoRiscado($);
-    if (blockAwareText($.root()).length < fullText * 0.2) {
+    if (visiveis($) < fullText * 0.2) {
       return this.extractFrom(this.loadClean(html));
     }
     return this.extractFrom($);

@@ -69,6 +69,17 @@ describe('PlanaltoScraper: texto riscado', () => {
     expect(out).toContain('219-A');
   });
 
+  it('corpo riscado em HTML indentado (espaços não contam na proporção) conserva o texto histórico', () => {
+    // Decreto 11.317/2022 no dry-run: 2.225 → 208 caracteres. O HTML do
+    // Planalto tem indentação e quebras que pesavam mais que o próprio texto.
+    const pad = '\n' + ' '.repeat(400) + '\n';
+    const corpo = Array.from({ length: 10 }, (_, i) =>
+      `${pad}<p>${pad}<strike>${pad}Art. ${i + 1}º Texto revogado do artigo ${i + 1}, com a redação original do decreto.${pad}</strike>${pad}</p>`,
+    ).join('');
+    const out = extract(`<html><body>${pad}<p>Presidência da República</p>${pad}<p>Casa Civil</p>${pad}<p>DECRETO Nº 11.317, DE 29 DE DEZEMBRO DE 2022</p>${corpo}</body></html>`);
+    expect(out).toContain('Art. 10º Texto revogado');
+  });
+
   it('ato com o corpo inteiro riscado conserva o texto histórico', () => {
     const corpo = Array.from({ length: 10 }, (_, i) => `<p><strike>Art. ${i + 1}. Texto revogado do artigo ${i + 1} com conteúdo suficiente.</strike></p>`).join('');
     const out = extract(`<html><body><p>DECRETO Nº 1, DE 1º DE JANEIRO DE 1990</p>${corpo}</body></html>`);
