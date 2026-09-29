@@ -340,9 +340,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                       <Layers className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold text-ink-primary">Conteudo Programatico</h2>
+                      <h2 className="text-3xl font-bold text-ink-primary">Conteúdo Programático</h2>
                       <p className="text-sm text-ink-muted mt-1">
-                        {modules.length} {modules.length === 1 ? 'modulo' : 'modulos'} com{' '}
+                        {modules.length} {modules.length === 1 ? 'módulo' : 'módulos'} com{' '}
                         {modules.reduce((sum, m) => sum + m._count.lessons, 0)} aulas estruturadas
                       </p>
                     </div>
@@ -374,7 +374,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                   <div className="mt-6 pt-4 border-t border-border-subtle">
                     <div className="flex items-center gap-2 text-sm text-ink-muted">
                       <Lock className="w-4 h-4" />
-                      <span>Conteudo completo disponivel para alunos matriculados</span>
+                      <span>Conteúdo completo disponível para alunos matriculados</span>
                     </div>
                   </div>
                 </div>

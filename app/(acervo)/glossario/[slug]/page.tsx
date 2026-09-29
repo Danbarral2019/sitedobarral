@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import ReactMarkdown from 'react-markdown';
 import { Home, ChevronRight, Eye, FileText, Tag } from 'lucide-react';
 
@@ -17,6 +18,13 @@ interface RelatedTerm {
   slug: string;
   shortDef?: string;
   category?: string;
+}
+
+// Sem isto o termo herda o canonical '/glossario' do layout, e os buscadores
+// tratam todas as páginas de termo como cópias da listagem.
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  return { alternates: { canonical: `/glossario/${slug}` } };
 }
 
 async function getTermBySlug(slug: string) {
