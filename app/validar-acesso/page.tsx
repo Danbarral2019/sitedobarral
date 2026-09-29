@@ -2,9 +2,11 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import ValidarAcessoForm from './ValidarAcessoForm';
 import type { Metadata } from 'next';
+import { NOINDEX } from '@/lib/site-metadata';
 
 export const metadata: Metadata = {
   title: 'Primeiro Acesso',
+  robots: NOINDEX,
 };
 
 /**

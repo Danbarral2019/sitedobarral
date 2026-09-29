@@ -1,6 +1,11 @@
 import { MetadataRoute } from 'next';
 import { getSiteUrl } from '@/lib/site-url';
 
+/**
+ * Login, registro e demais páginas de conta não entram no `disallow`: ficam
+ * fora do índice pelo `noindex` (`NOINDEX` em `lib/site-metadata.ts`), que o
+ * buscador só lê se puder rastrear a página.
+ */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
@@ -14,9 +19,6 @@ export default function robots(): MetadataRoute.Robots {
           '/area-restrita/*',
           '/api',
           '/api/*',
-          '/login',
-          '/registro',
-          '/validar-acesso',
           '/preview',
           '/_next/static/*',
         ],
@@ -31,9 +33,6 @@ export default function robots(): MetadataRoute.Robots {
           '/area-restrita/*',
           '/api',
           '/api/*',
-          '/login',
-          '/registro',
-          '/validar-acesso',
           '/preview',
         ],
         crawlDelay: 0,
@@ -48,9 +47,6 @@ export default function robots(): MetadataRoute.Robots {
           '/area-restrita/*',
           '/api',
           '/api/*',
-          '/login',
-          '/registro',
-          '/validar-acesso',
           '/preview',
         ],
         crawlDelay: 0,
