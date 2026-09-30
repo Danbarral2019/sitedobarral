@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
 import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
+import { validarAtualizacaoAutomatica } from '@/lib/legislative-scrapers/validate-content';
 import { scrapeAndIndexAct } from '@/lib/legislative-scrapers/scrape-and-index';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { detectAndSaveRelationsHybrid } from '@/lib/legislative-acts/relations';
@@ -121,6 +122,28 @@ export async function GET(request: NextRequest) {
         } else {
           // Verificar se houve mudança
           const changed = hasHashChanged(act.contentHash, result.hash!);
+
+          // Texto novo passa pela mesma validação da importação manual, mais o
+          // bloqueio de encolhimento brusco: sem ninguém conferindo, página de
+          // erro ou texto truncado não substitui o ato. Fica o texto anterior.
+          if (changed) {
+            const validacao = validarAtualizacaoAutomatica({
+              url: act.officialUrl,
+              content: result.content ?? '',
+              previousContent: act.content,
+            });
+            if (!validacao.ok) {
+              const erro = `Validação falhou: ${validacao.errors.join('; ')}`;
+              apiLogger.warn({ act: act.fullNumber, errors: validacao.errors }, '[Cron Legislative] texto novo recusado');
+              await prisma.legislativeAct.update({
+                where: { id: act.id },
+                data: { lastScrapedAt: new Date(), scrapeStatus: 'failed', scrapeError: erro.slice(0, 500) },
+              });
+              results.push({ id: act.id, fullNumber: act.fullNumber, status: 'failed', error: erro });
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              continue;
+            }
+          }
 
           // Atualizar registro
           await prisma.legislativeAct.update({
