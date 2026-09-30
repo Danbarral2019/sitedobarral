@@ -33,6 +33,7 @@ async function getEnrollmentData(userId: string) {
       userId,
       OR: [
         { expiresAt: { gte: new Date() } },
+        { expiresAt: null }, // assinatura: a Stripe controla o fim
         { isLifetime: true },
       ],
     },

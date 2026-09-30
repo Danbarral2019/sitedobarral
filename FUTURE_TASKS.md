@@ -29,7 +29,7 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 |---|---|---|
 | BIA-1. Régua de resposta ampliada | Parcial | Passe barato do prompt em produção (PR #134). Faltam as dimensões novas (`eval/judge.ts` ainda tem só `faithfulness`, `citationAccuracy`, `completeness`), as respostas de referência e a estabilidade do juiz |
 | BIA-5. Buracos de dados | Parcial | Informativos do TCU voltaram via CSV (PR #138); Inf. 44/2010, Inf. 50/2011 e Enunciado IBDA nº 5 não foram reconferidos no banco |
-| `/api/area-restrita/search-all` sem filtro por matrícula | Aberto | Nenhuma referência a matrícula na rota (medido em 27/09); dívida registrada em `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(6) |
+| `/api/area-restrita/search-all` sem filtro por matrícula | ✅ CONCLUÍDO (2026-09-30) | Rota removida, com `/api/search/unified`: nenhuma tela chamava as duas, e na segunda o filtro de acesso era sobrescrito pela condição de texto (qualquer usuário logado recebia título, link e conteúdo de documentos privados dos cursos). Registro original: nenhuma referência a matrícula na rota (medido em 27/09); `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(6) |
 | Teses do TCU: 20 cartões de reconferência e promoção à vitrine | Aberto; ação editorial do Daniel | `docs/HANDOFF-2026-09-09-heranca-editorial.md` §4 |
 | Teses do TCU: Onda 4 (busca por IA) | Plano escrito, não executado | PR #213 aberto desde 08/09/2026; o comando `prisma migrate diff` do plano usa flags removidas no Prisma 7.8 |
 | Acórdãos citados que não existem no acervo (alvos citados do TCU) | Em andamento em outra sessão | PR #229 (rascunho). Não mexer nos arquivos dela |
@@ -53,7 +53,7 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | Check mensal da newsletter na nuvem | Aberto; configuração do ambiente | O alerta de 02/09 foi bloqueio de rede do ambiente; liberar os domínios do site na política de rede da sessão |
 | TCE-PE: `extractTextFromHTML` cola palavras na fronteira de bloco | Achado registrado, não corrigido | Commit do PR #218 |
 | T16. Teto de tamanho no RTF do clipping | Condicional | O teto de 20 MB existe no catálogo (`lib/tcu/inteiro-teor-fetch.ts:13`), mas não no clipping (`lib/clipping/dispositivo-extractor.ts:142`) |
-| Resíduos de higiene | Aberto | `scripts/import-tcu-precedentes.ts:436` ainda usa `claude-3-5-haiku-20241022`; `mailchimpId` sobrevive só na interface de `lib/newsletter.ts:15`; `scripts/migrate-mp-to-stripe.ts` permanece; 16 `.md` na raiz |
+| Resíduos de higiene | Parcial: três de quatro ✅ CONCLUÍDOS (2026-09-30) | `import-tcu-precedentes.ts` passou para `claude-haiku-4-5-20251001`; `mailchimpId` saiu da interface de `lib/newsletter.ts`; `migrate-mp-to-stripe.ts` foi para `scripts/.archived/`. Resta: 16 `.md` na raiz |
 | Tribunais: 21 pendentes após o julgamento por IA | Aberto | Todos de tribunais de contas estaduais: TCE-PE 15, TCE-RS 3, TCE-PR 2, TCE-SC 1 (banco, 27/09/2026); nenhum do STF |
 | T2b: 67 ONs públicas sem link DOU específico (após a restauração de 27/09/2026) | Em execução: `scripts/find-ons-dou-urls.ts` | Núcleo encerrado por decisão de 27/09/2026 |
 | 1 PDF em `failed` na indexação | Aberto | `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(8) |
@@ -277,7 +277,7 @@ Ver relatório completo em `docs/audits/2026-05-16-silent-failures.md` para tabe
 **Status:** ✅ **BIA-0b IMPLEMENTADO 2026-07-08** (FTS-first + upgrade híbrido, endpoint `/api/area-restrita/global-search/hybrid` só para `document`+`legislative-act`, pós-filtro de matrícula). BIA-0a (piscar/foco) também resolvido antes. Restante do BIA-0: só o que o BIA-0c registra abaixo.
 
 ### BIA-0c. [ACHADO 2026-07-08] Card de IA não filtra documentos por matrícula [Média] ✅ CONCLUÍDO (2026-07-09)
-**Resolvido no PR #135** ("card de IA respeita matrícula por curso"): `lib/rag/answerContext.ts:257` aplica `filterByEnrollment` (importado de `lib/search/hybrid-documents`) sobre os resultados, com as matrículas buscadas em `app/api/documents/query/route.ts`. Documentos comuns ou sem curso continuam visíveis, como na lista do BIA-0b. Resíduo relacionado, ainda aberto: `/api/area-restrita/search-all` não filtra matrícula (ver quadro no topo).
+**Resolvido no PR #135** ("card de IA respeita matrícula por curso"): `lib/rag/answerContext.ts:257` aplica `filterByEnrollment` (importado de `lib/search/hybrid-documents`) sobre os resultados, com as matrículas buscadas em `app/api/documents/query/route.ts`. Documentos comuns ou sem curso continuam visíveis, como na lista do BIA-0b. Resíduo relacionado, resolvido em 30/09/2026: `/api/area-restrita/search-all`, que não filtrava matrícula, foi removida (ver quadro no topo).
 
 Ao implementar o BIA-0b, verificou-se que `assembleAnswerContext` chama `hybridSearch` com `courseId: undefined` → o card de IA (e as fontes citadas) pode retornar documentos de cursos em que o aluno **NÃO** está matriculado. Não é o escopo do BIA-0b (a lista já pós-filtra por matrícula no endpoint `/global-search/hybrid`). Avaliar: (a) se há documentos restritos de fato expostos no card, (b) aplicar o mesmo pós-filtro por matrícula em `answerContext`/`documents/query`. Prioridade Média (risco de acesso, mas a maioria do acervo é `isCommon`/público).
 

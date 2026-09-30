@@ -45,6 +45,7 @@ async function getGlobalAnalytics(
         OR: [
           { isLifetime: true },
           { expiresAt: { gte: now } },
+          { expiresAt: null }, // assinatura: a Stripe controla o fim
         ],
       },
       select: { userId: true, courseId: true },
@@ -170,6 +171,7 @@ async function getCourseAnalytics(
       OR: [
         { isLifetime: true },
         { expiresAt: { gte: now } },
+        { expiresAt: null }, // assinatura: a Stripe controla o fim
       ],
     },
     select: { userId: true },
