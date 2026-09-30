@@ -125,6 +125,22 @@ test.describe('fluxos de registro e verificação de email', () => {
     await expect(page.getByText(E2E_CATALOG_COURSE.title).first()).toBeVisible();
   });
 
+  test('registro com email já cadastrado: mesma tela de sucesso, nenhuma conta nova', async ({ page }) => {
+    const email = uniqueEmail('repetido');
+    await registerViaUi(page, { name: 'Aluno Original E2E', email });
+    const original = await e2ePrisma().user.findUniqueOrThrow({ where: { email } });
+
+    // A segunda tentativa segue o mesmo caminho da primeira (sem 409): a rota
+    // não revela que o email tem conta; o aviso vai para a caixa do dono.
+    await registerViaUi(page, { name: 'Outra Pessoa E2E', email });
+
+    const depois = await e2ePrisma().user.findMany({ where: { email } });
+    expect(depois).toHaveLength(1);
+    expect(depois[0].id).toBe(original.id);
+    expect(depois[0].name).toBe('Aluno Original E2E');
+    expect(depois[0].verificationToken).toBe(original.verificationToken);
+  });
+
   test('reenvio da verificação: o token novo funciona e o antigo não', async ({ page }) => {
     const email = uniqueEmail('reenvio');
     await registerViaUi(page, { name: 'Aluno Reenvio E2E', email });

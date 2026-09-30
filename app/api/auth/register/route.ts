@@ -1,16 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendVerificationEmail, sendWelcomeEmail } from '@/lib/email';
+import { sendDuplicateRegistrationEmail, sendVerificationEmail, sendWelcomeEmail } from '@/lib/email';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { validateRequest } from '@/lib/validation-helper';
 import { RegisterSchema } from '@/lib/validation-schemas';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ConflictError } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { reportError, reportMessage } from '@/lib/monitoring/report-error';
+
+/**
+ * Resposta de sucesso do cadastro. É a mesma, byte a byte, para email novo e
+ * para email já cadastrado: a rota não revela quais emails têm conta. Por
+ * isso não leva o id do usuário, e o nome e o email ecoam o que foi enviado.
+ */
+function registrationAccepted(name: string, email: string): NextResponse {
+  return NextResponse.json(
+    {
+      success: true,
+      message: 'Cadastro realizado com sucesso! Verifique seu email para ativar sua conta.',
+      user: { name, email },
+    },
+    { status: 201 }
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,13 +49,24 @@ export async function POST(request: NextRequest) {
       where: { email },
     });
 
-    if (existingUser) {
-      authLogger.warn({ email }, 'Registration attempt: email already exists');
-      throw new ConflictError('Este email já está cadastrado');
-    }
-
-    // Criar hash da senha
+    // Criar hash da senha. Também no email já cadastrado, em que o hash é
+    // descartado: assim o tempo de resposta não distingue os dois casos.
     const passwordHash = await bcrypt.hash(password, 10);
+
+    if (existingUser) {
+      // Nada é criado nem alterado. O dono da conta recebe um aviso, e quem
+      // tentou vê a mesma resposta de um cadastro novo.
+      authLogger.warn({ userId: existingUser.id }, 'Registration attempt: email already exists');
+      const warned = await sendDuplicateRegistrationEmail(
+        existingUser.email,
+        existingUser.name,
+        existingUser.emailVerified
+      );
+      if (!warned) {
+        authLogger.error({ userId: existingUser.id }, 'Failed to send duplicate registration warning');
+      }
+      return registrationAccepted(name, email);
+    }
 
     // QR code: a matrícula e o consumo da vaga ficam para a verificação do
     // email (app/api/auth/verify-email). Aqui só se guarda o QR pendente, se
@@ -71,18 +98,32 @@ export async function POST(request: NextRequest) {
     verificationExpiry.setHours(verificationExpiry.getHours() + 24);
 
     // Criar usuário
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        passwordHash,
-        role: 'student',
-        emailVerified: false,
-        verificationToken,
-        verificationExpiry,
-        pendingQrCodeId,
-      },
-    });
+    let user;
+    try {
+      user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          passwordHash,
+          role: 'student',
+          emailVerified: false,
+          verificationToken,
+          verificationExpiry,
+          pendingQrCodeId,
+        },
+      });
+    } catch (createError) {
+      // Dois cadastros simultâneos com o mesmo email: o segundo perde na
+      // unicidade e responde como qualquer email já cadastrado.
+      if (
+        createError instanceof Prisma.PrismaClientKnownRequestError &&
+        createError.code === 'P2002'
+      ) {
+        authLogger.warn('Registration race: email already exists');
+        return registrationAccepted(name, email);
+      }
+      throw createError;
+    }
 
     // Enviar email de verificação
     const emailSent = await sendVerificationEmail(
@@ -120,18 +161,7 @@ export async function POST(request: NextRequest) {
     authLogger.info({ userId: user.id, email: user.email, pendingQrCodeId }, 'User registration successful');
     trackServerEvent('user_register', { courseId: qrCourseId || 'none' });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Cadastro realizado com sucesso! Verifique seu email para ativar sua conta.',
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
-      },
-      { status: 201 }
-    );
+    return registrationAccepted(name, email);
   } catch (error) {
     return handleApiError(error);
   }
