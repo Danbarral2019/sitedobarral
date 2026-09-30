@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { prisma } from '@/lib/prisma';
+import { buscarCompartilhamento } from '@/lib/search/historico-da-busca';
 
 /** Só URLs absolutas http(s) viram link (evita `javascript:` e afins vindos do histórico). */
 function safeHttpUrl(url: unknown): string | null {
@@ -18,31 +18,8 @@ interface SharedSearchPageProps {
   params: Promise<{ shareId: string }>;
 }
 
-async function getSharedSearch(shareId: string) {
-  const entry = await prisma.searchHistory.findFirst({
-    where: {
-      shareId,
-      isPublic: true,
-    },
-    select: {
-      query: true,
-      aiAnswer: true,
-      sources: true,
-      legalSources: true,
-      createdAt: true,
-    },
-  });
-
-  if (!entry) return null;
-
-  return {
-    query: entry.query,
-    aiAnswer: entry.aiAnswer,
-    sources: entry.sources ? JSON.parse(entry.sources) : [],
-    legalSources: entry.legalSources ? JSON.parse(entry.legalSources) : [],
-    createdAt: entry.createdAt,
-  };
-}
+/** Links antigos (8 caracteres) e respostas não gravadas pelo servidor: 404. */
+const getSharedSearch = buscarCompartilhamento;
 
 export async function generateMetadata({ params }: SharedSearchPageProps): Promise<Metadata> {
   const { shareId } = await params;
@@ -71,8 +48,7 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
     notFound();
   }
 
-  const sources = data.sources as Array<{ title: string; category: string; url?: string }>;
-  const legalSources = data.legalSources as Array<{ type: string; title: string; url: string }>;
+  const { sources, legalSources } = data;
 
   return (
     <main className="min-h-screen bg-brand-50">
