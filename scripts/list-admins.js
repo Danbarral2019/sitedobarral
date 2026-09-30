@@ -26,7 +26,7 @@ async function listAdmins() {
       console.log('❌ Nenhum usuário admin encontrado no banco de dados.');
       console.log('');
       console.log('💡 Você precisa criar um admin primeiro.');
-      console.log('   Use: node scripts/create-admin.js email@exemplo.com SenhaSegura "Nome Completo"');
+      console.log('   Use: npx tsx scripts/create-admin.ts email@exemplo.com '<senha>' "Nome Completo"');
     } else {
       console.log(`✅ Encontrados ${admins.length} admin(s):\n`);
       admins.forEach((admin, index) => {

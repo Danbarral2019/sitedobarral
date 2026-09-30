@@ -55,7 +55,7 @@ npx prisma studio
 Execute o script para criar o usuário admin:
 
 ```bash
-node scripts/create-admin.js admin@profbarral.com.br SuaSenhaAqui "Prof. Daniel Barral"
+npx tsx scripts/create-admin.ts admin@profbarral.com.br '<senha>' "Prof. Daniel Barral"
 ```
 
 **Parâmetros:**

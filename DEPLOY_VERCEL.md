@@ -198,9 +198,9 @@ DATABASE_URL="postgresql://..." npx prisma studio
 
 ```bash
 # Conectar ao banco de produção e rodar script
-DATABASE_URL="postgresql://..." node scripts/create-admin.js \
+DATABASE_URL="postgresql://..." npx tsx scripts/create-admin.ts \
   admin@profbarral.com.br \
-  SenhaForte123! \
+  '<senha>' \
   "Prof. Daniel Barral"
 ```
 
