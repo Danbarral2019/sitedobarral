@@ -1,27 +1,24 @@
 /**
  * Script para enrollar o aluno de teste nos cursos.
  *
- * Busca o usuario aluno@teste.com e cria Enrollment para cada curso
- * com expiracao de 1 ano. Usa upsert para nao duplicar.
+ * Busca o usuario aluno@teste.com e cria Enrollment para cada curso do
+ * catalogo (data/courses.ts) com expiracao de 1 ano. Usa upsert para nao
+ * duplicar.
  *
  * Uso:
- *   npx dotenv -e .env.local -- npx tsx scripts/enroll-test-user.ts
- *   npx dotenv -e .env.local -- npx tsx scripts/enroll-test-user.ts --dry-run
+ *   npx tsx scripts/enroll-test-user.ts
+ *   npx tsx scripts/enroll-test-user.ts --dry-run
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
+import { courses } from '../data/courses';
 
-const prisma = new PrismaClient();
 const isDryRun = process.argv.includes('--dry-run');
 
 const TEST_EMAIL = 'aluno@teste.com';
 
-// Course IDs conhecidos (ver COURSE_IDS_REFERENCE.md)
-const COURSES = [
-  { id: '1', title: 'Nova Lei de Licitações' },
-  { id: '2', title: 'Planejamento das Contratações' },
-  { id: '3', title: 'Gestão e Fiscalização de Contratos' },
-];
+// Todos os cursos do catalogo (ver COURSE_IDS_REFERENCE.md)
+const COURSES = courses.map(({ id, title }) => ({ id, title }));
 
 async function main() {
   console.log('Enrollando aluno de teste nos cursos...\n');
