@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getAcessoDoUsuario, whereDocumentoVisivel } from '@/lib/search/acesso-documentos';
 
 /**
  * GET /api/area-restrita/batch-data
@@ -51,7 +52,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const courseIds = courseIdsParam.split(',').filter(Boolean);
+    // O parâmetro só pode estreitar: não-admin recebe apenas os cursos em que
+    // tem acesso válido (matrícula válida ou assinatura ativa).
+    const acesso = await getAcessoDoUsuario(payload);
+    const pedidos = courseIdsParam.split(',').filter(Boolean);
+    const courseIds = acesso.isAdmin
+      ? pedidos
+      : pedidos.filter((id) => acesso.cursosAtivos.includes(id));
 
     if (courseIds.length === 0) {
       return NextResponse.json({
@@ -97,9 +104,15 @@ export async function GET(request: NextRequest) {
       console.log('[Batch-Data] Buscando documentos...');
       documents = await prisma.document.findMany({
         where: {
-          OR: [
-            { courseId: { in: courseIds } }, // Específicos do curso
-            { isCommon: true },               // Comuns a todos os cursos
+          AND: [
+            {
+              OR: [
+                { courseId: { in: courseIds } }, // Específicos do curso
+                { isCommon: true },               // Comuns a todos os cursos
+              ],
+            },
+            // isCommon só com acesso ativo; grafo nunca (lib/search/acesso-documentos).
+            whereDocumentoVisivel(acesso),
           ],
         },
         orderBy: [
