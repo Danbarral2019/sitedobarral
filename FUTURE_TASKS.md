@@ -1,7 +1,7 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-09-27
+> Atualizado em: 2026-09-30
 
 ---
 
@@ -22,6 +22,8 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | Redes sociais (A2): reavaliar `social-publish` | Pausa ✅ CONCLUÍDA (2026-09-27, PR #236); reavaliação da rotina em aberto | Cron fora do `vercel.json`, com o critério de reativação no cabeçalho de `app/api/cron/social-publish/route.ts`. Registro original: Só 2 posts no Instagram, ambos com falha, em outubro de 2025; nenhuma credencial válida comprovada. O cron roda todo dia útil sem nada a publicar. Pausar o cron até validar as credenciais e reavaliar a rotina, que interessa ao Daniel para a divulgação. Publicar com o "em breve" ligado não é intencional |
 | Aposentar `daily-tcu-clipping` e `sync-datajud` | ✅ CONCLUÍDO (2026-09-27) | PR #237: rotas e `lib/tribunal-scrapers/datajud.ts` removidos. Registro original: Decisão do Daniel em 27/09/2026: substituídos por `daily-clipping` (PR #119) e pelos Espelhos do STJ (PR #192) |
 | STJ: 264 julgados aprovados sem `summary` | ✅ CONCLUÍDO (2026-09-28) | `scripts/generate-decision-summaries.ts --tribunal STJ` rodado pelo Daniel em 28/09/2026 com `gemini-3-flash-preview`: 267 resumos gerados (o número subiu com a coleta desde 27/09), 0 falhas, 0 pulados; teste prévio de 3 itens com `--dry-run` |
+| Senha pública do aluno de teste (`aluno@teste.com`) | ✅ CONCLUÍDO (2026-09-30), salvo o painel do GitGuardian | A senha publicada no código dava acesso ao conteúdo pago em produção (matrículas nos cursos 1, 3 e 10). Trocada no banco em 30/09/2026, só o `passwordHash`, sem mexer nas matrículas; o `CLAUDE.md` deixou de mostrá-la (PR #305). Falta o Daniel marcar o incidente como resolvido no GitGuardian |
+| SEO e peso das páginas públicas | ✅ CONCLUÍDO (2026-09-30) | PR #298, conferido em produção: `/cursos/<slug fora do catálogo>` responde 404 (`dynamicParams = false`); os links internos apontam direto para `/lei-14133?artigo=N`, sem o redirecionamento de `/artigo/N`; o texto do artigo vem no HTML do servidor; `/novidades` mostra 20 itens por seção no resumo do mês e pagina a lista completa no servidor (setembro caiu de cerca de 2,8 MB para 158 KB de HTML) |
 
 **Média**
 
