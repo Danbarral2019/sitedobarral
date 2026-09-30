@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
 
 export async function GET() {
   try {
     const documents = await prisma.document.findMany({
       where: {
+        ...PUBLIC_DOCUMENT_WHERE,
         leiArticlesArr: { isEmpty: false },
       },
       select: {

@@ -1,3 +1,6 @@
+import type { Prisma } from '@prisma/client';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+
 /**
  * Categorias de `Document` que existem apenas como substrato interno de busca
  * e nunca devem aparecer ao usuário como "documento".
@@ -21,3 +24,22 @@ export type InternalOnlyCategory = (typeof INTERNAL_ONLY_CATEGORIES)[number];
 export function isInternalOnlyCategory(category: string | null | undefined): boolean {
   return !!category && (INTERNAL_ONLY_CATEGORIES as readonly string[]).includes(category);
 }
+
+/**
+ * Categorias que nunca entram em listagens ou métricas públicas: o substrato
+ * interno acima e o combustível do grafo de precedentes do TCU
+ * (`acordao-grafo`, ver `lib/tcu/backfill-retroativo.ts`).
+ */
+export const NON_PUBLIC_LISTING_CATEGORIES: string[] = [
+  CATEGORIA_GRAFO,
+  ...INTERNAL_ONLY_CATEGORIES,
+];
+
+/**
+ * Filtro Prisma de `Document` para superfícies públicas (métricas, contagens,
+ * listagens): só documentos públicos e fora das categorias internas/grafo.
+ */
+export const PUBLIC_DOCUMENT_WHERE = {
+  isPublic: true,
+  category: { notIn: NON_PUBLIC_LISTING_CATEGORIES },
+} satisfies Prisma.DocumentWhereInput;
