@@ -5,7 +5,7 @@
  * Suporta múltiplos formatos de URL e estruturas de página.
  */
 
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { computeHash } from './change-detector';
 import type { LegislativeScraper, ScraperResult } from './index';
 import { collapseWhitespace, detectCharsetFromResponse, blockAwareText } from './normalize';
@@ -145,7 +145,7 @@ export class PlanaltoScraper implements LegislativeScraper {
     // Só caracteres visíveis: a indentação e as quebras do HTML do Planalto
     // pesavam mais que o texto e escondiam o ato riscado por inteiro
     // (Decreto 11.317/2022 caía de 2.225 para 208 caracteres).
-    const visiveis = (root: cheerio.Root) => blockAwareText(root.root()).replace(/\s+/g, '').length;
+    const visiveis = (root: cheerio.CheerioAPI) => blockAwareText(root.root()).replace(/\s+/g, '').length;
     const fullText = visiveis($);
 
     // Redação superada, riscada no texto compilado, não é texto vigente
@@ -158,7 +158,7 @@ export class PlanaltoScraper implements LegislativeScraper {
     return this.extractFrom($);
   }
 
-  private loadClean(html: string): cheerio.Root {
+  private loadClean(html: string): cheerio.CheerioAPI {
     const $ = cheerio.load(html);
 
     // Remover elementos indesejados
@@ -168,7 +168,7 @@ export class PlanaltoScraper implements LegislativeScraper {
     return $;
   }
 
-  private extractFrom($: cheerio.Root): string {
+  private extractFrom($: cheerio.CheerioAPI): string {
 
     // O cheerio 0.22 (htmlparser2) não reconstrói o HTML malformado do
     // Planalto: no Código Civil compilado o texto vem depois de um </body>

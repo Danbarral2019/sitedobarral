@@ -7,7 +7,7 @@
  * ocorrências de "Enunciado nº X" / "ENUNCIADO X". Compara com a
  * cobertura local. Não compara texto completo (HTML structure varia).
  */
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { prisma } from '../lib/prisma';
 import { detectCharsetFromResponse } from '../lib/legislative-scrapers/normalize';
 

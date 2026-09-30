@@ -5,7 +5,8 @@
  * relacionados a licitações e contratos públicos.
  */
 
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
+import type { AnyNode } from 'domhandler';
 import { computeHash } from './change-detector';
 import { stripDouBoilerplate, stripFormAnnex, stripGovbrUiNoise, collapseWhitespace, detectCharsetFromResponse, blockAwareText, separarCaputColado } from './normalize';
 import type { LegislativeScraper, ScraperResult } from './index';
@@ -53,7 +54,7 @@ const ELEMENTS_TO_REMOVE = [
  * Seletores de classe/tag seguem casando todos os elementos — ali cada um é
  * uma parte distinta do conteúdo e concatenar é o comportamento correto.
  */
-function pickOne($: cheerio.Root, selector: string): cheerio.Cheerio {
+function pickOne($: cheerio.CheerioAPI, selector: string): cheerio.Cheerio<AnyNode> {
   const el = $(selector);
   return selector.startsWith('#') && el.length > 1 ? el.first() : el;
 }

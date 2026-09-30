@@ -17,7 +17,7 @@
 import 'dotenv/config';
 import { config } from 'dotenv';
 config({ path: '.env.local' });
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { prisma } from '../lib/prisma';
 import { CacheInvalidation } from '../lib/cache/redis-client';
 

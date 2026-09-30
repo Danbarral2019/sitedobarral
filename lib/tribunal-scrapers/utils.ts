@@ -5,7 +5,7 @@
  * normalizacao de numeros de decisoes e logging de health.
  */
 
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from "@/lib/logger";
 

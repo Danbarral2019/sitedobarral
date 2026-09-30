@@ -9,7 +9,7 @@
  */
 import { prisma } from '../lib/prisma';
 import { scrapeUrl } from '../lib/legislative-scrapers';
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { normalizeScrapedText } from '../lib/legislative-scrapers/normalize';
 import { validateActContent } from '../lib/legislative-scrapers/validate-content';
 import { processLegislativeAct } from '../lib/embeddings/legislative-act-processor';
