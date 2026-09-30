@@ -273,7 +273,7 @@ npx prisma db push --force-reset
 
 Para dúvidas ou problemas:
 1. Verifique a documentação no `/CLAUDE.md`
-2. Consulte o arquivo `IMPORTACAO_EXCEL.md` para upload de documentos
+2. Consulte o arquivo `docs/operations/IMPORTACAO_EXCEL.md` para upload de documentos
 3. Revise `RESUMO_MIGRACAO.md` para detalhes do sistema de renovação
 
 ---

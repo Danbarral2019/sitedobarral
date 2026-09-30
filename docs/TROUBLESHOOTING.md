@@ -77,7 +77,7 @@ function Header() {
 
 ## Índice de documentação
 
-Setup: `SETUP.md`, `RESEND_SETUP_COMPLETO.md`, `MCP_SETUP.md`, `DEPLOY_VERCEL.md`.
-Features/domínio: `AGU_SCRAPER_V4.md`, `IMPORTACAO_EXCEL.md`, `AUTOMACAO_CRON_JOBS.md`, `COURSE_IDS_REFERENCE.md`.
+Setup: `SETUP.md`, `docs/operations/RESEND_SETUP_COMPLETO.md`, `docs/operations/MCP_SETUP.md`, `docs/operations/DEPLOY_VERCEL.md`.
+Features/domínio: `docs/operations/AGU_SCRAPER_V4.md`, `docs/operations/IMPORTACAO_EXCEL.md`, `docs/operations/AUTOMACAO_CRON_JOBS.md`, `COURSE_IDS_REFERENCE.md`.
 Referência canônica: `prisma/schema.prisma` (schema), `FUTURE_TASKS.md` (backlog), `docs/PROJECT_HISTORY.md` (changelog).
 Demais docs de domínio: ver os `*.md` no root e em `docs/`.

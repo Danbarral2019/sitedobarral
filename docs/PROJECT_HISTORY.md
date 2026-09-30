@@ -198,7 +198,7 @@
 - ✅ Sistema de versionamento automático com detecção de mudanças
 - ✅ 97 Orientações Normativas com análise de relevância
 - ✅ Significance scoring (0-100) para mudanças
-- 📖 Ver `AGU_SCRAPER_V4.md`
+- 📖 Ver `docs/operations/AGU_SCRAPER_V4.md`
 
 **TCU Manager:**
 - ✅ Interface admin unificada

@@ -53,7 +53,7 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | Check mensal da newsletter na nuvem | Aberto; configuração do ambiente | O alerta de 02/09 foi bloqueio de rede do ambiente; liberar os domínios do site na política de rede da sessão |
 | TCE-PE: `extractTextFromHTML` cola palavras na fronteira de bloco | ✅ CONCLUÍDO (2026-09-30) | Blocos (p, div, li, h1-h6, tr, td, th, table, section, article, blockquote) ganham espaço na abertura e no fechamento; teste em `lib/tribunal-scrapers/__tests__/utils.test.ts`. Vale para TCE-PE e TCE-RS; o inteiro teor gravado já usava `extractParagraphsFromHTML`. Registro original: commit do PR #218 |
 | T16. Teto de tamanho no RTF do clipping | Condicional | O teto de 20 MB existe no catálogo (`lib/tcu/inteiro-teor-fetch.ts:13`), mas não no clipping (`lib/clipping/dispositivo-extractor.ts:142`) |
-| Resíduos de higiene | Parcial: três de quatro ✅ CONCLUÍDOS (2026-09-30) | `import-tcu-precedentes.ts` passou para `claude-haiku-4-5-20251001`; `mailchimpId` saiu da interface de `lib/newsletter.ts`; `migrate-mp-to-stripe.ts` foi para `scripts/.archived/`. Resta: 16 `.md` na raiz |
+| Resíduos de higiene | ✅ CONCLUÍDO (2026-09-30) | `import-tcu-precedentes.ts` passou para `claude-haiku-4-5-20251001`; `mailchimpId` saiu da interface de `lib/newsletter.ts`; `migrate-mp-to-stripe.ts` foi para `scripts/.archived/`; os 9 guias e roteiros avulsos da raiz foram para `docs/operations/` e `docs/legacy/`. Na raiz ficam os 7 de referência ativa (`CLAUDE.md`, `README.md`, `FUTURE_TASKS.md`, `DESIGN.md`, `PRODUCT.md`, `SETUP.md`, `COURSE_IDS_REFERENCE.md`) |
 | Tribunais: 21 pendentes após o julgamento por IA | Aberto | Todos de tribunais de contas estaduais: TCE-PE 15, TCE-RS 3, TCE-PR 2, TCE-SC 1 (banco, 27/09/2026); nenhum do STF |
 | T2b: 67 ONs públicas sem link DOU específico (após a restauração de 27/09/2026) | Em execução: `scripts/find-ons-dou-urls.ts` | Núcleo encerrado por decisão de 27/09/2026 |
 | 1 PDF em `failed` na indexação | Aberto | `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(8) |
@@ -841,7 +841,7 @@ Código funcional arquivado em `FUNCIONALIDADES_FUTURAS/` para implementação f
 - [ ] Página `/glossario` (lista alfabética, busca, filtros por categoria, navegação A-Z)
 - [ ] Página `/glossario/[slug]` (termo completo, artigos relacionados, documentos)
 - [ ] Admin CRUD em `/admin/glossario` (se não existir)
-- [ ] Conteúdo inicial: ~50-100 termos (ver `GUIA_ALIMENTACAO_FAQ_GLOSSARIO.md`)
+- [ ] Conteúdo inicial: ~50-100 termos (ver `docs/operations/GUIA_ALIMENTACAO_FAQ_GLOSSARIO.md`)
 
 **FAQ — falta:**
 - [ ] Página `/faq` (accordion por categoria, busca, sistema de feedback "Foi útil?")
