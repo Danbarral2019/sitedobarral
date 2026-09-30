@@ -2,15 +2,18 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
+import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
 
 // GET /api/analytics/article-stats - Estatísticas de documentos por artigo
 export async function GET() {
   try {
     const result = await withCache(
-      CacheKeys.adminAnalytics('stats'),
+      CacheKeys.adminAnalytics('article-stats-public'),
       async () => {
         const documents = await prisma.document.findMany({
+          // Métrica pública: só documentos públicos e fora do grafo/substrato interno
           where: {
+            ...PUBLIC_DOCUMENT_WHERE,
             leiArticlesArr: {
               isEmpty: false,
             },

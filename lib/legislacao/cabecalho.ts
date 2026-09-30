@@ -48,14 +48,16 @@ export function dataDoAto(
   numero: string | null | undefined,
   fontes: Array<string | null | undefined>,
 ): Date | null {
-  const proprio = (numero ?? '').replace(/\D/g, '');
+  // Zeros à esquerda não contam: "Nº 07" é o ato 7.
+  const soDigitos = (n: string) => n.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  const proprio = soDigitos(numero ?? '');
   if (!proprio) return null;
   const re = /n\.?\s*[ºo°]?\.?\s*([\d.]+)\s*,?\s+de\s+(\d{1,2})[ºo°]?\s+de\s+([a-zç]+)\s+de\s+(\d{4})/gi;
   for (const fonte of fontes) {
     if (!fonte) continue;
     const trecho = collapse(fonte.slice(0, 3000));
     for (const m of trecho.matchAll(re)) {
-      if (m[1].replace(/\D/g, '') !== proprio) continue;
+      if (soDigitos(m[1]) !== proprio) continue;
       const mes = MESES.indexOf(m[3].toLowerCase());
       const dia = Number(m[2]);
       if (mes < 0 || dia < 1 || dia > 31) continue;

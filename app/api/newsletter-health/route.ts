@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from '@/lib/logger';
 
 /**
  * GET /api/newsletter-health
@@ -47,8 +48,9 @@ export async function GET() {
       },
     });
   } catch (error) {
+    apiLogger.error({ err: error }, 'newsletter-health: falha ao consultar o estado');
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Erro ao consultar o estado do serviço' },
       { status: 500 }
     );
   }

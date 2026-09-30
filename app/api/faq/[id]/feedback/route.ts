@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
-import { getClientIp } from '@/lib/cache/rate-limit-helper';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 
 const FeedbackSchema = z.object({
   wasHelpful: z.boolean(),
@@ -13,16 +13,19 @@ const FeedbackSchema = z.object({
 export async function POST(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params;
+    const ip = getClientIp(request);
+    // 10 votos por minuto por IP (Redis)
+    await enforceRateLimit(`faq:feedback:${ip}`, 10, 60);
     const body = await request.json().catch(() => ({}));
     const parsed = FeedbackSchema.safeParse(body);
     if (!parsed.success) {
       throw new ValidationError('Feedback inválido', parsed.error.issues);
     }
 
-    const faq = await prisma.fAQ.findUnique({ where: { id }, select: { id: true } });
-    if (!faq) throw new NotFoundError('FAQ');
+    const faq = await prisma.fAQ.findUnique({ where: { id }, select: { id: true, isPublished: true } });
+    // FAQ não publicada não recebe voto (evita inflar contadores de rascunhos)
+    if (!faq || !faq.isPublished) throw new NotFoundError('FAQ');
 
-    const ip = getClientIp(request);
     await prisma.$transaction([
       prisma.fAQFeedback.create({
         data: {

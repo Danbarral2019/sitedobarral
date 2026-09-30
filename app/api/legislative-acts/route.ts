@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
+import { bearerToken, safeCompareSecret } from '@/lib/cron-auth';
 
 /**
  * GET /api/legislative-acts
@@ -25,14 +26,20 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort'); // recent (default) | oldest | hierarchy | number | alpha
 
     // Parâmetros de paginação
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
+    const limitParam = parseInt(searchParams.get('limit') || '20', 10);
+    const page = Number.isFinite(pageParam) && pageParam >= 1 ? Math.min(pageParam, 10000) : 1;
+    const limit = Number.isFinite(limitParam) && limitParam >= 1 ? Math.min(limitParam, 100) : 20;
     const skip = (page - 1) * limit;
 
-    // Revalidação sob demanda via CRON_SECRET
-    const revalidate = searchParams.get('_revalidate');
-    if (revalidate && revalidate === process.env.CRON_SECRET) {
-      await CacheInvalidation.legislativeActs();
+    // Revalidação sob demanda via CRON_SECRET: preferir `Authorization: Bearer <CRON_SECRET>`.
+    // `?_revalidate=<CRON_SECRET>` segue aceito por compatibilidade (skills de importação).
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret) {
+      const provided = bearerToken(request) ?? searchParams.get('_revalidate');
+      if (provided && safeCompareSecret(provided, cronSecret)) {
+        await CacheInvalidation.legislativeActs();
+      }
     }
 
     // Generate cache key based on all filters

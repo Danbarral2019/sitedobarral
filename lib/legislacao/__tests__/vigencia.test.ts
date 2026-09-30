@@ -107,6 +107,7 @@ describe('tituloDoDouEDoAto', () => {
     expect(tituloDoDouEDoAto('INSTRUÇÃO NORMATIVA SEGES/ME Nº 67, DE 8 DE JULHO DE 2021', '', 'in', '67', 2021)).toBe(true);
     expect(tituloDoDouEDoAto('INSTRUÇÃO NORMATIVA No- 2, DE 11 DE OUTUBRO DE 2010', '', 'in', '2', 2010)).toBe(true);
     expect(tituloDoDouEDoAto('PORTARIA Nº 12.395, DE 26 DE MAIO DE 2020', '', 'portaria', '12.395', 2020)).toBe(true);
+    expect(tituloDoDouEDoAto('INSTRUÇÃO NORMATIVA Nº 07, DE 20 DE SETEMBRO DE 2018', '', 'in', '7', 2018)).toBe(true);
   });
   it('recusa outro número, outro tipo, outro ano e retificação', () => {
     expect(tituloDoDouEDoAto('INSTRUÇÃO NORMATIVA Nº 167, DE 8 DE JULHO DE 2021', '', 'in', '67', 2021)).toBe(false);

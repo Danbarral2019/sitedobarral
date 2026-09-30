@@ -8,7 +8,7 @@
  * covering all stages of public procurement under Lei 14.133/2021.
  */
 
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { computeHash } from '@/lib/legislative-scrapers/change-detector';
 import { apiLogger } from "@/lib/logger";
 

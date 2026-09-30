@@ -1,25 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { verifyConversationToken } from '@/lib/artigos/conversation-token';
+import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { apiLogger } from '@/lib/logger';
 
-interface FeedbackRequest {
-  wasHelpful: boolean;
-}
+const FeedbackSchema = z.object({
+  wasHelpful: z.boolean(),
+});
 
 // PATCH /api/artigos/[numero]/chat/[questionId]/feedback
+// Exige o token da conversa (Authorization: Bearer) emitido pelo POST do chat.
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ numero: string; questionId: string }> }
 ) {
   try {
     const { numero: articleNumber, questionId } = await params;
-    const body = await request.json() as FeedbackRequest;
-
-    // Validar input
-    if (typeof body.wasHelpful !== 'boolean') {
-      return NextResponse.json(
-        { error: 'wasHelpful deve ser true ou false' },
-        { status: 400 }
-      );
+    const body = await request.json().catch(() => ({}));
+    const parsed = FeedbackSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new ValidationError('wasHelpful deve ser true ou false');
     }
 
     // Verificar se a pergunta existe e pertence ao artigo
@@ -28,20 +30,20 @@ export async function PATCH(
         id: questionId,
         articleNumber,
       },
+      select: { id: true, conversationId: true },
     });
 
-    if (!question) {
-      return NextResponse.json(
-        { error: 'Pergunta não encontrada' },
-        { status: 404 }
-      );
+    // Pergunta sem conversa não tem dono verificável: tratada como inexistente
+    if (!question || !question.conversationId) {
+      throw new NotFoundError('Pergunta');
     }
 
-    // Atualizar feedback
+    await verifyConversationToken(request, question.conversationId);
+
     const updated = await prisma.articleQuestion.update({
       where: { id: questionId },
       data: {
-        wasHelpful: body.wasHelpful,
+        wasHelpful: parsed.data.wasHelpful,
       },
       select: {
         id: true,
@@ -50,7 +52,10 @@ export async function PATCH(
       },
     });
 
-    console.log(`✅ Feedback registrado: Art. ${articleNumber}, Q: ${questionId}, Helpful: ${body.wasHelpful}`);
+    apiLogger.info(
+      { articleNumber, questionId, wasHelpful: parsed.data.wasHelpful },
+      'Feedback do chat de artigo registrado'
+    );
 
     return NextResponse.json({
       success: true,
@@ -60,12 +65,7 @@ export async function PATCH(
         updatedAt: updated.createdAt.toISOString(),
       },
     });
-
   } catch (error) {
-    console.error('Erro ao salvar feedback:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar feedback' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

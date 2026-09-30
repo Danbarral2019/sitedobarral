@@ -170,6 +170,7 @@ export function tituloDoDouEDoAto(
   const palavra = PALAVRA_DO_TIPO[tipo];
   if (palavra && !t.includes(palavra)) return false;
   if (/retifica/.test(t) || /^retifica/.test(normalizar(resumo))) return false;
-  const numeros = [...t.matchAll(/\bn\.?\s*o?[\s.-]*(\d[\d.]*)/g)].map((m) => m[1].replace(/\./g, ''));
-  return numeros.includes(numero.replace(/\./g, '')) && t.includes(String(ano));
+  const semZeros = (n: string) => n.replace(/\./g, '').replace(/^0+(?=\d)/, '');
+  const numeros = [...t.matchAll(/\bn\.?\s*o?[\s.-]*(\d[\d.]*)/g)].map((m) => semZeros(m[1]));
+  return numeros.includes(semZeros(numero)) && t.includes(String(ano));
 }

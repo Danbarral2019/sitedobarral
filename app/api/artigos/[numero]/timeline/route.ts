@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { NON_PUBLIC_LISTING_CATEGORIES, PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
+
+const PERIODS = new Set(['30d', '6m', '1y', 'all']);
+const CATEGORY_PATTERN = /^[a-z0-9_-]{1,64}$/i;
 
 interface TimelinePeriod {
   period: string;
@@ -31,8 +35,20 @@ export async function GET(
     const { numero: articleNumber } = await params;
     const searchParams = request.nextUrl.searchParams;
 
-    const periodParam = searchParams.get('period');
+    const rawPeriod = searchParams.get('period');
+    const periodParam = rawPeriod && PERIODS.has(rawPeriod) ? rawPeriod : null;
     const category = searchParams.get('category');
+
+    // Categoria livre só se for pública: grafo e substrato interno ficam de fora
+    if (
+      category &&
+      (!CATEGORY_PATTERN.test(category) || NON_PUBLIC_LISTING_CATEGORIES.includes(category))
+    ) {
+      return NextResponse.json(
+        { error: 'Categoria inválida' },
+        { status: 400 }
+      );
+    }
 
     if (!articleNumber) {
       return NextResponse.json(
@@ -42,7 +58,7 @@ export async function GET(
     }
 
     const result = await withCache(
-      CacheKeys.articleDetails(articleNumber, `tl:${periodParam || 'all'}:${category || 'all'}`),
+      CacheKeys.articleDetails(articleNumber, `tl-pub:${periodParam || 'all'}:${category || 'all'}`),
       async () => {
         let dateFilter: Date | undefined;
         const now = new Date();
@@ -67,13 +83,14 @@ export async function GET(
             leiArticlesArr: {
               has: articleNumber,
             },
+            ...PUBLIC_DOCUMENT_WHERE,
             ...(dateFilter && {
               uploadedAt: {
                 gte: dateFilter,
               },
             }),
             ...(category && {
-              category: category,
+              category: { equals: category, notIn: NON_PUBLIC_LISTING_CATEGORIES },
             }),
           },
           select: {

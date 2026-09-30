@@ -1,6 +1,6 @@
 /**
  * Lista os webhook endpoints cadastrados no Stripe (no modo da chave usada) e
- * confere se cobrem os 7 eventos que o handler em app/api/pagamento/webhook
+ * confere se cobrem os 9 eventos que o handler em app/api/pagamento/webhook
  * processa. Também imprime as payment method capabilities da conta (incluindo
  * pix_payments), porque o checkout oferece PIX nativo.
  *
@@ -11,6 +11,8 @@ import Stripe from 'stripe';
 
 const EXPECTED_EVENTS = [
   'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.async_payment_failed',
   'invoice.paid',
   'invoice.payment_failed',
   'customer.subscription.updated',
@@ -41,7 +43,7 @@ async function main() {
     if (missing.length) {
       console.log(`  ⚠️  faltam: ${missing.join(', ')}`);
     } else {
-      console.log('  ✓ cobre os 7 eventos esperados');
+      console.log(`  ✓ cobre os ${EXPECTED_EVENTS.length} eventos esperados`);
     }
     console.log('');
   }

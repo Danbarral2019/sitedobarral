@@ -3,12 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { listR2FilesWithMetadata, deleteFromR2, isR2Configured } from '@/lib/storage/r2-client';
 import { apiLogger } from '@/lib/logger';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { verifyCronAuth } from '@/lib/cron-auth';
 
 // ===========================
 // Configuration
 // ===========================
-
-const CRON_SECRET = process.env.CRON_SECRET;
 
 // Files older than this threshold (in hours) without DB records will be deleted
 const ORPHAN_THRESHOLD_HOURS = 24; // 24 hours
@@ -157,16 +156,8 @@ async function deleteOrphanedFiles(
 
 export async function GET(req: NextRequest) {
   // Auth fora do telemetry (auth != falha de cron)
-  const authHeader = req.headers.get('authorization');
-  if (!CRON_SECRET) {
-    return NextResponse.json(
-      { error: 'Cron secret not configured' },
-      { status: 500 }
-    );
-  }
-  if (authHeader !== `Bearer ${CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   // R2 não configurado (ex.: ambiente sem storage): não há nada para limpar.
   // Pula graciosamente em vez de lançar erro a cada execução (evita falha diária ruidosa).
@@ -255,13 +246,11 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    // Check if user is authenticated admin
-    const { searchParams } = new URL(req.url);
-    const secret = searchParams.get('secret');
+    // Segredo só no header (Authorization: Bearer <CRON_SECRET>), nunca na query string
+    const authError = verifyCronAuth(req);
+    if (authError) return authError;
 
-    if (!CRON_SECRET || secret !== CRON_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { searchParams } = new URL(req.url);
 
     // Allow overriding dry run mode via query parameter
     const forceDryRun = searchParams.get('dryRun') === 'true';

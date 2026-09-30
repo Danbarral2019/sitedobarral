@@ -10,7 +10,7 @@
  * Tudo aqui é função pura (sem DB/rede) para ser testável. A rota injeta o HTML
  * e os registros do banco.
  */
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 
 export interface PageON {
   key: string;

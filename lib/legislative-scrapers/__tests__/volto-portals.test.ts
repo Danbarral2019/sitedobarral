@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { blockAwareText, stripGovbrUiNoise } from '../normalize';
 import { GovBrComprasScraper } from '../govbr-compras';
 

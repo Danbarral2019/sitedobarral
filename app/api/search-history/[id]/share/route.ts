@@ -38,7 +38,8 @@ export async function POST(
     }
 
     // Gerar novo shareId
-    const shareId = crypto.randomUUID().slice(0, 8);
+    // 128 bits: o link é o único controle de acesso à resposta compartilhada
+    const shareId = crypto.randomBytes(16).toString('base64url');
 
     await prisma.searchHistory.update({
       where: { id },

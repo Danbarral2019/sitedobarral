@@ -11,10 +11,10 @@ import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { findRelatedArticles } from '@/data/lei-14133-cross-references';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { enforceGlobalAiCap } from '@/lib/cache/ai-quota';
-import { AuthenticationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
-import { jwtVerify, SignJWT } from 'jose';
+import { signConversationToken, verifyConversationToken } from '@/lib/artigos/conversation-token';
 import { z } from 'zod';
 
 const ChatBodySchema = z.object({
@@ -23,42 +23,6 @@ const ChatBodySchema = z.object({
 });
 
 const ConversationQuerySchema = z.string().uuid();
-const CONVERSATION_AUDIENCE = 'article-chat';
-
-function conversationSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET não configurado');
-  return new TextEncoder().encode(secret);
-}
-
-async function signConversationToken(conversationId: string): Promise<string> {
-  return new SignJWT({})
-    .setProtectedHeader({ alg: 'HS256' })
-    .setSubject(conversationId)
-    .setAudience(CONVERSATION_AUDIENCE)
-    .setIssuedAt()
-    .setExpirationTime('24h')
-    .sign(conversationSecret());
-}
-
-async function verifyConversationToken(request: NextRequest, conversationId: string): Promise<void> {
-  const authorization = request.headers.get('authorization');
-  const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : null;
-  if (!token) throw new AuthenticationError('Token de conversa obrigatório');
-
-  try {
-    const { payload } = await jwtVerify(token, conversationSecret(), {
-      audience: CONVERSATION_AUDIENCE,
-    });
-    if (payload.sub !== conversationId) {
-      throw new AuthenticationError('Token de conversa inválido');
-    }
-  } catch (error) {
-    if (error instanceof AuthenticationError) throw error;
-    throw new AuthenticationError('Token de conversa inválido');
-  }
-}
-
 // POST /api/artigos/[numero]/chat - IA Assistente
 export async function POST(
   request: NextRequest,

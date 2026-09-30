@@ -8,7 +8,7 @@
  * do Diário Oficial da União federal.
  */
 
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { apiLogger } from "@/lib/logger";
 
 /**

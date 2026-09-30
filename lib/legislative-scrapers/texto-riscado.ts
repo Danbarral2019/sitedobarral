@@ -15,7 +15,7 @@
  *   <p><strike>I - produzidos ou prestados por empresas...;</strike> <a>(Revogado pela Lei nº 12.349, de 2010)</a></p>
  *   → "I - (Revogado pela Lei nº 12.349, de 2010)"
  */
-import type * as cheerio from 'cheerio';
+import type * as cheerio from 'cheerio/slim';
 
 const STRUCK_SELECTOR = 'strike, s, del';
 const BLOCK_SELECTOR = 'p, div, td, li, h1, h2, h3, h4, h5, h6, blockquote';
@@ -32,7 +32,7 @@ function isStruckByStyle(style: string | undefined): boolean {
  * Remove do documento o texto riscado. Devolve quantos trechos saíram.
  * Altera `$` no lugar.
  */
-export function removerTextoRiscado($: cheerio.Root): number {
+export function removerTextoRiscado($: cheerio.CheerioAPI): number {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const q = $ as any;
   const struck = q(STRUCK_SELECTOR)

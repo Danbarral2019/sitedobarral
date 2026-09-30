@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/cache/redis-client';
+import { getClientIp } from '@/lib/cache/rate-limit-helper';
 
 // 1x1 transparent GIF pixel
 const TRANSPARENT_GIF = Buffer.from(
@@ -27,6 +29,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Limita incrementos por IP para não inflar a métrica; o pixel é sempre devolvido.
+    const rl = await checkRateLimit(`newsletter:track:${getClientIp(request)}`, 30, 60);
+    if (!rl.allowed) {
+      return new NextResponse(TRANSPARENT_GIF, {
+        status: 200,
+        headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' },
+      });
+    }
+
     await prisma.newsletterSend.update({
       where: { id },
       data: { opens: { increment: 1 } },
