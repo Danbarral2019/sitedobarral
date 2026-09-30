@@ -41,7 +41,7 @@ npx tsx scripts/migrate-to-embeddings.ts               # indexa docs pendentes n
 npx tsx scripts/index-legislative-acts.ts              # indexa atos legislativos
 ```
 
-**Test Credentials:** Student `aluno@teste.com` / `aluno123` (Nova Lei de Licitações) · Admin: criar via `node scripts/create-admin.js`.
+**Test Credentials:** Student `aluno@teste.com` / `aluno123`, criado por `npx tsx scripts/create-test-student.ts` com a senha em `TEST_STUDENT_PASSWORD` (matrícula no primeiro curso de `data/courses.ts`; `npx tsx scripts/enroll-test-user.ts` matricula em todos) · Admin: criar via `node scripts/create-admin.js`.
 
 ## Architecture Quick Reference
 
