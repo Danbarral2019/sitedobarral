@@ -31,6 +31,9 @@ function LeiComentadaContent() {
   const [isAISearching, setIsAISearching] = useState(false);
   const [aiSearchResults, setAiSearchResults] = useState<AISearchResponse | null>(null);
   const [showAIResults, setShowAIResults] = useState(false);
+  // A busca com IA exige login: com a sessão expirada, a API responde 401 e
+  // o painel mostra o convite a entrar em vez de erro.
+  const [aiExigeLogin, setAiExigeLogin] = useState(false);
 
   // Per-doc expansion state (so usado nessa pagina)
   const [expandedDocumentId, setExpandedDocumentId] = useState<string | null>(null);
@@ -46,6 +49,7 @@ function LeiComentadaContent() {
 
     setIsAISearching(true);
     setShowAIResults(true);
+    setAiExigeLogin(false);
 
     try {
       const response = await fetch('/api/lei-14133/search', {
@@ -53,6 +57,11 @@ function LeiComentadaContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: q }),
       });
+      if (response.status === 401) {
+        setAiExigeLogin(true);
+        setAiSearchResults(null);
+        return;
+      }
       if (!response.ok) throw new Error('Erro na busca com IA');
       const data: AISearchResponse = await response.json();
       setAiSearchResults(data);
@@ -137,6 +146,8 @@ function LeiComentadaContent() {
           results={aiSearchResults}
           onClose={() => setShowAIResults(false)}
           onResultClick={handleAIResultClick}
+          exigeLogin={aiExigeLogin}
+          returnTo="/area-restrita/lei-comentada"
         />
       )}
 
