@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchLeiArticlesWithExcerpts } from '@/data/lei-14133-artigos';
-import { verifyAuth, hasAnyActiveAccess } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth';
+import {
+  getAcessoDoUsuario,
+  podeVerDocumento,
+  type AcessoDoUsuario,
+} from '@/lib/search/acesso-documentos';
 import {
   searchDocuments,
   searchGlossary,
@@ -37,16 +42,11 @@ export async function GET(request: NextRequest) {
 
     // Verificar se usuário está autenticado (opcional — busca funciona sem login)
     const authResult = await verifyAuth(request);
-    const isAuthenticated = authResult.valid;
-    const userCourseId = isAuthenticated && authResult.user?.courseId
-      ? authResult.user.courseId
-      : null;
+    const acesso = await getAcessoDoUsuario(authResult.valid ? authResult.user : null);
 
     // Quem já tem o assistente não deve ver a demonstração dele nem a oferta.
     // Admin e qualquer acesso ativo (matrícula válida ou assinatura) contam.
-    const hasAiAccess = authResult.user
-      ? authResult.user.role === 'admin' || await hasAnyActiveAccess(authResult.user.userId)
-      : false;
+    const hasAiAccess = acesso.isAdmin || acesso.temAcessoAtivo;
 
     // Executar todas as buscas em paralelo via FTS (tsvector + stemming português)
     const [
@@ -74,14 +74,11 @@ export async function GET(request: NextRequest) {
     // ou com o pgvector fora, a busca textual segue respondendo. Melhor uma
     // busca pior do que uma busca quebrada.
     //
-    // Não vaza acervo pago: esta rota devolve título, descrição e categoria —
-    // nunca o trecho do chunk. Documento restrito encontrado aqui aparece
-    // marcado como restrito, igual ao que o full-text já fazia.
+    // Não vaza acervo pago: esta rota nunca devolve o trecho do chunk, e
+    // documento que o leitor não pode ver sai sem url nem descrição (ver
+    // paraResultado). O grafo de precedentes não aparece.
     const [docsSemanticos, teses] = await Promise.all([
-      buscarSemanticos(query, {
-        userCourseId,
-        isAdmin: authResult.user?.role === 'admin',
-      }).catch(() => []),
+      buscarSemanticos(query, acesso).catch(() => []),
       buscarTeses(query, hasAiAccess).catch((err) => {
         apiLogger.warn({ err, query }, 'busca integrada: busca das teses falhou');
         return [] as TeseCard[];
@@ -92,13 +89,8 @@ export async function GET(request: NextRequest) {
     const articles = searchLeiArticlesWithExcerpts(query).slice(0, 10);
 
     // Processar documentos para indicar acessibilidade
-    const processedDocuments = docResults.map(({ data: doc }) => {
-      const isPublic = doc.is_public;
-      const hasAccess = isPublic
-        || (userCourseId && doc.course_id === userCourseId)
-        || authResult.user?.role === 'admin';
-
-      return {
+    const processedDocuments = docResults.flatMap(({ data: doc }) => {
+      const item = paraResultado({
         id: doc.id,
         title: doc.title,
         description: doc.description,
@@ -107,10 +99,10 @@ export async function GET(request: NextRequest) {
         url: doc.url,
         courseId: doc.course_id,
         uploadedAt: doc.uploaded_at,
-        isPublic,
-        hasAccess,
-        requiresEnrollment: !hasAccess,
-      };
+        isPublic: doc.is_public,
+        isCommon: doc.is_common,
+      }, acesso);
+      return item ? [item] : [];
     });
 
     const documentosFinais = mesclarSemDuplicar(processedDocuments, docsSemanticos, 20);
@@ -186,14 +178,50 @@ export async function GET(request: NextRequest) {
   }
 }
 
+interface DocumentoEncontrado {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  type: string;
+  url: string | null;
+  courseId: string | null;
+  uploadedAt: Date;
+  isPublic: boolean;
+  isCommon: boolean;
+}
+
+/**
+ * Formato de saída de um documento, com a regra única de acesso
+ * (lib/search/acesso-documentos.ts) aplicada aos dois ramos, textual e
+ * semântico. O que o leitor não pode ver:
+ * - do acervo comum, aparece como vitrine ("Requer Inscrição"), sem url nem
+ *   descrição;
+ * - de resto (material de curso, grafo de precedentes), não aparece.
+ */
+function paraResultado(d: DocumentoEncontrado, acesso: AcessoDoUsuario) {
+  const hasAccess = podeVerDocumento(d, acesso);
+  if (!hasAccess && !d.isCommon) return null;
+  return {
+    id: d.id,
+    title: d.title,
+    description: hasAccess ? d.description : null,
+    category: d.category,
+    type: d.type,
+    url: hasAccess ? d.url : null,
+    courseId: d.courseId,
+    uploadedAt: d.uploadedAt,
+    isPublic: d.isPublic,
+    hasAccess,
+    requiresEnrollment: !hasAccess,
+  };
+}
+
 /**
  * Documentos encontrados por similaridade semântica, no mesmo formato dos que
  * vêm do full-text. Devolve [] em qualquer falha — o chamador não trata erro.
  */
-async function buscarSemanticos(
-  query: string,
-  acesso: { userCourseId: string | null; isAdmin: boolean },
-) {
+async function buscarSemanticos(query: string, acesso: AcessoDoUsuario) {
   const { results } = await hybridSearch({
     query,
     limit: 12,
@@ -211,34 +239,18 @@ async function buscarSemanticos(
     where: { id: { in: ids } },
     select: {
       id: true, title: true, description: true, category: true, type: true,
-      url: true, courseId: true, uploadedAt: true, isPublic: true,
+      url: true, courseId: true, uploadedAt: true, isPublic: true, isCommon: true,
     },
   });
 
   // Preserva a ordem de relevância do híbrido, que o findMany não garante.
+  // Mesma regra de acesso do ramo full-text: divergir aqui faria o mesmo
+  // documento aparecer destravado ou trancado conforme o ramo que o achou.
   const porId = new Map(rows.map((r) => [r.id, r]));
   return ids.flatMap((id) => {
     const d = porId.get(id);
-    if (!d) return [];
-    // Mesma regra de acesso do ramo full-text: divergir aqui faria o mesmo
-    // documento aparecer destravado ou trancado conforme o ramo que o achou.
-    const hasAccess =
-      d.isPublic ||
-      (!!acesso.userCourseId && d.courseId === acesso.userCourseId) ||
-      acesso.isAdmin;
-    return [{
-      id: d.id,
-      title: d.title,
-      description: d.description,
-      category: d.category,
-      type: d.type,
-      url: d.url,
-      courseId: d.courseId,
-      uploadedAt: d.uploadedAt,
-      isPublic: d.isPublic,
-      hasAccess,
-      requiresEnrollment: !hasAccess,
-    }];
+    const item = d ? paraResultado(d, acesso) : null;
+    return item ? [item] : [];
   });
 }
 
