@@ -2,17 +2,19 @@
 
 **IMPORTANTE:** Sempre use o `id` (numérico), NÃO o `slug` ao referenciar cursos no banco de dados!
 
-## Lista Completa dos 10 Cursos
+## Cursos
+
+Fonte de verdade: `data/courses.ts`. Os IDs `'1'`, `'5'` e `'6'` foram descontinuados (ver `scripts/.archived/cleanup-removed-courses.ts`) e não devem ser usados em código novo; os IDs dos demais cursos não foram renumerados.
 
 | ID | Slug | Título |
 |---|---|---|
-| `'1'` | `nova-lei-licitacoes` | Nova Lei de Licitações e Contratos (Lei nº 14.133/2021) |
+| ~~`'1'`~~ | ~~`nova-lei-licitacoes`~~ | Nova Lei de Licitações e Contratos (descontinuado) |
 | `'2'` | `planejamento-contratacoes` | Planejamento das Contratações Públicas |
 | `'3'` | `gestao-fiscalizacao-contratos` | Gestão e Fiscalização de Contratos Administrativos |
 | `'4'` | `processo-sancionador` | Processo Administrativo Sancionador |
-| `'5'` | `inovacao-contratacoes` | Inovação nas Contratações Públicas |
-| `'6'` | `terceirizacao-formacao-precos` | Terceirização e Formação de Preços |
-| `'7'` | `assessoramento-juridico` | Assessoramento Jurídico na Nova Lei de Licitações |
+| ~~`'5'`~~ | ~~`inovacao-contratacoes`~~ | Inovação nas Contratações Públicas (descontinuado) |
+| ~~`'6'`~~ | ~~`terceirizacao-formacao-precos`~~ | Terceirização e Formação de Preços (descontinuado) |
+| `'7'` | `assessoramento-juridico` | Assessoramento Jurídico em Licitações |
 | `'8'` | `revisao-reajuste-repactuacao` | Revisão, Reajuste e Repactuação |
 | `'9'` | `alteracoes-contratuais` | Alterações Contratuais |
 | `'10'` | `contratacao-direta` | Contratação Direta |
@@ -40,7 +42,7 @@
 await prisma.enrollment.create({
   data: {
     userId: user.id,
-    courseId: 'nova-lei-licitacoes', // ❌ Usando slug!
+    courseId: 'planejamento-contratacoes', // ❌ Usando slug!
   }
 });
 ```
@@ -51,7 +53,7 @@ await prisma.enrollment.create({
 await prisma.enrollment.create({
   data: {
     userId: user.id,
-    courseId: '1', // ✅ Usando ID!
+    courseId: '2', // ✅ Usando ID!
   }
 });
 ```
@@ -59,7 +61,7 @@ await prisma.enrollment.create({
 ### ✅ CORRETO (com busca):
 ```typescript
 // Encontrar curso por slug para pegar o ID
-const course = courses.find(c => c.slug === 'nova-lei-licitacoes');
+const course = courses.find(c => c.slug === 'planejamento-contratacoes');
 if (course) {
   await prisma.enrollment.create({
     data: {
@@ -76,10 +78,10 @@ Sempre use os IDs numéricos nos scripts de teste:
 
 ```javascript
 // ✅ CORRETO
-const courseId = '1'; // Nova Lei de Licitações
+const courseId = '2'; // Planejamento das Contratações Públicas
 
 // ❌ ERRADO
-const courseId = 'nova-lei-licitacoes';
+const courseId = 'planejamento-contratacoes';
 ```
 
 ## Conversão Rápida
