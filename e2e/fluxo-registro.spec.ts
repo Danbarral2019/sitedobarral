@@ -72,36 +72,52 @@ test.describe('fluxos de registro e verificação de email', () => {
     await expect(page.getByRole('heading', { name: 'Premium', exact: true })).toBeVisible();
   });
 
-  test('registro com QR code: matrícula de 1 mês visível na área restrita', async ({ page, context }) => {
+  test('registro com QR code: matrícula de 1 mês criada só na verificação do email', async ({ page, context }) => {
     const email = uniqueEmail('com-qr');
     const antes = await e2ePrisma().qRCode.findUniqueOrThrow({ where: { code: E2E_QR_CODE.code } });
 
     await registerViaUi(page, { name: 'Aluno Com QR E2E', email, qrCode: E2E_QR_CODE.code });
 
+    // Antes da verificação: QR guardado como pendente, sem matrícula e sem
+    // consumo de vaga (conta nunca confirmada não ocupa lugar na turma).
     const criado = await e2ePrisma().user.findUniqueOrThrow({
       where: { email },
       include: { enrollments: true },
     });
-    expect(criado.enrollments).toHaveLength(1);
-    const [matricula] = criado.enrollments;
-    expect(matricula.courseId).toBe(E2E_CATALOG_COURSE.id);
-    expect(matricula.qrCodeId).toBe(E2E_QR_CODE.id);
-    expect(matricula.turma).toBe(E2E_QR_CODE.turma);
-    expect(matricula.isLifetime).toBe(false);
-
-    // Trial de 1 mês contado do registro (tolerância para meses de 28 a 31 dias).
-    const dias = (matricula.expiresAt!.getTime() - matricula.enrolledAt.getTime()) / 86_400_000;
-    expect(dias).toBeGreaterThanOrEqual(27.9);
-    expect(dias).toBeLessThanOrEqual(31.1);
-
-    const depois = await e2ePrisma().qRCode.findUniqueOrThrow({ where: { code: E2E_QR_CODE.code } });
-    expect(depois.usedCount).toBeGreaterThan(antes.usedCount);
+    expect(criado.enrollments).toHaveLength(0);
+    expect(criado.pendingQrCodeId).toBe(E2E_QR_CODE.id);
+    const aposRegistro = await e2ePrisma().qRCode.findUniqueOrThrow({ where: { code: E2E_QR_CODE.code } });
+    expect(aposRegistro.usedCount).toBe(antes.usedCount);
 
     const token = await readVerificationToken(email);
     await page.goto(`/verificar-email?token=${token}`);
     await expect
       .poll(async () => (await e2ePrisma().user.findUniqueOrThrow({ where: { email } })).emailVerified)
       .toBe(true);
+
+    // Depois da verificação: matrícula criada e vaga consumida uma única vez,
+    // mesmo com a chamada duplicada do StrictMode.
+    await expect
+      .poll(async () => (await e2ePrisma().enrollment.count({ where: { user: { email } } })))
+      .toBe(1);
+    const verificado = await e2ePrisma().user.findUniqueOrThrow({
+      where: { email },
+      include: { enrollments: true },
+    });
+    expect(verificado.pendingQrCodeId).toBeNull();
+    const [matricula] = verificado.enrollments;
+    expect(matricula.courseId).toBe(E2E_CATALOG_COURSE.id);
+    expect(matricula.qrCodeId).toBe(E2E_QR_CODE.id);
+    expect(matricula.turma).toBe(E2E_QR_CODE.turma);
+    expect(matricula.isLifetime).toBe(false);
+
+    // Trial de 1 mês contado da verificação (tolerância para meses de 28 a 31 dias).
+    const dias = (matricula.expiresAt!.getTime() - matricula.enrolledAt.getTime()) / 86_400_000;
+    expect(dias).toBeGreaterThanOrEqual(27.9);
+    expect(dias).toBeLessThanOrEqual(31.1);
+
+    const depois = await e2ePrisma().qRCode.findUniqueOrThrow({ where: { code: E2E_QR_CODE.code } });
+    expect(depois.usedCount).toBe(antes.usedCount + 1);
 
     await context.clearCookies();
     await loginViaUi(page, email);
