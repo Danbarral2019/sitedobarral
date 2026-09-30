@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withUserApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { NotFoundError } from '@/lib/errors/api-error';
+import { NotFoundError, AuthorizationError } from '@/lib/errors/api-error';
+import { whereMatriculaValida } from '@/lib/search/acesso-documentos';
 
 /**
  * GET: Retorna o quiz de uma lição (perguntas SEM isCorrect para o aluno)
@@ -19,11 +20,27 @@ export const GET = withUserApi<{ lessonId: string }>(async (
         orderBy: { displayOrder: 'asc' },
       },
       _count: { select: { attempts: true } },
+      lesson: { select: { module: { select: { courseId: true } } } },
     },
   });
 
   if (!quiz || !quiz.isPublished) {
     throw new NotFoundError('Quiz');
+  }
+
+  // Matrícula válida no curso da lição (mesma regra do submit).
+  if (ctx.user.role !== 'admin') {
+    const enrollment = await prisma.enrollment.findFirst({
+      where: {
+        userId: ctx.user.userId,
+        courseId: quiz.lesson.module.courseId,
+        ...whereMatriculaValida(),
+      },
+      select: { id: true },
+    });
+    if (!enrollment) {
+      throw new AuthorizationError('Acesso expirado ou inexistente para este curso.');
+    }
   }
 
   // Contar tentativas do usuário
