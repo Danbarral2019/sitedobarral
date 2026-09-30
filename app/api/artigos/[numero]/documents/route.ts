@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { verifyAuth } from '@/lib/auth';
+import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 /**
  * GET /api/artigos/[numero]/documents
@@ -22,8 +25,14 @@ export async function GET(
       );
     }
 
+    // Rota pública: documento privado só para admin (mesmo padrão de
+    // /api/lei-14133/article-docs/[numero]). O cache é separado por perfil,
+    // senão a lista do admin seria servida ao público.
+    const authResult = await verifyAuth(request);
+    const isAdminUser = authResult.valid && authResult.user?.role === 'admin';
+
     const result = await withCache(
-      CacheKeys.articleDocuments(numero),
+      `${CacheKeys.articleDocuments(numero)}:${isAdminUser ? 'admin' : 'publico'}`,
       async () => {
         // Busca em paralelo: Documents E LegislativeActs
         const [documents, legislativeActs] = await Promise.all([
@@ -31,7 +40,9 @@ export async function GET(
             where: {
               leiArticlesArr: {
                 has: numero
-              }
+              },
+              category: { notIn: [CATEGORIA_GRAFO, ...INTERNAL_ONLY_CATEGORIES] },
+              ...(!isAdminUser && { isPublic: true }),
             },
             include: {
               metaTcu: true,
