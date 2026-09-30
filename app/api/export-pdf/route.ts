@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/auth';
+import { getAcessoDoUsuario, whereDocumentoVisivel } from '@/lib/search/acesso-documentos';
 import jsPDF from 'jspdf';
 import { getSiteUrl } from '@/lib/site-url';
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
 
 /**
  * Sanitiza texto para o jsPDF (Helvetica/WinANSI).
@@ -59,9 +58,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica JWT
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    const userId = payload.userId as string;
+    // Verifica JWT (verifyToken exige JWT_SECRET, sem segredo de fallback)
+    const payload = await verifyToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { error: 'Token inválido' },
+        { status: 401 }
+      );
+    }
+    const userId = payload.userId;
 
     // 2. Busca informações do usuário
     const user = await prisma.user.findUnique({
@@ -87,10 +92,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Busca documentos
+    // 4. Busca documentos — só os que o usuário pode ver (lib/search/acesso-documentos)
+    const acesso = await getAcessoDoUsuario(payload);
     const documents = await prisma.document.findMany({
       where: {
-        id: { in: documentIds },
+        AND: [
+          { id: { in: documentIds } },
+          whereDocumentoVisivel(acesso),
+        ],
       },
       orderBy: {
         category: 'asc',
