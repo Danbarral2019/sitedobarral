@@ -35,6 +35,9 @@ export default async function seedE2E(): Promise<void> {
             role: user.role,
             passwordHash,
             emailVerified: true,
+            // authenticateAs assina tokens sem `tv` (versão 0): um logout
+            // numa execução anterior não pode deixar o usuário revogado.
+            tokenVersion: 0,
           },
         }),
       ),

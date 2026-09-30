@@ -34,6 +34,7 @@ import {
   sendEmail,
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendDuplicateRegistrationEmail,
   sendExpirationNotification,
   sendContactNotification,
   sendNewDocumentsNotification,
@@ -200,6 +201,44 @@ describe('Email Module', () => {
     it('deve retornar true em desenvolvimento', async () => {
       const result = await sendVerificationEmail('user@test.com', 'Test', 'token');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('sendDuplicateRegistrationEmail', () => {
+    beforeEach(() => {
+      (process.env as Record<string, string>).NODE_ENV = 'production';
+      process.env.RESEND_API_KEY = 'test-key';
+      mockSend.mockResolvedValue({ data: { id: '123' } });
+    });
+
+    it('avisa o dono da conta, com links de login e de redefinição de senha', async () => {
+      const result = await sendDuplicateRegistrationEmail('dono@test.com', 'Dono', true);
+
+      expect(result).toBe(true);
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'dono@test.com',
+          subject: expect.stringContaining('Tentativa de cadastro'),
+          html: expect.stringContaining('https://test.com/login'),
+        })
+      );
+      const { html } = mockSend.mock.calls[0][0] as { html: string };
+      expect(html).toContain('https://test.com/esqueci-senha');
+    });
+
+    it('para conta não confirmada, orienta a reenviar a verificação', async () => {
+      await sendDuplicateRegistrationEmail('dono@test.com', 'Dono', false);
+
+      const { text } = mockSend.mock.calls[0][0] as { text: string };
+      expect(text).toContain('ainda não foi confirmado');
+    });
+
+    it('escapa o nome no HTML', async () => {
+      await sendDuplicateRegistrationEmail('dono@test.com', '<script>x</script>', true);
+
+      const { html } = mockSend.mock.calls[0][0] as { html: string };
+      expect(html).not.toContain('<script>x</script>');
+      expect(html).toContain('&lt;script&gt;');
     });
   });
 

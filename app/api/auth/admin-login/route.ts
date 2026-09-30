@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     const token = await generateToken({
       userId: admin.id,
       role: 'admin',
+      tv: admin.tokenVersion,
     });
 
     // Define cookie

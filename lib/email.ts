@@ -253,6 +253,92 @@ Equipe Prof. Daniel Barral
 }
 
 /**
+ * Avisa o dono de uma conta que alguém tentou criar outra conta com o mesmo
+ * email. A rota de cadastro responde a essa tentativa exatamente como a um
+ * cadastro novo (para não revelar quais emails estão cadastrados); este
+ * email é o único sinal, e só chega a quem controla a caixa de entrada.
+ *
+ * `emailVerified` muda a orientação: conta ainda não confirmada costuma ser
+ * o próprio dono tentando de novo, e o caminho é reenviar a verificação.
+ */
+export async function sendDuplicateRegistrationEmail(
+  email: string,
+  name: string,
+  emailVerified: boolean
+): Promise<boolean> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const loginUrl = `${baseUrl}/login`;
+  const resetUrl = `${baseUrl}/esqueci-senha`;
+  const safeName = escapeHtml(name);
+
+  const orientacaoHtml = emailVerified
+    ? `<p>Se foi você, não é preciso criar outra conta: basta <a href="${loginUrl}">entrar com o seu email e senha</a>. Se esqueceu a senha, <a href="${resetUrl}">redefina-a aqui</a>.</p>`
+    : `<p>Se foi você, sua conta já existe, mas o email ainda não foi confirmado. Na página de confirmação do cadastro, use a opção de reenviar o email de verificação; se esqueceu a senha, <a href="${resetUrl}">redefina-a aqui</a>.</p>`;
+  const orientacaoTexto = emailVerified
+    ? `Se foi você, não é preciso criar outra conta: basta entrar com o seu email e senha em ${loginUrl}. Se esqueceu a senha, redefina-a em ${resetUrl}.`
+    : `Se foi você, sua conta já existe, mas o email ainda não foi confirmado. Na página de confirmação do cadastro, use a opção de reenviar o email de verificação; se esqueceu a senha, redefina-a em ${resetUrl}.`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #1a1c20; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #20364e; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f7f6f3; padding: 30px; border-radius: 0 0 10px 10px; }
+          .footer { text-align: center; margin-top: 30px; color: #6b6e72; font-size: 14px; }
+          .warning { background: #e9d8b8; border-left: 4px solid #7b5427; padding: 15px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Tentativa de cadastro com o seu email</h1>
+          </div>
+          <div class="content">
+            <p>Olá ${safeName},</p>
+            <p>Alguém tentou criar uma conta no site do <strong>Prof. Daniel Barral</strong> usando este endereço de email, que já está cadastrado. Nenhuma conta nova foi criada e a sua não foi alterada.</p>
+            ${orientacaoHtml}
+            <div class="warning">
+              <strong>Não foi você?</strong><br>
+              Pode ignorar este email. Ninguém consegue acessar a sua conta sem a sua senha.
+            </div>
+            <p>Atenciosamente,<br><strong>Equipe Prof. Daniel Barral</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este é um email automático, por favor não responda.</p>
+            <p>© ${new Date().getFullYear()} Prof. Daniel Barral - Todos os direitos reservados</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const text = `
+Tentativa de cadastro com o seu email
+
+Olá ${name},
+
+Alguém tentou criar uma conta no site do Prof. Daniel Barral usando este endereço de email, que já está cadastrado. Nenhuma conta nova foi criada e a sua não foi alterada.
+
+${orientacaoTexto}
+
+Não foi você? Pode ignorar este email. Ninguém consegue acessar a sua conta sem a sua senha.
+
+Atenciosamente,
+Equipe Prof. Daniel Barral
+  `;
+
+  return (await sendEmail({
+    to: email,
+    subject: 'Tentativa de cadastro com o seu email - Prof. Daniel Barral',
+    html,
+    text,
+  })).success;
+}
+
+/**
  * Envia email de boas-vindas após cadastro
  */
 export async function sendWelcomeEmail(

@@ -36,14 +36,17 @@ export async function POST(request: NextRequest) {
     // Hash da nova senha
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
-    // Atualizar senha e limpar token
-    await prisma.user.update({
+    // Atualizar senha, limpar token e revogar as sessões abertas com a senha
+    // antiga (incremento de tokenVersion; o token emitido abaixo usa a nova).
+    const { tokenVersion } = await prisma.user.update({
       where: { id: user.id },
       data: {
         passwordHash,
         resetPasswordToken: null,
         resetPasswordExpiry: null,
+        tokenVersion: { increment: 1 },
       },
+      select: { tokenVersion: true },
     });
 
     // Auto-login após redefinição (usa módulo auth centralizado — sem segredos hardcoded)
@@ -51,6 +54,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       email: user.email,
       role: user.role as 'admin' | 'student',
+      tv: tokenVersion,
     });
 
     // Buscar usuário atualizado com enrollments

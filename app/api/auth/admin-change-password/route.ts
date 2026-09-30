@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyAuth } from '@/lib/auth';
+import { generateToken, verifyAuth } from '@/lib/auth';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import bcrypt from 'bcryptjs';
@@ -62,19 +62,34 @@ export async function POST(request: NextRequest) {
     // Gerar hash da nova senha
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
-    // Atualizar senha no banco
-    await prisma.user.update({
+    // Atualizar senha no banco e revogar todas as sessões abertas
+    // (incremento de tokenVersion).
+    const { tokenVersion } = await prisma.user.update({
       where: { id: user.id },
-      data: { passwordHash: newPasswordHash },
+      data: { passwordHash: newPasswordHash, tokenVersion: { increment: 1 } },
+      select: { tokenVersion: true },
     });
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: 'Senha alterada com sucesso',
       },
       { status: 200 }
     );
+
+    // A sessão de quem trocou a senha continua: recebe um token na versão nova.
+    // As demais (outros navegadores, token vazado) deixam de valer.
+    const token = await generateToken({ userId: user.id, role: 'admin', tv: tokenVersion });
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 dias (igual ao admin-login)
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     if (error instanceof RateLimitError) {
       return NextResponse.json(

@@ -16,10 +16,16 @@ export const AuthPayloadSchema = z.object({
   name: z.string().optional(),
   validUntil: z.string().datetime().optional(),
   turma: z.string().optional(),
+  // Versão do token (User.tokenVersion). Ausente nos tokens emitidos antes da
+  // revogação existir: vale como 0 (ver tokenVersionOf).
+  tv: z.number().int().nonnegative().optional(),
 });
 
 // Tipos para o payload do JWT (inferido do schema Zod)
 export type AuthPayload = z.infer<typeof AuthPayloadSchema>;
+
+// Payload de emissão: todo token novo sai com a versão atual do usuário.
+export type SessionPayload = AuthPayload & { tv: number };
 
 // Tipo para resultado de verificação de autenticação
 export interface AuthResult {
@@ -39,7 +45,7 @@ const getSecretKey = () => {
 /**
  * Gera um token JWT
  */
-export async function generateToken(payload: AuthPayload): Promise<string> {
+export async function generateToken(payload: SessionPayload): Promise<string> {
   const secret = getSecretKey();
 
   // Validar payload com Zod
@@ -81,9 +87,45 @@ export async function generateToken(payload: AuthPayload): Promise<string> {
 }
 
 /**
- * Verifica e decodifica um token JWT
+ * Versão carregada pelo token. Token sem `tv` (emitido antes da revogação)
+ * conta como 0, que é o default da coluna: o deploy não derruba as sessões.
  */
-export async function verifyToken(token: string): Promise<AuthPayload | null> {
+export function tokenVersionOf(payload: Pick<AuthPayload, 'tv'>): number {
+  return payload.tv ?? 0;
+}
+
+/**
+ * Lê a versão atual dos tokens do usuário. Null quando o usuário não existe.
+ */
+export async function getUserTokenVersion(userId: string): Promise<number | null> {
+  const { prisma } = await import('@/lib/prisma');
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { tokenVersion: true },
+  });
+  return user ? user.tokenVersion : null;
+}
+
+/**
+ * Revoga todos os tokens já emitidos para o usuário (logout, troca ou
+ * redefinição de senha). Devolve a versão nova, para quem precisar emitir um
+ * token que continue valendo.
+ */
+export async function revokeUserTokens(userId: string): Promise<number> {
+  const { prisma } = await import('@/lib/prisma');
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { tokenVersion: { increment: 1 } },
+    select: { tokenVersion: true },
+  });
+  return user.tokenVersion;
+}
+
+/**
+ * Verifica só a assinatura, a expiração e o formato do token, sem consultar o
+ * banco. Não detecta token revogado: para autenticar, usar verifyToken.
+ */
+export async function verifyTokenSignature(token: string): Promise<AuthPayload | null> {
   try {
     const secret = getSecretKey();
     const { payload } = await jwtVerify(token, secret);
@@ -99,6 +141,39 @@ export async function verifyToken(token: string): Promise<AuthPayload | null> {
     return validationResult.data;
   } catch (error) {
     authLogger.debug({ err: error }, 'Erro ao verificar token JWT');
+    return null;
+  }
+}
+
+/**
+ * Verifica e decodifica um token JWT de sessão: assinatura, expiração,
+ * formato e revogação. O token só vale se a sua versão (`tv`, 0 quando
+ * ausente) for igual a User.tokenVersion; usuário apagado também invalida.
+ * Custa uma leitura por chave primária no banco.
+ */
+export async function verifyToken(token: string): Promise<AuthPayload | null> {
+  const payload = await verifyTokenSignature(token);
+  if (!payload) {
+    return null;
+  }
+
+  try {
+    const current = await getUserTokenVersion(payload.userId);
+    if (current === null) {
+      authLogger.warn({ userId: payload.userId }, 'Token JWT de usuário inexistente');
+      return null;
+    }
+    if (current !== tokenVersionOf(payload)) {
+      authLogger.info(
+        { userId: payload.userId, tokenVersion: tokenVersionOf(payload), currentVersion: current },
+        'Token JWT revogado',
+      );
+      return null;
+    }
+    return payload;
+  } catch (error) {
+    // Sem como conferir a revogação, a sessão não é aceita (falha fechada).
+    authLogger.error({ err: error, userId: payload.userId }, 'Erro ao conferir a versão do token JWT');
     return null;
   }
 }
@@ -290,7 +365,7 @@ export async function isAdmin(): Promise<boolean> {
 /**
  * Cria um token JWT e define o cookie de autenticação
  */
-export async function createAuthSession(payload: AuthPayload): Promise<string> {
+export async function createAuthSession(payload: SessionPayload): Promise<string> {
   const token = await generateToken(payload);
   const cookieStore = await cookies();
 
