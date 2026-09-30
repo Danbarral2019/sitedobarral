@@ -6,6 +6,7 @@ import {
   classifyByAi,
 } from '@/lib/legislative-scrapers/theme-enricher';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
 
 /**
  * GET /api/cron/enrich-themes
@@ -34,8 +35,10 @@ export async function GET(request: NextRequest) {
       console.log('[Cron EnrichThemes] Iniciando enriquecimento...');
 
       const acts = await prisma.legislativeAct.findMany({
-    where: { themes: null },
+    where: { ...ATO_VISIVEL, themes: null },
     select: { id: true, fullNumber: true, title: true, ementa: true, leiArticlesArr: true, content: true },
+    // Novos primeiro: são os que ainda não passaram pela classificação.
+    orderBy: { createdAt: 'desc' },
     take: TAKE_LIMIT,
   });
 
@@ -74,6 +77,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (aiResult.themes.length === 0) {
+      // Fora da taxonomia (tributário, previdenciário, técnica legislativa):
+      // grava a lista vazia para o ato não voltar ao lote toda semana.
+      await prisma.legislativeAct.update({
+        where: { id: act.id },
+        data: { themes: '[]' },
+      });
       aiEmpty++;
       console.log(`[EnrichThemes] = ai-empty ${act.fullNumber}`);
       continue;

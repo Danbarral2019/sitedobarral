@@ -185,7 +185,7 @@ async function fetchAtosNormativos(params: AtosParams) {
 
   // Buscar estatísticas de filtros disponíveis (respeitando filtro TIC)
   const statsWhere: Record<string, unknown> = ticOnly
-    ? { ...ATO_VISIVEL, themes: { contains: '"tic"' } }
+    ? { ...ATO_VISIVEL, themes: { contains: '"tecnologia-informacao"' } }
     : { ...ATO_VISIVEL };
   const [typeStats, issuerStats, yearStats, esferaStats] = await Promise.all([
     prisma.legislativeAct.groupBy({
