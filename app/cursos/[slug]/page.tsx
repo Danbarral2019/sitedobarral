@@ -158,6 +158,12 @@ const getCourseColor = (courseId: string) => {
 
 export const revalidate = 3600; // ISR: revalida a cada 1h
 
+// Só os slugs de generateStaticParams (data/courses.ts). Um slug desconhecido
+// recebe 404 antes da renderização; o notFound() abaixo, sozinho, saía com
+// status 200, porque o loading.tsx de /cursos já inicia a resposta em
+// streaming antes de a página rodar.
+export const dynamicParams = false;
+
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const course = courses.find((c) => c.slug === slug);

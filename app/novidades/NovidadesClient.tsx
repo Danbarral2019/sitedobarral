@@ -8,21 +8,34 @@ import { ChevronLeft, ChevronRight, FileText, Scale, BookOpen, Video, Newspaper,
 interface NovidadesClientProps {
   year: number;
   month: number;
-  documentsByCategory: Record<string, Array<{
-    id: string;
-    title: string;
-    description: string | null;
-    category: string;
-    uploadedAt: Date;
-  }>>;
-  tribunalDecisions: Array<{
-    id: string;
-    title: string;
-    tribunalCode: string;
-    /** Trecho já recortado no servidor (ver trechoDaDecisao em page.tsx). */
-    trecho: string;
-    createdAt: Date;
+  /** Seção aberta na lista completa ('decisoes' ou categoria); null no resumo do mês. */
+  secao: string | null;
+  pagina: number;
+  totalPaginas: number;
+  /** Posição do primeiro item da página na lista completa (numeração dos documentos). */
+  inicio: number;
+  /** Em cada categoria, os itens enviados e o total do mês. */
+  documentsByCategory: Record<string, {
+    itens: Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      category: string;
+      uploadedAt: Date;
+    }>;
+    total: number;
   }>;
+  tribunalDecisions: {
+    itens: Array<{
+      id: string;
+      title: string;
+      tribunalCode: string;
+      /** Trecho já recortado no servidor (ver trechoDaDecisao em page.tsx). */
+      trecho: string;
+      createdAt: Date;
+    }>;
+    total: number;
+  };
   blogPosts: Array<{
     title: string;
     slug: string;
@@ -88,13 +101,26 @@ const tribunalColors: Record<string, string> = {
   'TST': 'bg-rose-100 text-rose-800',
 };
 
+const SECAO_DECISOES = 'decisoes';
+
 function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function hrefNovidades(mes: string, secao?: string | null, pagina?: number): string {
+  const query = new URLSearchParams({ mes });
+  if (secao) query.set('secao', secao);
+  if (pagina && pagina > 1) query.set('pagina', String(pagina));
+  return `/novidades?${query.toString()}`;
 }
 
 export default function NovidadesClient({
   year,
   month,
+  secao,
+  pagina,
+  totalPaginas,
+  inicio,
   documentsByCategory,
   tribunalDecisions,
   blogPosts,
@@ -107,6 +133,7 @@ export default function NovidadesClient({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['author', 'decisions', ...Object.keys(documentsByCategory)]));
 
   const monthLabel = `${monthNames[month - 1]} de ${year}`;
+  const mesAtual = `${year}-${String(month).padStart(2, '0')}`;
 
   const navigateMonth = (direction: -1 | 1) => {
     let newMonth = month + direction;
@@ -114,8 +141,38 @@ export default function NovidadesClient({
     if (newMonth < 1) { newMonth = 12; newYear--; }
     if (newMonth > 12) { newMonth = 1; newYear++; }
     const mes = `${newYear}-${String(newMonth).padStart(2, '0')}`;
-    router.push(`/novidades?mes=${mes}`);
+    router.push(hrefNovidades(mes, secao));
   };
+
+  const tituloDaSecao = (chave: string) =>
+    chave === SECAO_DECISOES ? 'Decisões de Tribunais' : categoryLabels[chave] || chave;
+
+  // No resumo, a seção com mais itens do que os enviados leva à lista completa.
+  const verTodos = (chave: string, enviados: number, total: number) =>
+    !secao && total > enviados ? (
+      <Link
+        href={hrefNovidades(mesAtual, chave)}
+        className="block text-center text-sm font-medium text-brand-600 hover:underline py-2"
+      >
+        Ver {total === 1 ? 'o item' : `todos os ${total.toLocaleString('pt-BR')} itens`} de {tituloDaSecao(chave)} &rarr;
+      </Link>
+    ) : null;
+
+  const paginacao = secao && totalPaginas > 1 ? (
+    <nav aria-label="Paginação" className="flex items-center justify-between gap-2 pt-2">
+      {pagina > 1 ? (
+        <Link href={hrefNovidades(mesAtual, secao, pagina - 1)} className="flex items-center gap-1 text-sm text-brand-600 hover:underline">
+          <ChevronLeft className="w-4 h-4" /> Anterior
+        </Link>
+      ) : <span />}
+      <span className="text-sm text-ink-muted">Página {pagina} de {totalPaginas}</span>
+      {pagina < totalPaginas ? (
+        <Link href={hrefNovidades(mesAtual, secao, pagina + 1)} className="flex items-center gap-1 text-sm text-brand-600 hover:underline">
+          Próxima <ChevronRight className="w-4 h-4" />
+        </Link>
+      ) : <span />}
+    </nav>
+  ) : null;
 
   const isCurrentMonth = (() => {
     const now = new Date();
@@ -155,7 +212,9 @@ export default function NovidadesClient({
           </button>
           <div className="text-center">
             <h2 className="text-xl font-bold text-ink-primary">{monthLabel}</h2>
-            <p className="text-sm text-ink-muted">{totalItems} documento{totalItems !== 1 ? 's' : ''} no período</p>
+            <p className="text-sm text-ink-muted">
+              {totalItems.toLocaleString('pt-BR')} {secao ? `ite${totalItems !== 1 ? 'ns' : 'm'} nesta seção` : `documento${totalItems !== 1 ? 's' : ''} no período`}
+            </p>
           </div>
           <button
             onClick={() => navigateMonth(1)}
@@ -166,6 +225,12 @@ export default function NovidadesClient({
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
+
+        {secao && (
+          <Link href={hrefNovidades(mesAtual)} className="text-sm text-brand-600 hover:underline mb-4 inline-block">
+            &larr; Voltar ao resumo de {monthLabel}
+          </Link>
+        )}
 
         {/* Empty state */}
         {totalItems === 0 && !hasAuthorContent && legislativeActs.length === 0 && (
@@ -217,16 +282,16 @@ export default function NovidadesClient({
         )}
 
         {/* Tribunal Decisions */}
-        {tribunalDecisions.length > 0 && (
+        {tribunalDecisions.itens.length > 0 && (
           <Section
             title="Decisões de Tribunais"
             icon={<Scale className="w-5 h-5" />}
-            count={tribunalDecisions.length}
+            count={tribunalDecisions.total}
             color="border-brand-500"
             expanded={expandedSections.has('decisions')}
             onToggle={() => toggleSection('decisions')}
           >
-            {tribunalDecisions.map(decision => (
+            {tribunalDecisions.itens.map(decision => (
               <div key={decision.id} className="p-4 border border-border-subtle rounded-[6px] bg-white mb-3">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded ${tribunalColors[decision.tribunalCode] || 'bg-surface-deep text-ink-secondary'}`}>
@@ -238,31 +303,35 @@ export default function NovidadesClient({
                 <p className="text-xs text-ink-muted mt-2">{formatDate(decision.createdAt)}</p>
               </div>
             ))}
+            {verTodos(SECAO_DECISOES, tribunalDecisions.itens.length, tribunalDecisions.total)}
+            {paginacao}
           </Section>
         )}
 
         {/* Document Categories */}
-        {Object.entries(documentsByCategory).map(([category, docs]) => {
+        {Object.entries(documentsByCategory).map(([category, { itens: docs, total }]) => {
           const IconComponent = categoryIcons[category] || FileText;
           return (
             <Section
               key={category}
               title={categoryLabels[category] || category}
               icon={<IconComponent className="w-5 h-5" />}
-              count={docs.length}
+              count={total}
               color={`border-l-4`}
               expanded={expandedSections.has(category)}
               onToggle={() => toggleSection(category)}
             >
               {docs.map((doc, i) => (
                 <div key={doc.id} className="p-4 border border-border-subtle rounded-[6px] bg-white mb-3">
-                  <h4 className="font-semibold text-ink-primary text-sm">{i + 1}. {doc.title}</h4>
+                  <h4 className="font-semibold text-ink-primary text-sm">{inicio + i + 1}. {doc.title}</h4>
                   {doc.description && (
                     <p className="text-sm text-ink-muted mt-1">{doc.description.substring(0, 200)}{doc.description.length > 200 ? '...' : ''}</p>
                   )}
                   <p className="text-xs text-ink-muted mt-2">{formatDate(doc.uploadedAt)}</p>
                 </div>
               ))}
+              {verTodos(category, docs.length, total)}
+              {paginacao}
             </Section>
           );
         })}

@@ -14,6 +14,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import type { LeiArticle } from '@/data/lei-14133-artigos';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
 
 export default function ArtigosListPanel() {
   const [artigos, setArtigos] = useState<Record<string, LeiArticle>>({});
@@ -228,7 +229,7 @@ export default function ArtigosListPanel() {
                   {orphans.map(n => (
                     <Link
                       key={n}
-                      href={`/artigo/${n}`}
+                      href={urlDoArtigo(n)}
                       target="_blank"
                       className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 transition-colors"
                     >
@@ -355,7 +356,7 @@ export default function ArtigosListPanel() {
                         Editar
                       </Link>
                       <Link
-                        href={`/artigo/${numero}`}
+                        href={urlDoArtigo(numero)}
                         target="_blank"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
                       >

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import LeiComentadaClient from './LeiComentadaClient';
 import { metadadosDoArtigo } from '@/lib/lei-14133/metadados-artigo';
+import { artigoInicial } from '@/lib/lei-14133/artigo-inicial';
 
 const METADADOS_DA_LEI: Metadata = {
   title: 'Lei 14.133/2021 Comentada',
@@ -20,6 +21,12 @@ export async function generateMetadata({
   return metadadosDoArtigo(typeof artigo === 'string' ? artigo : undefined) ?? METADADOS_DA_LEI;
 }
 
-export default function LeiPage() {
-  return <LeiComentadaClient />;
+export default async function LeiPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ artigo?: string | string[] }>;
+}) {
+  const { artigo } = await searchParams;
+  const inicial = await artigoInicial(typeof artigo === 'string' ? artigo : undefined);
+  return <LeiComentadaClient artigoInicial={inicial} />;
 }
