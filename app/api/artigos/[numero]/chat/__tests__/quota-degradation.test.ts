@@ -7,6 +7,10 @@ const { mockEnforceRateLimit, mockEnforceGlobalAiCap, mockQueryGeminiText } = vi
   mockQueryGeminiText: vi.fn(),
 }));
 
+vi.mock('@/lib/auth', () => ({
+  getCurrentUser: async () => ({ userId: 'user-1', email: 'aluno@x.com', role: 'student' }),
+}));
+
 vi.mock('@/lib/cache/rate-limit-helper', () => ({
   enforceRateLimit: (...args: unknown[]) => mockEnforceRateLimit(...args),
   getClientIp: () => '127.0.0.1',
@@ -29,9 +33,10 @@ vi.mock('@/lib/gemini/config', () => ({
 vi.mock('@/lib/prisma', () => ({ prisma: {} }));
 vi.mock('@/data/lei-14133-artigos', () => ({ LEI_14133_ARTIGOS: {} }));
 vi.mock('@/data/lei-14133-cross-references', () => ({ findRelatedArticles: () => [] }));
-vi.mock('@/lib/logger', () => ({
-  apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
+vi.mock('@/lib/logger', () => {
+  const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: () => logger };
+  return { apiLogger: logger };
+});
 
 import { POST } from '../route';
 import { NextRequest } from 'next/server';

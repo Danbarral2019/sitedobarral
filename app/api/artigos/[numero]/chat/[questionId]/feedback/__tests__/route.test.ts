@@ -5,7 +5,20 @@ import { NextRequest } from 'next/server';
 const mocks = vi.hoisted(() => ({
   findFirst: vi.fn(),
   update: vi.fn(),
+  getCurrentUser: vi.fn(),
 }));
+
+vi.mock('@/lib/auth', () => ({
+  getCurrentUser: (...args: unknown[]) => mocks.getCurrentUser(...args),
+}));
+vi.mock('@/lib/cache/rate-limit-helper', () => ({
+  enforceRateLimit: async () => undefined,
+  getClientIp: () => '127.0.0.1',
+}));
+vi.mock('@/lib/logger', () => {
+  const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: () => logger };
+  return { apiLogger: logger };
+});
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -41,6 +54,16 @@ describe('PATCH /api/artigos/[numero]/chat/[questionId]/feedback', () => {
     process.env.JWT_SECRET = 'test-secret-para-feedback-com-tamanho-suficiente';
     mocks.findFirst.mockResolvedValue({ id: 'q1', conversationId: CONVERSATION });
     mocks.update.mockResolvedValue({ id: 'q1', wasHelpful: true, createdAt: new Date() });
+    mocks.getCurrentUser.mockResolvedValue({ userId: 'user-1', email: 'aluno@x.com', role: 'student' });
+  });
+
+  it('exige login mesmo com o token da conversa', async () => {
+    mocks.getCurrentUser.mockResolvedValue(null);
+    const token = await signConversationToken(CONVERSATION);
+    const res = await PATCH(req(token), params);
+    expect(res.status).toBe(401);
+    expect(mocks.findFirst).not.toHaveBeenCalled();
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it('recusa sem token de conversa', async () => {

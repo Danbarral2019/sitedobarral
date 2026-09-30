@@ -1,23 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { verifyConversationToken } from '@/lib/artigos/conversation-token';
 import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
-import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
+import { withUserApi } from '@/lib/api/handler';
 
 const FeedbackSchema = z.object({
   wasHelpful: z.boolean(),
 });
 
 // PATCH /api/artigos/[numero]/chat/[questionId]/feedback
-// Exige o token da conversa (Authorization: Bearer) emitido pelo POST do chat.
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ numero: string; questionId: string }> }
-) {
-  try {
-    const { numero: articleNumber, questionId } = await params;
+// Exige login (a IA do artigo é só para usuários autenticados) e o token da
+// conversa (Authorization: Bearer) emitido pelo POST do chat.
+export const PATCH = withUserApi<{ numero: string; questionId: string }>(
+  async (request, { params }) => {
+    const { numero: articleNumber, questionId } = params;
     const body = await request.json().catch(() => ({}));
     const parsed = FeedbackSchema.safeParse(body);
     if (!parsed.success) {
@@ -65,7 +63,5 @@ export async function PATCH(
         updatedAt: updated.createdAt.toISOString(),
       },
     });
-  } catch (error) {
-    return handleApiError(error);
-  }
-}
+  },
+);

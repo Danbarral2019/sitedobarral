@@ -12,6 +12,11 @@ const mocks = vi.hoisted(() => ({
   articleQuestionCreate: vi.fn(),
   articleQuestionUpdate: vi.fn(),
   findRelatedArticles: vi.fn(),
+  getCurrentUser: vi.fn(),
+}));
+
+vi.mock('@/lib/auth', () => ({
+  getCurrentUser: (...args: unknown[]) => mocks.getCurrentUser(...args),
 }));
 
 vi.mock('@/lib/cache/rate-limit-helper', () => ({
@@ -61,9 +66,10 @@ vi.mock('@/data/lei-14133-artigos', () => ({
 vi.mock('@/data/lei-14133-cross-references', () => ({
   findRelatedArticles: (...args: unknown[]) => mocks.findRelatedArticles(...args),
 }));
-vi.mock('@/lib/logger', () => ({
-  apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
+vi.mock('@/lib/logger', () => {
+  const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: () => logger };
+  return { apiLogger: logger };
+});
 
 import { GET, POST } from '../route';
 
@@ -100,6 +106,37 @@ describe('/api/artigos/[numero]/chat', () => {
     mocks.articleQuestionUpdate.mockResolvedValue({ id: 'question-1' });
     mocks.queryGeminiText.mockResolvedValue({ response: 'Resposta', cached: false, latency: 1 });
     mocks.findRelatedArticles.mockReturnValue({ articles: [], topics: [] });
+    mocks.getCurrentUser.mockResolvedValue({ userId: 'user-1', email: 'aluno@x.com', role: 'student' });
+  });
+
+  it('exige login: visitante recebe 401 antes de banco ou IA', async () => {
+    mocks.getCurrentUser.mockResolvedValue(null);
+    const response = await POST(makePost({ question: 'Quando cabe dispensa?' }), routeCtx);
+
+    expect(response.status).toBe(401);
+    expect(mocks.enforceGlobalAiCap).not.toHaveBeenCalled();
+    expect(mocks.documentFindMany).not.toHaveBeenCalled();
+    expect(mocks.articleQuestionCreate).not.toHaveBeenCalled();
+    expect(mocks.queryGeminiText).not.toHaveBeenCalled();
+  });
+
+  it('GET da conversa também exige login', async () => {
+    mocks.getCurrentUser.mockResolvedValue(null);
+    const response = await GET(makeGet('550e8400-e29b-41d4-a716-446655440000'), routeCtx);
+
+    expect(response.status).toBe(401);
+    expect(mocks.articleQuestionFindMany).not.toHaveBeenCalled();
+  });
+
+  it('grava a pergunta com o usuário autenticado', async () => {
+    const response = await POST(makePost({ question: 'Quando cabe dispensa?' }), routeCtx);
+
+    expect(response.status).toBe(200);
+    expect(mocks.articleQuestionCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ userId: 'user-1', userEmail: 'aluno@x.com' }),
+      }),
+    );
   });
 
   it('rejeita pergunta acima de 1.000 caracteres antes de banco ou IA', async () => {
