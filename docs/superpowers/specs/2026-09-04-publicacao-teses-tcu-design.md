@@ -439,6 +439,8 @@ Convenção, para que a regra seja mecânica e não subjetiva: **`julgadoPor` qu
 
 Consequência prática: das 93 teses `fiel` em destilações atuais, só 8 estão hoje habilitadas à vitrine — e esse conjunto ainda será filtrado pela identidade resolvida (§4). As 20 da vitrine inicial precisam ser conferidas antes — é trabalho manual, com a folha de calibração, e é o gargalo real do lançamento público. O acervo restrito e o ELIC não têm essa exigência.
 
+**Decisão de 30 de setembro de 2026: a vitrine passa a aceitar o lote.** Por decisão do usuário, os enunciados aprovados em lote podem ir à vitrine sem conferência individual, pela opção `--incluir-lote` de `scripts/promover-vitrine-teses.ts`. A etiqueta `:lote-` continua no `julgadoPor`, de modo que o registro segue dizendo que a aprovação foi em lote, e a retirada seletiva é possível (`--despromover --incluir-lote`). As demais exigências da vitrine valem igual: identidade oficial (nível 1), evidência íntegra e nenhuma reconferência pendente. O comportamento padrão do script continua sendo só a conferência individual. A exclusão de matéria estranha (item 3 abaixo) passa a depender da leitura do dry-run, que mostra o assunto de cada tese antes da execução.
+
 **Critérios de seleção dos candidatos à conferência:**
 
 1. Ordenar por `dossieNoVoto` decrescente entre as elegíveis.
