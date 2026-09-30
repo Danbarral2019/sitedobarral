@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { reportError } from '@/lib/monitoring/report-error';
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,6 +64,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Auth check error:', error);
+    reportError(error, 'auth', { rota: 'me' });
     return NextResponse.json(
       { error: 'Erro ao verificar autenticação' },
       { status: 500 }

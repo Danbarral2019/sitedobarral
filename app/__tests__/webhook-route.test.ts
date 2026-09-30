@@ -85,9 +85,17 @@ vi.mock('@/lib/email-templates/subscription', () => ({
   renderCanceledEmail: vi.fn().mockReturnValue({ subject: '', html: '' }),
 }));
 
+const { mockCaptureMessage, mockCaptureException, mockSetTag } = vi.hoisted(() => ({
+  mockCaptureMessage: vi.fn(),
+  mockCaptureException: vi.fn(),
+  mockSetTag: vi.fn(),
+}));
+
 vi.mock('@sentry/nextjs', () => ({
-  captureMessage: vi.fn(),
-  captureException: vi.fn(),
+  captureMessage: mockCaptureMessage,
+  captureException: mockCaptureException,
+  withScope: (cb: (scope: { setTag: typeof mockSetTag; setContext: () => void }) => void) =>
+    cb({ setTag: mockSetTag, setContext: () => {} }),
 }));
 
 import { POST } from '@/app/api/pagamento/webhook/route';
@@ -309,6 +317,9 @@ describe('POST /api/pagamento/webhook', () => {
     expect(mockProcessedDelete).toHaveBeenCalledWith({
       where: { stripeEventId: 'evt_test_123' },
     });
+    // A falha do handler chega ao Sentry, marcada como pagamento
+    expect(mockSetTag).toHaveBeenCalledWith('area', 'pagamento');
+    expect(mockCaptureException).toHaveBeenCalled();
   });
 
   // 8. invoice.payment_failed → marca past_due + envia email de falha
@@ -447,6 +458,8 @@ describe('POST /api/pagamento/webhook', () => {
       data: { status: 'canceled' },
     });
     expect(mockRemoveEnrollments).toHaveBeenCalledWith('sub_stripe_1');
+    expect(mockSetTag).toHaveBeenCalledWith('area', 'pagamento');
+    expect(mockCaptureMessage).toHaveBeenCalledWith('Stripe dispute created — subscription canceled', 'error');
   });
 
   it('no-ops on charge.dispute.created when dispute has no charge', async () => {
