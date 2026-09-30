@@ -4,14 +4,14 @@
  * Problema: 32 dos 40 sites estão "órfãos" (sem registros em SiteToCourse).
  * Solução: Criar registros SiteToCourse para cada combinação site x curso.
  *
- * Uso: npx dotenv -e .env.local -- npx tsx scripts/link-all-sites-to-courses.ts
+ * Uso: npx tsx scripts/link-all-sites-to-courses.ts
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
+import { courses } from '../data/courses';
 
-const prisma = new PrismaClient();
-
-const COURSE_IDS = ['1', '2', '3', '4', '7', '8', '9', '10'];
+// Cursos do catálogo (data/courses.ts); os descontinuados ficam de fora.
+const COURSE_IDS = courses.map((c) => c.id);
 
 async function main() {
   console.log('Buscando sites ativos...');
