@@ -22,44 +22,10 @@ export async function GET(req: NextRequest) {
   }
 }
 
-const ALLOWED_TYPES = new Set(['documents', 'jurisprudencia']);
-
-export async function POST(req: NextRequest) {
-  try {
-    const authResult = await verifyAuth(req);
-    if (!authResult.valid || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (process.env.SEARCH_ANALYTICS_ENABLED === 'false') {
-      return NextResponse.json({ id: null, disabled: true }, { status: 200 });
-    }
-
-    const body = await req.json();
-    const { query, aiAnswer, sources, legalSources, filters, type } = body;
-
-    if (!query || query.trim().length < 2) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
-    }
-
-    const entry = await prisma.searchHistory.create({
-      data: {
-        userId: authResult.user.userId,
-        type: typeof type === 'string' && ALLOWED_TYPES.has(type) ? type : 'documents',
-        query: query.trim(),
-        filters: filters ? JSON.stringify(filters) : null,
-        aiAnswer: aiAnswer || null,
-        sources: sources ? JSON.stringify(sources) : null,
-        legalSources: legalSources ? JSON.stringify(legalSources) : null,
-      },
-    });
-
-    return NextResponse.json({ id: entry.id }, { status: 201 });
-  } catch (error) {
-    console.error('Error saving search history:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
+// Não há POST: o histórico é gravado pelo servidor na rota que gerou a
+// resposta (/api/documents/query, /api/jurisprudencia/query), com
+// `respostaDoServidor = true`. O POST antigo aceitava `aiAnswer`/`sources`
+// do cliente, que depois podiam ser publicados por /busca/[shareId].
 
 export async function DELETE(req: NextRequest) {
   try {

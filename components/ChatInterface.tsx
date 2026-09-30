@@ -271,6 +271,13 @@ export default function ChatInterface({
               setMessages((prev) => prev.map(m =>
                 m.id === assistantId ? { ...m, content: fullContent } : m
               ));
+            } else if (parsed.type === 'history' && typeof parsed.id === 'string') {
+              // O servidor gravou a resposta no histórico: o id habilita
+              // feedback e compartilhamento (só do que o servidor gravou).
+              const historyId: string = parsed.id;
+              setMessages((prev) => prev.map(m =>
+                m.id === assistantId ? { ...m, searchHistoryId: historyId } : m
+              ));
             } else if (parsed.type === 'citation' && parsed.citation) {
               // Citations API: trecho-fonte verificado por afirmação. Acumula
               // (dedup por citedText) e anexa à mensagem do assistente.
@@ -306,40 +313,6 @@ export default function ChatInterface({
               : 'Não encontrei documentos relevantes para sua pergunta. Tente reformular ou fazer uma pergunta mais específica.',
           };
         }));
-      }
-
-      // Salvar no historico e capturar o ID para compartilhamento
-      if (fullContent) {
-        try {
-          const currentMsg = (await new Promise<Message | undefined>(resolve => {
-            setMessages(prev => {
-              const msg = prev.find(m => m.id === assistantId);
-              resolve(msg);
-              return prev;
-            });
-          }));
-
-          const historyRes = await fetch('/api/area-restrita/search-history', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'documents',
-              query,
-              aiAnswer: fullContent,
-              filters: courseId ? { courseId } : undefined,
-              sources: currentMsg?.sources?.map(s => ({ title: s.title, category: s.category, url: s.url })),
-              legalSources: currentMsg?.legalSources?.map(s => ({ type: s.type, title: s.title, url: s.url })),
-            }),
-          });
-          if (historyRes.ok) {
-            const { id: historyId } = await historyRes.json();
-            setMessages(prev => prev.map(m =>
-              m.id === assistantId ? { ...m, searchHistoryId: historyId } : m
-            ));
-          }
-        } catch {
-          // Non-critical, silently ignore
-        }
       }
 
       console.log('[ChatInterface] Streaming complete!');
