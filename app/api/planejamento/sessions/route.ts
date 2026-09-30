@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import {
   createSession,
   listSessions,
 } from "@/lib/planejamento/session-manager";
 import { zCreateSessionBody } from "@/data/planejamento/types";
 
-export const GET = withUserApi(async (_request: NextRequest, ctx) => {
+export const GET = withAssinanteApi(async (_request: NextRequest, ctx) => {
   const userId = ctx.user.userId;
   const sessions = await listSessions(userId);
   return NextResponse.json({ sessions });
 });
 
-export const POST = withUserApi(async (request: NextRequest, ctx) => {
+export const POST = withAssinanteApi(async (request: NextRequest, ctx) => {
   const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const parsed = zCreateSessionBody.safeParse(body);

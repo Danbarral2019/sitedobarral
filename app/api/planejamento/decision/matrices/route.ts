@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { DECISION_MATRICES } from "@/data/planejamento/decision-matrix/modalidade-julgamento-v1";
 
 /**
@@ -7,7 +7,7 @@ import { DECISION_MATRICES } from "@/data/planejamento/decision-matrix/modalidad
  * Lista (sem as regras) as matrizes disponíveis — usado pela UI do wizard
  * para carregar inputs.
  */
-export const GET = withUserApi(async () => {
+export const GET = withAssinanteApi(async () => {
   return NextResponse.json({
     matrices: DECISION_MATRICES.map((m) => ({
       slug: m.slug,

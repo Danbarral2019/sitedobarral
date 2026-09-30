@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { buildSectionContext } from "@/lib/planejamento/rag";
@@ -12,7 +12,7 @@ import { NotFoundError, ConflictError } from "@/lib/errors/api-error";
  * painel didático. Não chama LLM — só RAG + heurísticas. Cacheado no
  * `semanticSearch` via Redis.
  */
-export const GET = withUserApi<{ id: string; key: string }>(async (_request: NextRequest, ctx) => {
+export const GET = withAssinanteApi<{ id: string; key: string }>(async (_request: NextRequest, ctx) => {
   const { id, key } = ctx.params;
   const userId = ctx.user.userId;
   await enforceRateLimit(`planejamento:context:${userId}`, 30, 60);

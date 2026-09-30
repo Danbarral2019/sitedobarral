@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zUpdateSectionBody } from "@/data/planejamento/types";
 import { createVersion } from "@/lib/planejamento/versioning";
 import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
 import type { ApiContext } from "@/lib/api/types";
 
-export const PATCH = withUserApi<{ id: string; key: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string; key: string }>) => {
+export const PATCH = withAssinanteApi<{ id: string; key: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string; key: string }>) => {
   const { id, key } = ctx.params;
   const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));

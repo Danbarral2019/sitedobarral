@@ -10,11 +10,12 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminApi, withUserApi, withPublicApi } from '../handler';
+import { withAdminApi, withUserApi, withPublicApi, withAssinanteApi } from '../handler';
 
 // Mocks de dependências externas
 vi.mock('@/lib/auth', () => ({
   getCurrentUser: vi.fn(),
+  hasAnyActiveAccess: vi.fn(),
 }));
 
 vi.mock('@/lib/cache/rate-limit-helper', () => ({
@@ -475,6 +476,59 @@ describe('lib/api/handler', () => {
       const response = await handler(makeRequest(), makeNextCtx());
 
       expect(response.headers.get('X-Request-Id')).toMatch(/^[0-9a-f]{8}$/);
+    });
+  });
+
+  describe('auth — withAssinanteApi', () => {
+    beforeEach(async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockReset();
+      vi.mocked(auth.hasAnyActiveAccess).mockReset();
+    });
+
+    it('responde 401 sem sessão, sem consultar acesso', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue(null);
+      const handlerFn = vi.fn();
+      const response = await withAssinanteApi(handlerFn)(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(401);
+      expect(handlerFn).not.toHaveBeenCalled();
+      expect(vi.mocked(auth.hasAnyActiveAccess)).not.toHaveBeenCalled();
+    });
+
+    it('responde 403 a aluno sem acesso ativo', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'student' });
+      vi.mocked(auth.hasAnyActiveAccess).mockResolvedValue(false);
+      const handlerFn = vi.fn();
+      const response = await withAssinanteApi(handlerFn)(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(403);
+      expect(handlerFn).not.toHaveBeenCalled();
+      expect(vi.mocked(auth.hasAnyActiveAccess)).toHaveBeenCalledWith('u1');
+    });
+
+    it('invoca o handler para aluno com acesso ativo', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'student' });
+      vi.mocked(auth.hasAnyActiveAccess).mockResolvedValue(true);
+      const response = await withAssinanteApi(async () => NextResponse.json({ ok: true }))(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(200);
+    });
+
+    it('admin passa sem consultar acesso', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'a1', role: 'admin' });
+      const response = await withAssinanteApi(async () => NextResponse.json({ ok: true }))(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(200);
+      expect(vi.mocked(auth.hasAnyActiveAccess)).not.toHaveBeenCalled();
+    });
+
+    it('withUserApi continua sem exigir acesso ativo', async () => {
+      const auth = await import('@/lib/auth');
+      vi.mocked(auth.getCurrentUser).mockResolvedValue({ userId: 'u1', role: 'student' });
+      const response = await withUserApi(async () => NextResponse.json({ ok: true }))(makeRequest(), makeNextCtx());
+      expect(response.status).toBe(200);
+      expect(vi.mocked(auth.hasAnyActiveAccess)).not.toHaveBeenCalled();
     });
   });
 });

@@ -58,6 +58,13 @@ export interface ApiHandlerOptions {
    * são gerados independentemente desta flag.
    */
   telemetry?: boolean;
+
+  /**
+   * Exige acesso ativo (matrícula válida ou assinatura ativa, via
+   * `hasAnyActiveAccess`) de quem não é admin; sem ele, 403. Só vale para
+   * rotas autenticadas. Ver `withAssinanteApi`.
+   */
+  exigeAcessoAtivo?: boolean;
 }
 
 /**

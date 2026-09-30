@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { runReview } from "@/lib/planejamento/review";
 import { NotFoundError } from "@/lib/errors/api-error";
@@ -10,7 +10,7 @@ import { NotFoundError } from "@/lib/errors/api-error";
  * um relatório estruturado. Não altera nada no DB — chamadas repetidas são
  * seguras e baratas.
  */
-export const POST = withUserApi<{ id: string }>(async (_request: NextRequest, ctx) => {
+export const POST = withAssinanteApi<{ id: string }>(async (_request: NextRequest, ctx) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
   const session = await prisma.planningSession.findFirst({

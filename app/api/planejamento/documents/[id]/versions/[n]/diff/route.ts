@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { diffSnapshots, type DocumentSnapshot } from "@/lib/planejamento/versioning";
 import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
@@ -8,7 +8,7 @@ import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
  * GET /api/planejamento/documents/[id]/versions/[n]/diff
  * Retorna diff da versão N contra a imediatamente anterior (por versionNumber).
  */
-export const GET = withUserApi<{ id: string; n: string }>(async (_request: NextRequest, ctx) => {
+export const GET = withAssinanteApi<{ id: string; n: string }>(async (_request: NextRequest, ctx) => {
   const { id, n } = ctx.params;
   const userId = ctx.user.userId;
   const version = Number.parseInt(n, 10);
