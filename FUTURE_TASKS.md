@@ -53,7 +53,7 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | Check mensal da newsletter na nuvem | Aberto; configuração do ambiente | O alerta de 02/09 foi bloqueio de rede do ambiente; liberar os domínios do site na política de rede da sessão |
 | TCE-PE: `extractTextFromHTML` cola palavras na fronteira de bloco | Achado registrado, não corrigido | Commit do PR #218 |
 | T16. Teto de tamanho no RTF do clipping | Condicional | O teto de 20 MB existe no catálogo (`lib/tcu/inteiro-teor-fetch.ts:13`), mas não no clipping (`lib/clipping/dispositivo-extractor.ts:142`) |
-| Resíduos de higiene | Aberto | `scripts/import-tcu-precedentes.ts:436` ainda usa `claude-3-5-haiku-20241022`; `mailchimpId` sobrevive só na interface de `lib/newsletter.ts:15`; `scripts/migrate-mp-to-stripe.ts` permanece; 16 `.md` na raiz |
+| Resíduos de higiene | Parcial: três de quatro ✅ CONCLUÍDOS (2026-09-30) | `import-tcu-precedentes.ts` passou para `claude-haiku-4-5-20251001`; `mailchimpId` saiu da interface de `lib/newsletter.ts`; `migrate-mp-to-stripe.ts` foi para `scripts/.archived/`. Resta: 16 `.md` na raiz |
 | Tribunais: 21 pendentes após o julgamento por IA | Aberto | Todos de tribunais de contas estaduais: TCE-PE 15, TCE-RS 3, TCE-PR 2, TCE-SC 1 (banco, 27/09/2026); nenhum do STF |
 | T2b: 67 ONs públicas sem link DOU específico (após a restauração de 27/09/2026) | Em execução: `scripts/find-ons-dou-urls.ts` | Núcleo encerrado por decisão de 27/09/2026 |
 | 1 PDF em `failed` na indexação | Aberto | `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(8) |

@@ -433,7 +433,7 @@ async function gerarTituloComIA(enunciado: string, tituloInformativo: string): P
   try {
     const anthropic = new Anthropic({ apiKey });
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 100,
       temperature: 0.2,
       messages: [{
