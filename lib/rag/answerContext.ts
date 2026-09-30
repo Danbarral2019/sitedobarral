@@ -28,6 +28,7 @@ import {
   buildLegalSources,
 } from '@/lib/legal-context';
 import { filterByEnrollment } from '@/lib/search/hybrid-documents';
+import { filtrarResultadosVisiveis } from '@/lib/search/acesso-documentos';
 import { anexarEvidenciaDasTeses, costurarEvidencia } from './evidencia-da-tese';
 import { hashQueryStr, diversifyResults, generateExcerpt } from './util';
 import { detectQueryDomain, type QueryScope } from './domain-detection';
@@ -40,7 +41,7 @@ import { ATO_VISIVEL, ressalvaDeRevogacao } from '@/lib/legislacao/visibilidade'
  * Retorna `{ empty: true }` quando a busca não encontra nenhum resultado.
  */
 export async function assembleAnswerContext(input: AssembleAnswerInput): Promise<AnswerContext> {
-  const { query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds, tesesVisibilidade } = input;
+  const { query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds, acesso, tesesVisibilidade } = input;
 
     // 4b. Enrich query with conversation context for better semantic retrieval
     let semanticQuery = query;
@@ -149,6 +150,8 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       courseId: filters.courseId || undefined,
       category: filters.category,
       excludeCategories: ['boa_pratica'],
+      // Com acesso, o que o usuário não pode ver sai antes da fusão/corte.
+      acesso,
       limit: Math.max(maxResults * 5, 60),
       alpha: 0.6,
       useCache,
@@ -209,6 +212,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
           url: true,
           courseId: true,
           isCommon: true,
+          isPublic: true,
           tags: true,
           leiArticlesArr: true,
         },
@@ -244,6 +248,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         url: doc.url || undefined,
         courseId: doc.courseId || undefined,
         isCommon: doc.isCommon,
+        isPublic: doc.isPublic,
         tags: doc.tags ? JSON.parse(doc.tags) : undefined,
         leiArticles:
           doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : null,
@@ -281,7 +286,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         where: { id: { in: idsCitantesFaltando } },
         select: {
           id: true, title: true, category: true, description: true, url: true,
-          courseId: true, isCommon: true, tags: true, leiArticlesArr: true,
+          courseId: true, isCommon: true, isPublic: true, tags: true, leiArticlesArr: true,
         },
       });
       citantesDasTeses = citantes.map(doc => ({
@@ -294,6 +299,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
         url: doc.url || undefined,
         courseId: doc.courseId || undefined,
         isCommon: doc.isCommon,
+        isPublic: doc.isPublic,
         tags: doc.tags ? JSON.parse(doc.tags) : undefined,
         leiArticles:
           doc.leiArticlesArr.length > 0 ? JSON.stringify(doc.leiArticlesArr) : null,
@@ -310,9 +316,14 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     // documentos comuns/sem curso são mantidos por filterByEnrollment. Omitido
     // no eval → sem filtro (preserva a medição de retrieval).
     const combinedResults = [...resultadosComEvidencia, ...complementaryResults, ...citantesDasTeses];
-    const allResults = enrolledCourseIds
-      ? filterByEnrollment(combinedResults, enrolledCourseIds)
-      : combinedResults;
+    // Com `acesso` (rota de produção), vale a regra única: grafo nunca,
+    // acervo comum e privado-sem-curso só com acesso ativo, curso só com
+    // matrícula válida. `enrolledCourseIds` fica para scripts legados.
+    const allResults = acesso
+      ? filtrarResultadosVisiveis(combinedResults, acesso)
+      : enrolledCourseIds
+        ? filterByEnrollment(combinedResults, enrolledCourseIds)
+        : combinedResults;
     const leiResults = allResults.filter(r => r.category === 'lei-artigo');
     const actResults = allResults.filter(r => r.category === 'ato-normativo');
     // Semantic legislative acts from LegislativeActChunk (via UNION ALL)

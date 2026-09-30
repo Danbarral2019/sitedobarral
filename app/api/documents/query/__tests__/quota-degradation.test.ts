@@ -38,6 +38,10 @@ vi.mock('@/lib/rag/answerContext', () => ({
 
 // BIA-0c: a rota busca matrículas (prisma.user.findUnique) para pós-filtrar.
 // Mock hermético para não depender de banco real em teste.
+vi.mock('@/lib/search/acesso-documentos', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/search/acesso-documentos')>()),
+  getAcessoDoUsuario: async () => ({ isAdmin: false, temAcessoAtivo: false, cursosAtivos: [] }),
+}));
 vi.mock('@/lib/prisma', () => ({
   prisma: { user: { findUnique: async () => ({ enrollments: [] }) } },
 }));
