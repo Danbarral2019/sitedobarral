@@ -22,6 +22,7 @@ import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
 import { isRateLimitError } from '@/lib/ai/error-detection';
 import type { LegalSource } from '@/lib/legal-context';
+import { registrarBuscaNoHistorico } from '@/lib/search/historico-da-busca';
 
 // ===========================
 // Types
@@ -225,6 +226,9 @@ export async function POST(req: NextRequest) {
             // para Gemini (sem citações) se o Claude falhar ANTES de emitir tokens.
             let hasTokens = false;
             let fullAnswer = '';
+            // Tudo o que foi emitido como `token` (síntese + avisos), para
+            // gravar no histórico exatamente o texto que o usuário viu.
+            let textoEmitido = '';
             let finishReason: string | undefined;
             let usedCitations = false;
 
@@ -235,6 +239,7 @@ export async function POST(req: NextRequest) {
                 if (chunk.text) {
                   hasTokens = true;
                   fullAnswer += chunk.text;
+                  textoEmitido += chunk.text;
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ type: 'token', text: chunk.text })}\n\n`),
                   );
@@ -301,6 +306,7 @@ export async function POST(req: NextRequest) {
               const note = hasTokens
                 ? `\n\n⚠️ (Resposta interrompida antes do final — motivo: ${finishReason}.)`
                 : `Não consegui gerar uma síntese (motivo: ${finishReason}). Consulte as fontes abaixo.`;
+              textoEmitido += note;
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: note })}\n\n`));
             }
 
@@ -327,10 +333,31 @@ export async function POST(req: NextRequest) {
                     'Citation validation: aspas não encontradas nos chunks de contexto',
                   );
                   const warning = buildCitationWarning(validation.invalidQuotes);
+                  textoEmitido += warning;
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: warning })}\n\n`));
                 }
               } catch (err) {
                 apiLogger.error({ err }, 'Citation validator falhou — segue sem aviso');
+              }
+            }
+
+            // Histórico gravado pelo servidor (só com síntese de fato): é a
+            // única fonte do que pode ser compartilhado em /busca/[shareId].
+            // O cliente recebe o id pelo evento `history`.
+            if (hasTokens) {
+              const historyId = await registrarBuscaNoHistorico({
+                userId,
+                type: 'documents',
+                query,
+                filters,
+                aiAnswer: textoEmitido,
+                sources: formattedResults.map((r) => ({ title: r.title, category: r.category, url: r.url })),
+                legalSources: legalSources.map((ls) => ({ type: ls.type, title: ls.title, url: ls.url })),
+              });
+              if (historyId) {
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify({ type: 'history', id: historyId })}\n\n`),
+                );
               }
             }
 

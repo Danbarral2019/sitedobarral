@@ -17,6 +17,7 @@ const {
   mockUserFindUnique,
   mockValidateQuotes,
   mockHasAnyActiveAccess,
+  mockRegistrarBusca,
 } = vi.hoisted(() => ({
   mockVerifyAuth: vi.fn(),
   mockCheckRateLimit: vi.fn(),
@@ -27,6 +28,7 @@ const {
   mockUserFindUnique: vi.fn(),
   mockValidateQuotes: vi.fn(),
   mockHasAnyActiveAccess: vi.fn(),
+  mockRegistrarBusca: vi.fn(),
 }));
 
 vi.mock('@/lib/auth', () => ({
@@ -57,6 +59,9 @@ vi.mock('@/lib/embeddings/citation-validator', () => ({
 vi.mock('@/lib/gemini/cached-client', () => ({ queryGeminiText: (...a: unknown[]) => mockQueryGeminiText(...a) }));
 vi.mock('@/lib/gemini/config', () => ({ PRIMARY_GEMINI_MODEL: 'gemini-test', FALLBACK_GEMINI_MODELS: ['gemini-test', 'gemini-fb'] }));
 vi.mock('@/lib/ai', () => ({ generateStream: (...a: unknown[]) => mockGenerateStream(...a), LEGAL_SAFETY_SETTINGS: [] }));
+vi.mock('@/lib/search/historico-da-busca', () => ({
+  registrarBuscaNoHistorico: (...a: unknown[]) => mockRegistrarBusca(...a),
+}));
 vi.mock('@/lib/monitoring/events', () => ({ trackServerEvent: vi.fn() }));
 vi.mock('@/lib/logger', () => ({ apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 
@@ -201,6 +206,40 @@ describe('/api/documents/query — robustez do streaming', () => {
     mockAssembleAnswerContext.mockResolvedValue(READY_CTX);
     mockUserFindUnique.mockResolvedValue({ enrollments: [] });
     mockValidateQuotes.mockReturnValue({ invalidQuotes: [], totalQuotes: 0 });
+    mockRegistrarBusca.mockResolvedValue('sh-1');
+  });
+
+  it('grava o histórico no servidor com o texto emitido e envia o id no evento history', async () => {
+    mockGenerateStream.mockImplementation(async () =>
+      streamOf([{ text: 'parte 1 ' }, { text: 'parte 2', finishReason: 'SAFETY' }]),
+    );
+    const text = await sse(
+      await POST(makeReq({ query: 'dispensa licitação', stream: true, filters: { courseId: '3' } })),
+    );
+
+    expect(mockRegistrarBusca).toHaveBeenCalledTimes(1);
+    const entrada = mockRegistrarBusca.mock.calls[0][0];
+    expect(entrada).toMatchObject({ userId: 'u1', type: 'documents', query: 'dispensa licitação', filters: { courseId: '3' } });
+    // Texto que o usuário viu: síntese + nota de interrupção
+    expect(entrada.aiAnswer).toMatch(/^parte 1 parte 2/);
+    expect(entrada.aiAnswer).toMatch(/interrompida antes do final/i);
+    expect(text).toContain('"type":"history","id":"sh-1"');
+    expect(text.indexOf('"type":"history"')).toBeLessThan(text.indexOf('[DONE]'));
+  });
+
+  it('sem síntese (nenhum token) não grava histórico', async () => {
+    mockGenerateStream.mockImplementation(async () => streamOf([{ finishReason: 'end_turn' }]));
+    const text = await sse(await POST(makeReq({ query: 'dispensa licitação', stream: true })));
+    expect(mockRegistrarBusca).not.toHaveBeenCalled();
+    expect(text).not.toContain('"type":"history"');
+  });
+
+  it('histórico desligado ou falho (id null) não emite evento history', async () => {
+    mockRegistrarBusca.mockResolvedValue(null);
+    mockGenerateStream.mockImplementation(async () => streamOf([{ text: 'ok', finishReason: 'end_turn' }]));
+    const text = await sse(await POST(makeReq({ query: 'dispensa licitação', stream: true })));
+    expect(text).not.toContain('"type":"history"');
+    expect(text).toContain('[DONE]');
   });
 
   it('encaminha eventos de citação do Claude', async () => {
