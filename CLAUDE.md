@@ -41,7 +41,7 @@ npx tsx scripts/migrate-to-embeddings.ts               # indexa docs pendentes n
 npx tsx scripts/index-legislative-acts.ts              # indexa atos legislativos
 ```
 
-**Test Credentials:** Student `aluno@teste.com` / `aluno123`, criado por `npx tsx scripts/create-test-student.ts` com a senha em `TEST_STUDENT_PASSWORD` (matrícula no primeiro curso de `data/courses.ts`; `npx tsx scripts/enroll-test-user.ts` matricula em todos) · Admin: criar via `npx tsx scripts/create-admin.ts`.
+**Test Credentials:** Student `aluno@teste.com`, com a senha fora do repositório (a antiga, publicada no código, foi trocada em produção em 30/09/2026), criado por `npx tsx scripts/create-test-student.ts` com a senha em `TEST_STUDENT_PASSWORD` (matrícula no primeiro curso de `data/courses.ts`; `npx tsx scripts/enroll-test-user.ts` matricula em todos) · Admin: criar via `npx tsx scripts/create-admin.ts`.
 
 ## Architecture Quick Reference
 
