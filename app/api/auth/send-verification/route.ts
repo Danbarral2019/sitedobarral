@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import { sendVerificationEmail } from '@/lib/email';
+import { reportError } from '@/lib/monitoring/report-error';
 
 // Resposta única para e-mail inexistente, já verificado ou pendente: o
 // endpoint não pode servir para descobrir se uma conta existe ou em que
@@ -78,6 +79,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('Erro ao enviar código de verificação:', error);
+    reportError(error, 'auth', { rota: 'send-verification' });
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
       { status: 500 }

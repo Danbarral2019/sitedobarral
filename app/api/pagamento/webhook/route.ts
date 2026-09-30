@@ -14,6 +14,7 @@ import {
   renderCanceledEmail,
 } from '@/lib/email-templates/subscription';
 import { getSiteUrl } from '@/lib/site-url';
+import { reportError, reportMessage } from '@/lib/monitoring/report-error';
 
 export const runtime = 'nodejs';
 
@@ -559,13 +560,10 @@ async function handleDisputeCreated(event: Stripe.Event) {
 
   await removeEnrollmentsForSubscription(stripeSubscriptionId);
 
-  // Sentry alert for disputes
-  try {
-    const Sentry = await import('@sentry/nextjs');
-    Sentry.captureMessage(`Stripe dispute created for subscription ${stripeSubscriptionId}`, 'error');
-  } catch {
-    // Sentry not available
-  }
+  reportMessage('Stripe dispute created — subscription canceled', 'pagamento', {
+    stripeSubscriptionId,
+    disputeId: dispute.id,
+  });
 
   apiLogger.error({ stripeSubscriptionId, disputeId: dispute.id }, 'Dispute created — subscription canceled');
   trackServerEvent('charge_disputed', { stripeSubscriptionId });
@@ -596,6 +594,7 @@ export async function POST(request: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
     apiLogger.error('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook');
+    reportMessage('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook', 'pagamento');
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
   }
 
@@ -657,9 +656,11 @@ export async function POST(request: NextRequest) {
       });
     } catch (rollbackErr) {
       apiLogger.error({ rollbackErr, eventId: event.id }, 'Failed to rollback dedup record');
+      reportError(rollbackErr, 'pagamento', { eventId: event.id, etapa: 'rollback-dedup' });
     }
 
     apiLogger.error({ err, eventType: event.type, eventId: event.id }, 'Webhook handler error');
+    reportError(err, 'pagamento', { eventType: event.type, eventId: event.id });
     return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
   }
 }

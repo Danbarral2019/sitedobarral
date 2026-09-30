@@ -23,6 +23,7 @@ import { trackServerEvent } from '@/lib/monitoring/events';
 import { apiLogger } from '@/lib/logger';
 import { isRateLimitError } from '@/lib/ai/error-detection';
 import type { LegalSource } from '@/lib/legal-context';
+import { reportError } from '@/lib/monitoring/report-error';
 
 // ===========================
 // Types
@@ -289,6 +290,7 @@ export async function POST(req: NextRequest) {
                   { err: claudeErr instanceof Error ? claudeErr.message : String(claudeErr) },
                   'Síntese Claude falhou antes de tokens — fallback para Gemini (sem citações)',
                 );
+                reportError(claudeErr, 'assistente', { etapa: 'sintese-claude', fallback: 'gemini' });
                 await runGemini();
               }
             }
@@ -330,12 +332,14 @@ export async function POST(req: NextRequest) {
                 }
               } catch (err) {
                 apiLogger.error({ err }, 'Citation validator falhou — segue sem aviso');
+                reportError(err, 'assistente', { etapa: 'validador-citacoes' });
               }
             }
 
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           } catch (err) {
             apiLogger.error({ error: err }, 'SSE streaming error');
+            if (!isRateLimitError(err)) reportError(err, 'assistente', { etapa: 'streaming' });
 
             // Quota Gemini esgotada mid-stream (ou na iniciação do stream).
             // Emite evento de erro estruturado em vez do token genérico — o
@@ -404,6 +408,7 @@ export async function POST(req: NextRequest) {
       synthesizedAnswer = geminiResult.response;
     } catch (error) {
       apiLogger.error({ error }, 'Gemini synthesis failed');
+      if (!isRateLimitError(error)) reportError(error, 'assistente', { etapa: 'sintese-gemini' });
       // Quota Gemini esgotada durante a síntese: re-lança pra o outer catch
       // classificar como 503 + code='QUOTA_EXHAUSTED'. Outros erros (safety,
       // network) ficam silenciosos — endpoint ainda retorna documentos no
@@ -429,6 +434,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     apiLogger.error({ error }, 'Document query failed');
+    if (!isRateLimitError(error)) reportError(error, 'assistente', { etapa: 'consulta' });
 
     // Quota Gemini esgotada em todas as keys configuradas — degrada
     // graciosamente. Frontend trata 503 + code='QUOTA_EXHAUSTED' para

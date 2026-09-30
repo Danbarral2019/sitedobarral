@@ -4,6 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
 import bcrypt from 'bcryptjs';
+import { reportError } from '@/lib/monitoring/report-error';
 
 
 export async function POST(request: NextRequest) {
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('Erro ao alterar senha:', error);
+    reportError(error, 'auth', { rota: 'admin-change-password' });
     return NextResponse.json(
       { error: 'Erro ao processar solicitação' },
       { status: 500 }

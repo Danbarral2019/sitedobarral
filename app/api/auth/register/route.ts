@@ -11,6 +11,7 @@ import { handleApiError } from '@/lib/errors/error-handler';
 import { ConflictError } from '@/lib/errors/api-error';
 import { authLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { reportError, reportMessage } from '@/lib/monitoring/report-error';
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,6 +129,7 @@ export async function POST(request: NextRequest) {
         }
       } catch (enrollmentError) {
         authLogger.error({ err: enrollmentError, userId: user.id }, 'Failed to create enrollment');
+        reportError(enrollmentError, 'auth', { etapa: 'matricula-qr', userId: user.id });
         // Não falhar o registro se erro na matrícula
       }
     }
@@ -141,6 +143,7 @@ export async function POST(request: NextRequest) {
 
     if (!emailSent) {
       authLogger.error({ userId: user.id, email: user.email }, 'Failed to send verification email');
+      reportMessage('Failed to send verification email', 'auth', { userId: user.id });
     }
 
     // Enviar welcome email (fire-and-forget)

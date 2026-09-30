@@ -5,6 +5,7 @@ import { sendPasswordResetEmail } from '@/lib/email';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { ValidationError } from '@/lib/errors/api-error';
+import { reportError } from '@/lib/monitoring/report-error';
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       await sendPasswordResetEmail(user.email, user.name, resetToken);
     } catch (emailError) {
       console.error('Erro ao enviar email de redefinição:', emailError);
+      reportError(emailError, 'auth', { etapa: 'email-redefinicao' });
       // Continua mesmo se email falhar - usuário pode tentar novamente
     }
 
