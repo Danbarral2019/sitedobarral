@@ -5,6 +5,7 @@ import { courses } from '@/data/courses';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
 import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 // Categorias que devem ser agrupadas sob "Pareceres"
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
@@ -69,7 +70,18 @@ export async function GET(request: NextRequest) {
     // Fetch user with enrollments from database
     const user = await prisma.user.findUnique({
       where: { id: authPayload.userId },
-      include: { enrollments: true },
+      include: {
+        // Só matrículas válidas (vitalícia, sem prazo ou ainda no prazo)
+        enrollments: {
+          where: {
+            OR: [
+              { isLifetime: true },
+              { expiresAt: null },
+              { expiresAt: { gt: new Date() } },
+            ],
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -102,6 +114,8 @@ export async function GET(request: NextRequest) {
       prisma.document.groupBy({
         by: ['courseId', 'category'],
         where: {
+          // Combustível do grafo de precedentes não é acervo navegável
+          category: { not: CATEGORIA_GRAFO },
           OR: [
             { isCommon: true },
             { isPublic: true },
