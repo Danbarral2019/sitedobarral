@@ -384,7 +384,7 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     if (filters.ticMode) {
       try {
         const ticActs = await prisma.legislativeAct.findMany({
-          where: { ...ATO_VISIVEL, themes: { contains: '"tic"' } },
+          where: { ...ATO_VISIVEL, themes: { contains: '"tecnologia-informacao"' } },
           select: { fullNumber: true, ementa: true, officialUrl: true, leiArticlesArr: true, revoked: true, revokedNote: true },
           orderBy: { hierarchyLevel: 'asc' },
           take: 10,

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
+import { guardarVersaoSuperada } from '@/lib/legislacao/versoes';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 
@@ -101,12 +102,15 @@ export const PUT = withAdminApi<{ id: string }>(async (request, ctx) => {
     updateData.importance = allowed.includes(body.importance) ? body.importance : null;
   }
 
-  // Atualizar ato normativo
+  // Atualizar ato normativo; texto integral trocado vai para o histórico.
   try {
-    const act = await prisma.legislativeAct.update({
+    const versao =
+      normalizedContent !== undefined ? guardarVersaoSuperada(existing, normalizedContent, 'admin-edicao') : null;
+    const atualizacao = prisma.legislativeAct.update({
       where: { id },
       data: updateData
     });
+    const act = versao ? (await prisma.$transaction([versao, atualizacao]))[1] : await atualizacao;
 
     // Invalidate caches (legislative acts + lei articles if leiArticles changed)
     await CacheInvalidation.legislativeActs();

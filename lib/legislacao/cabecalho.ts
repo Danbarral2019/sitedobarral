@@ -72,6 +72,22 @@ export function dataPorExtenso(date: Date | string): string {
   return `${dia === 1 ? '1º' : dia} de ${MESES[d.getUTCMonth()]} de ${d.getUTCFullYear()}`;
 }
 
+/**
+ * Data de um instante (registro de sistema, não data de ato) no fuso de
+ * Brasília, por extenso: o cron roda de madrugada em UTC, que ainda é o dia
+ * anterior no Brasil em parte do ano.
+ */
+export function dataEmBrasilia(date: Date | string): string {
+  const partes = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  }).formatToParts(new Date(date));
+  const valor = (tipo: string) => Number(partes.find((p) => p.type === tipo)?.value);
+  return dataPorExtenso(new Date(Date.UTC(valor('year'), valor('month') - 1, valor('day'))));
+}
+
 function diaUTC(d: Date): number {
   return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
 }

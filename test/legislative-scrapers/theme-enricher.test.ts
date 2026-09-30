@@ -71,6 +71,18 @@ describe('classifyByHeuristic', () => {
       ).toContain('contratacao-direta');
     });
 
+    it('keyword casa só no início de palavra ("TIC" não casa com "política")', () => {
+      expect(
+        classifyByHeuristic(act({ ementa: 'Institui a Política Nacional de Minerais Críticos' }))
+      ).toEqual([]);
+      expect(classifyByHeuristic(act({ ementa: 'Contratação de soluções de TIC' }))).toContain(
+        'tecnologia-informacao'
+      );
+      expect(classifyByHeuristic(act({ ementa: 'Dispõe sobre os agentes públicos' }))).toContain(
+        'agentes-governanca'
+      );
+    });
+
     it('sem keyword match → retorna []', () => {
       expect(
         classifyByHeuristic(act({ title: 'Regulamenta assunto genérico', ementa: 'sem correspondência' }))

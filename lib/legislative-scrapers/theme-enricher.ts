@@ -64,6 +64,16 @@ function normalizeText(text: string): string {
 }
 
 /**
+ * `termo` aparece em `texto` no início de uma palavra: "TIC" não casa com
+ * "política" nem com "críticos", e "lance" não casa com "balanço"; plural e
+ * derivadas continuam valendo ("agentes", "ambientalmente").
+ */
+function contemPalavra(texto: string, termo: string): boolean {
+  const e = termo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?<![a-z0-9])${e}`).test(texto);
+}
+
+/**
  * Input da classificação. Aceita os campos mínimos de LegislativeAct.
  */
 export interface ActForClassification {
@@ -99,12 +109,12 @@ export function classifyByHeuristic(act: ActForClassification): string[] {
     }
   }
 
-  // 2. Keywords em title + ementa
+  // 2. Keywords em title + ementa, no início de palavra.
   const text = normalizeText([act.title ?? '', act.ementa ?? ''].join(' '));
   for (const [theme, keywords] of Object.entries(THEME_KEYWORDS)) {
     if (seen.has(theme)) continue;
     for (const kw of keywords) {
-      if (text.includes(normalizeText(kw))) {
+      if (contemPalavra(text, normalizeText(kw))) {
         add(theme);
         break;
       }

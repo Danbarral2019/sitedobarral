@@ -865,6 +865,9 @@ model LegislativeAct {
   relationsAsSource LegislativeActRelation[] @relation("RelationSource")
   relationsAsTarget LegislativeActRelation[] @relation("RelationTarget")
 
+  // Textos superados (histórico de alterações do texto integral)
+  versions LegislativeActVersion[]
+
   // Full-Text Search
   search_vector Unsupported("tsvector")?
 
@@ -2015,6 +2018,30 @@ model PlanningExport {
   createdAt  DateTime         @default(now())
 
   @@index([documentId, createdAt])
+}
+
+/// Texto superado de um ato normativo. Sempre que o texto integral muda
+/// (cron de atualização, verificação ou edição no admin, reimportação), a
+/// versão anterior é guardada aqui; a página /legislacao/[id]/alteracoes
+/// compara as versões por dispositivo (lib/legislacao/comparar-textos.ts).
+model LegislativeActVersion {
+  id String @id @default(uuid())
+
+  actId String
+  act   LegislativeAct @relation(fields: [actId], references: [id], onDelete: Cascade)
+
+  content     String  @db.Text
+  contentHash String?
+
+  // Desde quando este texto estava no site (changeDetectedAt anterior ou a
+  // criação do ato) e quando foi substituído pelo seguinte.
+  textSince  DateTime?
+  replacedAt DateTime  @default(now())
+
+  // 'cron' | 'admin-raspagem' | 'admin-edicao' | 'reimportacao'
+  source String
+
+  @@index([actId, replacedAt])
 }
 
 model LegislativeActRelation {

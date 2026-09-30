@@ -158,6 +158,30 @@ body {
   letter-spacing: 0.005em;
 }
 
+/* Alterações do texto de ato normativo (/legislacao/[id]/alteracoes).
+   O traço (sublinhado, riscado) distingue os dois sem depender da cor. */
+.texto-incluido {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  background-color: var(--color-brand-100);
+  color: var(--color-ink-primary);
+  border-radius: 2px;
+  padding: 0 0.1em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.texto-suprimido {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  background-color: var(--color-status-error-soft);
+  color: var(--color-status-error);
+  border-radius: 2px;
+  padding: 0 0.1em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 /* Mono: número de artigo, código técnico, citação `art. 75, II, b` */
 .font-mono-tech {
   font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', Consolas, monospace;

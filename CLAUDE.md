@@ -52,13 +52,13 @@ npx tsx scripts/index-legislative-acts.ts              # indexa atos legislativo
 - `lib/agu-modules/` - AGU scrapers (ONs, Pareceres, DECOR, Súmulas)
 - `lib/lms/` - Helpers LMS analytics (query-timing, analytics-queries, progress-aggregation) — criado na Onda 4.6
 - `components/` - React components
-- `prisma/schema.prisma` - Database schema (76 models em set/2026)
+- `prisma/schema.prisma` - Database schema (77 models em set/2026)
 - `scripts/` - Admin/import/scraping scripts
 - `lib/email-templates/` - Templates HTML de newsletter
 
-**Key Models** (fonte de verdade: `prisma/schema.prisma` — 76 models em set/2026; ver o schema para o conjunto completo e campos). Por área:
+**Key Models** (fonte de verdade: `prisma/schema.prisma` — 77 models em set/2026; ver o schema para o conjunto completo e campos). Por área:
 - **Auth/Acesso:** `User`, `Enrollment` (trial 1 mês via QR ou Subscription), `Subscription` (Stripe), `QRCode`, `AccessLog`, `ProcessedWebhookEvent`.
-- **Conteúdo:** `Document` (+ `DocumentChunk` p/ embeddings, `DocumentVersion`, `DocumentMetaTcu/Dou`), `LegislativeAct` (+ `LegislativeActChunk`, `LegislativeActRelation`), `LeiArticle` (Lei 14.133, 195 arts. + embeddings/cross-refs), `BlogPost`, `FAQ`, `GlossaryTerm`, `DOUStagingDocument`.
+- **Conteúdo:** `Document` (+ `DocumentChunk` p/ embeddings, `DocumentVersion`, `DocumentMetaTcu/Dou`), `LegislativeAct` (+ `LegislativeActChunk`, `LegislativeActRelation`, `LegislativeActVersion` = histórico do texto), `LeiArticle` (Lei 14.133, 195 arts. + embeddings/cross-refs), `BlogPost`, `FAQ`, `GlossaryTerm`, `DOUStagingDocument`.
 - **LMS:** `Module`, `Lesson` (+ progress/comments), `Quiz*`, `Certificate`, `Badge`, `UserStreak`, `CourseStatus`.
 - **Jurisprudência:** `TribunalDecision` (+ `TribunalDecisionChunk`), `ScraperHealthLog`.
 - **Clipping/Newsletter:** `DailyClippingSend`, `NewsletterSubscriber/Send`, `PushSubscription`.

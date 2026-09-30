@@ -12,6 +12,7 @@ import { validateActContent } from '@/lib/legislative-scrapers/validate-content'
 import { extractEmenta, looksLikeDefectiveEmenta } from '@/lib/legislative-scrapers/extract-ementa';
 import { normalizeScrapedText } from '@/lib/legislative-scrapers/normalize';
 import { apiLogger } from "@/lib/logger";
+import { guardarVersaoSuperada } from '@/lib/legislacao/versoes';
 
 export interface ScrapeAndIndexResult {
   scraped: boolean;
@@ -32,6 +33,8 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
       fullNumber: true,
       title: true,
       ementa: true,
+      changeDetectedAt: true,
+      createdAt: true,
     },
   });
 
@@ -96,8 +99,9 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
     );
   }
 
-  // 2. Salvar content
-  await prisma.legislativeAct.update({
+  // 2. Salvar content (o texto que sai, se havia, vai para o histórico)
+  const versao = guardarVersaoSuperada(act, result.content, 'reimportacao');
+  const atualizacao = prisma.legislativeAct.update({
     where: { id: actId },
     data: {
       content: result.content,
@@ -108,6 +112,8 @@ export async function scrapeAndIndexAct(actId: string): Promise<ScrapeAndIndexRe
       lastScrapedAt: new Date(),
     },
   });
+  if (versao) await prisma.$transaction([versao, atualizacao]);
+  else await atualizacao;
 
   console.log(`[ScrapeAndIndex] Conteúdo salvo para "${act.fullNumber}" (${result.content.length} chars)`);
 

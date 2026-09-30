@@ -8,6 +8,8 @@ import { verifyCronAuth } from '@/lib/cron-auth';
 import { detectAndSaveRelationsHybrid } from '@/lib/legislative-acts/relations';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
 import { apiLogger } from '@/lib/logger';
+import { guardarVersaoSuperada } from '@/lib/legislacao/versoes';
+import { compararTextos } from '@/lib/legislacao/comparar-textos';
 
 /**
  * GET /api/cron/check-legislative-updates
@@ -58,6 +60,8 @@ export async function GET(request: NextRequest) {
         officialUrl: true,
         content: true,
         contentHash: true,
+        changeDetectedAt: true,
+        createdAt: true,
       },
       take: LOTE,
       orderBy: [
@@ -72,6 +76,8 @@ export async function GET(request: NextRequest) {
       fullNumber: string;
       status: 'success' | 'unchanged' | 'failed' | 'skipped';
       changed?: boolean;
+      /** Mudou só a apresentação (espaços, marcação); o texto é o mesmo. */
+      soFormatacao?: boolean;
       error?: string;
     }[] = [];
 
@@ -145,8 +151,10 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          // Atualizar registro
-          await prisma.legislativeAct.update({
+          // Atualizar registro. Com texto novo, o anterior vai para o
+          // histórico na mesma transação (lib/legislacao/versoes.ts).
+          const versao = changed ? guardarVersaoSuperada(act, result.content, 'cron') : null;
+          const atualizacao = prisma.legislativeAct.update({
             where: { id: act.id },
             data: {
               lastScrapedAt: new Date(),
@@ -161,12 +169,15 @@ export async function GET(request: NextRequest) {
               }),
             },
           });
+          if (versao) await prisma.$transaction([versao, atualizacao]);
+          else await atualizacao;
 
           results.push({
             id: act.id,
             fullNumber: act.fullNumber,
             status: changed ? 'success' : 'unchanged',
             changed,
+            ...(changed && { soFormatacao: compararTextos(act.content, result.content).soFormatacao }),
           });
 
           // Re-detectar relações quando o conteúdo mudou (ex: portal oficial
@@ -244,6 +255,7 @@ export async function GET(request: NextRequest) {
       failed: results.filter(r => r.status === 'failed').length,
       skipped: results.filter(r => r.status === 'skipped').length,
       changed: results.filter(r => r.changed).length,
+      soFormatacao: results.filter(r => r.soFormatacao).length,
       backlog: {
         total: backlogResults.length,
         scraped: backlogResults.filter(r => r.scraped).length,
@@ -264,7 +276,12 @@ export async function GET(request: NextRequest) {
         itemsFound: stats.total,
         itemsNew: stats.changed,
         itemsError: stats.failed,
-        metadata: { backlogResults: backlogResults.length, pendentesNoLote: actsToCheck.length - results.length },
+        metadata: {
+          backlogResults: backlogResults.length,
+          pendentesNoLote: actsToCheck.length - results.length,
+          // Mudanças de apresentação na fonte, sem mudança do texto.
+          soFormatacao: stats.soFormatacao,
+        },
       };
     });
     return NextResponse.json(responseBody);
