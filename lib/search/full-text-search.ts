@@ -9,6 +9,11 @@
 
 import { prisma } from '@/lib/prisma';
 import { atoVisivelSql } from '@/lib/legislacao/visibilidade';
+import {
+  CATEGORIA_GRAFO,
+  documentoVisivelSql,
+  type AcessoDoUsuario,
+} from '@/lib/search/acesso-documentos';
 
 // ===========================
 // Types
@@ -24,11 +29,20 @@ export interface FTSOptions {
 }
 
 export interface DocumentFTSOptions extends FTSOptions {
+  /**
+   * Acesso do leitor (lib/search/acesso-documentos.ts). Quando presente, é a
+   * regra de visibilidade aplicada e `enrolledCourseIds` é ignorado.
+   */
+  acesso?: AcessoDoUsuario;
+  /** Legado: sem `acesso`, filtra por isCommon OR isPublic OR estes cursos. */
   enrolledCourseIds?: string[];
   excludeCategories?: string[];
+  /** Inclui o grafo de precedentes (CATEGORIA_GRAFO). Só admin. Default false. */
+  incluirGrafo?: boolean;
 }
 
 export interface VideoFTSOptions extends FTSOptions {
+  /** Cursos cujos vídeos podem aparecer. Lista vazia = nenhum vídeo (falha fechada). */
   enrolledCourseIds?: string[];
 }
 
@@ -48,6 +62,7 @@ interface DocumentRow {
   tags: string | null;
   uploaded_at: Date;
   is_public: boolean;
+  is_common: boolean;
   rank: number;
 }
 
@@ -169,20 +184,31 @@ export async function searchDocuments(
   const sanitized = sanitizeQuery(query);
   if (!sanitized) return [];
 
-  const { enrolledCourseIds = [], excludeCategories = [], limit = 500 } = options;
+  const { acesso, enrolledCourseIds = [], excludeCategories = [], limit = 500, incluirGrafo = false } = options;
 
   // Build WHERE clauses
   const conditions: string[] = [
     `search_vector @@ ${buildTsQueryExpr(1)}`,
   ];
 
-  // Access control: isCommon OR isPublic OR courseId in enrolled
-  const accessParts: string[] = ['"isCommon" = true', '"isPublic" = true'];
-  if (enrolledCourseIds.length > 0) {
-    const escaped = enrolledCourseIds.map(id => `'${id.replace(/'/g, "''")}'`).join(', ');
-    accessParts.push(`"courseId" IN (${escaped})`);
+  if (acesso) {
+    // Regra única de visibilidade (já exclui o grafo para não-admin).
+    conditions.push(documentoVisivelSql(acesso));
+  } else {
+    // Legado: isCommon OR isPublic OR courseId in enrolled. Quem chama sem
+    // `acesso` pós-filtra o resultado (ver hybrid-search).
+    const accessParts: string[] = ['"isCommon" = true', '"isPublic" = true'];
+    if (enrolledCourseIds.length > 0) {
+      const escaped = enrolledCourseIds.map(id => `'${id.replace(/'/g, "''")}'`).join(', ');
+      accessParts.push(`"courseId" IN (${escaped})`);
+    }
+    conditions.push(`(${accessParts.join(' OR ')})`);
   }
-  conditions.push(`(${accessParts.join(' OR ')})`);
+
+  // O grafo de precedentes nunca aparece a usuário (lib/tcu/backfill-retroativo.ts).
+  if (!incluirGrafo && !acesso?.isAdmin) {
+    conditions.push(`category <> '${CATEGORIA_GRAFO}'`);
+  }
 
   // Exclude categories passed by caller (no hardcoded defaults)
   if (excludeCategories.length > 0) {
@@ -197,6 +223,7 @@ export async function searchDocuments(
       tags,
       "uploadedAt" as uploaded_at,
       "isPublic" as is_public,
+      "isCommon" as is_common,
       ts_rank(search_vector, ${buildTsQueryExpr(1)}) as rank
     FROM "Document"
     WHERE ${conditions.join(' AND ')}
@@ -330,15 +357,15 @@ export async function searchVideos(
 
   const { enrolledCourseIds = [], limit = 500 } = options;
 
+  // Falha fechada: sem curso com acesso, nenhum vídeo (a URL é o conteúdo).
+  if (enrolledCourseIds.length === 0) return [];
+
+  const escaped = enrolledCourseIds.map(id => `'${id.replace(/'/g, "''")}'`).join(', ');
   const conditions: string[] = [
     '"isActive" = true',
     `search_vector @@ ${buildTsQueryExpr(1)}`,
+    `"courseId" IN (${escaped})`,
   ];
-
-  if (enrolledCourseIds.length > 0) {
-    const escaped = enrolledCourseIds.map(id => `'${id.replace(/'/g, "''")}'`).join(', ');
-    conditions.push(`"courseId" IN (${escaped})`);
-  }
 
   const sql = `
     SELECT

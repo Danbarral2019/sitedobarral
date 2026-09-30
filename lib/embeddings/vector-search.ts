@@ -9,6 +9,7 @@ import { generateQueryEmbedding, embeddingToSql } from './gemini-embeddings';
 import { withCache, CACHE_TTL } from '@/lib/cache/redis-client';
 import type { Prisma } from '@prisma/client';
 import { atoVisivelSql, ressalvaDeRevogacaoSql } from '@/lib/legislacao/visibilidade';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 // ===========================
 // Whitelist: coluna de vetor (anti-injeção)
@@ -53,6 +54,11 @@ export interface SearchResult {
   url?: string;
   courseId?: string;
   isCommon: boolean;
+  /**
+   * Só significativo em sourceType 'document'. Ausente (ex.: resultado vindo
+   * de cache antigo) conta como privado no pós-filtro de acesso.
+   */
+  isPublic?: boolean;
   tags?: string[];
   leiArticles?: string | null;
   uploadedAt?: string;
@@ -67,6 +73,12 @@ export interface SearchOptions {
   category?: string;      // Filtrar por categoria
   categoryIn?: string[];  // Lista de categorias (complementa category singular)
   excludeCategories?: string[];  // Categories to exclude from results
+  /**
+   * Inclui no ramo Document os acórdãos do grafo de precedentes
+   * (CATEGORIA_GRAFO), combustível invisível que por padrão fica de fora.
+   * Só para admin; nenhum chamador de usuário deve ligar.
+   */
+  incluirGrafo?: boolean;
   limit?: number;         // Numero maximo de resultados (default: 5)
   threshold?: number;     // Similaridade minima (0-1, default: 0.5)
   useCache?: boolean;     // Usar cache (default: true)
@@ -183,7 +195,7 @@ export async function semanticSearch(
   const tbKey = options.tribunalBoost
     ? `${options.tribunalBoost.code}@${options.tribunalBoost.factor}`
     : '';
-  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:ts=${chaveVisibilidadeTeses(options)}:tb=${tbKey}:ew=${ewKey}`;
+  const cacheKey = `vector-search:${hashQuery(query)}:${courseId || 'all'}:${category || 'all'}:${limit}:${threshold}:${(options.excludeCategories || []).join(',')}:td=${options.includeTribunalDecisions ? '1' : '0'}:cin=${(options.categoryIn || []).join(',')}:sd=${options.skipDocumentBranch ? '1' : '0'}:sl=${options.skipLegislativeActBranch ? '1' : '0'}:tc=${options.tribunalCodeFilter || ''}:eis=${options.excludeInactiveSumulas === false ? '0' : '1'}:ts=${chaveVisibilidadeTeses(options)}:tb=${tbKey}:ew=${ewKey}:g=${options.incluirGrafo ? '1' : '0'}`;
 
   // Tenta usar cache
   if (useCache) {
@@ -340,6 +352,12 @@ async function executeVectorSearch(
   if (includeDocBranch) {
     let whereClause = `d."embeddingStatus" = 'completed'`;
 
+    // O grafo de precedentes nunca aparece a usuário (lib/tcu/backfill-retroativo.ts).
+    if (!options.incluirGrafo) {
+      whereClause += ` AND d."category" <> $${nextParam()}`;
+      params.push(CATEGORIA_GRAFO);
+    }
+
     if (courseId) {
       whereClause += ` AND (d."courseId" = $${nextParam()} OR d."isCommon" = true)`;
       params.push(courseId);
@@ -391,7 +409,8 @@ async function executeVectorSearch(
         to_jsonb(d."leiArticlesArr")::text as lei_articles,
         NULL::int as hierarchy_level,
         'document' as source_type,
-        d."uploadedAt" as uploaded_at
+        d."uploadedAt" as uploaded_at,
+        d."isPublic" as is_public
       FROM "DocumentChunk" c
       JOIN "Document" d ON c."documentId" = d.id
       WHERE ${finalDocWhere}
@@ -433,7 +452,8 @@ async function executeVectorSearch(
         to_jsonb(la."leiArticlesArr")::text as lei_articles,
         la."hierarchyLevel" as hierarchy_level,
         'legislative-act' as source_type,
-        la."publishDate" as uploaded_at
+        la."publishDate" as uploaded_at,
+        true as is_public
       FROM "LegislativeActChunk" lc
       JOIN "LegislativeAct" la ON lc."legislativeActId" = la.id
       WHERE la."embeddingStatus" = 'completed'
@@ -512,7 +532,8 @@ async function executeVectorSearch(
         to_jsonb(td."leiArticlesArr")::text as lei_articles,
         NULL::int as hierarchy_level,
         'tribunal-decision' as source_type,
-        td."dataJulgamento" as uploaded_at
+        td."dataJulgamento" as uploaded_at,
+        true as is_public
       FROM "TribunalDecisionChunk" tc
       JOIN "TribunalDecision" td ON tc."tribunalDecisionId" = td.id
       WHERE ${finalDecisionWhere}
@@ -557,7 +578,8 @@ async function executeVectorSearch(
         NULL as lei_articles,
         NULL::int as hierarchy_level,
         'tese' as source_type,
-        te."atualizadoEm" as uploaded_at
+        te."atualizadoEm" as uploaded_at,
+        true as is_public
       FROM "TeseEnunciadoChunk" tec
       JOIN "TeseEnunciado" te ON tec."enunciadoId" = te.id
       JOIN "TeseDestilacao" td ON te."destilacaoId" = td.id
@@ -601,6 +623,7 @@ async function executeVectorSearch(
     lei_articles: string | null;
     source_type: string;
     uploaded_at: string | null;
+    is_public: boolean | null;
   }>>(
     sqlQuery,
     ...params
@@ -664,6 +687,7 @@ async function executeVectorSearch(
       url: bestChunk.url || undefined,
       courseId: bestChunk.course_id || undefined,
       isCommon: bestChunk.is_common,
+      isPublic: bestChunk.is_public === true,
       tags: bestChunk.tags ? safeParseArray(bestChunk.tags) : undefined,
       leiArticles: bestChunk.lei_articles,
       uploadedAt: bestChunk.uploaded_at ? new Date(bestChunk.uploaded_at).toISOString() : undefined,

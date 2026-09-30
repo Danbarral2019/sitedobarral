@@ -259,3 +259,33 @@ describe('semanticSearch — extraWhere', () => {
     expect(params).toContain(2023);
   });
 });
+
+describe('semanticSearch — grafo de precedentes e isPublic', () => {
+  it('por padrão exclui acordao-grafo do ramo Document', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('query test', { useCache: false });
+    const sql = getLastSql();
+    const params = mockQueryRawUnsafe.mock.calls.at(-1)!.slice(1);
+    expect(sql).toMatch(/d\."category" <> \$\d+/);
+    expect(params).toContain('acordao-grafo');
+  });
+
+  it('incluirGrafo=true (admin) não exclui', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([]);
+    await semanticSearch('query test', { useCache: false, incluirGrafo: true });
+    const params = mockQueryRawUnsafe.mock.calls.at(-1)!.slice(1);
+    expect(params).not.toContain('acordao-grafo');
+  });
+
+  it('devolve isPublic do documento', async () => {
+    mockQueryRawUnsafe.mockResolvedValue([
+      {
+        document_id: 'd1', document_title: 'D1', category: 'parecer', chunk_content: 'x', chunk_index: 0,
+        similarity: 0.9, url: null, course_id: null, is_common: false, tags: null, lei_articles: null,
+        source_type: 'document', uploaded_at: null, is_public: true,
+      },
+    ]);
+    const r = await semanticSearch('query test', { useCache: false, threshold: 0.5 });
+    expect(r.results[0].isPublic).toBe(true);
+  });
+});

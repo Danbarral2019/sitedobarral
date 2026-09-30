@@ -11,6 +11,7 @@ import { semanticSearch, multiQuerySearch, type SearchResult, type SearchOptions
 import { searchDocuments, type DocumentFTSOptions } from '../search/full-text-search';
 import { rerankResults } from './reranker';
 import { apiLogger } from '../logger';
+import { filtrarResultadosVisiveis, type AcessoDoUsuario } from '../search/acesso-documentos';
 
 // ===========================
 // Types
@@ -22,6 +23,15 @@ export interface HybridSearchOptions {
   courseId?: string;
   category?: string;
   excludeCategories?: string[];
+  /**
+   * Acesso do leitor (lib/search/acesso-documentos.ts). Quando presente, os
+   * documentos que ele não pode ver saem ANTES da fusão e do corte em `limit`.
+   * Sem ele, nenhum filtro de acesso é aplicado além do grafo (quem chama
+   * pós-filtra).
+   */
+  acesso?: AcessoDoUsuario;
+  /** Inclui o grafo de precedentes (CATEGORIA_GRAFO). Só admin. Default: acesso?.isAdmin. */
+  incluirGrafo?: boolean;
   limit?: number;
   alpha?: number;  // Peso do vetor vs FTS (0.6 = 60% vetor, 40% FTS)
   useCache?: boolean;
@@ -95,6 +105,8 @@ export async function hybridSearch(
     courseId,
     category,
     excludeCategories = [],
+    acesso,
+    incluirGrafo = acesso?.isAdmin ?? false,
     limit = 10,
     alpha = 0.6,
     useCache = true,
@@ -117,6 +129,7 @@ export async function hybridSearch(
     courseId,
     category,
     excludeCategories,
+    incluirGrafo,
     limit: limit * 3,
     useCache,
     includeChunkContent: true,
@@ -135,11 +148,13 @@ export async function hybridSearch(
   const ftsOptions: DocumentFTSOptions = {
     limit: limit * 3,
     excludeCategories,
+    acesso,
+    incluirGrafo,
   };
 
   // Executar buscas em paralelo. Quando skipFts, FTS é trocado por array vazio
   // (RRF degenera para ranking puramente vetorial).
-  const [vectorResults, ftsResults] = await Promise.all([
+  const [vectorResultsBrutos, ftsResults] = await Promise.all([
     expandedQueries && expandedQueries.length > 1
       ? multiQuerySearch(expandedQueries, vectorOptions)
           .then(results => ({ results, query, totalFound: results.length, latency: 0, cached: false }))
@@ -157,6 +172,11 @@ export async function hybridSearch(
           return [];
         }),
   ]);
+
+  // Pós-filtro de acesso ANTES do ranking (o FTS já filtrou na query).
+  const vectorResults = acesso
+    ? { ...vectorResultsBrutos, results: filtrarResultadosVisiveis(vectorResultsBrutos.results, acesso) }
+    : vectorResultsBrutos;
 
   // Mapear rankings vetoriais (documentId → rank)
   const vectorRanks = new Map<string, number>();
@@ -226,7 +246,8 @@ export async function hybridSearch(
           similarity: score,
           url: ftsEntry.data.url || undefined,
           courseId: ftsEntry.data.course_id || undefined,
-          isCommon: false,
+          isCommon: ftsEntry.data.is_common === true,
+          isPublic: ftsEntry.data.is_public === true,
           tags: ftsEntry.data.tags ? safeParseArray(ftsEntry.data.tags) : undefined,
           leiArticles: null,
           sourceType: 'document',
