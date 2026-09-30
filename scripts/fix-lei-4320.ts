@@ -3,7 +3,7 @@
  * Faz fetch direto + cheerio + extrai texto de um seletor mais genérico.
  */
 import { prisma } from '../lib/prisma';
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { normalizeScrapedText } from '../lib/legislative-scrapers/normalize';
 import { validateActContent } from '../lib/legislative-scrapers/validate-content';
 import { processLegislativeAct } from '../lib/embeddings/legislative-act-processor';

@@ -7,6 +7,9 @@
  * e o texto, e opera sobre um clone, sem mutar o documento de entrada.)
  */
 
+import type { Cheerio } from 'cheerio/slim';
+import type { AnyNode } from 'domhandler';
+
 /**
  * Detecta o charset declarado pelo servidor + meta tags do HTML, com fallback
  * via sniffing: se a decodificação UTF-8 produz bytes inválidos, assume
@@ -78,7 +81,7 @@ const BLOCK_LEVEL_SELECTOR =
  *
  * O `collapseWhitespace` a jusante reduz os runs de `\n` resultantes.
  */
-export function blockAwareText(el: cheerio.Cheerio): string {
+export function blockAwareText(el: Cheerio<AnyNode>): string {
   const clone = el.clone();
   clone.find(BLOCK_LEVEL_SELECTOR).before('\n').after('\n');
   return clone.text();
