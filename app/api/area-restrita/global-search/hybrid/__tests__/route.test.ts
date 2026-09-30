@@ -1,10 +1,10 @@
 // @vitest-environment node
 import { it, expect, vi, beforeEach } from 'vitest';
 
-const { mockVerifyToken, mockHybridSearch, mockUserFind, mockDocFind, mockActFind } = vi.hoisted(() => ({
+const { mockVerifyToken, mockHybridSearch, mockEnrollFind, mockDocFind, mockActFind } = vi.hoisted(() => ({
   mockVerifyToken: vi.fn(),
   mockHybridSearch: vi.fn(),
-  mockUserFind: vi.fn(),
+  mockEnrollFind: vi.fn(),
   mockDocFind: vi.fn(),
   mockActFind: vi.fn(),
 }));
@@ -13,7 +13,8 @@ vi.mock('@/lib/auth', () => ({ verifyToken: (...a: unknown[]) => mockVerifyToken
 vi.mock('@/lib/embeddings/hybrid-search', () => ({ hybridSearch: (...a: unknown[]) => mockHybridSearch(...a) }));
 vi.mock('@/lib/prisma', () => ({
   prisma: {
-    user: { findUnique: (...a: unknown[]) => mockUserFind(...a) },
+    enrollment: { findMany: (...a: unknown[]) => mockEnrollFind(...a) },
+    subscription: { findMany: async () => [] },
     document: { findMany: (...a: unknown[]) => mockDocFind(...a) },
     legislativeAct: { findMany: (...a: unknown[]) => mockActFind(...a) },
   },
@@ -32,7 +33,7 @@ function req(q: string) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockVerifyToken.mockResolvedValue({ userId: 'u1', role: 'student' });
-  mockUserFind.mockResolvedValue({ id: 'u1', enrollments: [{ courseId: '3' }] });
+  mockEnrollFind.mockResolvedValue([{ courseId: '3' }]);
   mockDocFind.mockResolvedValue([]);
   mockActFind.mockResolvedValue([]);
 });
@@ -43,7 +44,7 @@ it('remove documento de curso não-matriculado (acesso) e retorna só os permiti
     { documentId: 'd-leak', category: 'apostila', similarity: 0.8, isCommon: false, courseId: '99', sourceType: 'document' },
   ] });
   mockDocFind.mockResolvedValue([
-    { id: 'd-ok', title: 'OK', description: null, category: 'apostila', type: 'm', url: null, courseId: '3', tags: null, uploadedAt: new Date(), isPublic: false },
+    { id: 'd-ok', title: 'OK', description: null, category: 'apostila', type: 'm', url: null, courseId: '3', tags: null, uploadedAt: new Date(), isPublic: false, isCommon: false },
   ]);
 
   const res = await GET(req('dispensa'));
@@ -72,14 +73,44 @@ it('fallback: hybridSearch lança → responde 200 com results vazio (nunca queb
 
 it('preserva a ordem de relevância do híbrido (após dedupe/hidratação)', async () => {
   mockHybridSearch.mockResolvedValue({ results: [
-    { documentId: 'd2', category: 'apostila', similarity: 0.95, isCommon: true, sourceType: 'document' },
-    { documentId: 'd1', category: 'apostila', similarity: 0.90, isCommon: true, sourceType: 'document' },
+    { documentId: 'd2', category: 'apostila', similarity: 0.95, isCommon: true, isPublic: true, sourceType: 'document' },
+    { documentId: 'd1', category: 'apostila', similarity: 0.90, isCommon: true, isPublic: true, sourceType: 'document' },
   ] });
   mockDocFind.mockResolvedValue([
-    { id: 'd1', title: 'D1', description: null, category: 'apostila', type: 'm', url: null, courseId: null, tags: null, uploadedAt: new Date(), isPublic: true },
-    { id: 'd2', title: 'D2', description: null, category: 'apostila', type: 'm', url: null, courseId: null, tags: null, uploadedAt: new Date(), isPublic: true },
+    { id: 'd1', title: 'D1', description: null, category: 'apostila', type: 'm', url: null, courseId: null, tags: null, uploadedAt: new Date(), isPublic: true, isCommon: true },
+    { id: 'd2', title: 'D2', description: null, category: 'apostila', type: 'm', url: null, courseId: null, tags: null, uploadedAt: new Date(), isPublic: true, isCommon: true },
   ]);
   const res = await GET(req('dispensa'));
   const body = await res.json();
   expect(body.results.map((r: { data: { id: string } }) => r.data.id)).toEqual(['d2', 'd1']);
+});
+
+it('sem acesso ativo: acervo comum, sem curso e grafo ficam de fora; matrícula consultada com validade', async () => {
+  mockEnrollFind.mockResolvedValue([]);
+  mockHybridSearch.mockResolvedValue({ results: [
+    { documentId: 'comum', category: 'apostila', similarity: 0.9, isCommon: true, isPublic: false, sourceType: 'document' },
+    { documentId: 'semcurso', category: 'parecer', similarity: 0.85, isCommon: false, isPublic: false, sourceType: 'document' },
+    { documentId: 'grafo', category: 'acordao-grafo', similarity: 0.8, isCommon: false, isPublic: false, sourceType: 'document' },
+    { documentId: 'pub', category: 'parecer', similarity: 0.7, isCommon: false, isPublic: true, sourceType: 'document' },
+  ] });
+  mockDocFind.mockResolvedValue([
+    { id: 'pub', title: 'P', description: null, category: 'parecer', type: 'm', url: 'https://p', courseId: null, tags: null, uploadedAt: new Date(), isPublic: true, isCommon: false },
+  ]);
+  const body = await (await GET(req('dispensa'))).json();
+  expect(body.results.map((r: { data: { id: string } }) => r.data.id)).toEqual(['pub']);
+  expect(mockDocFind).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: ['pub'] } } }));
+  expect(mockEnrollFind.mock.calls[0][0].where.OR).toHaveLength(3);
+  expect(mockHybridSearch.mock.calls[0][0].acesso).toEqual({ isAdmin: false, temAcessoAtivo: false, cursosAtivos: [] });
+});
+
+it('segunda tranca: linha do banco que o usuário não pode ver não sai, mesmo se o resultado (cache) dizia público', async () => {
+  mockEnrollFind.mockResolvedValue([]);
+  mockHybridSearch.mockResolvedValue({ results: [
+    { documentId: 'mudou', category: 'parecer', similarity: 0.9, isCommon: false, isPublic: true, sourceType: 'document' },
+  ] });
+  mockDocFind.mockResolvedValue([
+    { id: 'mudou', title: 'M', description: null, category: 'parecer', type: 'm', url: 'https://m', courseId: '3', tags: null, uploadedAt: new Date(), isPublic: false, isCommon: false },
+  ]);
+  const body = await (await GET(req('dispensa'))).json();
+  expect(body.results).toEqual([]);
 });
