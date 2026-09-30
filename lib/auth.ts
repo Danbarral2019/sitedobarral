@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { authLogger } from './logger';
+import { CATEGORIA_GRAFO } from './tcu/backfill-retroativo';
 
 // Schema Zod para validação runtime do payload JWT
 export const AuthPayloadSchema = z.object({
@@ -216,7 +217,10 @@ export interface DocumentAccessFields {
   isPublic: boolean;
   isCommon: boolean;
   courseId: string | null;
+  /** Obrigatório: a categoria do grafo de precedentes é negada a não-admin. */
+  category: string | null;
 }
+
 
 interface DocumentAccessDeps {
   getUser: () => Promise<AuthPayload | null>;
@@ -230,8 +234,9 @@ interface DocumentAccessDeps {
  * Não confundir com existir: documento restrito continua tendo página, com
  * amostra e oferta, para quem não tem acesso. Ver app/documento/[id]/page.tsx.
  *
- * Cascata: público → livre · admin → tudo · acervo comum → qualquer acesso
- * ativo · documento de um curso → delega a hasAccessToCourse.
+ * Cascata: público → livre · admin → tudo · grafo de precedentes → negado ·
+ * acervo comum → qualquer acesso ativo · documento de um curso → delega a
+ * hasAccessToCourse.
  *
  * isCommon vence courseId, e não é detalhe: em produção os 151 documentos
  * restritos são TODOS isCommon, e 102 deles também trazem courseId. Ali o
@@ -247,7 +252,9 @@ export async function hasAccessToDocument(
     hasAnyActiveAccess,
   },
 ): Promise<boolean> {
-  if (doc.isPublic) {
+  const ehGrafo = doc.category === CATEGORIA_GRAFO;
+
+  if (doc.isPublic && !ehGrafo) {
     return true;
   }
 
@@ -258,6 +265,11 @@ export async function hasAccessToDocument(
 
   if (user.role === 'admin') {
     return true;
+  }
+
+  // Combustível do grafo de precedentes: invisível a quem não é admin.
+  if (ehGrafo) {
+    return false;
   }
 
   if (!doc.isCommon && doc.courseId) {

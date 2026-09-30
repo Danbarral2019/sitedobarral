@@ -146,8 +146,35 @@ describe('GET /api/documents/[id] — documento restrito', () => {
       isPublic: false,
       isCommon: true,
       courseId: null,
+      category: 'manual-tcu',
+      url: 'https://pub-r2.example/manual.pdf',
+      alternativeUrls: '["https://pub-r2.example/manual-2.pdf"]',
       notes: { publicNotes: 'obs do prof', practicalUse: 'uso', keyPoints: 'pontos', importance: 'alta' },
     });
+  });
+
+  it('sem acesso: não devolve url nem alternativeUrls (URL pública do R2)', async () => {
+    mockTemAcesso.mockResolvedValue(false);
+    const body = await (await GET(req(), ctx)).json();
+    expect(body.url).toBeNull();
+    expect(body.alternativeUrls).toBeNull();
+  });
+
+  it('com acesso: mantém url e alternativeUrls', async () => {
+    mockTemAcesso.mockResolvedValue(true);
+    const body = await (await GET(req(), ctx)).json();
+    expect(body.url).toBe('https://pub-r2.example/manual.pdf');
+    expect(body.alternativeUrls).toBe('["https://pub-r2.example/manual-2.pdf"]');
+  });
+
+  it('grafo de precedentes sem acesso: 404, sem amostra', async () => {
+    mockTemAcesso.mockResolvedValue(false);
+    mockFindUnique.mockResolvedValue({
+      id: 'doc-1', title: 'Acórdão do grafo', content: 'x', isPublic: false, isCommon: false,
+      courseId: null, category: 'acordao-grafo', url: 'https://tcu/x',
+    });
+    const res = await GET(req(), ctx);
+    expect(res.status).toBe(404);
   });
 
   it('sem acesso: devolve só a amostra, sem resumo nem notas', async () => {
@@ -177,9 +204,9 @@ describe('GET /api/documents/[id] — documento restrito', () => {
     expect(body).not.toHaveProperty('isCommon');
   });
 
-  it('decide o acesso com isPublic, isCommon e courseId do documento', async () => {
+  it('decide o acesso com isPublic, isCommon, courseId e category do documento', async () => {
     mockTemAcesso.mockResolvedValue(false);
     await GET(req(), ctx);
-    expect(mockTemAcesso).toHaveBeenCalledWith({ isPublic: false, isCommon: true, courseId: null });
+    expect(mockTemAcesso).toHaveBeenCalledWith({ isPublic: false, isCommon: true, courseId: null, category: 'manual-tcu' });
   });
 });

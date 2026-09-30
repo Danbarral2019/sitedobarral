@@ -7,6 +7,7 @@ import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError, AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 export async function GET(
   request: NextRequest,
@@ -26,8 +27,9 @@ export async function GET(
       throw new NotFoundError('Documento');
     }
 
-    // Documentos públicos não exigem autenticação
-    if (document.isPublic) {
+    // Documentos públicos não exigem autenticação (o grafo de precedentes
+    // nunca é público: passa pela checagem completa abaixo).
+    if (document.isPublic && document.category !== CATEGORIA_GRAFO) {
       apiLogger.info({ documentId: document.id }, 'Public document download');
       return await downloadFile(document);
     }
@@ -59,6 +61,7 @@ export async function GET(
       isPublic: document.isPublic,
       isCommon: document.isCommon,
       courseId: document.courseId,
+      category: document.category,
     });
 
     if (!canDownload) {
