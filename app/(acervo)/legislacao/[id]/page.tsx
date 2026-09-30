@@ -25,12 +25,14 @@ import {
   subtituloDoAto,
   dataDoAto,
   dataPorExtenso,
+  dataEmBrasilia,
   dataDePublicacao,
   orgaoEmissor,
   rotuloArtigo,
   ementaNoTexto,
 } from '@/lib/legislacao/cabecalho';
 import { referenciaDoRevogador } from '@/lib/legislacao/revogacao';
+import { ultimaAlteracaoDoTexto } from '@/lib/legislacao/versoes';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -175,6 +177,8 @@ export default async function LegislativeActPage({ params }: PageProps) {
   // Buscar relações entre atos (revoga/altera/regulamenta/etc.)
   // Se vier do fallback Document (não LegislativeAct), retorna vazio sem custo significativo
   const relations = await getRelationsForAct(act.id, { hideRejected: true });
+  // Última mudança do texto (não só de apresentação) registrada no histórico.
+  const textoAtualizadoEm = act.fromDocument ? null : await ultimaAlteracaoDoTexto(act.id, act.content);
   const hasRelations = relations.alters.length > 0 || relations.alteredBy.length > 0;
 
   return (
@@ -240,6 +244,18 @@ export default async function LegislativeActPage({ params }: PageProps) {
                 </div>
               ))}
             </dl>
+          )}
+
+          {textoAtualizadoEm && (
+            <p className="text-sm text-ink-secondary mt-4">
+              Texto atualizado em {dataEmBrasilia(textoAtualizadoEm)}.{' '}
+              <Link
+                href={`/legislacao/${act.id}/alteracoes`}
+                className="font-medium text-brand-700 underline underline-offset-2 hover:text-brand-600"
+              >
+                Ver o que mudou
+              </Link>
+            </p>
           )}
 
           {/* Links */}

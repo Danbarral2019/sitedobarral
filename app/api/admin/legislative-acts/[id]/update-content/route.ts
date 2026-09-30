@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { ApiError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { scrapeUrl, canScrapeUrl } from '@/lib/legislative-scrapers';
-import { hasHashChanged, generateChangeSummary } from '@/lib/legislative-scrapers/change-detector';
+import { hasHashChanged } from '@/lib/legislative-scrapers/change-detector';
+import { guardarVersaoSuperada, alteracoesDoTexto } from '@/lib/legislacao/versoes';
+import { compararTextos, resumoDaComparacao } from '@/lib/legislacao/comparar-textos';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { validateActContent } from '@/lib/legislative-scrapers/validate-content';
 
@@ -28,6 +30,8 @@ export const POST = withAdminApi<{ id: string }>(async (request, ctx) => {
         content: true,
         contentHash: true,
         lastScrapedAt: true,
+        changeDetectedAt: true,
+        createdAt: true,
       },
     });
 
@@ -122,17 +126,20 @@ export const POST = withAdminApi<{ id: string }>(async (request, ctx) => {
       updateData.contentHash = result.hash;
       updateData.changeDetectedAt = new Date();
 
-      // Gerar resumo das mudanças se havia conteúdo anterior
+      // Resumo das mudanças por dispositivo, se havia conteúdo anterior
       if (act.content) {
-        changeSummary = generateChangeSummary(act.content, result.content!);
+        changeSummary = resumoDaComparacao(compararTextos(act.content, result.content));
       }
     }
 
-    // Atualizar no banco
-    await prisma.legislativeAct.update({
+    // Atualizar no banco; o texto que sai vai para o histórico.
+    const versao = changed ? guardarVersaoSuperada(act, result.content, 'admin-raspagem') : null;
+    const atualizacao = prisma.legislativeAct.update({
       where: { id },
       data: updateData,
     });
+    if (versao) await prisma.$transaction([versao, atualizacao]);
+    else await atualizacao;
 
     console.log(`[Update Content] Concluído para ${act.fullNumber}: ${changed ? 'ALTERADO' : 'sem mudanças'}`);
 
@@ -180,12 +187,15 @@ export const GET = withAdminApi<{ id: string }>(async (_request, ctx) => {
         scrapeError: true,
         changeDetectedAt: true,
         notifyOnChange: true,
+        content: true,
       },
     });
 
     if (!act) {
       throw new NotFoundError('Ato normativo');
     }
+
+    const alteracoes = await alteracoesDoTexto(act.id, act.content);
 
     return NextResponse.json({
       id: act.id,
@@ -200,5 +210,13 @@ export const GET = withAdminApi<{ id: string }>(async (_request, ctx) => {
         contentHash: act.contentHash,
         notifyOnChange: act.notifyOnChange,
       },
+      // Histórico do texto: cada troca, com o que mudou (ou só a apresentação).
+      historico: alteracoes.map((a) => ({
+        versaoId: a.versaoId,
+        em: a.em,
+        origem: a.origem,
+        soFormatacao: a.comparacao.soFormatacao,
+        resumo: resumoDaComparacao(a.comparacao),
+      })),
     });
 });

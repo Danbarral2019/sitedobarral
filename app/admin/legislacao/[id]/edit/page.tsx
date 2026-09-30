@@ -28,6 +28,13 @@ const ISSUER_OPTIONS = [
   { value: 'TCU', label: 'TCU (Tribunal de Contas da União)' }
 ];
 
+const ORIGEM_DA_VERSAO: Record<string, string> = {
+  cron: 'verificação automática',
+  'admin-raspagem': 'verificação no admin',
+  'admin-edicao': 'edição no admin',
+  reimportacao: 'reimportação',
+};
+
 export default function EditLegislativeActPage() {
   const router = useRouter();
   const params = useParams();
@@ -51,6 +58,14 @@ export default function EditLegislativeActPage() {
     status?: string;
     error?: string;
   } | null>(null);
+  // Histórico do texto (LegislativeActVersion), da troca mais recente para a mais antiga
+  const [historico, setHistorico] = useState<Array<{
+    versaoId: string;
+    em: string;
+    origem: string;
+    soFormatacao: boolean;
+    resumo: string;
+  }>>([]);
 
   const [formData, setFormData] = useState({
     type: 'decreto',
@@ -122,6 +137,7 @@ export default function EditLegislativeActPage() {
       if (response.ok) {
         const data = await response.json();
         setScrapeStatus(data.scraping);
+        setHistorico(data.historico ?? []);
       }
     } catch (error) {
       console.error('Erro ao buscar status:', error);
@@ -675,6 +691,37 @@ export default function EditLegislativeActPage() {
                 {scrapeStatus.error && (
                   <p className="mt-2 text-xs text-red-600">{scrapeStatus.error}</p>
                 )}
+              </div>
+            )}
+
+            {/* Histórico do texto: cada troca, com o que mudou */}
+            {historico.length > 0 && (
+              <div className="mb-4 p-3 bg-white/80 rounded-lg border border-purple-200">
+                <p className="text-sm font-medium text-gray-700 mb-2">Histórico do texto</p>
+                <ul className="space-y-1.5 text-sm">
+                  {historico.map((h) => (
+                    <li key={h.versaoId} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="text-gray-600">{new Date(h.em).toLocaleString('pt-BR')}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          h.soFormatacao ? 'bg-gray-100 text-gray-700' : 'bg-amber-100 text-amber-900'
+                        }`}
+                      >
+                        {h.soFormatacao ? 'Só apresentação' : 'Texto alterado'}
+                      </span>
+                      <span className="text-gray-700">{h.resumo}</span>
+                      <span className="text-xs text-gray-500">({ORIGEM_DA_VERSAO[h.origem] ?? h.origem})</span>
+                      <a
+                        href={`/legislacao/${id}/alteracoes#versao-${h.versaoId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-purple-700 underline"
+                      >
+                        comparar
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
