@@ -55,16 +55,18 @@ function dataDoResultado(r: DOUSearchResult): Date | null {
   return m ? new Date(Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1]))) : null;
 }
 
+type Achado = { data: Date; titulo: string };
+
 async function buscarPublicacao(
   dou: DOUClient,
   tipo: string,
   numero: string,
   ato: Date,
-): Promise<{ data: Date; titulo: string } | 'falhou' | null> {
+  descartados: string[],
+): Promise<Achado | 'falhou' | null> {
   const dia = ato.getUTCDate();
   const mes = MESES[ato.getUTCMonth()];
   const ano = ato.getUTCFullYear();
-  const ate = new Date(ato.getTime() + 60 * 86_400_000);
   // Frase exata no texto todo: a busca restrita ao título (title-"...") não
   // acha nada no portal atual, e a busca sem aspas devolve milhares de
   // resultados em que o ato não aparece entre os primeiros. O filtro
@@ -75,34 +77,47 @@ async function buscarPublicacao(
     `${numero} de ${d} de ${mes} de ${ano}`,
     `${numero}, de ${dia} de ${mes} de ${ano}`,
   ])];
+  // Primeiro os 10 dias seguintes ao ato: em 60 dias, ato muito citado (a
+  // IN SEGES/MGI 148/2026, por exemplo) some atrás das publicações que o
+  // citam, e só os 20 primeiros resultados são lidos.
+  const janelas = [10, 60];
+  let buscas = 0;
   let falhas = 0;
-  for (const termo of termos) {
-    let resultados: DOUSearchResult[] = [];
-    try {
-      resultados = await dou.search({
-        searchTerm: termo,
-        field: DOUField.TUDO,
-        isExactSearch: true,
-        period: DOUPeriod.PERSONALIZADO,
-        publishFrom: ddmmaaaa(ato),
-        publishTo: ddmmaaaa(ate),
-        sections: [DOUSection.TODOS],
-        maxResults: 20,
-      });
-    } catch (err) {
-      falhas++;
-      console.log(`    busca falhou (${termo}): ${err instanceof Error ? err.message : err}`);
+  for (const dias of janelas) {
+    const ate = new Date(ato.getTime() + dias * 86_400_000);
+    for (const termo of termos) {
+      let resultados: DOUSearchResult[] = [];
+      buscas++;
+      try {
+        resultados = await dou.search({
+          searchTerm: termo,
+          field: DOUField.TUDO,
+          isExactSearch: true,
+          period: DOUPeriod.PERSONALIZADO,
+          publishFrom: ddmmaaaa(ato),
+          publishTo: ddmmaaaa(ate),
+          sections: [DOUSection.TODOS],
+          maxResults: 20,
+        });
+      } catch (err) {
+        falhas++;
+        console.log(`    busca falhou (${termo}): ${err instanceof Error ? err.message : err}`);
+      }
+      const achados = resultados
+        .filter((r) => {
+          const ok = tituloDoDouEDoAto(r.title, r.abstract, tipo, numero, ano);
+          if (!ok && descartados.length < 5 && !descartados.includes(r.title)) descartados.push(r.title);
+          return ok;
+        })
+        .map((r) => ({ data: dataDoResultado(r), titulo: r.title }))
+        .filter((x): x is Achado => !!x.data && dentroDaJanela(x.data, ato))
+        .sort((a, b) => a.data.getTime() - b.data.getTime());
+      if (achados.length) return achados[0];
+      await sleep(1500);
     }
-    const achados = resultados
-      .filter((r) => tituloDoDouEDoAto(r.title, r.abstract, tipo, numero, ano))
-      .map((r) => ({ data: dataDoResultado(r), titulo: r.title }))
-      .filter((x): x is { data: Date; titulo: string } => !!x.data && dentroDaJanela(x.data, ato))
-      .sort((a, b) => a.data.getTime() - b.data.getTime());
-    if (achados.length) return achados[0];
-    await sleep(1500);
   }
   // Todas as buscas deram erro (rede, bloqueio): não é o mesmo que "não achou".
-  return falhas === termos.length ? 'falhou' : null;
+  return falhas === buscas ? 'falhou' : null;
 }
 
 async function main() {
@@ -117,7 +132,9 @@ async function main() {
   });
 
   const dou = new DOUClient();
-  const linhas: string[][] = [['ato', 'situacao', 'publicacao_dou', 'vigencia', 'titulo_no_dou', 'clausula']];
+  const linhas: string[][] = [
+    ['ato', 'situacao', 'publicacao_dou', 'vigencia', 'titulo_no_dou', 'clausula', 'titulos_descartados'],
+  ];
   const gravar: Array<{ id: string; ato: string; vigencia: Date }> = [];
 
   console.log(`\n${acts.length} atos sem vigência${apply ? '' : ' (dry-run: nada será gravado)'}.\n`);
@@ -129,11 +146,12 @@ async function main() {
     let pub: { data: Date; titulo: string } | null = null;
     let falhou = false;
     let vigencia: Date | null = null;
+    const descartados: string[] = [];
 
     if (soPublicacao) {
       if (!ato) situacao = 'data do ato não identificada no texto';
       else {
-        const achado = await buscarPublicacao(dou, a.type, a.number, ato);
+        const achado = await buscarPublicacao(dou, a.type, a.number, ato, descartados);
         falhou = achado === 'falhou';
         pub = achado === 'falhou' ? null : achado;
         situacao = pub ? 'publicação no DOU' : falhou ? 'busca no DOU falhou (rede ou bloqueio)' : 'não encontrado no DOU';
@@ -145,7 +163,7 @@ async function main() {
     else if (!ato) situacao = 'data do ato não identificada no texto';
     else if (publicacaoNoTexto(a.content, ato)) situacao = 'publicação já consta do texto (fora do escopo)';
     else {
-      const achado = await buscarPublicacao(dou, a.type, a.number, ato);
+      const achado = await buscarPublicacao(dou, a.type, a.number, ato, descartados);
       falhou = achado === 'falhou';
       pub = achado === 'falhou' ? null : achado;
       vigencia = pub ? calcularVigencia(regra, pub.data) : null;
@@ -157,7 +175,15 @@ async function main() {
     }
 
     console.log(`  ${vigencia ? '✓' : '·'} ${a.fullNumber}: ${situacao}${vigencia ? ` → ${iso(vigencia)} (DOU ${iso(pub!.data)})` : ''}`);
-    linhas.push([a.fullNumber, situacao, iso(pub?.data ?? null), iso(vigencia), pub?.titulo ?? '', cl?.texto ?? '']);
+    linhas.push([
+      a.fullNumber,
+      situacao,
+      iso(pub?.data ?? null),
+      iso(vigencia),
+      pub?.titulo ?? '',
+      cl?.texto ?? '',
+      pub ? '' : descartados.join(' | '),
+    ]);
   }
 
   const dir = path.join(process.cwd(), 'scripts', 'output');
