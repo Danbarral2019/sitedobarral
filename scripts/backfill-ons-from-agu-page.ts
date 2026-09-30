@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { prisma } from '../lib/prisma';
 import { detectChanges, saveDocumentVersion } from '../lib/agu-modules/versioning';
 

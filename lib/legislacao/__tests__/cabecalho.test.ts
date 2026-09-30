@@ -50,6 +50,12 @@ describe('dataDoAto', () => {
       '2023-01-01',
     );
   });
+  it('número com zero à esquerda na epígrafe ("Nº 07")', () => {
+    expect(dataDoAto('7', ['INSTRUÇÃO NORMATIVA Nº 07, DE 20 DE SETEMBRO DE 2018'])?.toISOString().slice(0, 10)).toBe(
+      '2018-09-20',
+    );
+    expect(dataDoAto('70', ['INSTRUÇÃO NORMATIVA Nº 7, DE 20 DE SETEMBRO DE 2018'])).toBeNull();
+  });
   it('ignora epígrafe de outro ato citado', () => {
     expect(dataDoAto('6.364', ['Altera a Portaria SEGES/MGI nº 9.510, de 1º de outubro de 2024'])).toBeNull();
   });

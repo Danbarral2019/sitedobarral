@@ -13,6 +13,7 @@ const {
   mockProcessedCreate,
   mockProcessedDelete,
   mockSubscriptionCreate,
+  mockSubscriptionUpsert,
   mockSubscriptionFindUnique,
   mockSubscriptionUpdate,
   mockSubscriptionUpdateMany,
@@ -28,6 +29,7 @@ const {
   mockProcessedCreate: vi.fn(),
   mockProcessedDelete: vi.fn(),
   mockSubscriptionCreate: vi.fn(),
+  mockSubscriptionUpsert: vi.fn(),
   mockSubscriptionFindUnique: vi.fn(),
   mockSubscriptionUpdate: vi.fn(),
   mockSubscriptionUpdateMany: vi.fn(),
@@ -55,6 +57,7 @@ vi.mock('@/lib/prisma', () => ({
     },
     subscription: {
       create: (...args: any[]) => mockSubscriptionCreate(...args),
+      upsert: (...args: any[]) => mockSubscriptionUpsert(...args),
       findUnique: (...args: any[]) => mockSubscriptionFindUnique(...args),
       update: (...args: any[]) => mockSubscriptionUpdate(...args),
       updateMany: (...args: any[]) => mockSubscriptionUpdateMany(...args),
@@ -172,13 +175,17 @@ describe('POST /api/pagamento/webhook', () => {
     const res = await POST(makeRequest('{}', 'valid_sig') as any);
     expect(res.status).toBe(200);
     // Handler should NOT be called
-    expect(mockSubscriptionCreate).not.toHaveBeenCalled();
+    expect(mockSubscriptionUpsert).not.toHaveBeenCalled();
   });
 
   // 5. checkout.session.completed
-  it('creates Subscription + enrollments on checkout.session.completed', async () => {
-    const sessionEvent = makeEvent('checkout.session.completed', {
+  function checkoutSession(overrides: Record<string, unknown> = {}) {
+    return {
       id: 'cs_test_123',
+      object: 'checkout.session',
+      mode: 'subscription',
+      status: 'complete',
+      payment_status: 'paid',
       subscription: 'sub_stripe_1',
       customer: 'cus_1',
       payment_method_types: ['card'],
@@ -186,32 +193,118 @@ describe('POST /api/pagamento/webhook', () => {
         userId: 'user-1',
         plan: 'basico',
         billingCycle: 'monthly',
-        courseId: 'course-1',
+        courseId: '2',
       },
-    });
+      ...overrides,
+    };
+  }
 
-    mockConstructEvent.mockReturnValue(sessionEvent);
-    mockSubscriptionCreate.mockResolvedValue({});
+  it('creates Subscription + enrollments on checkout.session.completed with payment_status=paid', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('checkout.session.completed', checkoutSession()));
+    mockSubscriptionUpsert.mockResolvedValue({});
     mockCreateEnrollments.mockResolvedValue(undefined);
     mockUserFindUnique.mockResolvedValue({ email: 'user@test.com', name: 'User' });
 
     const res = await POST(makeRequest('{}', 'valid_sig') as any);
     expect(res.status).toBe(200);
 
-    expect(mockSubscriptionCreate).toHaveBeenCalledWith({
-      data: expect.objectContaining({
+    expect(mockSubscriptionUpsert).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      create: expect.objectContaining({
         userId: 'user-1',
         plan: 'basico',
         stripeSubscriptionId: 'sub_stripe_1',
+        stripeCheckoutSessionId: 'cs_test_123',
         status: 'active',
       }),
+      update: expect.objectContaining({ status: 'active' }),
     });
 
     expect(mockCreateEnrollments).toHaveBeenCalledWith({
       userId: 'user-1',
       plan: 'basico',
-      courseId: 'course-1',
+      courseId: '2',
     });
+  });
+
+  it('grants access on checkout.session.completed with payment_status=no_payment_required', async () => {
+    mockConstructEvent.mockReturnValue(
+      makeEvent('checkout.session.completed', checkoutSession({ payment_status: 'no_payment_required' })),
+    );
+    mockSubscriptionUpsert.mockResolvedValue({});
+    mockUserFindUnique.mockResolvedValue(null);
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ create: expect.objectContaining({ status: 'active' }) }),
+    );
+    expect(mockCreateEnrollments).toHaveBeenCalled();
+  });
+
+  it('does NOT grant access on checkout.session.completed with payment_status=unpaid (records processing)', async () => {
+    mockConstructEvent.mockReturnValue(
+      makeEvent('checkout.session.completed', checkoutSession({ payment_status: 'unpaid', payment_method_types: ['pix'] })),
+    );
+    mockSubscriptionUpsert.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpsert).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      create: expect.objectContaining({ status: 'processing', paymentMethod: 'pix' }),
+      update: {},
+    });
+    expect(mockCreateEnrollments).not.toHaveBeenCalled();
+    expect(mockUserFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('does NOT grant access when payment_status is absent', async () => {
+    const session: Record<string, unknown> = checkoutSession();
+    delete session.payment_status;
+    mockConstructEvent.mockReturnValue(makeEvent('checkout.session.completed', session));
+    mockSubscriptionUpsert.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ create: expect.objectContaining({ status: 'processing' }) }),
+    );
+    expect(mockCreateEnrollments).not.toHaveBeenCalled();
+  });
+
+  it('grants access on checkout.session.async_payment_succeeded', async () => {
+    mockConstructEvent.mockReturnValue(
+      makeEvent('checkout.session.async_payment_succeeded', checkoutSession({ payment_method_types: ['pix'] })),
+    );
+    mockSubscriptionUpsert.mockResolvedValue({});
+    mockUserFindUnique.mockResolvedValue({ email: 'user@test.com', name: 'User' });
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { stripeSubscriptionId: 'sub_stripe_1' },
+        update: expect.objectContaining({ status: 'active' }),
+      }),
+    );
+    expect(mockCreateEnrollments).toHaveBeenCalledWith({ userId: 'user-1', plan: 'basico', courseId: '2' });
+  });
+
+  it('does NOT grant access on checkout.session.async_payment_failed and closes the processing row', async () => {
+    mockConstructEvent.mockReturnValue(
+      makeEvent('checkout.session.async_payment_failed', checkoutSession({ payment_status: 'unpaid' })),
+    );
+    mockSubscriptionUpdateMany.mockResolvedValue({ count: 1 });
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdateMany).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1', status: 'processing' },
+      data: { status: 'canceled' },
+    });
+    expect(mockSubscriptionUpsert).not.toHaveBeenCalled();
+    expect(mockCreateEnrollments).not.toHaveBeenCalled();
   });
 
   // 5b. subscription.updated com cancel_at (Customer Portal moderno)
@@ -237,6 +330,87 @@ describe('POST /api/pagamento/webhook', () => {
       where: { stripeSubscriptionId: 'sub_stripe_1' },
       data: expect.objectContaining({ cancelAtPeriodEnd: true }),
     });
+  });
+
+  // 5c. subscription.updated com status que deixa de cobrar
+  it.each([
+    ['unpaid', 'past_due'],
+    ['paused', 'past_due'],
+    ['incomplete_expired', 'canceled'],
+  ])('maps Stripe status %s to %s and suspends access of an active subscription', async (stripeStatus, dbStatus) => {
+    mockConstructEvent.mockReturnValue(makeEvent('customer.subscription.updated', {
+      id: 'sub_stripe_1',
+      status: stripeStatus,
+      cancel_at_period_end: false,
+      cancel_at: null,
+      items: { data: [{ current_period_end: 1779999999 }] },
+    }));
+    mockSubscriptionFindUnique.mockResolvedValue({ status: 'active' });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: expect.objectContaining({ status: dbStatus }),
+    });
+    expect(mockRemoveEnrollments).toHaveBeenCalledWith('sub_stripe_1');
+  });
+
+  it('marks incomplete_expired of a processing subscription as canceled without touching enrollments', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('customer.subscription.updated', {
+      id: 'sub_stripe_1',
+      status: 'incomplete_expired',
+      cancel_at_period_end: false,
+      cancel_at: null,
+      items: { data: [] },
+    }));
+    mockSubscriptionFindUnique.mockResolvedValue({ status: 'processing' });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: expect.objectContaining({ status: 'canceled' }),
+    });
+    expect(mockRemoveEnrollments).not.toHaveBeenCalled();
+  });
+
+  it('keeps the current status on subscription.updated with status incomplete', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('customer.subscription.updated', {
+      id: 'sub_stripe_1',
+      status: 'incomplete',
+      cancel_at_period_end: false,
+      cancel_at: null,
+      items: { data: [] },
+    }));
+    mockSubscriptionFindUnique.mockResolvedValue({ status: 'processing' });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockSubscriptionUpdate).toHaveBeenCalledWith({
+      where: { stripeSubscriptionId: 'sub_stripe_1' },
+      data: expect.objectContaining({ status: 'processing' }),
+    });
+    expect(mockRemoveEnrollments).not.toHaveBeenCalled();
+  });
+
+  it('does not suspend access on subscription.updated with status active', async () => {
+    mockConstructEvent.mockReturnValue(makeEvent('customer.subscription.updated', {
+      id: 'sub_stripe_1',
+      status: 'active',
+      cancel_at_period_end: false,
+      cancel_at: null,
+      items: { data: [{ current_period_end: 1779999999 }] },
+    }));
+    mockSubscriptionFindUnique.mockResolvedValue({ status: 'active' });
+    mockSubscriptionUpdate.mockResolvedValue({});
+
+    const res = await POST(makeRequest('{}', 'valid_sig') as any);
+    expect(res.status).toBe(200);
+    expect(mockRemoveEnrollments).not.toHaveBeenCalled();
   });
 
   // 6. customer.subscription.deleted
@@ -294,21 +468,8 @@ describe('POST /api/pagamento/webhook', () => {
 
   // 7. Handler failure -> dedup rollback + 500
   it('rolls back dedup record and returns 500 on handler failure', async () => {
-    const sessionEvent = makeEvent('checkout.session.completed', {
-      id: 'cs_test_123',
-      subscription: 'sub_stripe_1',
-      customer: 'cus_1',
-      payment_method_types: ['card'],
-      metadata: {
-        userId: 'user-1',
-        plan: 'basico',
-        billingCycle: 'monthly',
-        courseId: 'course-1',
-      },
-    });
-
-    mockConstructEvent.mockReturnValue(sessionEvent);
-    mockSubscriptionCreate.mockRejectedValue(new Error('DB error'));
+    mockConstructEvent.mockReturnValue(makeEvent('checkout.session.completed', checkoutSession()));
+    mockSubscriptionUpsert.mockRejectedValue(new Error('DB error'));
 
     const res = await POST(makeRequest('{}', 'valid_sig') as any);
     expect(res.status).toBe(500);
@@ -522,7 +683,7 @@ describe('POST /api/pagamento/webhook', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.received).toBe(true);
-    expect(mockSubscriptionCreate).not.toHaveBeenCalled();
+    expect(mockSubscriptionUpsert).not.toHaveBeenCalled();
   });
 
   // 13. Evento desconhecido (não ignorado, sem handler) → 200

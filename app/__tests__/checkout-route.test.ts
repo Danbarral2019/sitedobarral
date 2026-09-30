@@ -112,6 +112,20 @@ describe('POST /api/pagamento/checkout', () => {
     expect(data.error).toContain('courseId');
   });
 
+  it('returns 400 for basico with courseId outside the catalog', async () => {
+    const res = await POST(makeRequest({ plan: 'basico', method: 'card', courseId: 'curso-inexistente' }), routeCtx);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toContain('courseId inválido');
+    expect(mockCreateCheckoutSession).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for basico with a discontinued course id', async () => {
+    const res = await POST(makeRequest({ plan: 'basico', method: 'card', courseId: '1' }), routeCtx);
+    expect(res.status).toBe(400);
+    expect(mockCreateCheckoutSession).not.toHaveBeenCalled();
+  });
+
   it('returns 409 when user has active subscription', async () => {
     mockSubscriptionFindFirst.mockResolvedValue({
       id: 'sub-1',
@@ -126,7 +140,7 @@ describe('POST /api/pagamento/checkout', () => {
   });
 
   it('returns 200 + url for valid checkout (card + basico + courseId)', async () => {
-    const res = await POST(makeRequest({ plan: 'basico', method: 'card', courseId: 'course-1' }), routeCtx);
+    const res = await POST(makeRequest({ plan: 'basico', method: 'card', courseId: '2' }), routeCtx);
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.url).toBe('https://checkout.stripe.com/session_123');
@@ -135,7 +149,7 @@ describe('POST /api/pagamento/checkout', () => {
         userId: 'user-1',
         plan: 'basico',
         method: 'card',
-        courseId: 'course-1',
+        courseId: '2',
       }),
     );
   });

@@ -14,6 +14,8 @@ import Stripe from 'stripe';
 
 const EXPECTED_EVENTS = [
   'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.async_payment_failed',
   'invoice.paid',
   'invoice.payment_failed',
   'customer.subscription.updated',
@@ -52,7 +54,7 @@ async function main() {
 
   console.log(`  atuais:  ${current.length} eventos`);
   if (!missing.length) {
-    console.log('  ✓ já cobre os 7 eventos esperados — nada a fazer.');
+    console.log(`  ✓ já cobre os ${EXPECTED_EVENTS.length} eventos esperados — nada a fazer.`);
     return;
   }
   console.log(`  faltam:  ${missing.join(', ')}`);
@@ -68,7 +70,7 @@ async function main() {
   });
   console.log(`\n✓ Atualizado. Agora com ${updated.enabled_events.length} eventos.`);
   const stillMissing = EXPECTED_EVENTS.filter((e) => !updated.enabled_events.includes(e));
-  console.log(stillMissing.length ? `⚠️  ainda faltam: ${stillMissing.join(', ')}` : '✓ os 7 eventos esperados estão cobertos.');
+  console.log(stillMissing.length ? `⚠️  ainda faltam: ${stillMissing.join(', ')}` : `✓ os ${EXPECTED_EVENTS.length} eventos esperados estão cobertos.`);
 }
 
 main().catch((err) => {

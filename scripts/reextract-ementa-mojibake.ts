@@ -15,7 +15,7 @@
  *
  * Modos: dry-run (default) | --apply
  */
-import * as cheerio from 'cheerio';
+import * as cheerio from 'cheerio/slim';
 import { prisma } from '../lib/prisma';
 import {
   detectCharsetFromResponse,

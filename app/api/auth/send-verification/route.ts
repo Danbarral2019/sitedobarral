@@ -6,6 +6,11 @@ import { RateLimitError } from '@/lib/errors/api-error';
 import { sendVerificationEmail } from '@/lib/email';
 import { reportError } from '@/lib/monitoring/report-error';
 
+// Resposta única para e-mail inexistente, já verificado ou pendente: o
+// endpoint não pode servir para descobrir se uma conta existe ou em que
+// estado está.
+const GENERIC_MESSAGE = 'Se o email estiver cadastrado e ainda não verificado, você receberá um link de verificação.';
+
 /**
  * POST /api/auth/send-verification
  * Envia código de verificação de email (ou reenvia)
@@ -30,21 +35,8 @@ export async function POST(request: NextRequest) {
       where: { email: email.toLowerCase().trim() },
     });
 
-    if (!user) {
-      // Por segurança, retorna sucesso mesmo se não encontrar
-      return NextResponse.json({
-        success: true,
-        message: 'Se o email estiver cadastrado, você receberá um código de verificação.',
-      });
-    }
-
-    // Se já verificado, retorna sucesso
-    if (user.emailVerified) {
-      return NextResponse.json({
-        success: true,
-        message: 'Email já verificado!',
-        alreadyVerified: true,
-      });
+    if (!user || user.emailVerified) {
+      return NextResponse.json({ success: true, message: GENERIC_MESSAGE });
     }
 
     // Gera token hex seguro (mesmo formato do registro)
@@ -72,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Link de verificação enviado para seu email.',
+      message: GENERIC_MESSAGE,
       // ATENÇÃO: Remover em produção! Só para desenvolvimento
       devInfo: process.env.NODE_ENV === 'development' ? {
         token: verificationToken,

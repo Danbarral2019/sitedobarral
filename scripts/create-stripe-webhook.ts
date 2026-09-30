@@ -1,6 +1,6 @@
 /**
  * Cria (idempotente) o webhook endpoint do app no modo da chave usada, já com os
- * 7 eventos que app/api/pagamento/webhook processa. Na criação, grava o signing
+ * 9 eventos que app/api/pagamento/webhook processa. Na criação, grava o signing
  * secret em .whsec.tmp em vez de imprimi-lo (o secret permite forjar eventos —
  * não deve aparecer em logs). Se o endpoint já existe, não recria (o secret de um
  * endpoint existente não é recuperável via API — rotacione no dashboard).
@@ -14,6 +14,8 @@ import { writeFileSync } from 'fs';
 const URL = 'https://www.profdanielbarral.com/api/pagamento/webhook';
 const EVENTS: Stripe.WebhookEndpointCreateParams.EnabledEvent[] = [
   'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.async_payment_failed',
   'invoice.paid',
   'invoice.payment_failed',
   'customer.subscription.updated',

@@ -136,28 +136,41 @@ function extractMeta(metadata: Record<string, string> | undefined | null): Subsc
 
 // ── Handler: checkout.session.completed ───────────────────────────────────
 
-async function handleCheckoutCompleted(event: Stripe.Event) {
-  const session = event.data.object as Stripe.Checkout.Session;
-  const meta = extractMeta(session.metadata as Record<string, string>);
-  if (!meta) {
-    apiLogger.warn({ sessionId: session.id }, 'Checkout session missing metadata');
-    return;
-  }
+/**
+ * `payment_status` da sessão que autoriza liberar o acesso já no
+ * `checkout.session.completed`. Na assinatura por cartão a Stripe só conclui a
+ * sessão depois de cobrar a primeira fatura, e o evento chega com `paid`;
+ * `no_payment_required` cobre a primeira fatura de valor zero (cupom de 100%
+ * ou período de teste). `unpaid` indica meio de pagamento assíncrono (PIX): a
+ * confirmação vem depois, em `checkout.session.async_payment_succeeded`.
+ */
+const GRANTING_PAYMENT_STATUSES = new Set<Stripe.Checkout.Session['payment_status']>([
+  'paid',
+  'no_payment_required',
+]);
 
-  const stripeSubscriptionId = typeof session.subscription === 'string'
+function extractSessionSubscriptionId(session: Stripe.Checkout.Session): string | null {
+  if (!session.subscription) return null;
+  return typeof session.subscription === 'string'
     ? session.subscription
-    : (session.subscription as Stripe.Subscription)?.id;
+    : session.subscription.id ?? null;
+}
 
-  if (!stripeSubscriptionId) {
-    apiLogger.warn({ sessionId: session.id }, 'Checkout session has no subscription');
-    return;
-  }
-
+/**
+ * Cria (ou ativa, se o registro `processing` já existir) a assinatura e as
+ * matrículas. Idempotente por `stripeSubscriptionId`.
+ */
+async function activateSubscriptionFromSession(
+  session: Stripe.Checkout.Session,
+  meta: SubscriptionMeta,
+  stripeSubscriptionId: string,
+) {
   const now = new Date();
   const periodEnd = calculatePeriodEnd(now, meta.billingCycle);
 
-  await prisma.subscription.create({
-    data: {
+  await prisma.subscription.upsert({
+    where: { stripeSubscriptionId },
+    create: {
       userId: meta.userId,
       plan: meta.plan,
       billingCycle: meta.billingCycle,
@@ -168,6 +181,11 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
       stripeSubscriptionId,
       stripeCheckoutSessionId: session.id,
       stripePriceId: null,
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+    },
+    update: {
+      status: 'active',
       currentPeriodStart: now,
       currentPeriodEnd: periodEnd,
     },
@@ -191,6 +209,91 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
 
   apiLogger.info({ userId: meta.userId, plan: meta.plan, stripeSubscriptionId }, 'Subscription created via checkout');
   trackServerEvent('subscription_created', { plan: meta.plan });
+}
+
+function readCheckoutSession(event: Stripe.Event): {
+  session: Stripe.Checkout.Session;
+  meta: SubscriptionMeta;
+  stripeSubscriptionId: string;
+} | null {
+  const session = event.data.object as Stripe.Checkout.Session;
+  const meta = extractMeta(session.metadata as Record<string, string>);
+  if (!meta) {
+    apiLogger.warn({ sessionId: session.id }, 'Checkout session missing metadata');
+    return null;
+  }
+
+  const stripeSubscriptionId = extractSessionSubscriptionId(session);
+  if (!stripeSubscriptionId) {
+    apiLogger.warn({ sessionId: session.id }, 'Checkout session has no subscription');
+    return null;
+  }
+
+  return { session, meta, stripeSubscriptionId };
+}
+
+async function handleCheckoutCompleted(event: Stripe.Event) {
+  const parsed = readCheckoutSession(event);
+  if (!parsed) return;
+  const { session, meta, stripeSubscriptionId } = parsed;
+
+  if (GRANTING_PAYMENT_STATUSES.has(session.payment_status)) {
+    await activateSubscriptionFromSession(session, meta, stripeSubscriptionId);
+    return;
+  }
+
+  // Pagamento ainda não confirmado (meio assíncrono). Registra a assinatura
+  // como `processing`, sem matrícula: o acesso só sai em
+  // `checkout.session.async_payment_succeeded` (ou `invoice.paid`). O `update`
+  // vazio preserva um registro que já exista.
+  const now = new Date();
+  await prisma.subscription.upsert({
+    where: { stripeSubscriptionId },
+    create: {
+      userId: meta.userId,
+      plan: meta.plan,
+      billingCycle: meta.billingCycle,
+      courseId: meta.courseId || null,
+      status: 'processing',
+      paymentMethod: session.payment_method_types?.[0] || 'card',
+      stripeCustomerId: typeof session.customer === 'string' ? session.customer : null,
+      stripeSubscriptionId,
+      stripeCheckoutSessionId: session.id,
+      stripePriceId: null,
+      currentPeriodStart: now,
+      currentPeriodEnd: calculatePeriodEnd(now, meta.billingCycle),
+    },
+    update: {},
+  });
+
+  apiLogger.info(
+    { userId: meta.userId, stripeSubscriptionId, paymentStatus: session.payment_status ?? null },
+    'Checkout completed without confirmed payment — access pending',
+  );
+}
+
+// ── Handler: checkout.session.async_payment_succeeded / failed ────────────
+
+async function handleCheckoutAsyncPaymentSucceeded(event: Stripe.Event) {
+  const parsed = readCheckoutSession(event);
+  if (!parsed) return;
+  const { session, meta, stripeSubscriptionId } = parsed;
+  await activateSubscriptionFromSession(session, meta, stripeSubscriptionId);
+}
+
+async function handleCheckoutAsyncPaymentFailed(event: Stripe.Event) {
+  const parsed = readCheckoutSession(event);
+  if (!parsed) return;
+  const { stripeSubscriptionId, meta } = parsed;
+
+  // Nenhuma matrícula foi criada para a assinatura `processing`; basta
+  // encerrá-la para não bloquear um novo checkout.
+  await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId, status: 'processing' },
+    data: { status: 'canceled' },
+  });
+
+  apiLogger.warn({ userId: meta.userId, stripeSubscriptionId }, 'Checkout async payment failed — access not granted');
 }
 
 // ── Handler: invoice.paid ─────────────────────────────────────────────────
@@ -285,6 +388,45 @@ async function handleInvoicePaymentFailed(event: Stripe.Event) {
 
 // ── Handler: customer.subscription.updated ────────────────────────────────
 
+/**
+ * Converte o status da assinatura na Stripe para o status gravado no banco.
+ * `null` mantém o status atual (ex.: `incomplete`, `trialing`, que não
+ * alteram o acesso já concedido ou pendente).
+ *
+ * - `unpaid` e `paused`: a Stripe parou de cobrar e a assinatura pode voltar
+ *   com o pagamento regularizado. Viram `past_due`, o status de pagamento
+ *   pendente que o resto do sistema já entende (tela de pagamento pendente,
+ *   bloqueio de novo checkout, recriação das matrículas em `invoice.paid`).
+ * - `incomplete_expired`: a primeira cobrança nunca foi paga e a Stripe
+ *   encerrou a assinatura; é terminal, como `canceled`.
+ */
+function mapStripeSubscriptionStatus(status: Stripe.Subscription.Status): string | null {
+  switch (status) {
+    case 'active':
+      return 'active';
+    case 'past_due':
+    case 'unpaid':
+    case 'paused':
+      return 'past_due';
+    case 'canceled':
+    case 'incomplete_expired':
+      return 'canceled';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Status da Stripe que, recebidos em `customer.subscription.updated`,
+ * suspendem o acesso. `past_due` fica de fora porque `invoice.payment_failed`
+ * já cuida dele, e `canceled` porque `customer.subscription.deleted` cuida.
+ */
+const SUSPENDING_STRIPE_STATUSES = new Set<Stripe.Subscription.Status>([
+  'unpaid',
+  'paused',
+  'incomplete_expired',
+]);
+
 async function handleSubscriptionUpdated(event: Stripe.Event) {
   const stripeSub = event.data.object as Stripe.Subscription;
   const stripeSubscriptionId = stripeSub.id;
@@ -305,19 +447,32 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
   // tratamos qualquer um como "marcado pra cancelar".
   const isScheduledToCancel = stripeSub.cancel_at_period_end || stripeSub.cancel_at !== null;
 
+  const mappedStatus = mapStripeSubscriptionStatus(stripeSub.status);
+
   await prisma.subscription.update({
     where: { stripeSubscriptionId },
     data: {
       cancelAtPeriodEnd: isScheduledToCancel,
-      status: stripeSub.status === 'active' ? 'active'
-        : stripeSub.status === 'past_due' ? 'past_due'
-        : stripeSub.status === 'canceled' ? 'canceled'
-        : sub.status,
+      status: mappedStatus ?? sub.status,
       ...(periodEndSeconds !== null && {
         currentPeriodEnd: new Date(periodEndSeconds * 1000),
       }),
     },
   });
+
+  // Estados em que a Stripe deixou de cobrar ou encerrou a assinatura
+  // suspendem o acesso, como em invoice.payment_failed. `invoice.paid`
+  // recria as matrículas se a cobrança for regularizada (exceto se cancelada).
+  // Só assinatura que estava ativa tem matrículas a remover: uma `processing`
+  // (PIX não confirmado) nunca as recebeu, e remover pelo plano/curso poderia
+  // apagar matrículas de outra assinatura do mesmo usuário.
+  if (SUSPENDING_STRIPE_STATUSES.has(stripeSub.status) && sub.status === 'active') {
+    await removeEnrollmentsForSubscription(stripeSubscriptionId);
+    apiLogger.warn(
+      { stripeSubscriptionId, stripeStatus: stripeSub.status, status: mappedStatus },
+      'Subscription updated to a non-paying status — access suspended',
+    );
+  }
 
   apiLogger.info({ stripeSubscriptionId, status: stripeSub.status }, 'Subscription updated');
 }
@@ -418,6 +573,8 @@ async function handleDisputeCreated(event: Stripe.Event) {
 
 const HANDLERS: Record<string, (event: Stripe.Event) => Promise<void>> = {
   'checkout.session.completed': handleCheckoutCompleted,
+  'checkout.session.async_payment_succeeded': handleCheckoutAsyncPaymentSucceeded,
+  'checkout.session.async_payment_failed': handleCheckoutAsyncPaymentFailed,
   // Stripe envia ambos pra cobranças bem-sucedidas (event.id distinto). O dispatch
   // dedup via ProcessedWebhookEvent garante que cada um roda no máximo 1x; o handler
   // é idempotente (atualiza currentPeriodEnd e status='active' sem efeitos colaterais).
