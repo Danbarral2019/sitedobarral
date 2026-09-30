@@ -36,7 +36,17 @@ vi.mock('@/lib/search/mesclar-semantica', () => ({
   mesclarSemDuplicar: (items: unknown[]) => items,
   contarNovos: () => 0,
 }));
-vi.mock('@/lib/prisma', () => ({ prisma: { document: { findMany: vi.fn() } } }));
+// O acesso do leitor vem de getAcessoDoUsuario (matrículas válidas +
+// assinaturas); o mock de hasAnyActiveAccess decide se há matrícula válida.
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    document: { findMany: vi.fn() },
+    enrollment: {
+      findMany: async () => ((await mocks.hasAnyActiveAccess()) ? [{ courseId: '2' }] : []),
+    },
+    subscription: { findMany: async () => [] },
+  },
+}));
 vi.mock('@/data/lei-14133-artigos', () => ({ searchLeiArticlesWithExcerpts: () => [] }));
 vi.mock('@/lib/logger', () => ({
   apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },

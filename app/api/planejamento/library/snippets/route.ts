@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zCreateSnippetBody } from "@/data/planejamento/types";
 
-export const GET = withUserApi(async (request: NextRequest, ctx) => {
+export const GET = withAssinanteApi(async (request: NextRequest, ctx) => {
   const userId = ctx.user.userId;
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
@@ -26,7 +26,7 @@ export const GET = withUserApi(async (request: NextRequest, ctx) => {
   return NextResponse.json({ snippets });
 });
 
-export const POST = withUserApi(async (request: NextRequest, ctx) => {
+export const POST = withAssinanteApi(async (request: NextRequest, ctx) => {
   const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
   const parsed = zCreateSnippetBody.safeParse(body);

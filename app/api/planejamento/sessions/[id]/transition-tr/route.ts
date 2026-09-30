@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { materializeTRWithInheritance } from "@/lib/planejamento/session-manager";
 import { NotFoundError, ConflictError } from "@/lib/errors/api-error";
@@ -10,7 +10,7 @@ import type { ApiContext } from "@/lib/api/types";
  * Materializa o TR da sessão, pré-carregando campos herdados do ETP.
  * Idempotente: se o TR já existe, retorna-o sem alterações.
  */
-export const POST = withUserApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+export const POST = withAssinanteApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
 

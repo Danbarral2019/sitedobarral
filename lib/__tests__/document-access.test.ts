@@ -6,9 +6,10 @@ vi.mock('@/lib/prisma', () => ({ prisma: {} }));
 
 import { hasAccessToDocument, type DocumentAccessFields } from '../auth';
 
-const publico: DocumentAccessFields = { isPublic: true, isCommon: false, courseId: '1' };
-const restritoDeCurso: DocumentAccessFields = { isPublic: false, isCommon: false, courseId: '2' };
-const restritoComum: DocumentAccessFields = { isPublic: false, isCommon: true, courseId: null };
+const publico: DocumentAccessFields = { isPublic: true, isCommon: false, courseId: '1', category: 'parecer' };
+const restritoDeCurso: DocumentAccessFields = { isPublic: false, isCommon: false, courseId: '2', category: 'apostila' };
+const restritoComum: DocumentAccessFields = { isPublic: false, isCommon: true, courseId: null, category: 'parecer' };
+const grafo: DocumentAccessFields = { isPublic: false, isCommon: false, courseId: null, category: 'acordao-grafo' };
 
 function makeDeps(over: Partial<Parameters<typeof hasAccessToDocument>[1]> = {}) {
   return {
@@ -89,7 +90,7 @@ describe('hasAccessToDocument', () => {
   // restrição: tratá-lo como restrição negaria dois terços do acervo restrito a
   // um assinante Básico de outro curso.
   it('trata isCommon como acervo comum mesmo quando há courseId preenchido', async () => {
-    const comumComCurso: DocumentAccessFields = { isPublic: false, isCommon: true, courseId: '2' };
+    const comumComCurso: DocumentAccessFields = { isPublic: false, isCommon: true, courseId: '2', category: 'parecer' };
     const deps = makeDeps({
       getUser: vi.fn().mockResolvedValue(aluno),
       hasCourseAccess: vi.fn().mockResolvedValue(false),
@@ -101,12 +102,34 @@ describe('hasAccessToDocument', () => {
   });
 
   it('trata documento restrito sem curso e sem isCommon como acervo comum', async () => {
-    const semCurso: DocumentAccessFields = { isPublic: false, isCommon: false, courseId: null };
+    const semCurso: DocumentAccessFields = { isPublic: false, isCommon: false, courseId: null, category: 'parecer' };
     const deps = makeDeps({
       getUser: vi.fn().mockResolvedValue(aluno),
       hasAnyActiveAccess: vi.fn().mockResolvedValue(true),
     });
 
     expect(await hasAccessToDocument(semCurso, deps)).toBe(true);
+  });
+
+  it('nega o grafo de precedentes a aluno com acesso ativo', async () => {
+    const deps = makeDeps({
+      getUser: vi.fn().mockResolvedValue(aluno),
+      hasCourseAccess: vi.fn().mockResolvedValue(true),
+      hasAnyActiveAccess: vi.fn().mockResolvedValue(true),
+    });
+
+    expect(await hasAccessToDocument(grafo, deps)).toBe(false);
+    // mesmo marcado como público por engano
+    expect(await hasAccessToDocument({ ...grafo, isPublic: true }, deps)).toBe(false);
+  });
+
+  it('nega o grafo a visitante anônimo mesmo marcado como público', async () => {
+    const deps = makeDeps();
+    expect(await hasAccessToDocument({ ...grafo, isPublic: true }, deps)).toBe(false);
+  });
+
+  it('libera o grafo para admin', async () => {
+    const deps = makeDeps({ getUser: vi.fn().mockResolvedValue(admin) });
+    expect(await hasAccessToDocument(grafo, deps)).toBe(true);
   });
 });

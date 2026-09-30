@@ -9,6 +9,7 @@ import type { QueryScope } from './domain-detection';
 import type { LegalSource } from '@/lib/legal-context';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
 import type { AiDocument } from '@/lib/ai/types';
+import type { AcessoDoUsuario } from '@/lib/search/acesso-documentos';
 
 export interface QueryFilters {
   courseId?: string;
@@ -62,6 +63,13 @@ export interface AssembleAnswerInput {
    * preserva o comportamento de medição de retrieval.
    */
   enrolledCourseIds?: string[];
+  /**
+   * Acesso do usuário (lib/search/acesso-documentos.ts). Quando fornecido, é a
+   * regra aplicada — no retrieval (antes da fusão) e no pós-filtro de todas as
+   * fontes — e `enrolledCourseIds` é ignorado. A rota de produção sempre o
+   * fornece.
+   */
+  acesso?: AcessoDoUsuario;
   /**
    * Recorte das teses do TCU visível a este usuário (spec §9; ver
    * `lib/teses/visibilidade.ts`). Quando fornecido, a busca inclui o ramo das

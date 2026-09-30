@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { getAcessoDoUsuario } from '@/lib/search/acesso-documentos';
 import { searchLeiArticlesWithExcerpts } from '@/data/lei-14133-artigos';
 import { courses } from '@/data/courses';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
+import { AuthenticationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import {
   searchDocuments,
@@ -50,29 +51,10 @@ export async function GET(request: NextRequest) {
       throw new AuthenticationError();
     }
 
-    const isAdmin = authPayload.role === 'admin';
-
-    // Fetch user with enrollments from database (select only needed fields)
-    const user = await prisma.user.findUnique({
-      where: { id: authPayload.userId },
-      select: {
-        id: true,
-        enrollments: {
-          select: {
-            courseId: true,
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundError('Usuário');
-    }
-
-    // Get enrolled course IDs
-    const enrolledCourseIds = isAdmin
-      ? courses.map(c => c.id)
-      : user.enrollments.map(e => e.courseId);
+    // Acesso do usuário: cursos com matrícula válida (ou assinatura ativa);
+    // admin recebe todos. Ver lib/search/acesso-documentos.
+    const acesso = await getAcessoDoUsuario(authPayload);
+    const enrolledCourseIds = acesso.cursosAtivos;
 
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q')?.trim() || '';
@@ -125,7 +107,7 @@ export async function GET(request: NextRequest) {
       searchPromises.push(
         (async () => {
           const ftsResults = await searchDocuments(query, {
-            enrolledCourseIds,
+            acesso,
             limit,
           });
 
@@ -297,7 +279,8 @@ export async function GET(request: NextRequest) {
 
           const siteIds = [...new Set(siteToCourses.map((s) => s.siteId))];
 
-          const ftsResults = await searchSites(query, { siteIds, limit });
+          // Lista vazia em searchSites significa "todos": sem curso, nenhum site.
+          const ftsResults = siteIds.length > 0 ? await searchSites(query, { siteIds, limit }) : [];
 
           counts.site = ftsResults.length;
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { ApiError, ConflictError, NotFoundError, ValidationError } from "@/lib/errors/api-error";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
@@ -9,7 +9,7 @@ import type { TrailDefinition } from "@/data/planejamento/types";
 
 const MAX_CONTENT = 40_000;
 
-export const POST = withUserApi<{ id: string; key: string }>(async (request, { params, user, logger }) => {
+export const POST = withAssinanteApi<{ id: string; key: string }>(async (request, { params, user, logger }) => {
   const { id, key } = params;
   const userId = user.userId;
 

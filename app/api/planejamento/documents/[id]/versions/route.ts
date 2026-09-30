@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { createVersion } from "@/lib/planejamento/versioning";
 import { NotFoundError } from "@/lib/errors/api-error";
 
-export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx) => {
+export const GET = withAssinanteApi<{ id: string }>(async (_request: NextRequest, ctx) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
 
@@ -36,7 +36,7 @@ export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx
   });
 });
 
-export const POST = withUserApi<{ id: string }>(async (request: NextRequest, ctx) => {
+export const POST = withAssinanteApi<{ id: string }>(async (request: NextRequest, ctx) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));

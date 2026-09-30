@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { getTrailBySlug } from "@/data/planejamento/trails";
 import { NotFoundError } from "@/lib/errors/api-error";
 import type { ApiContext } from "@/lib/api/types";
 
-export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+export const GET = withAssinanteApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
 

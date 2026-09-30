@@ -3,6 +3,9 @@ import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { queryGeminiText } from '@/lib/gemini/cached-client';
 import { PRIMARY_GEMINI_MODEL } from '@/lib/gemini/config';
 import { prisma } from '@/lib/prisma';
+import { verifyAuth } from '@/lib/auth';
+import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 import { ENUNCIADOS, buscarEnunciados } from '@/data/enunciados';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { enforceGlobalAiCap } from '@/lib/cache/ai-quota';
@@ -187,6 +190,12 @@ Regras:
     const articleNumbers = results.map(r => r.articleNumber);
     const searchTerms = searchQuery.toLowerCase().split(/\s+/).filter((t: string) => t.length > 2);
 
+    // Rota pública: documento privado só para admin (mesmo padrão de
+    // /api/lei-14133/article-docs/[numero]); o grafo e as categorias internas
+    // ficam de fora para todos.
+    const authResult = await verifyAuth(request);
+    const isAdminUser = authResult.valid && authResult.user?.role === 'admin';
+
     // Buscar documentos vinculados aos artigos OU que contenham os termos de busca
     const documents = await prisma.document.findMany({
       where: {
@@ -204,7 +213,8 @@ Regras:
             summary: { contains: term, mode: 'insensitive' as const }
           })),
         ],
-        category: { notIn: ['boa_pratica'] },
+        category: { notIn: ['boa_pratica', CATEGORIA_GRAFO, ...INTERNAL_ONLY_CATEGORIES] },
+        ...(!isAdminUser && { isPublic: true }),
       },
       select: {
         id: true,

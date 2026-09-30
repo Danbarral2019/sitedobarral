@@ -90,6 +90,10 @@ vi.mock('@/lib/legal-context', () => ({
   buildLegalSources: () => [],
 }));
 
+vi.mock('@/lib/search/acesso-documentos', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/search/acesso-documentos')>()),
+  getAcessoDoUsuario: async () => ({ isAdmin: false, temAcessoAtivo: false, cursosAtivos: [] }),
+}));
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     document: { findMany: async () => [] },

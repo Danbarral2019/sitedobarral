@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { zDecisionRunBody } from "@/data/planejamento/types";
@@ -12,7 +12,7 @@ import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
  * Body: { sessionId, matrixSlug, inputs }
  * Executa a matriz determinística e grava PlanningDecisionRun.
  */
-export const POST = withUserApi(async (request: NextRequest, ctx) => {
+export const POST = withAssinanteApi(async (request: NextRequest, ctx) => {
   const userId = ctx.user.userId;
   await enforceRateLimit(`planejamento:decision:${userId}`, 20, 60);
 

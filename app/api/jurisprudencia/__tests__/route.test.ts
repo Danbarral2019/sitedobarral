@@ -43,7 +43,9 @@ describe('GET /api/jurisprudencia', () => {
         ano: 2024,
         tema: 'pregão',
       }),
-      { page: 1, pageSize: 10 }
+      { page: 1, pageSize: 10 },
+      // visitante anônimo: ramo Document só com públicos
+      { isAdmin: false, temAcessoAtivo: false, cursosAtivos: [] }
     );
   });
 
@@ -127,7 +129,8 @@ describe('GET /api/jurisprudencia', () => {
     await GET(makeReq('pageSize=500'));
     expect(mockFetchUnifiedList).toHaveBeenCalledWith(
       expect.any(Object),
-      expect.objectContaining({ pageSize: 50 })
+      expect.objectContaining({ pageSize: 50 }),
+      expect.any(Object)
     );
   });
 });

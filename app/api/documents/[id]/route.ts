@@ -5,6 +5,7 @@ import { NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { hasAccessToDocument } from '@/lib/auth';
 import { trechoDeAmostra } from '@/lib/text-preview';
+import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
 
 /** Mesmo corte da página /documento/[id]. */
 const LIMITE_AMOSTRA = 520;
@@ -103,13 +104,26 @@ export async function GET(
     // página /documento/[id]. Quem não tem acesso recebe aqui o mesmo que lá:
     // a amostra do texto, sem resumo nem notas de curadoria.
     const { isPublic, isCommon, ...publico } = document;
-    const temAcesso = await hasAccessToDocument({ isPublic, isCommon, courseId: document.courseId });
+    const temAcesso = await hasAccessToDocument({
+      isPublic,
+      isCommon,
+      courseId: document.courseId,
+      category: document.category,
+    });
 
     apiLogger.info({ documentId, temAcesso }, 'Document fetched successfully');
 
     if (!temAcesso) {
+      // O grafo de precedentes é invisível a não-admin: nem amostra.
+      if (document.category === CATEGORIA_GRAFO) {
+        throw new NotFoundError('Documento');
+      }
       return NextResponse.json({
         ...publico,
+        // url e alternativeUrls apontam para o arquivo (URL pública do R2):
+        // entregá-las anularia a amostra.
+        url: null,
+        alternativeUrls: null,
         content: trechoDeAmostra(document.content || document.description || '', LIMITE_AMOSTRA).trecho,
         summary: null,
         notes: null,

@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-import { courses } from '@/data/courses';
 import { hybridSearch } from '@/lib/embeddings/hybrid-search';
 import { apiLogger } from '@/lib/logger';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
+import { AuthenticationError } from '@/lib/errors/api-error';
 import {
-  filterByEnrollment,
+  getAcessoDoUsuario,
+  podeVerDocumento,
+  filtrarResultadosVisiveis,
+} from '@/lib/search/acesso-documentos';
+import {
   dedupeByDocument,
   mapDocumentRowToResult,
   mapActRowToResult,
@@ -37,18 +40,9 @@ export async function GET(request: NextRequest) {
     }
     const limit = Math.min(parseInt(request.nextUrl.searchParams.get('limit') || String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 100);
 
-    // Matrículas (admin vê todos os cursos)
-    const isAdmin = authPayload.role === 'admin';
-    const user = await prisma.user.findUnique({
-      where: { id: authPayload.userId },
-      select: { id: true, enrollments: { select: { courseId: true } } },
-    });
-    if (!user) {
-      throw new NotFoundError('Usuário');
-    }
-    const enrolledCourseIds = isAdmin
-      ? courses.map((c) => c.id)
-      : user.enrollments.map((e) => e.courseId);
+    // Acesso do usuário (regra única: matrículas válidas, acervo comum só com
+    // acesso ativo, grafo nunca; admin vê tudo).
+    const acesso = await getAcessoDoUsuario(authPayload);
 
     // Fase 2: híbrido (document + legislative-act). Fallback gracioso em qualquer erro.
     // ⚠️ Este try/catch interno é intencional e NÃO deve ser substituído por
@@ -60,9 +54,10 @@ export async function GET(request: NextRequest) {
         limit: Math.ceil(limit * 1.5), // margem para o pós-filtro de acesso
         includeTribunalDecisions: false,
         useCache: true,
+        acesso,
       });
 
-      const allowed = dedupeByDocument(filterByEnrollment(results, enrolledCourseIds)).slice(0, limit);
+      const allowed = dedupeByDocument(filtrarResultadosVisiveis(results, acesso)).slice(0, limit);
 
       const docIds = allowed.filter((r) => r.sourceType === 'document').map((r) => r.documentId);
       const actIds = allowed.filter((r) => r.sourceType === 'legislative-act').map((r) => r.documentId);
@@ -71,7 +66,7 @@ export async function GET(request: NextRequest) {
         docIds.length
           ? prisma.document.findMany({
               where: { id: { in: docIds } },
-              select: { id: true, title: true, description: true, category: true, type: true, url: true, courseId: true, tags: true, uploadedAt: true, isPublic: true },
+              select: { id: true, title: true, description: true, category: true, type: true, url: true, courseId: true, tags: true, uploadedAt: true, isPublic: true, isCommon: true },
             })
           : Promise.resolve([]),
         actIds.length
@@ -90,7 +85,10 @@ export async function GET(request: NextRequest) {
       for (const r of allowed) {
         if (r.sourceType === 'document') {
           const row = docById.get(r.documentId);
-          if (row) items.push({ type: 'document', data: mapDocumentRowToResult(row) });
+          // Segunda tranca com o dado atual do banco (o resultado da busca pode vir de cache).
+          if (row && podeVerDocumento(row, acesso)) {
+            items.push({ type: 'document', data: mapDocumentRowToResult(row) });
+          }
         } else if (r.sourceType === 'legislative-act') {
           const row = actById.get(r.documentId);
           if (row) items.push({ type: 'legislative-act', data: mapActRowToResult(row) });

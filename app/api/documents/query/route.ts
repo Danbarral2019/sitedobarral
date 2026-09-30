@@ -3,10 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-import { verifyAuth, hasAnyActiveAccess } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth';
+import { getAcessoDoUsuario, CATEGORIA_GRAFO } from '@/lib/search/acesso-documentos';
 import { visibilidadeDasTeses } from '@/lib/teses/visibilidade';
-import { prisma } from '@/lib/prisma';
-import { courses } from '@/data/courses';
 import { assembleAnswerContext } from '@/lib/rag/answerContext';
 import type { QueryFilters, ConversationMessage, DocumentResult } from '@/lib/rag/types';
 import {
@@ -137,28 +136,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4a. BIA-0c: matrículas do usuário para pós-filtrar o retrieval por acesso
-    // (mesmo gate do BIA-0b na lista). Admin recebe todos os cursos. Sem isso, o
-    // card de IA citaria material restrito de cursos não matriculados.
-    const isAdmin = authResult.user.role === 'admin';
-    const enrolledCourseIds = isAdmin
-      ? courses.map((c) => c.id)
-      : (
-          await prisma.user.findUnique({
-            where: { id: userId },
-            select: { enrollments: { select: { courseId: true } } },
-          })
-        )?.enrollments.map((e) => e.courseId) ?? [];
+    // 4a. BIA-0c: acesso do usuário para filtrar o retrieval (regra única de
+    // lib/search/acesso-documentos: matrículas válidas, acervo comum só com
+    // acesso ativo, grafo nunca). Admin vê tudo. Sem isso, o card de IA
+    // citaria material restrito.
+    const acesso = await getAcessoDoUsuario(authResult.user);
+
+    // O filtro de categoria vem do cliente e não pode abrir o grafo de
+    // precedentes, que é invisível a não-admin.
+    if (!acesso.isAdmin && filters.category === CATEGORIA_GRAFO) {
+      return NextResponse.json(
+        { success: false, error: 'Categoria inválida' },
+        { status: 400 }
+      );
+    }
 
     // 4a'. Recorte das teses do TCU (spec §9): acervo para quem tem acesso
     // ativo (matrícula válida, assinatura ou admin), vitrine para os demais.
     // A mesma regra da busca integrada e da página do acórdão-líder.
-    const tesesVisibilidade = visibilidadeDasTeses(isAdmin || await hasAnyActiveAccess(userId));
+    const tesesVisibilidade = visibilidadeDasTeses(acesso.isAdmin || acesso.temAcessoAtivo);
 
     // 4b-12b. Montagem do contexto (retrieval + contexto em camadas + prompt +
     // fontes) extraída para lib/rag/answerContext — mesma função usada pelo eval.
-    apiLogger.info({ userId, query, filters, enrolledCourseCount: enrolledCourseIds.length }, 'Document query started');
-    const ctx = await assembleAnswerContext({ query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds, tesesVisibilidade });
+    apiLogger.info({ userId, query, filters, activeCourseCount: acesso.cursosAtivos.length }, 'Document query started');
+    const ctx = await assembleAnswerContext({ query, filters, maxResults, conversationHistory, useCache, acesso, tesesVisibilidade });
 
     if (ctx.empty) {
       return NextResponse.json<QueryResponse>({

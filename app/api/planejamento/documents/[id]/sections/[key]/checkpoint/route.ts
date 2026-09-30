@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zCheckpointAnswerBody } from "@/data/planejamento/types";
 import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
@@ -8,7 +8,7 @@ import { ValidationError, NotFoundError } from "@/lib/errors/api-error";
  * POST /api/planejamento/documents/[id]/sections/[key]/checkpoint
  * Registra resposta conceitual do aluno. Informativa (sem gatekeeping).
  */
-export const POST = withUserApi<{ id: string; key: string }>(async (request: NextRequest, ctx) => {
+export const POST = withAssinanteApi<{ id: string; key: string }>(async (request: NextRequest, ctx) => {
   const { id, key } = ctx.params;
   const userId = ctx.user.userId;
 

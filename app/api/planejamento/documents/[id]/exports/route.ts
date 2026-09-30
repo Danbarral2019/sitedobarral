@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { ApiError, NotFoundError, ValidationError } from "@/lib/errors/api-error";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
@@ -10,7 +10,7 @@ import { getTrailBySlug } from "@/data/planejamento/trails";
 import type { TrailDefinition } from "@/data/planejamento/types";
 import { uploadToR2, getSignedR2Url } from "@/lib/storage/r2-client";
 
-export const GET = withUserApi<{ id: string }>(async (_request, { params, user, logger }) => {
+export const GET = withAssinanteApi<{ id: string }>(async (_request, { params, user, logger }) => {
   const { id } = params;
   const userId = user.userId;
   const doc = await prisma.planningDocument.findFirst({
@@ -37,7 +37,7 @@ export const GET = withUserApi<{ id: string }>(async (_request, { params, user, 
   return NextResponse.json({ exports: withUrls });
 });
 
-export const POST = withUserApi<{ id: string }>(async (request, { params, user, logger }) => {
+export const POST = withAssinanteApi<{ id: string }>(async (request, { params, user, logger }) => {
   const { id } = params;
   const userId = user.userId;
   await enforceRateLimit(`planejamento:export:${userId}`, 5, 60);

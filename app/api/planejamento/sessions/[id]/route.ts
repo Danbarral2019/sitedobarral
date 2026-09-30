@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withUserApi } from "@/lib/api/handler";
+import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { zUpdateSessionBody } from "@/data/planejamento/types";
 import {
@@ -10,7 +10,7 @@ import {
 import { NotFoundError, ValidationError } from "@/lib/errors/api-error";
 import type { ApiContext } from "@/lib/api/types";
 
-export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+export const GET = withAssinanteApi<{ id: string }>(async (_request: NextRequest, ctx: ApiContext<{ id: string }>) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
   const session = await getSessionForUser(id, userId);
@@ -20,7 +20,7 @@ export const GET = withUserApi<{ id: string }>(async (_request: NextRequest, ctx
   return NextResponse.json({ session });
 });
 
-export const PATCH = withUserApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+export const PATCH = withAssinanteApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
   const body = await request.json().catch(() => ({}));
@@ -57,7 +57,7 @@ export const PATCH = withUserApi<{ id: string }>(async (request: NextRequest, ct
   return NextResponse.json({ session });
 });
 
-export const DELETE = withUserApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
+export const DELETE = withAssinanteApi<{ id: string }>(async (request: NextRequest, ctx: ApiContext<{ id: string }>) => {
   const { id } = ctx.params;
   const userId = ctx.user.userId;
   const { searchParams } = new URL(request.url);

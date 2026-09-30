@@ -33,6 +33,15 @@ vi.mock('@/lib/auth', () => ({
   verifyAuth: (...a: unknown[]) => mockVerifyAuth(...a),
   hasAnyActiveAccess: (...a: unknown[]) => mockHasAnyActiveAccess(...a),
 }));
+// Acesso do usuário: admin vê tudo; aluno tem acesso ativo conforme o mock
+// de hasAnyActiveAccess (a regra em si é testada em lib/search).
+vi.mock('@/lib/search/acesso-documentos', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/search/acesso-documentos')>()),
+  getAcessoDoUsuario: async (user: { userId: string; role: string }) =>
+    user.role === 'admin'
+      ? { isAdmin: true, temAcessoAtivo: true, cursosAtivos: ['2', '3'] }
+      : { isAdmin: false, temAcessoAtivo: !!(await mockHasAnyActiveAccess(user.userId)), cursosAtivos: [] },
+}));
 vi.mock('@/lib/cache/redis-client', () => ({
   checkRateLimit: (...a: unknown[]) => mockCheckRateLimit(...a),
   withCache: async (_k: string, fn: () => Promise<unknown>) => fn(),
@@ -126,6 +135,21 @@ describe('/api/documents/query — guardas', () => {
     expect(mockCheckRateLimit).not.toHaveBeenCalled();
     // admin não consulta enrollments no banco
     expect(mockUserFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('400 quando não-admin pede a categoria do grafo de precedentes', async () => {
+    const res = await POST(makeReq({ query: 'dispensa de licitação', filters: { category: 'acordao-grafo' } }));
+    expect(res.status).toBe(400);
+    expect(mockAssembleAnswerContext).not.toHaveBeenCalled();
+  });
+
+  it('repassa o acesso do usuário para a montagem do contexto', async () => {
+    mockHasAnyActiveAccess.mockResolvedValue(false);
+    await POST(makeReq({ query: 'dispensa de licitação', stream: false }));
+    expect(mockAssembleAnswerContext.mock.calls[0][0]).toMatchObject({
+      acesso: { isAdmin: false, temAcessoAtivo: false, cursosAtivos: [] },
+    });
+    expect(mockAssembleAnswerContext.mock.calls[0][0]).not.toHaveProperty('enrolledCourseIds');
   });
 
   it('contexto vazio retorna results:[] e totalDocuments:0', async () => {

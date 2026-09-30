@@ -49,6 +49,14 @@ function createApiHandler<P>(
         if (role === 'admin' && user.role !== 'admin') {
           throw new AuthorizationError();
         }
+        if (options.exigeAcessoAtivo && user.role !== 'admin') {
+          const { hasAnyActiveAccess } = await import('@/lib/auth');
+          if (!(await hasAnyActiveAccess(user.userId))) {
+            throw new AuthorizationError(
+              'Recurso disponível para alunos e assinantes com acesso ativo.'
+            );
+          }
+        }
         Sentry.setUser({ id: user.userId, email: user.email, role: user.role });
       }
 
@@ -124,6 +132,22 @@ export function withUserApi<P = unknown>(
     'user',
     handler as ApiHandler<ApiContext<P> | PublicApiContext<P>>,
     options
+  );
+}
+
+/**
+ * Como `withUserApi`, mas exige acesso ativo (matrícula válida ou assinatura
+ * ativa) de quem não é admin; sem ele, 403 (`AuthorizationError`). Para
+ * recursos pagos que não pertencem a um curso específico (ex.: planejamento).
+ */
+export function withAssinanteApi<P = unknown>(
+  handler: ApiHandler<ApiContext<P>>,
+  options?: ApiHandlerOptions
+): NextRouteHandler<P> {
+  return createApiHandler<P>(
+    'user',
+    handler as ApiHandler<ApiContext<P> | PublicApiContext<P>>,
+    { ...options, exigeAcessoAtivo: true }
   );
 }
 
