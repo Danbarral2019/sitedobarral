@@ -437,6 +437,67 @@ Na segunda geração (63):
 
 2358/2024, 1083/2024, 11432/2023, 12868/2023, 12867/2023, 10886/2023, 12290/2023, 12187/2023, 12186/2023, 10411/2023, 10410/2023, 11883/2023, 8904/2023, 1293/2023, 1051/2023, 3739/2023, 3631/2023, 563/2023, 343/2023, 130/2023, 8461/2022, 4038/2022, 397/2022, 2845/2021, 18224/2021, 11375/2021, 9164/2021, 7869/2020, 6415/2020, 1356/2019, 1020/2019, 382/2019, 12076/2018, 10563/2018, 7163/2018, 1106/2017, 9012/2016, 8541/2016, 1835/2016, 3385/2015, 6814/2015, 8535/2015, 4586/2015, 508/2014, 41/2014, 6282/2013, 140/2012, 128/2012, 8336/2011, 4820/2010, 3782/2010, 383/2010, 6989/2009, 819/2009, 2416/2008, 3405/2006, 2719/2006, 571/2004, 102/2002, 50/2002, 21/2002, 19/2002, 45/1999
 
+## Embeddings e destilação: volume e custo (30/09/2026)
+
+Levantamento pedido pelo Daniel, sem nenhuma chamada de IA: volume medido no banco e com os
+próprios scripts. Nada foi executado.
+
+**Recomendação:** não indexar os 3.890 inteiros teores de uma vez, e fazer as duas frentes
+depois da classificação por matéria, restritas aos acórdãos de licitações e contratos.
+
+### Embeddings
+
+| | Quantidade |
+|---|---|
+| Documentos com texto | 3.890 |
+| Chunks (chunker genérico do pipeline: 2.000 caracteres, sobreposição de 400) | 208.965 |
+| Caracteres nos chunks | ~372 milhões (93 a 106 milhões de tokens) |
+| `DocumentChunk` hoje, no site inteiro | 73.570 |
+
+- **Custo de API:** baixo. O `gemini-embedding-2` custa US$ 0,20 por milhão de tokens de
+  texto, conforme [OpenRouter](https://openrouter.ai/google/gemini-embedding-2) e
+  [TheRundown](https://www.therundown.ai/tools/gemini-embedding-2). A página oficial do Google
+  não pôde ser conferida, porque a rede da nuvem a bloqueia. Total: **US$ 19 a 21**. O modo
+  batch custaria a metade, mas `migrate-to-embeddings.ts` não o usa.
+- **Armazenamento:** os vetores de 768 dimensões ocupam ~640 MB, mais ~370 MB de texto dos
+  chunks e os índices. Seria mais de 1 GB novo no Neon; conferir contra o limite do plano.
+- **Qualidade da busca:** o índice ficaria quase 4 vezes maior, com muita matéria alheia a
+  licitações (pessoal, tomada de contas). Isso tende a diluir o retrieval do assistente, e o
+  teto de recall@5 de ~65% (`docs/ROADMAP_BUSCA_QUALIDADE.md`) foi medido sem esses chunks.
+- **Visibilidade:** antes de religar a fila, confirmar como a busca trata documentos com
+  `isPublic: false` e categoria `acordao-grafo`.
+
+**Proposta.** Depois da classificação, religar `embeddingStatus` (de `skipped` para
+`pending`) só nos acórdãos classificados como licitações e contratos. Antes, rodar
+`npm run eval:run` (sem custo) numa amostra para medir o efeito no retrieval. Uma alternativa
+mais barata é indexar só ementa e dispositivo, com poucos chunks por acórdão, em vez do
+inteiro teor.
+
+### Destilação de teses
+
+`backfill-teses-tcu.ts` seleciona alvos do grafo, não os 3.890 documentos. Os documentos novos
+entram como fonte: são os votos citantes que formam o dossiê de cada tese. Por isso a carga
+ampliou o universo elegível. Dry-run em 30/09/2026:
+
+| Limiar | Candidatos | Faixa A (≥20) | Faixa B (10-19) | Faixa C (5-9) |
+|---|---|---|---|---|
+| ≥5 citações no voto (padrão) | 1.658 | 194 | 372 | 1.092 |
+
+- **Custo:** ~10 mil tokens de entrada e ~1,5 mil de saída por caso no Claude Sonnet 5 (US$ 2
+  e US$ 10 por milhão, preço mantido como definitivo pela
+  [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing)), ou seja, ~US$ 0,035
+  por caso: **~US$ 20 para as faixas A e B (566 casos)** e ~US$ 58 para os 1.658.
+- **Gargalo humano:** cada tese só é publicada com veredito "fiel" na folha de calibração.
+  Mil e seiscentas teses novas seriam mil e seiscentas conferências.
+
+**Proposta.** Depois da classificação, destilar só as faixas A e B da matéria licitações e
+contratos, com `--min-no-voto=10 --tema=licitacoes-contratos`. O lote deve cair para poucas
+centenas de casos, dentro da capacidade de revisão.
+
+Observação: o comentário de `backfill-teses-tcu.ts` diz que o preço do Sonnet 5 subiria para
+US$ 3/15 em 01/09/2026. O aumento não ocorreu, então o comentário está desatualizado; ele não
+afeta nenhuma decisão do script.
+
 ## Pendente
 
 1. Classificação por matéria: o Daniel roda localmente (`--min-no-voto=2`, 207 chamadas,
@@ -446,6 +507,6 @@ Na segunda geração (63):
    nuvem e formato que o catalogador não extrai), outros 3 casos de HTTP 403, RTFs gigantes
    (151), erros do `rtf-parser` (50), HTTP 503 (16) e arquivos que não são RTF (3). Pedem
    extrator novo ou máquina com acesso ao host.
-4. Embeddings e destilação de teses: **não autorizados**. Trazer volume e estimativa de custo
-   ao Daniel antes. Religar a fila de embeddings é trocar `embeddingStatus` de `skipped` para
+4. Embeddings e destilação de teses: **não autorizados**. Volume, custo e proposta na seção
+   "Embeddings e destilação: volume e custo". Religar a fila de embeddings é trocar `embeddingStatus` de `skipped` para
    `pending` nos documentos com `reviewedBy = 'alvos-citados-tcu'` (hoje, 3.890 com texto).
