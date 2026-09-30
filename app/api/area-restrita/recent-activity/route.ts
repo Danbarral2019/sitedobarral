@@ -3,6 +3,7 @@ import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { AuthenticationError } from '@/lib/errors/api-error';
+import { getAcessoDoUsuario, podeVerDocumento } from '@/lib/search/acesso-documentos';
 
 export async function GET(req: NextRequest) {
   try {
@@ -48,17 +49,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ recentDocuments: [] });
     }
 
-    // Busca dados dos documentos
-    const documents = await prisma.document.findMany({
-      where: { id: { in: uniqueDocIds } },
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        courseId: true,
-        url: true,
-      },
-    });
+    // Busca dados dos documentos. O log aceita qualquer id que o cliente
+    // mandou no passado: só sai o que o usuário pode ver hoje.
+    const [rows, acesso] = await Promise.all([
+      prisma.document.findMany({
+        where: { id: { in: uniqueDocIds } },
+        select: {
+          id: true,
+          title: true,
+          category: true,
+          courseId: true,
+          url: true,
+          isPublic: true,
+          isCommon: true,
+        },
+      }),
+      getAcessoDoUsuario(authResult.user),
+    ]);
+    const documents = rows.filter((d) => podeVerDocumento(d, acesso));
 
     // Mantém a ordem de acesso recente e adiciona data
     const recentDocuments = uniqueDocIds

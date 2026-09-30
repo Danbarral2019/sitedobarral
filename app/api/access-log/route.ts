@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { NotFoundError } from '@/lib/errors/api-error';
+import { getAcessoDoUsuario, podeVerDocumento } from '@/lib/search/acesso-documentos';
 
+/** Teto do histórico devolvido pelo GET. */
+const LIMITE_MAXIMO = 200;
 
 // POST /api/access-log - Registrar um acesso/download
 export async function POST(request: NextRequest) {
@@ -24,6 +29,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'action é obrigatório' }, { status: 400 });
     }
 
+    // Só entra no histórico documento que existe e que o usuário pode ver:
+    // o recent-activity devolve título e url do que estiver aqui.
+    if (documentId) {
+      const doc = typeof documentId === 'string'
+        ? await prisma.document.findUnique({
+            where: { id: documentId },
+            select: { isPublic: true, isCommon: true, courseId: true, category: true },
+          })
+        : null;
+      if (!doc || !podeVerDocumento(doc, await getAcessoDoUsuario(decoded))) {
+        throw new NotFoundError('Documento');
+      }
+    }
+
     // Captura IP e User Agent
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
@@ -41,8 +60,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ accessLog }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao registrar acesso:', error);
-    return NextResponse.json({ error: 'Erro ao registrar acesso' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -63,7 +81,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
     const action = searchParams.get('action');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const pedido = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = Number.isFinite(pedido) && pedido > 0 ? Math.min(pedido, LIMITE_MAXIMO) : 50;
 
     const where: Record<string, unknown> = { userId: decoded.userId };
     if (courseId) where.courseId = courseId;
