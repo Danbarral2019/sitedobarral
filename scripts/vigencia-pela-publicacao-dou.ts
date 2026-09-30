@@ -18,6 +18,12 @@
  *   npx tsx scripts/vigencia-pela-publicacao-dou.ts
  *   npx tsx scripts/vigencia-pela-publicacao-dou.ts --apply
  *   npx tsx scripts/vigencia-pela-publicacao-dou.ts --id=<uuid> [--apply]
+ *   npx tsx scripts/vigencia-pela-publicacao-dou.ts --so-publicacao
+ *
+ * --so-publicacao: busca a publicação no DOU de todo ato sem vigência cuja
+ * data o texto informe, qualquer que seja a cláusula (vigência escalonada,
+ * vacância em anos, sem cláusula), e só relata a data. Não calcula nem grava
+ * vigência: esses atos são lidos um a um.
  */
 import { mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
@@ -102,6 +108,7 @@ async function buscarPublicacao(
 async function main() {
   const apply = process.argv.includes('--apply');
   const onlyId = process.argv.find((a) => a.startsWith('--id='))?.split('=')[1];
+  const soPublicacao = process.argv.includes('--so-publicacao');
 
   const acts = await prisma.legislativeAct.findMany({
     where: { effectiveDate: null, ...(onlyId ? { id: onlyId } : {}) },
@@ -123,7 +130,16 @@ async function main() {
     let falhou = false;
     let vigencia: Date | null = null;
 
-    if (!cl || !regra) situacao = 'sem cláusula de vigência no texto';
+    if (soPublicacao) {
+      if (!ato) situacao = 'data do ato não identificada no texto';
+      else {
+        const achado = await buscarPublicacao(dou, a.type, a.number, ato);
+        falhou = achado === 'falhou';
+        pub = achado === 'falhou' ? null : achado;
+        situacao = pub ? 'publicação no DOU' : falhou ? 'busca no DOU falhou (rede ou bloqueio)' : 'não encontrado no DOU';
+        await sleep(1500);
+      }
+    } else if (!cl || !regra) situacao = 'sem cláusula de vigência no texto';
     else if (regra.tipo === 'especial' || regra.tipo === 'data') situacao = 'regra que exige leitura (fora do escopo)';
     else if (cl.multiplas) situacao = 'mais de uma cláusula de vigência (fora do escopo)';
     else if (!ato) situacao = 'data do ato não identificada no texto';
@@ -146,13 +162,20 @@ async function main() {
 
   const dir = path.join(process.cwd(), 'scripts', 'output');
   mkdirSync(dir, { recursive: true });
-  const arquivo = path.join(dir, `vigencia-dou-${new Date().toISOString().slice(0, 10)}.csv`);
+  const arquivo = path.join(
+    dir,
+    `vigencia-dou-${soPublicacao ? 'publicacoes-' : ''}${new Date().toISOString().slice(0, 10)}.csv`,
+  );
   const csv = linhas.map((l) => l.map((c) => `"${c.replace(/"/g, '""')}"`).join(';')).join('\r\n');
   writeFileSync(arquivo, '﻿' + csv, 'utf8');
   const falhas = linhas.filter((l) => l[1].startsWith('busca no DOU falhou')).length;
   console.log(`\n${gravar.length} com vigência encontrada. Relatório: ${arquivo}`);
   if (falhas) console.log(`⚠️  ${falhas} busca(s) falharam por rede ou bloqueio; o in.gov.br está acessível desta máquina?`);
 
+  if (soPublicacao) {
+    console.log('🔒 --so-publicacao: só relata a data de publicação; nada foi gravado.');
+    return;
+  }
   if (!apply) {
     console.log('🔒 dry-run: nada foi gravado. Confira o CSV e rode com --apply para gravar.');
     return;
