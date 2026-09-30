@@ -11,6 +11,7 @@ import {
 import { AnaliseIADemo } from '@/components/busca/AnaliseIADemo';
 import CartaoTese from '@/components/teses/CartaoTese';
 import type { TeseCard } from '@/lib/teses/consultas';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
 
 interface SearchResults {
   query: string;
@@ -495,7 +496,7 @@ function BuscaIntegradaContent() {
                   {results.results.articles.map(article => (
                     <Link
                       key={article.numero}
-                      href={`/artigo/${article.numero}`}
+                      href={urlDoArtigo(article.numero)}
                       className="block p-5 bg-brand-50 rounded-[6px] border-2 border-brand-200 hover:border-brand-500 hover:bg-brand-100 transition-all group"
                     >
                       <div className="flex items-start gap-3">

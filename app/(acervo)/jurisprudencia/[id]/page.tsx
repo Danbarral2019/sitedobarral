@@ -8,6 +8,7 @@ import {
   Tag, BookOpen, Loader2, Sparkles
 } from 'lucide-react';
 import { blocosDoInteiroTeor, inteiroTeorTruncado } from '@/lib/tcu/inteiro-teor-exibicao';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
 
 interface DecisionDetail {
   id: string;
@@ -491,7 +492,7 @@ export default function JurisprudenciaDetailPage() {
               {articleNumbers.map((art) => (
                 <Link
                   key={art}
-                  href={`/artigo/${art}`}
+                  href={urlDoArtigo(art)}
                   className="px-3 py-1.5 bg-brand-50 text-brand-700 rounded-[6px] text-sm font-medium hover:bg-brand-100 transition-colors"
                 >
                   Art. {art}

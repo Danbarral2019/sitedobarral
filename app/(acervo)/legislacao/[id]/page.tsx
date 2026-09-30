@@ -33,6 +33,7 @@ import {
 } from '@/lib/legislacao/cabecalho';
 import { referenciaDoRevogador } from '@/lib/legislacao/revogacao';
 import { ultimaAlteracaoDoTexto } from '@/lib/legislacao/versoes';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -429,7 +430,7 @@ export default async function LegislativeActPage({ params }: PageProps) {
               {leiArticlesArray.map((articleNum) => (
                 <li key={articleNum}>
                   <Link
-                    href={`/artigo/${encodeURIComponent(articleNum)}`}
+                    href={urlDoArtigo(articleNum)}
                     className="inline-flex items-center px-3 py-1 border border-border-subtle rounded-[6px] text-sm font-medium text-brand-700 hover:bg-surface-raised hover:border-border-strong transition-colors"
                   >
                     {rotuloArtigo(articleNum)}

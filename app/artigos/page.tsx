@@ -6,6 +6,7 @@ import { Search, BookOpen, ArrowRight, FileText, X, List, Hash } from 'lucide-re
 import type { LeiArticle } from '@/data/lei-14133-artigos';
 import { LEI_14133_GRUPOS, getGroupById } from '@/data/lei-14133-grupos';
 import { formatArticleNumber } from '@/lib/article-utils';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
 
 type NavigationMode = 'articles' | 'groups';
 
@@ -179,7 +180,7 @@ export default function ArtigosIndexPage() {
                 {searchResults.map(article => (
                   <Link
                     key={article.numero}
-                    href={`/artigo/${article.numero}`}
+                    href={urlDoArtigo(article.numero)}
                     className="block p-6 bg-surface-raised rounded-[6px] border-2 border-border-subtle hover:border-brand-500 hover:bg-brand-50 transition-all group"
                   >
                     <div className="flex items-start gap-4">
@@ -268,7 +269,7 @@ export default function ArtigosIndexPage() {
                   {filteredArticles.map(article => (
                     <Link
                       key={article.numero}
-                      href={`/artigo/${article.numero}`}
+                      href={urlDoArtigo(article.numero)}
                       className="aspect-square bg-brand-100 hover:bg-brand-600 rounded-[6px] flex items-center justify-center font-bold text-brand-700 hover:text-white transition-all hover:scale-105 hover: border border-border-subtle"
                       title={`Artigo ${article.numero}: ${article.titulo}`}
                     >
@@ -331,7 +332,7 @@ export default function ArtigosIndexPage() {
                             return (
                               <Link
                                 key={numero}
-                                href={`/artigo/${numero}`}
+                                href={urlDoArtigo(numero)}
                                 className="block p-5 bg-surface-raised rounded-[6px] border-2 border-border-subtle hover:border-brand-500 hover:bg-brand-50 transition-all group"
                               >
                                 <div className="flex items-start gap-4">

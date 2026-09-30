@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
 
 // ===========================
 // Types
@@ -337,7 +338,7 @@ export async function POST(req: NextRequest) {
             description: article.ementa.substring(0, 200) + (article.ementa.length > 200 ? '...' : ''),
             capitulo: article.capitulo,
             secao: article.secao || undefined,
-            url: `/artigo/${article.numero}`,
+            url: urlDoArtigo(article.numero),
             relevance,
           };
         })

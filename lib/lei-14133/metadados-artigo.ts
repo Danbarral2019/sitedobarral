@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import { rotuloArtigo } from '@/lib/legislacao/cabecalho';
+import { urlDoArtigo } from '@/lib/lei-14133/url-artigo';
+
+export { urlDoArtigo };
 
 /**
  * Metadados de cada artigo da Lei 14.133/2021 exibido em /lei-14133?artigo=N.
@@ -27,10 +30,6 @@ export function artigoIndexavel(numero: string): boolean {
 
 export function artigosIndexaveis(): string[] {
   return Object.keys(LEI_14133_ARTIGOS).filter(artigoIndexavel);
-}
-
-export function urlDoArtigo(numero: string): string {
-  return `/lei-14133?artigo=${encodeURIComponent(numero)}`;
 }
 
 /**
