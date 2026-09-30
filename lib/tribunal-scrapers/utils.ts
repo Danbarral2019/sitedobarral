@@ -99,8 +99,12 @@ export async function rateLimitedFetch(
 // ===========================
 
 export function extractTextFromHTML(html: string): string {
-  // Replace <br>, <br/>, <br /> with newlines before parsing
-  const preprocessed = html.replace(/<br\s*\/?>/gi, '\n');
+  // Replace <br>, <br/>, <br /> with newlines before parsing. Blocos ganham um
+  // espaço na abertura e no fechamento: sem isso, `.text()` cola a última
+  // palavra de um parágrafo na primeira do seguinte ("RELATÓRIOTrata-se").
+  const preprocessed = html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<(\/?)(p|div|li|h[1-6]|tr|td|th|table|section|article|blockquote)(?=[\s>])/gi, ' <$1$2');
 
   const $ = cheerio.load(preprocessed);
 

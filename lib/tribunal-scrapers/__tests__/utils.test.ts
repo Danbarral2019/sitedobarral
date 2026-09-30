@@ -110,6 +110,19 @@ describe('extractTextFromHTML', () => {
   it('converte <br> em separador de espaço', () => {
     expect(extractTextFromHTML('<div>linha1<br>linha2</div>')).toBe('linha1 linha2');
   });
+
+  it('separa as palavras na fronteira de bloco', () => {
+    expect(extractTextFromHTML('<p>RELATÓRIO</p><p>Trata-se de auditoria.</p>')).toBe(
+      'RELATÓRIO Trata-se de auditoria.',
+    );
+    expect(extractTextFromHTML('<div>antes<div>dentro</div>depois</div>')).toBe('antes dentro depois');
+    expect(extractTextFromHTML('<ul><li>um</li><li>dois</li></ul>')).toBe('um dois');
+    expect(extractTextFromHTML('<table><tr><td>a</td><td>b</td></tr></table>')).toBe('a b');
+  });
+
+  it('não separa palavras dentro de elementos inline', () => {
+    expect(extractTextFromHTML('<p>lici<b>tação</b></p>')).toBe('licitação');
+  });
 });
 
 describe('extractParagraphsFromHTML', () => {
