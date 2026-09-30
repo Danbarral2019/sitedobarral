@@ -54,3 +54,14 @@ export function contentMostraAlteracao(content: string | null, revokerNumero: st
   const esc = revokerNumero.replace(/[.]/g, '\\.');
   return new RegExp(`(Reda[çc][ãa]o dada|Inclu[íi]d[oa]|Vig[êe]ncia)\\s+pel[oa][^\\d]*${esc}`, 'i').test(content);
 }
+
+/**
+ * Linha do alerta para ato cuja última raspagem falhou: número do ato e o
+ * motivo, encurtado. Desde a validação no cron (check-legislative-updates),
+ * texto novo recusado mantém o anterior no ar e marca o ato como falho; sem o
+ * alerta, a recusa só apareceria na página de edição do ato.
+ */
+export function descreverFalhaDeRaspagem(fullNumber: string, scrapeError: string | null, max = 120): string {
+  const motivo = (scrapeError ?? 'sem motivo registrado').replace(/\s+/g, ' ').trim();
+  return `${fullNumber} (${motivo.length > max ? `${motivo.slice(0, max - 1)}…` : motivo})`;
+}

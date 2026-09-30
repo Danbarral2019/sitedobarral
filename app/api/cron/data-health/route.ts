@@ -6,7 +6,9 @@
  * Checagens:
  * - A) atos revoked que são falso positivo (revogador apenas ALTEROU o texto);
  * - B) decisões com leiArticlesArr mal formatado ("Art. N") = regressão do
- *      classifier de tribunais.
+ *      classifier de tribunais;
+ * - D) atos cuja última raspagem falhou (inclusive texto novo recusado pela
+ *      validação do cron check-legislative-updates, que mantém o anterior).
  *
  * Schedule em vercel.json. Auth via CRON_SECRET (verifyCronAuth).
  */
@@ -20,6 +22,7 @@ import {
   isArtigoInexistente,
   revokerFromNote,
   contentMostraAlteracao,
+  descreverFalhaDeRaspagem,
 } from '@/lib/data-health/checks';
 
 export const runtime = 'nodejs';
@@ -71,6 +74,18 @@ async function checkArtigoInexistente(): Promise<{ count: number; sample: string
   return { count: bad.length, sample: bad.slice(0, 10) };
 }
 
+async function checkRaspagemFalha(): Promise<{ count: number; sample: string[] }> {
+  const falhos = await prisma.legislativeAct.findMany({
+    where: { scrapeStatus: 'failed' },
+    select: { fullNumber: true, scrapeError: true },
+    orderBy: { lastScrapedAt: 'desc' },
+  });
+  return {
+    count: falhos.length,
+    sample: falhos.slice(0, 10).map((a) => descreverFalhaDeRaspagem(a.fullNumber, a.scrapeError)),
+  };
+}
+
 export async function GET(request: NextRequest) {
   const authError = verifyCronAuth(request);
   if (authError) return authError;
@@ -78,10 +93,11 @@ export async function GET(request: NextRequest) {
   let responseBody: Record<string, unknown> = {};
   try {
     await withCronTelemetry('data-health', async () => {
-      const [revokedFP, artigoFmt, artigoInex] = await Promise.all([
+      const [revokedFP, artigoFmt, artigoInex, raspagem] = await Promise.all([
         checkRevokedFalsePositives(),
         checkArtigoFormat(),
         checkArtigoInexistente(),
+        checkRaspagemFalha(),
       ]);
 
       const problems: string[] = [];
@@ -94,6 +110,9 @@ export async function GET(request: NextRequest) {
       if (artigoInex.count > 0) {
         problems.push(`${artigoInex.count} decisão(ões) com artigo que a Lei 14.133 não tem (artigo de outro diploma amarrado): ${artigoInex.sample.join(', ')}`);
       }
+      if (raspagem.count > 0) {
+        problems.push(`${raspagem.count} ato(s) com a última raspagem falha; o texto anterior segue no ar: ${raspagem.sample.join('; ')}`);
+      }
 
       if (problems.length > 0) {
         Sentry.captureMessage(`data-health: ${problems.length} problema(s) de dados detectado(s). ${problems.join(' | ')}`, 'warning');
@@ -101,13 +120,13 @@ export async function GET(request: NextRequest) {
 
       responseBody = {
         ok: problems.length === 0,
-        checks: { revokedFalsePositives: revokedFP, artigoFormat: artigoFmt, artigoInexistente: artigoInex },
+        checks: { revokedFalsePositives: revokedFP, artigoFormat: artigoFmt, artigoInexistente: artigoInex, raspagemFalha: raspagem },
       };
-      const total = revokedFP.count + artigoFmt.count + artigoInex.count;
+      const total = revokedFP.count + artigoFmt.count + artigoInex.count + raspagem.count;
       return {
         itemsFound: total,
         itemsError: total,
-        metadata: { revokedFP: revokedFP.count, artigoFmt: artigoFmt.count, artigoInex: artigoInex.count },
+        metadata: { revokedFP: revokedFP.count, artigoFmt: artigoFmt.count, artigoInex: artigoInex.count, raspagemFalha: raspagem.count },
       };
     });
     return NextResponse.json(responseBody);
