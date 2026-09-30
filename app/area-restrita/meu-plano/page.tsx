@@ -39,7 +39,11 @@ export default async function MeuPlanoPage() {
     prisma.enrollment.findMany({
       where: {
         userId: payload.userId,
-        OR: [{ expiresAt: { gte: new Date() } }, { isLifetime: true }],
+        OR: [
+          { expiresAt: { gte: new Date() } },
+          { expiresAt: null }, // assinatura: a Stripe controla o fim
+          { isLifetime: true },
+        ],
       },
       select: {
         id: true,
