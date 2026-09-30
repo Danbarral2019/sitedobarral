@@ -382,3 +382,33 @@ export function validateActContent(input: ValidationInput): ValidationResult {
 
   return { ok: errors.length === 0, errors, warnings };
 }
+
+/** Abaixo desta fração do texto anterior, a atualização automática não grava. */
+export const ENCOLHIMENTO_MAXIMO_AUTOMATICO = 0.5;
+
+/**
+ * Validação da atualização feita sem ninguém olhando (cron
+ * check-legislative-updates). Além dos erros de `validateActContent`, o texto
+ * novo com menos da metade do anterior bloqueia a gravação: na importação
+ * manual isso é só aviso, porque alguém confere o resultado; no cron, uma
+ * página de erro ou um texto truncado substituiria o ato inteiro sem que
+ * ninguém visse. O texto anterior fica e o ato é marcado para revisão.
+ */
+export function validarAtualizacaoAutomatica(input: {
+  url?: string | null;
+  content: string;
+  previousContent?: string | null;
+}): ValidationResult {
+  const r = validateActContent(input);
+  const anterior = input.previousContent?.length ?? 0;
+  if (anterior > 1000) {
+    const razao = input.content.trim().length / anterior;
+    if (razao < ENCOLHIMENTO_MAXIMO_AUTOMATICO) {
+      r.errors.push(
+        `Texto novo com ${Math.round(razao * 100)}% do anterior (${anterior} → ${input.content.trim().length} caracteres); ` +
+          'mantido o texto anterior até revisão.',
+      );
+    }
+  }
+  return { ...r, ok: r.errors.length === 0 };
+}

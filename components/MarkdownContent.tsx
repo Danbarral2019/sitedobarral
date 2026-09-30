@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkDirective from 'remark-directive';
 import { visit } from 'unist-util-visit';
+import { remarkAncorasDeArtigo } from '@/lib/legislacao/ancoras';
+import { AncoraArtigo } from '@/components/legislacao/AncoraArtigo';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractFirstText(children: any): string {
@@ -441,6 +443,62 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
           color: var(--color-ink-primary);
         }
 
+        /* Artigo com âncora (#art-75): ao abrir o link, rola até ele com folga
+           e marca o parágrafo por um instante. */
+        .markdown-content--planalto :global(p[id^='art-']) {
+          position: relative;
+          scroll-margin-top: 1.5rem;
+        }
+        .markdown-content--planalto :global(p[id^='art-']:target) {
+          background: var(--color-brand-50);
+          box-shadow: 0 0 0 0.5rem var(--color-brand-50);
+          border-radius: 2px;
+        }
+        /* Botão de copiar o link: no recuo da primeira linha, à esquerda do
+           rótulo, para não abrir vão no texto justificado. Aparece ao passar o
+           mouse ou com foco pelo teclado; em tela de toque fica esmaecido. */
+        .markdown-content--planalto :global(.ancora-artigo) {
+          position: absolute;
+          left: 0;
+          top: 0.3em;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.5em;
+          height: 1.5em;
+          padding: 0;
+          text-indent: 0;
+          color: var(--color-ink-muted);
+          background: none;
+          border: 0;
+          border-radius: 3px;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 150ms ease-out;
+        }
+        .markdown-content--planalto :global(p:hover > .ancora-artigo),
+        .markdown-content--planalto :global(.ancora-artigo:focus-visible),
+        .markdown-content--planalto :global(.ancora-artigo[data-copiado]) {
+          opacity: 1;
+        }
+        .markdown-content--planalto :global(.ancora-artigo:focus-visible) {
+          outline: 2px solid var(--color-brand-500);
+          outline-offset: 1px;
+        }
+        .markdown-content--planalto :global(.ancora-artigo:hover),
+        .markdown-content--planalto :global(.ancora-artigo[data-copiado]) {
+          color: var(--color-brand-600);
+        }
+        .markdown-content--planalto :global(.ancora-artigo svg) {
+          width: 0.875rem;
+          height: 0.875rem;
+        }
+        @media (hover: none) {
+          .markdown-content--planalto :global(.ancora-artigo) {
+            opacity: 0.5;
+          }
+        }
+
         /* Inciso (classe injetada pelo custom <p>) */
         .markdown-content--planalto :global(p.inciso) {
           padding-left: 2em;
@@ -551,6 +609,15 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
             text-align: left;
             text-indent: 1.25em;
           }
+          /* Recuo menor: o botão da âncora encolhe para caber antes do rótulo. */
+          .markdown-content--planalto :global(.ancora-artigo) {
+            width: 1.05em;
+            top: 0.35em;
+          }
+          .markdown-content--planalto :global(.ancora-artigo svg) {
+            width: 0.75rem;
+            height: 0.75rem;
+          }
           .markdown-content--planalto :global(h1) {
             font-size: 1.1875rem;
           }
@@ -575,7 +642,11 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
         }
       `}</style>
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkDirective, remarkLegalDirectives]}
+        remarkPlugins={
+          variant === 'planalto'
+            ? [remarkGfm, remarkDirective, remarkLegalDirectives, remarkAncorasDeArtigo]
+            : [remarkGfm, remarkDirective, remarkLegalDirectives]
+        }
         components={{
           // Customizar renderização de links para notas de rodapé
           a: ({ href, children, ...props }) => {
@@ -623,7 +694,20 @@ export default function MarkdownContent({ content, variant }: MarkdownContentPro
               } else if (/^[a-z]\)\s/.test(firstText)) {
                 className = 'alinea';
               }
-              return <p className={className} {...props}>{children}</p>;
+              // Artigo com âncora (remarkAncorasDeArtigo): botão de copiar o
+              // link logo depois do rótulo em negrito.
+              const { node: _node, ...resto } = props;
+              if (typeof resto.id === 'string' && resto.id.startsWith('art-')) {
+                const [rotulo, ...demais] = Array.isArray(children) ? children : [children];
+                return (
+                  <p className={className} {...resto}>
+                    {rotulo}
+                    <AncoraArtigo id={resto.id} />
+                    {demais}
+                  </p>
+                );
+              }
+              return <p className={className} {...resto}>{children}</p>;
             },
         }}
       >
