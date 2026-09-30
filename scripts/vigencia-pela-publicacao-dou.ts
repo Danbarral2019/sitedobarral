@@ -5,8 +5,8 @@
  * rodapé do DOU.
  *
  * Para cada ato sem vigência, busca a publicação na consulta oficial do DOU
- * (in.gov.br, via `lib/dou-api.ts`) pelo título ("Nº 10, DE 12 DE NOVEMBRO
- * DE 2012"), entre a data do ato e 60 dias depois, e calcula a vigência com
+ * (in.gov.br, via `lib/dou-api.ts`) pela frase exata do título ("10, de 12 de
+ * novembro de 2012"), entre a data do ato e 60 dias depois, e calcula a vigência com
  * `lib/legislacao/vigencia.ts`.
  *
  * Dry-run (padrão): nada é gravado; relata e salva um CSV em scripts/output/.
@@ -30,7 +30,6 @@ import {
   publicacaoNoTexto,
   calcularVigencia,
   dentroDaJanela,
-  palavraDoTipo,
   tituloDoDouEDoAto,
 } from '../lib/legislacao/vigencia';
 
@@ -60,19 +59,24 @@ async function buscarPublicacao(
   const mes = MESES[ato.getUTCMonth()];
   const ano = ato.getUTCFullYear();
   const ate = new Date(ato.getTime() + 60 * 86_400_000);
-  const termos = [
-    { q: `${numero}, de ${dia === 1 ? '1º' : dia} de ${mes} de ${ano}`, exata: true },
-    { q: `${numero}, de ${dia} de ${mes} de ${ano}`, exata: true },
-    { q: `${palavraDoTipo(tipo) ?? ''} ${numero} ${ano}`.trim(), exata: false },
-  ];
+  // Frase exata no texto todo: a busca restrita ao título (title-"...") não
+  // acha nada no portal atual, e a busca sem aspas devolve milhares de
+  // resultados em que o ato não aparece entre os primeiros. O filtro
+  // tituloDoDouEDoAto separa o ato das publicações que só o citam.
+  const d = dia === 1 ? '1º' : String(dia);
+  const termos = [...new Set([
+    `${numero}, de ${d} de ${mes} de ${ano}`,
+    `${numero} de ${d} de ${mes} de ${ano}`,
+    `${numero}, de ${dia} de ${mes} de ${ano}`,
+  ])];
   let falhas = 0;
   for (const termo of termos) {
     let resultados: DOUSearchResult[] = [];
     try {
       resultados = await dou.search({
-        searchTerm: termo.q,
-        field: DOUField.TITULO,
-        isExactSearch: termo.exata,
+        searchTerm: termo,
+        field: DOUField.TUDO,
+        isExactSearch: true,
         period: DOUPeriod.PERSONALIZADO,
         publishFrom: ddmmaaaa(ato),
         publishTo: ddmmaaaa(ate),
@@ -81,7 +85,7 @@ async function buscarPublicacao(
       });
     } catch (err) {
       falhas++;
-      console.log(`    busca falhou (${termo.q}): ${err instanceof Error ? err.message : err}`);
+      console.log(`    busca falhou (${termo}): ${err instanceof Error ? err.message : err}`);
     }
     const achados = resultados
       .filter((r) => tituloDoDouEDoAto(r.title, r.abstract, tipo, numero, ano))
