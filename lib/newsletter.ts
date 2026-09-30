@@ -4,6 +4,11 @@
 
 import { prisma } from './prisma';
 import { PaginatedResult } from './types/admin-list';
+import {
+  CONFIRMED_SUBSCRIBER_WHERE,
+  PENDING_SUBSCRIBER_WHERE,
+  subscriberStatus,
+} from './newsletter/filters';
 
 export interface NewsletterSubscriber {
   id: string;
@@ -26,15 +31,13 @@ export async function fetchNewsletterSubscribersPaginated(params: {
 
   const where: Record<string, unknown> = {};
 
-  // Mapeia status (UI) → isActive (schema). Não há "pending" no banco —
-  // schema só tem isActive boolean. Anteriormente passava `where.status`
-  // direto, que dava 500 porque a coluna não existe.
-  if (params.status === 'active') where.isActive = true;
+  // Mapeia status (UI) → colunas do schema. Double opt-in:
+  // - active:       isActive + confirmedAt preenchido (recebe os envios)
+  // - pending:      isActive sem confirmedAt (aguarda o clique no link)
+  // - unsubscribed: isActive = false
+  if (params.status === 'active') Object.assign(where, CONFIRMED_SUBSCRIBER_WHERE);
+  else if (params.status === 'pending') Object.assign(where, PENDING_SUBSCRIBER_WHERE);
   else if (params.status === 'unsubscribed') where.isActive = false;
-  else if (params.status === 'pending') {
-    // Sem coluna pending — força resultado vazio em vez de 500
-    where.id = '__pending_not_supported__';
-  }
 
   if (params.search) {
     where.OR = [
@@ -53,10 +56,10 @@ export async function fetchNewsletterSubscribersPaginated(params: {
     }),
   ]);
 
-  // Deriva campo "status" textual a partir de isActive pra UI exibir
+  // Deriva campo "status" textual pra UI exibir
   const itemsWithStatus = subscribers.map((s) => ({
     ...s,
-    status: s.isActive ? 'active' : 'unsubscribed',
+    status: subscriberStatus(s),
   }));
 
   return {

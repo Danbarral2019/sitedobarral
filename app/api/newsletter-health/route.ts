@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { apiLogger } from '@/lib/logger';
+import { CONFIRMED_SUBSCRIBER_WHERE } from '@/lib/newsletter/filters';
 
 /**
  * GET /api/newsletter-health
@@ -25,7 +26,7 @@ export async function GET() {
       prisma.newsletterSend.count({
         where: { type: 'monthly', sentAt: { gte: startOfMonth } },
       }),
-      prisma.newsletterSubscriber.count({ where: { isActive: true } }),
+      prisma.newsletterSubscriber.count({ where: CONFIRMED_SUBSCRIBER_WHERE }),
     ]);
 
     const dispatchedThisMonth = dispatchesThisMonth > 0;

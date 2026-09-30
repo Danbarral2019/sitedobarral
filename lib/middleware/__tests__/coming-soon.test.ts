@@ -21,6 +21,7 @@ describe('isAllowlistedRoute', () => {
     expect(isAllowlistedRoute('/verificar-email')).toBe(true);
     expect(isAllowlistedRoute('/validar-acesso')).toBe(true);
     expect(isAllowlistedRoute('/cancelar-newsletter')).toBe(true);
+    expect(isAllowlistedRoute('/confirmar-newsletter')).toBe(true);
   });
 
   test('permite áreas autenticadas', () => {

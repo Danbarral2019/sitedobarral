@@ -12,7 +12,7 @@
  */
 
 import { prisma } from '../lib/prisma';
-import { renderMonthlyNewsletter } from '../lib/email-templates/newsletter';
+import { personalizeNewsletterHtml, renderMonthlyNewsletter } from '../lib/email-templates/newsletter';
 import { filterByRelevance, type DecisionInput } from '../lib/newsletter/relevance-filter';
 import { generateNewsletterIntro } from '../lib/newsletter/intro-generator';
 import { randomUUID } from 'crypto';
@@ -181,7 +181,11 @@ async function main() {
 
   // 7. Salvar arquivo
   const outputPath = join(process.cwd(), 'newsletter-preview.html');
-  writeFileSync(outputPath, html.replace('{{NAME}}', 'Daniel'), 'utf-8');
+  writeFileSync(
+    outputPath,
+    personalizeNewsletterHtml(html, { name: 'Daniel', unsubscribeUrl: 'https://profdanielbarral.com/cancelar-newsletter?token=preview' }),
+    'utf-8',
+  );
 
   console.log(`\n✅ Newsletter preview salva em:`);
   console.log(`   ${outputPath}`);
