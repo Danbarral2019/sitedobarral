@@ -17,10 +17,20 @@
  *
  * Reversível: `--despromover` tira da vitrine sem tocar no acervo.
  *
+ * `--incluir-lote` (decisão do Daniel em 30/09/2026, spec §10.2): aceita também
+ * os enunciados aprovados em lote. A etiqueta de lote continua no `julgadoPor`,
+ * e o registro segue dizendo que ninguém leu cada tese contra os trechos-fonte;
+ * o que muda é só a vitrine aceitá-los. As demais exigências (identidade
+ * oficial, evidência íntegra, sem reconferência pendente) valem igual. Com
+ * `--despromover`, a mesma opção restringe a retirada aos de lote.
+ *
  * Uso:
  *   npx tsx scripts/promover-vitrine-teses.ts               # dry-run
  *   npx tsx scripts/promover-vitrine-teses.ts --executar
+ *   npx tsx scripts/promover-vitrine-teses.ts --incluir-lote              # dry-run
+ *   npx tsx scripts/promover-vitrine-teses.ts --incluir-lote --executar
  *   npx tsx scripts/promover-vitrine-teses.ts --despromover --executar
+ *   npx tsx scripts/promover-vitrine-teses.ts --despromover --incluir-lote --executar
  */
 import 'dotenv/config';
 import * as dotenv from 'dotenv';
@@ -35,7 +45,7 @@ const prisma = new PrismaClient({ adapter, log: ['error'] });
 
 const ETIQUETA_DE_LOTE = ':lote-';
 
-async function selecionar() {
+async function selecionar(incluirLote: boolean) {
   const candidatos = await prisma.teseEnunciado.findMany({
     where: {
       ...WHERE_ELEGIVEL_VITRINE,
@@ -56,17 +66,19 @@ async function selecionar() {
       trechos: {
         select: { ordem: true, origemDocumentId: true, origemUrl: true, origemLinkPDF: true },
       },
-      destilacao: { select: { numeroAlvo: true, anoAlvo: true, colegiadoAlvo: true } },
+      destilacao: { select: { numeroAlvo: true, anoAlvo: true, colegiadoAlvo: true, assunto: true } },
     },
   });
 
   const promoviveis = candidatos.filter(
     (c) =>
-      !c.julgadoPor!.includes(ETIQUETA_DE_LOTE) &&
+      (incluirLote || !c.julgadoPor!.includes(ETIQUETA_DE_LOTE)) &&
       evidenciaIntegral({ trechosFonte: c.trechosFonte, trechos: c.trechos }),
   );
 
-  const foraPorLote = candidatos.filter((c) => c.julgadoPor!.includes(ETIQUETA_DE_LOTE)).length;
+  const foraPorLote = incluirLote
+    ? 0
+    : candidatos.filter((c) => c.julgadoPor!.includes(ETIQUETA_DE_LOTE)).length;
 
   return { promoviveis, foraPorLote };
 }
@@ -74,13 +86,18 @@ async function selecionar() {
 async function main() {
   const executar = process.argv.includes('--executar');
   const despromover = process.argv.includes('--despromover');
+  const incluirLote = process.argv.includes('--incluir-lote');
 
   if (despromover) {
     const alvos = await prisma.teseEnunciado.findMany({
-      where: { vitrinePublica: true },
+      where: incluirLote
+        ? { vitrinePublica: true, julgadoPor: { contains: ETIQUETA_DE_LOTE } }
+        : { vitrinePublica: true },
       select: { id: true },
     });
-    console.log(`\nA retirar da vitrine: ${alvos.length} enunciados`);
+    console.log(
+      `\nA retirar da vitrine: ${alvos.length} enunciados${incluirLote ? ' (só os aprovados em lote)' : ''}`,
+    );
     console.log('(o acervo restrito não é tocado)');
     if (!executar) {
       console.log('\nDry-run. Para aplicar: --executar\n');
@@ -96,18 +113,28 @@ async function main() {
 
   console.log('\n=== PROMOÇÃO À VITRINE PÚBLICA ===\n');
 
-  const { promoviveis, foraPorLote } = await selecionar();
+  const { promoviveis, foraPorLote } = await selecionar(incluirLote);
 
-  console.log(`Conferidos individualmente e elegíveis à vitrine: ${promoviveis.length}\n`);
+  console.log(
+    incluirLote
+      ? `Elegíveis à vitrine, incluindo os aprovados em lote: ${promoviveis.length}\n`
+      : `Conferidos individualmente e elegíveis à vitrine: ${promoviveis.length}\n`,
+  );
   for (const p of promoviveis) {
     const d = p.destilacao;
     console.log(`  Acórdão ${d.numeroAlvo}/${d.anoAlvo} — ${d.colegiadoAlvo ?? 'sem colegiado'}`);
+    // O assunto aparece para a matéria estranha ao site (pessoal, previdência)
+    // ser vista antes de ir a público (spec §10.2, item 3).
+    console.log(`    assunto: ${d.assunto}`);
     console.log(`    conferido por: ${p.julgadoPor}`);
     console.log(`    "${p.enunciado.slice(0, 100)}${p.enunciado.length > 100 ? '...' : ''}"`);
   }
 
-  console.log(`\nFicaram de fora:`);
-  console.log(`  aprovados apenas em lote (sem conferência individual): ${foraPorLote}`);
+  if (!incluirLote) {
+    console.log(`\nFicaram de fora:`);
+    console.log(`  aprovados apenas em lote (sem conferência individual): ${foraPorLote}`);
+    console.log(`  (para incluí-los: --incluir-lote)`);
+  }
 
   if (!executar) {
     console.log('\nModo: dry-run (nada será gravado)');
