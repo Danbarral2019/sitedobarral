@@ -6,6 +6,8 @@ import {
 } from '@/lib/jurisprudencia/unified-query';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { apiLogger } from '@/lib/logger';
+import { verifyAuth } from '@/lib/auth';
+import { getAcessoDoUsuario } from '@/lib/search/acesso-documentos';
 
 const TRIBUNAL_CODES = [
   'TCU',
@@ -70,11 +72,16 @@ export async function GET(request: NextRequest) {
     const { page, pageSize, sort, ...filters } = parsed.data;
     const jurisFilters: JurisprudenciaFilters = filters;
 
+    // Login opcional: acórdãos do acervo (Document) restritos só aparecem para
+    // quem pode vê-los; sem acesso ativo, só os públicos.
+    const authResult = await verifyAuth(request);
+    const acesso = await getAcessoDoUsuario(authResult.valid ? authResult.user : null);
+
     const { items, total } = await fetchUnifiedList(jurisFilters, {
       page,
       pageSize,
       sort,
-    });
+    }, acesso);
 
     const formatted = items.map(item => ({
       id: item.id,

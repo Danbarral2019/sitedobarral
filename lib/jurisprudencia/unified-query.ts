@@ -7,6 +7,7 @@
  */
 
 import { Prisma } from '@prisma/client';
+import { documentoVisivelSql, type AcessoDoUsuario } from '@/lib/search/acesso-documentos';
 import { prisma } from '@/lib/prisma';
 
 export interface UnifiedDecision {
@@ -280,7 +281,8 @@ const TCU_DOCUMENT_CATEGORIES = ['acordao', 'consulta_tcu'] as const;
  * - Filtros mapeiam para campos tcu* quando necessário
  */
 export function buildDocumentTcuWhere(
-  filters: JurisprudenciaFilters
+  filters: JurisprudenciaFilters,
+  acesso?: AcessoDoUsuario
 ): Prisma.Sql {
   const fragments: Prisma.Sql[] = [
     Prisma.sql`category IN (${Prisma.join(
@@ -288,6 +290,12 @@ export function buildDocumentTcuWhere(
     )})`,
     Prisma.sql`"tcuNumeroAcordao" IS NOT NULL`,
   ];
+
+  // Visibilidade do leitor (lib/search/acesso-documentos). Sem acesso ativo,
+  // só isPublic. O fragmento só tem literais escapados, sem entrada livre.
+  if (acesso) {
+    fragments.push(Prisma.raw(documentoVisivelSql(acesso)));
+  }
 
   if (typeof filters.ano === 'number') {
     fragments.push(
@@ -440,7 +448,8 @@ function documentTcuSelect(where: Prisma.Sql, includeFullText: boolean): Prisma.
  */
 function composeUnifiedBody(
   filters: JurisprudenciaFilters,
-  includeFullText: boolean
+  includeFullText: boolean,
+  acesso?: AcessoDoUsuario
 ): Prisma.Sql | null {
   const includeA = shouldIncludeTribunalDecisionBranch(filters);
   const includeB = shouldIncludeDocumentTcuBranch(filters);
@@ -451,14 +460,14 @@ function composeUnifiedBody(
     return Prisma.sql`
       (${tribunalDecisionSelect(buildTribunalDecisionWhere(filters), includeFullText)})
       UNION ALL
-      (${documentTcuSelect(buildDocumentTcuWhere(filters), includeFullText)})
+      (${documentTcuSelect(buildDocumentTcuWhere(filters, acesso), includeFullText)})
     `;
   }
   if (includeA) {
     return tribunalDecisionSelect(buildTribunalDecisionWhere(filters), includeFullText);
   }
   // includeB only
-  return documentTcuSelect(buildDocumentTcuWhere(filters), includeFullText);
+  return documentTcuSelect(buildDocumentTcuWhere(filters, acesso), includeFullText);
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -528,12 +537,17 @@ function getOrderClause(sort: SortOption | undefined): Prisma.Sql {
   }
 }
 
+/**
+ * `acesso` (opcional): restringe o ramo Document ao que o leitor pode ver
+ * (lib/search/acesso-documentos). As rotas públicas sempre o passam.
+ */
 export async function fetchUnifiedList(
   filters: JurisprudenciaFilters,
-  { page, pageSize, sort }: PaginationOptions
+  { page, pageSize, sort }: PaginationOptions,
+  acesso?: AcessoDoUsuario
 ): Promise<UnifiedListResult> {
   // false: listagem não usa o inteiro teor — ver `LIST_ITEM_COLUMNS`.
-  const body = composeUnifiedBody(filters, false);
+  const body = composeUnifiedBody(filters, false, acesso);
   if (!body) return { items: [], total: 0 };
 
   const offset = (page - 1) * pageSize;

@@ -354,6 +354,21 @@ describe('buildDocumentTcuWhere', () => {
     expect(where.sql).toMatch(/"leiArticlesArr" @>/);
     expect(where.sql).toMatch(/"tcuOrgaoJulgador" ILIKE/);
   });
+
+  it('com acesso sem acesso ativo: só isPublic', () => {
+    const where = buildDocumentTcuWhere({}, { isAdmin: false, temAcessoAtivo: false, cursosAtivos: [] });
+    expect(where.sql).toMatch(/"isPublic" = true/);
+    expect(where.sql).not.toMatch(/"isCommon"/);
+  });
+
+  it('com acesso ativo: acervo comum entra', () => {
+    const where = buildDocumentTcuWhere({}, { isAdmin: false, temAcessoAtivo: true, cursosAtivos: [] });
+    expect(where.sql).toMatch(/"isCommon" = true/);
+  });
+
+  it('sem acesso informado (chamadores internos): sem filtro de visibilidade', () => {
+    expect(buildDocumentTcuWhere({}).sql).not.toMatch(/isPublic/);
+  });
 });
 
 describe('fetchUnifiedList', () => {

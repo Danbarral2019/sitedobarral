@@ -1,8 +1,17 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockFetchUnifiedById } = vi.hoisted(() => ({
+const { mockFetchUnifiedById, mockDocFindUnique } = vi.hoisted(() => ({
   mockFetchUnifiedById: vi.fn(),
+  mockDocFindUnique: vi.fn(),
+}));
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    document: { findUnique: (...a: unknown[]) => mockDocFindUnique(...a) },
+    enrollment: { findMany: vi.fn().mockResolvedValue([]) },
+    subscription: { findMany: vi.fn().mockResolvedValue([]) },
+  },
 }));
 
 vi.mock('@/lib/jurisprudencia/unified-query', () => ({
@@ -28,6 +37,8 @@ async function readJson(res: Response) {
 
 beforeEach(() => {
   mockFetchUnifiedById.mockReset();
+  mockDocFindUnique.mockReset();
+  mockDocFindUnique.mockResolvedValue({ isPublic: true, isCommon: false, courseId: null, category: 'acordao' });
 });
 
 describe('GET /api/jurisprudencia/[id]', () => {
@@ -51,5 +62,28 @@ describe('GET /api/jurisprudencia/[id]', () => {
       params: Promise.resolve({ id: 'inexistente' }),
     });
     expect(res.status).toBe(404);
+  });
+
+  it('acórdão do acervo restrito: anônimo recebe sem inteiro teor nem resumo', async () => {
+    mockFetchUnifiedById.mockResolvedValueOnce({
+      id: 'doc-r', tribunalCode: 'TCU', sourceType: 'document-tcu',
+      ementa: 'ementa', fullText: 'inteiro teor', summary: 'resumo',
+    });
+    mockDocFindUnique.mockResolvedValueOnce({ isPublic: false, isCommon: true, courseId: null, category: 'acordao' });
+    const res = await GET(makeReq(), { params: Promise.resolve({ id: 'doc-r' }) });
+    const body = await readJson(res);
+    expect(res.status).toBe(200);
+    expect(body.ementa).toBe('ementa');
+    expect(body.fullText).toBeNull();
+    expect(body.summary).toBeNull();
+    expect(body.acessoRestrito).toBe(true);
+  });
+
+  it('acórdão público: inteiro teor liberado', async () => {
+    mockFetchUnifiedById.mockResolvedValueOnce({
+      id: 'doc-p', tribunalCode: 'TCU', sourceType: 'document-tcu', fullText: 'inteiro teor',
+    });
+    const body = await readJson(await GET(makeReq(), { params: Promise.resolve({ id: 'doc-p' }) }));
+    expect(body.fullText).toBe('inteiro teor');
   });
 });
