@@ -206,7 +206,7 @@ export async function searchDocuments(
   }
 
   // O grafo de precedentes nunca aparece a usuário (lib/tcu/backfill-retroativo.ts).
-  if (!incluirGrafo && !acesso?.isAdmin) {
+  if (!incluirGrafo) {
     conditions.push(`category <> '${CATEGORIA_GRAFO}'`);
   }
 

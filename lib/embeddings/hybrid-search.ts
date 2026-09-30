@@ -30,7 +30,10 @@ export interface HybridSearchOptions {
    * pós-filtra).
    */
   acesso?: AcessoDoUsuario;
-  /** Inclui o grafo de precedentes (CATEGORIA_GRAFO). Só admin. Default: acesso?.isAdmin. */
+  /**
+   * Inclui o grafo de precedentes (CATEGORIA_GRAFO), combustível invisível.
+   * Default false inclusive para admin; nenhum chamador atual liga.
+   */
   incluirGrafo?: boolean;
   limit?: number;
   alpha?: number;  // Peso do vetor vs FTS (0.6 = 60% vetor, 40% FTS)
@@ -106,7 +109,7 @@ export async function hybridSearch(
     category,
     excludeCategories = [],
     acesso,
-    incluirGrafo = acesso?.isAdmin ?? false,
+    incluirGrafo = false,
     limit = 10,
     alpha = 0.6,
     useCache = true,
