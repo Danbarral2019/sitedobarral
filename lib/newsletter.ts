@@ -12,7 +12,6 @@ export interface NewsletterSubscriber {
   status: string;
   subscribedAt: Date;
   unsubscribedAt: Date | null;
-  mailchimpId: string | null;
 }
 
 export async function fetchNewsletterSubscribersPaginated(params: {
