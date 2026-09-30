@@ -3,6 +3,7 @@ import {
   isRateLimitError,
   isModelAvailabilityError,
   shouldTryFallbackModel,
+  isBudgetOrCredentialError,
 } from '../error-detection';
 
 describe('isRateLimitError', () => {
@@ -78,5 +79,30 @@ describe('shouldTryFallbackModel', () => {
     expect(shouldTryFallbackModel(new Error('Gemini blocked prompt: SAFETY'))).toBe(false);
     expect(shouldTryFallbackModel(new Error('401 unauthorized'))).toBe(false);
     expect(shouldTryFallbackModel(new Error('ECONNREFUSED'))).toBe(false);
+  });
+});
+
+describe('isBudgetOrCredentialError', () => {
+  it('detecta o limite de gasto da conta Anthropic (HTTP 400)', () => {
+    const msg =
+      '400 {"type":"error","error":{"type":"invalid_request_error","message":"You have reached your specified API usage limits. You will regain access on 2026-10-01 at 00:00 UTC."}}';
+    expect(isBudgetOrCredentialError(new Error(msg))).toBe(true);
+  });
+
+  it('detecta saldo de créditos insuficiente', () => {
+    expect(isBudgetOrCredentialError(new Error('Your credit balance is too low'))).toBe(true);
+  });
+
+  it('detecta credencial recusada', () => {
+    expect(isBudgetOrCredentialError(new Error('401 authentication_error: invalid x-api-key'))).toBe(true);
+  });
+
+  it('herda a detecção de 429', () => {
+    expect(isBudgetOrCredentialError(new Error('429 Too Many Requests'))).toBe(true);
+  });
+
+  it('não para por erro de um caso só', () => {
+    expect(isBudgetOrCredentialError(new Error('Resposta sem JSON válido'))).toBe(false);
+    expect(isBudgetOrCredentialError(new Error('fetch failed: ECONNRESET'))).toBe(false);
   });
 });

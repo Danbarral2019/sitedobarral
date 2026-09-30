@@ -21,10 +21,12 @@ import { coletarTrechosDoAlvo } from '../lib/tcu/trechos-de-citacao';
 import { montarPromptTese, parseRespostaTese } from '../lib/tcu/destilar-tese';
 import { buscarAcordaoPorNumero, escolherCandidato } from '../lib/tcu/buscar-acordao-tcu';
 import { generate } from '../lib/ai';
+import { isBudgetOrCredentialError } from '../lib/ai/error-detection';
 
 /**
  * Preço do modelo de `enhancement` (claude-sonnet-5), US$ por milhão de tokens.
- * Promocional de lançamento, vigente até 31/08/2026 — depois sobe para 3/15.
+ * Anunciado como introdutório até 31/08/2026, virou o preço definitivo: o
+ * aumento para 3/15 não ocorreu (tabela da Anthropic, conferida em 30/09/2026).
  * Serve só para o relatório de custo; não influencia nenhuma decisão do script.
  */
 const USD_POR_MTOK_IN = 2;
@@ -203,6 +205,13 @@ async function main() {
       // Um caso que falha não pode derrubar a onda; re-rodar o script o repesca.
       erros++;
       console.error(`${prefixo} — ERRO: ${(e as Error).message}`);
+      // Exceto erro de cota, gasto ou credencial: aí todos os casos seguintes
+      // falhariam igual. Re-rodar depois retoma de onde parou.
+      if (isBudgetOrCredentialError(e)) {
+        console.error(`\n  🛑 PARADO no caso ${i + 1}/${candidatos.length}: erro de cota, gasto ou credencial. Re-rodar retoma do que faltou.`);
+        process.exitCode = 2;
+        break;
+      }
     }
   }
 
