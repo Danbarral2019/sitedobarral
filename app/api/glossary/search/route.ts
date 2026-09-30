@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
         let relatedMap = new Map<string, { id: string; term: string; slug: string }>();
         if (allRelatedIds.size > 0) {
           const relatedRecords = await prisma.glossaryTerm.findMany({
-            where: { id: { in: [...allRelatedIds] } },
+            where: { id: { in: [...allRelatedIds] }, isPublic: true },
             select: { id: true, term: true, slug: true },
           });
           relatedMap = new Map(relatedRecords.map(r => [r.id, r]));

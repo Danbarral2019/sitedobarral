@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
+import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
 
 // GET /api/glossary/[slug] - Obter termo específico por slug
 export async function GET(
@@ -72,7 +73,8 @@ export async function GET(
             if (Array.isArray(docIds) && docIds.length > 0) {
               relatedDocuments = await prisma.document.findMany({
                 where: {
-                  id: { in: docIds },
+                  id: { in: docIds.filter((d): d is string => typeof d === 'string') },
+                  ...PUBLIC_DOCUMENT_WHERE,
                 },
                 select: {
                   id: true,
