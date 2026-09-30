@@ -62,6 +62,12 @@ export interface AssembleAnswerInput {
    * preserva o comportamento de medição de retrieval.
    */
   enrolledCourseIds?: string[];
+  /**
+   * Recorte das teses do TCU visível a este usuário (spec §9; ver
+   * `lib/teses/visibilidade.ts`). Quando fornecido, a busca inclui o ramo das
+   * teses. Quando OMITIDO (ex.: harness de eval), as teses ficam de fora.
+   */
+  tesesVisibilidade?: 'vitrine' | 'acervo';
 }
 
 /**

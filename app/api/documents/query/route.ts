@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-import { verifyAuth } from '@/lib/auth';
+import { verifyAuth, hasAnyActiveAccess } from '@/lib/auth';
+import { visibilidadeDasTeses } from '@/lib/teses/visibilidade';
 import { prisma } from '@/lib/prisma';
 import { courses } from '@/data/courses';
 import { assembleAnswerContext } from '@/lib/rag/answerContext';
@@ -148,10 +149,15 @@ export async function POST(req: NextRequest) {
           })
         )?.enrollments.map((e) => e.courseId) ?? [];
 
+    // 4a'. Recorte das teses do TCU (spec §9): acervo para quem tem acesso
+    // ativo (matrícula válida, assinatura ou admin), vitrine para os demais.
+    // A mesma regra da busca integrada e da página do acórdão-líder.
+    const tesesVisibilidade = visibilidadeDasTeses(isAdmin || await hasAnyActiveAccess(userId));
+
     // 4b-12b. Montagem do contexto (retrieval + contexto em camadas + prompt +
     // fontes) extraída para lib/rag/answerContext — mesma função usada pelo eval.
     apiLogger.info({ userId, query, filters, enrolledCourseCount: enrolledCourseIds.length }, 'Document query started');
-    const ctx = await assembleAnswerContext({ query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds });
+    const ctx = await assembleAnswerContext({ query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds, tesesVisibilidade });
 
     if (ctx.empty) {
       return NextResponse.json<QueryResponse>({

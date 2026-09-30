@@ -16,6 +16,7 @@ const {
   mockQueryGeminiText,
   mockUserFindUnique,
   mockValidateQuotes,
+  mockHasAnyActiveAccess,
 } = vi.hoisted(() => ({
   mockVerifyAuth: vi.fn(),
   mockCheckRateLimit: vi.fn(),
@@ -25,9 +26,13 @@ const {
   mockQueryGeminiText: vi.fn(),
   mockUserFindUnique: vi.fn(),
   mockValidateQuotes: vi.fn(),
+  mockHasAnyActiveAccess: vi.fn(),
 }));
 
-vi.mock('@/lib/auth', () => ({ verifyAuth: (...a: unknown[]) => mockVerifyAuth(...a) }));
+vi.mock('@/lib/auth', () => ({
+  verifyAuth: (...a: unknown[]) => mockVerifyAuth(...a),
+  hasAnyActiveAccess: (...a: unknown[]) => mockHasAnyActiveAccess(...a),
+}));
 vi.mock('@/lib/cache/redis-client', () => ({
   checkRateLimit: (...a: unknown[]) => mockCheckRateLimit(...a),
   withCache: async (_k: string, fn: () => Promise<unknown>) => fn(),
@@ -129,6 +134,37 @@ describe('/api/documents/query — guardas', () => {
     const body = await res.json();
     expect(body.results).toEqual([]);
     expect(body.totalDocuments).toBe(0);
+  });
+});
+
+describe('/api/documents/query: recorte das teses do TCU', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockVerifyAuth.mockResolvedValue({ valid: true, user: { userId: 'u1', role: 'student' } });
+    mockCheckRateLimit.mockResolvedValue({ allowed: true, limit: 10, remaining: 9, reset: 0 });
+    mockEnforceAiQuota.mockResolvedValue({ action: 'allow' });
+    mockAssembleAnswerContext.mockResolvedValue({ empty: true, cached: false });
+    mockUserFindUnique.mockResolvedValue({ enrollments: [] });
+  });
+
+  // A regra é a da busca integrada e da página do acórdão (spec §9).
+  it('usuário com acesso ativo recebe o acervo', async () => {
+    mockHasAnyActiveAccess.mockResolvedValue(true);
+    await POST(makeReq({ query: 'qualificação técnica', stream: false }));
+    expect(mockAssembleAnswerContext.mock.calls[0][0]).toMatchObject({ tesesVisibilidade: 'acervo' });
+  });
+
+  it('usuário sem acesso ativo recebe só a vitrine', async () => {
+    mockHasAnyActiveAccess.mockResolvedValue(false);
+    await POST(makeReq({ query: 'qualificação técnica', stream: false }));
+    expect(mockAssembleAnswerContext.mock.calls[0][0]).toMatchObject({ tesesVisibilidade: 'vitrine' });
+  });
+
+  it('admin recebe o acervo sem consultar o acesso', async () => {
+    mockVerifyAuth.mockResolvedValue({ valid: true, user: { userId: 'adm', role: 'admin' } });
+    await POST(makeReq({ query: 'qualificação técnica', stream: false }));
+    expect(mockHasAnyActiveAccess).not.toHaveBeenCalled();
+    expect(mockAssembleAnswerContext.mock.calls[0][0]).toMatchObject({ tesesVisibilidade: 'acervo' });
   });
 });
 

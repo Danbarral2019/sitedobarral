@@ -40,7 +40,7 @@ import { ATO_VISIVEL, ressalvaDeRevogacao } from '@/lib/legislacao/visibilidade'
  * Retorna `{ empty: true }` quando a busca não encontra nenhum resultado.
  */
 export async function assembleAnswerContext(input: AssembleAnswerInput): Promise<AnswerContext> {
-  const { query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds } = input;
+  const { query, filters, maxResults, conversationHistory, useCache, enrolledCourseIds, tesesVisibilidade } = input;
 
     // 4b. Enrich query with conversation context for better semantic retrieval
     let semanticQuery = query;
@@ -138,6 +138,11 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     // 5b. Hybrid search: combina busca semântica (vetor) + FTS (BM25) via RRF.
     // Reranking desligado em 2026-04-23 após Fase 2 provar regressão de
     // −15pp a −25pp em recall@5 com Gemini e Cohere. Ver ROADMAP_BUSCA_QUALIDADE.md.
+    // 5a'. Teses do TCU (spec §9). Ficam de fora quando o usuário restringe a
+    // busca ao TST ou a uma categoria de documento: nos dois casos ele pediu um
+    // recorte que as teses não integram.
+    const incluirTeses = !!tesesVisibilidade && scope !== 'tst-only' && !filters.category;
+
     const searchResponse = await hybridSearch({
       query: semanticQuery,
       expandedQueries: expandedQueries.length > 1 ? expandedQueries : undefined,
@@ -148,6 +153,8 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
       alpha: 0.6,
       useCache,
       ...scopedOptions,
+      includeTeses: incluirTeses,
+      tesesVisibilidade,
       rerank: false,
     });
 
@@ -247,9 +254,8 @@ Exemplo de resposta: ["variação 1", "variação 2"]`;
     }
 
     // 5c. A evidência acompanha a tese (spec §9; ver lib/rag/evidencia-da-tese.ts).
-    // Só age quando a busca trouxe tese, o que exige `includeTeses`. Hoje a
-    // rota do assistente não liga esse ramo, e a decisão de ligar depende da
-    // medição de eval/teses. Sem tese no resultado, nada é consultado.
+    // Só age quando a busca trouxe tese, o que exige `includeTeses`. Sem tese
+    // no resultado, nada é consultado.
     const evidencia = await anexarEvidenciaDasTeses(searchResponse.results);
     const resultadosComEvidencia = costurarEvidencia(searchResponse.results, evidencia.trechos);
     let citantesDasTeses: SearchResult[] = [];
@@ -466,6 +472,7 @@ INSTRUÇÕES:
    e) Acórdãos do TCU e Manual do TCU — cite com número/ano (ex: "Acórdão TCU 1234/2024 - Plenário")
    f) Informativos e Súmulas do TCU — cite com número (ex: "Informativo TCU nº 350", "Súmula TCU nº 247")
    g) Pareceres da AGU (DECOR, Pareceres Vinculantes)
+   h) Teses do TCU (fontes com título "Tese do TCU sobre o Acórdão N/AAAA"): são sínteses editoriais do entendimento do TCU, não texto do Tribunal. Ao usar uma, apoie a afirmação no trecho do acórdão citante que vem junto dela e cite esse acórdão; não apresente o enunciado da tese entre aspas como se fosse redação do TCU
 3. Cite enunciados, pareceres, orientações normativas e manuais do contexto que TRATEM da pergunta — sem omitir fontes claramente pertinentes, mas também sem forçar fontes tangenciais (ver Regra Fundamental)
 4. Para enunciados, sempre indique o órgão emissor (ex: "Enunciado IBDA nº 7", "Enunciado INCP nº 12")
 5. Diferencie fontes normativas VINCULANTES (lei, decreto, súmula vinculante) de fontes DOUTRINÁRIAS (apostilas, manuais) e JURISPRUDENCIAIS (acórdãos, informativos)

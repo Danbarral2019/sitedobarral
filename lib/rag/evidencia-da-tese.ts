@@ -17,6 +17,7 @@
  */
 import { prisma } from '@/lib/prisma';
 import type { SearchResult } from '@/lib/embeddings/vector-search';
+import { chaveUrl } from '@/lib/teses/consultas';
 
 export interface TrechoDeTese {
   enunciadoId: string;
@@ -28,6 +29,8 @@ export interface TrechoDeTese {
   origemDocumentId: string | null;
   origemUrl: string | null;
   origemLinkPDF: string | null;
+  /** O acórdão-líder, para o título e o link da tese na lista de fontes. */
+  enunciado: { destilacao: { numeroAlvo: number; anoAlvo: number; colegiadoAlvo: string | null } };
 }
 
 /** O primeiro trecho-fonte de cada tese recuperada, e os citantes que existem como Document. */
@@ -54,6 +57,9 @@ export async function anexarEvidenciaDasTeses(
       origemDocumentId: true,
       origemUrl: true,
       origemLinkPDF: true,
+      enunciado: {
+        select: { destilacao: { select: { numeroAlvo: true, anoAlvo: true, colegiadoAlvo: true } } },
+      },
     },
   });
 
@@ -79,8 +85,14 @@ export function costurarEvidencia(resultados: SearchResult[], trechos: TrechoDeT
     const t = porTese.get(r.documentId);
     if (!t) return [];
     const onde = t.noVoto ? 'no voto do' : 'no';
+    const lider = t.enunciado.destilacao;
     return [{
       ...r,
+      // O título diz o que a fonte é: síntese editorial do entendimento do
+      // TCU, e não texto do acórdão. O link leva à tese dentro da página do
+      // acórdão-líder, que pode ter mais de uma.
+      documentTitle: `Tese do TCU sobre o Acórdão ${lider.numeroAlvo}/${lider.anoAlvo}`,
+      url: `/teses/${chaveUrl(lider)}#${r.documentId}`,
       chunkContent:
         `${r.chunkContent}\n\n` +
         `Trecho ${onde} Acórdão ${t.origemNumero}/${t.origemAno} do TCU que sustenta esta tese:\n${t.trecho}`,
