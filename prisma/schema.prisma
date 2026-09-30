@@ -631,6 +631,11 @@ model NewsletterSubscriber {
   subscribedAt   DateTime  @default(now())
   unsubscribedAt DateTime?
   source         String? // 'coming-soon' | 'blog-footer' | 'footer' | etc.
+  // Double opt-in: só recebe envios quem tem confirmedAt preenchido (e isActive).
+  // Inscrição nova fica pendente (confirmedAt nulo) até o clique no link de
+  // confirmação (lib/newsletter/subscriptions.ts).
+  confirmedAt        DateTime?
+  confirmationSentAt DateTime? // último envio do e-mail de confirmação (cooldown)
 
   @@index([isActive])
   @@index([subscribedAt])

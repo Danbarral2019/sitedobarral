@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { apiLogger } from "@/lib/logger";
+import { CONFIRMED_SUBSCRIBER_WHERE } from '@/lib/newsletter/filters';
 
 /**
  * GET /api/admin/analytics
@@ -274,8 +275,9 @@ export const GET = withAdminApi(async () => {
 
     // 12. Newsletter
     const totalNewsletterSubscribers = await prisma.newsletterSubscriber.count();
+    // "Ativos" = confirmados (double opt-in); pendentes não recebem envios.
     const activeNewsletterSubscribers = await prisma.newsletterSubscriber.count({
-      where: { isActive: true },
+      where: CONFIRMED_SUBSCRIBER_WHERE,
     });
 
     return NextResponse.json({

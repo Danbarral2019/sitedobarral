@@ -46,6 +46,35 @@ export interface MonthlyNewsletterData {
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://profdanielbarral.com';
 
+/**
+ * Marcador do link de descadastro no rodapé. O HTML é renderizado uma vez por
+ * envio; quem envia troca o marcador pela URL assinada de cada inscrito
+ * (buildUnsubscribeUrl em lib/newsletter/subscriptions.ts) com
+ * personalizeNewsletterHtml.
+ */
+export const UNSUBSCRIBE_URL_PLACEHOLDER = '{{UNSUBSCRIBE_URL}}';
+
+function escapeHtmlText(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Preenche o nome e o link de descadastro de um inscrito no HTML da newsletter. */
+export function personalizeNewsletterHtml(
+  html: string,
+  recipient: { name: string | null; unsubscribeUrl: string },
+): string {
+  return html
+    .split('{{NAME}}')
+    .join(escapeHtmlText(recipient.name || 'Assinante'))
+    .split(UNSUBSCRIBE_URL_PLACEHOLDER)
+    .join(escapeHtmlText(recipient.unsubscribeUrl));
+}
+
 function trackingPixel(sendId: string): string {
   return `<img src="${baseUrl}/api/newsletter/track?id=${sendId}&type=open" width="1" height="1" style="display:block;" alt="" />`;
 }
@@ -186,7 +215,7 @@ function renderFooter(sendId: string): string {
             Voc&#234; est&#225; recebendo este email porque se inscreveu na nossa newsletter.
           </p>
           <p style="margin:0 0 8px 0;font-size:12px;color:#6b6e72;font-family:Arial,Helvetica,sans-serif;">
-            <a href="${baseUrl}/newsletter/unsubscribe" style="color:#6b6e72;text-decoration:underline;">Cancelar inscri&#231;&#227;o</a>
+            <a href="${UNSUBSCRIBE_URL_PLACEHOLDER}" style="color:#6b6e72;text-decoration:underline;">Cancelar inscri&#231;&#227;o</a>
           </p>
         </td>
       </tr>

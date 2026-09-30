@@ -84,8 +84,11 @@ export default function NewsletterForm({
         <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
           <CheckCircle className="w-6 h-6 text-white" />
         </div>
-        <h3 className="text-lg font-bold text-ink-primary mb-2">Cadastro realizado!</h3>
-        <p className="text-ink-secondary">Você receberá nossos conteúdos no e-mail informado.</p>
+        <h3 className="text-lg font-bold text-ink-primary mb-2">Confirme no seu e-mail</h3>
+        <p className="text-ink-secondary">
+          Enviamos um link de confirmação para o endereço informado. A inscrição só vale depois do
+          clique no link.
+        </p>
       </div>
     );
   }

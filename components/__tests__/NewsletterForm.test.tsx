@@ -217,7 +217,7 @@ describe('NewsletterForm', () => {
       await user.click(screen.getByRole('button', { name: /cadastrar/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Cadastro realizado!')).toBeInTheDocument();
+        expect(screen.getByText('Confirme no seu e-mail')).toBeInTheDocument();
       });
     });
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
 import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+import { CONFIRMED_SUBSCRIBER_WHERE } from '@/lib/newsletter/filters';
 
 /**
  * GET /api/admin/analytics/summary
@@ -73,7 +74,7 @@ export const GET = withAdminApi(async () => {
 
       // Newsletter
       prisma.newsletterSubscriber.count(),
-      prisma.newsletterSubscriber.count({ where: { isActive: true } }),
+      prisma.newsletterSubscriber.count({ where: CONFIRMED_SUBSCRIBER_WHERE }),
     ]);
 
     // Calcular taxa de renovação

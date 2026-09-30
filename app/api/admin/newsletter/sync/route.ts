@@ -3,6 +3,7 @@ import { withAdminApi } from '@/lib/api/handler';
 import { syncSubscribers, isMailChimpConfigured } from '@/lib/mailchimp';
 import { prisma } from '@/lib/prisma';
 import { ValidationError } from '@/lib/errors/api-error';
+import { CONFIRMED_SUBSCRIBER_WHERE } from '@/lib/newsletter/filters';
 
 /**
  * POST /api/admin/newsletter/sync
@@ -17,9 +18,9 @@ export const POST = withAdminApi(async (_request, ctx) => {
     );
   }
 
-  // Buscar todos os inscritos ativos
+  // Buscar os inscritos ativos e confirmados (pendentes do double opt-in ficam de fora)
   const subscribers = await prisma.newsletterSubscriber.findMany({
-    where: { isActive: true },
+    where: CONFIRMED_SUBSCRIBER_WHERE,
     select: {
       email: true,
       name: true,

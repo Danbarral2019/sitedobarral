@@ -1,17 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { RateLimitError } from '@/lib/errors/api-error';
-import { addSubscriber, unsubscribeSubscriber, isMailChimpConfigured } from '@/lib/mailchimp';
 import { prisma } from '@/lib/prisma';
-import { trackServerEvent } from '@/lib/monitoring/events';
+import { apiLogger } from '@/lib/logger';
+import {
+  requestNewsletterSubscription,
+  SUBSCRIBE_GENERIC_MESSAGE,
+  UNSUBSCRIBE_GENERIC_MESSAGE,
+} from '@/lib/newsletter/subscriptions';
 
-// POST - Cadastrar na newsletter
+// POST - Pedido de inscrição na newsletter (double opt-in).
+// A inscrição fica pendente até o clique no link enviado por e-mail. A resposta
+// é a mesma para e-mail novo, pendente ou já confirmado, para não revelar se o
+// endereço está na lista.
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting: 10 cadastros por minuto (Redis)
+    // Rate limiting por IP: 10 pedidos por minuto (Redis). O limite por e-mail
+    // fica em requestNewsletterSubscription (cooldown no banco + Redis).
     const ip = getClientIp(request);
     await enforceRateLimit(`form:newsletter:${ip}`, 10, 60);
-    const { email, name, interests, source } = await request.json();
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: 'Requisição inválida' }, { status: 400 });
+    }
+    const { email, name, interests, source } = body ?? {};
 
     // Saneamento de source: aceita apenas string curta; demais valores viram null
     // para evitar abuso (string gigante, tipo inesperado vindo do body).
@@ -19,112 +34,34 @@ export async function POST(request: NextRequest) {
       typeof source === 'string' && source.length > 0 && source.length <= 50
         ? source
         : null;
+    const safeName = typeof name === 'string' ? name : null;
+    const safeInterests = Array.isArray(interests)
+      ? interests.filter((i): i is string => typeof i === 'string' && i.length <= 100).slice(0, 20)
+      : null;
 
-    // Validações básicas
-    if (!email) {
+    if (!email || typeof email !== 'string') {
       return NextResponse.json(
         { error: 'E-mail é obrigatório' },
         { status: 400 }
       );
     }
 
-    // Validação de e-mail
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (email.length > 254 || !emailRegex.test(email.trim())) {
       return NextResponse.json(
         { error: 'E-mail inválido' },
         { status: 400 }
       );
     }
 
-    // Verificar se já existe
-    const existing = await prisma.newsletterSubscriber.findUnique({
-      where: { email }
+    await requestNewsletterSubscription({
+      email,
+      name: safeName,
+      interests: safeInterests,
+      source: safeSource,
     });
 
-    if (existing) {
-      // Se estava inativo, reativar
-      if (!existing.isActive) {
-        await prisma.newsletterSubscriber.update({
-          where: { email },
-          data: {
-            isActive: true,
-            name: name || existing.name,
-            interests: interests ? JSON.stringify(interests) : existing.interests,
-            source: safeSource ?? existing.source, // preserves original if no valid new value
-            unsubscribedAt: null
-          }
-        });
-
-        // Sincronizar com MailChimp (agora aguarda a sincronização)
-        if (isMailChimpConfigured()) {
-          const [firstName, ...lastNameParts] = (name || existing.name || '').split(' ');
-          const lastName = lastNameParts.join(' ');
-
-          try {
-            await addSubscriber(email, firstName, lastName, interests);
-          } catch (err: unknown) {
-            const error = err as Error;
-            console.error('[MailChimp] ERRO na reativação:', {
-              message: error.message,
-              error: error
-            });
-            // Não falha a requisição se MailChimp falhar - email já foi reativado no BD
-          }
-        }
-
-        return NextResponse.json(
-          { message: 'Inscrição reativada com sucesso!' },
-          { status: 200 }
-        );
-      }
-
-      return NextResponse.json(
-        { error: 'Este e-mail já está cadastrado na newsletter' },
-        { status: 400 }
-      );
-    }
-
-    // Criar novo cadastro
-    const subscriber = await prisma.newsletterSubscriber.create({
-      data: {
-        email,
-        name: name || null,
-        interests: interests ? JSON.stringify(interests) : null,
-        source: safeSource,
-      },
-    });
-
-    // Sincronizar com MailChimp (agora aguarda a sincronização)
-    if (isMailChimpConfigured()) {
-      const [firstName, ...lastNameParts] = (name || '').split(' ');
-      const lastName = lastNameParts.join(' ');
-
-      try {
-        await addSubscriber(email, firstName, lastName, interests);
-      } catch (err: unknown) {
-        const error = err as Error;
-        console.error('[MailChimp] ERRO DETALHADO:', {
-          message: error.message,
-          error: error,
-          stack: error.stack
-        });
-        // Não falha a requisição se MailChimp falhar - email já foi salvo no BD
-      }
-    }
-
-    trackServerEvent('newsletter_signup');
-
-    return NextResponse.json(
-      {
-        message: 'Cadastro realizado com sucesso!',
-        subscriber: {
-          id: subscriber.id,
-          subscribedAt: subscriber.subscribedAt
-        }
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({ message: SUBSCRIBE_GENERIC_MESSAGE, pendingConfirmation: true });
   } catch (error) {
     if (error instanceof RateLimitError) {
       return NextResponse.json(
@@ -132,7 +69,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    console.error('Erro ao cadastrar newsletter:', error);
+    apiLogger.error({ err: error }, 'Erro ao cadastrar newsletter');
     return NextResponse.json(
       { error: 'Erro ao cadastrar. Tente novamente.' },
       { status: 500 }
@@ -175,47 +112,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// DELETE - Cancelar inscrição
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
-
-    if (!email) {
-      return NextResponse.json(
-        { error: 'E-mail é obrigatório' },
-        { status: 400 }
-      );
-    }
-
-    // Atualizar para inativo ao invés de deletar
-    await prisma.newsletterSubscriber.update({
-      where: { email },
-      data: {
-        isActive: false,
-        unsubscribedAt: new Date()
-      }
-    });
-
-    // Sincronizar com MailChimp (agora aguarda a sincronização)
-    if (isMailChimpConfigured()) {
-      try {
-        await unsubscribeSubscriber(email);
-      } catch (err: unknown) {
-        const error = err as Error;
-        console.error('[MailChimp] Erro ao cancelar inscrição:', error);
-        // Não falha a requisição se MailChimp falhar - email já foi desativado no BD
-      }
-    }
-
-    return NextResponse.json({
-      message: 'Inscrição cancelada com sucesso'
-    });
-  } catch (error) {
-    console.error('Erro ao cancelar inscrição:', error);
-    return NextResponse.json(
-      { error: 'Erro ao cancelar inscrição' },
-      { status: 500 }
-    );
-  }
+// DELETE - Endpoint antigo de descadastro por `?email=`.
+// Não descadastra mais: qualquer pessoa conseguia cancelar a inscrição de
+// qualquer e-mail. O descadastro agora exige o link assinado presente no rodapé
+// de cada envio (POST /api/newsletter/unsubscribe). A resposta é genérica e não
+// revela se o e-mail está inscrito.
+export async function DELETE() {
+  return NextResponse.json({ message: UNSUBSCRIBE_GENERIC_MESSAGE });
 }

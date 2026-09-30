@@ -3,7 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { Resend } from 'resend';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { randomUUID } from 'crypto';
-import { renderMonthlyNewsletter } from '@/lib/email-templates/newsletter';
+import { personalizeNewsletterHtml, renderMonthlyNewsletter } from '@/lib/email-templates/newsletter';
+import { CONFIRMED_SUBSCRIBER_WHERE } from '@/lib/newsletter/filters';
+import { buildListUnsubscribeHeaders, buildUnsubscribeUrl } from '@/lib/newsletter/links';
 import { filterByRelevance, type DecisionInput } from '@/lib/newsletter/relevance-filter';
 import { generateNewsletterIntro } from '@/lib/newsletter/intro-generator';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
@@ -268,10 +270,10 @@ export async function GET(request: NextRequest) {
       introHtml = `<p>Olá, este é o panorama de <strong>${monthName}</strong> dos principais conteúdos de Licitações e Contratos publicados no portal: ${filterResult.totalSelected} decisões selecionadas, ${totalItems} documentos novos, ${newLegislativeActs.length} atos legislativos.</p>`;
     }
 
-    // 7. Buscar inscritos ativos
+    // 7. Buscar inscritos ativos e confirmados (double opt-in: pendentes ficam de fora)
     const subscribers = await prisma.newsletterSubscriber.findMany({
-      where: { isActive: true },
-      select: { email: true, name: true },
+      where: CONFIRMED_SUBSCRIBER_WHERE,
+      select: { id: true, email: true, name: true },
     });
 
     console.log(`[Cron Newsletter v0.2] ${subscribers.length} inscritos ativos`);
@@ -356,7 +358,11 @@ export async function GET(request: NextRequest) {
           from: fromAddress,
           to: subscriber.email,
           subject,
-          html: newsletterHtml.replace('{{NAME}}', subscriber.name || 'Assinante'),
+          html: personalizeNewsletterHtml(newsletterHtml, {
+            name: subscriber.name,
+            unsubscribeUrl: buildUnsubscribeUrl(subscriber.id),
+          }),
+          headers: buildListUnsubscribeHeaders(subscriber.id),
         });
 
         if (result.error) {

@@ -7,6 +7,7 @@ const ALLOWLIST_EXACT = new Set([
   // Auth e validação de acesso
   '/login', '/registro', '/esqueci-senha', '/redefinir-senha',
   '/verificar-email', '/validar-acesso', '/cancelar-newsletter',
+  '/confirmar-newsletter',
   // Páginas legais
   '/privacidade', '/termos',
   // Pagamento/upgrade
