@@ -145,10 +145,12 @@ UTC). Faltam 2.980 alvos para o modelo, uns 120 lotes.
 
 O script deveria ter parado no primeiro lote recusado, mas seguiu até o lote 207: a expressão
 de `deveInterromper` reconhecia "spending", "billing" e "api key", mas não "usage limit".
-Corrigido nesta branch (`scripts/classificar-temas-acordaos-tcu.ts`). As chamadas recusadas
-não são cobradas, então a falha só custou tempo. O `backfill-teses-tcu.ts` não tem guarda
-equivalente e seguiria tentando cada caso depois de um erro de cota; com lotes de algumas
-dezenas de casos o efeito é pequeno, mas vale a mesma proteção.
+Corrigido nesta branch: a regra foi para `isBudgetOrCredentialError`, em
+`lib/ai/error-detection.ts`, com testes, e passou a valer também no `backfill-teses-tcu.ts`,
+que antes não tinha guarda nenhuma e seguiria tentando cada caso depois de um erro de cota.
+Os dois scripts agora param no primeiro erro de cota, gasto ou credencial, e re-rodar retoma
+do que faltou. As chamadas recusadas não são cobradas, então a falha de 30/09 só custou
+tempo.
 
 ## Falhas
 

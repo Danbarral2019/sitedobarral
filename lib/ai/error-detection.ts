@@ -48,3 +48,18 @@ export function isModelAvailabilityError(err: unknown): boolean {
 export function shouldTryFallbackModel(err: unknown): boolean {
   return isModelAvailabilityError(err) || isRateLimitError(err);
 }
+
+/**
+ * Erro que vai se repetir em toda chamada seguinte: cota ou limite de gasto
+ * esgotado, ou credencial ausente ou recusada. Scripts em lote devem parar no
+ * primeiro, em vez de gastar o resto da fila contra um teto estourado.
+ * Inclui "usage limit": a Anthropic responde HTTP 400 com "You have reached
+ * your specified API usage limits" quando o limite de gasto da conta estoura.
+ */
+export function isBudgetOrCredentialError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return (
+    isRateLimitError(err) ||
+    /spending|usage limit|credit balance|billing|not configured|\b401\b|\b403\b|authentication|api key/i.test(msg)
+  );
+}
