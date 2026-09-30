@@ -80,12 +80,12 @@ Features concluídas + changelog detalhado em `docs/PROJECT_HISTORY.md` (e no gi
 
 | Database ID | URL Slug | Title |
 |---|---|---|
-| `'1'` | `nova-lei-licitacoes` | Nova Lei de Licitações |
 | `'2'` | `planejamento-contratacoes` | Planejamento das Contratações |
 | `'3'` | `gestao-fiscalizacao-contratos` | Gestão e Fiscalização |
+| `'4'` | `processo-sancionador` | Processo Administrativo Sancionador |
 | ... | ... | (ver `COURSE_IDS_REFERENCE.md`) |
 
-**Rule:** Numeric IDs para database, slugs para URLs.
+**Rule:** Numeric IDs para database, slugs para URLs. Fonte de verdade do catálogo: `data/courses.ts`. Os cursos `'1'` (`nova-lei-licitacoes`), `'5'` e `'6'` foram descontinuados (`scripts/.archived/cleanup-removed-courses.ts`); `/cursos/nova-lei-licitacoes` responde "Curso não encontrado".
 
 ### React Hooks Order
 
