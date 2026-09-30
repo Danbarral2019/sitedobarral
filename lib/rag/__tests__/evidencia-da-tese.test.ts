@@ -19,6 +19,7 @@ const trecho = (over: Partial<TrechoDeTese> = {}): TrechoDeTese => ({
   origemDocumentId: 'd1',
   origemUrl: null,
   origemLinkPDF: null,
+  enunciado: { destilacao: { numeroAlvo: 1441, anoAlvo: 2016, colegiadoAlvo: 'Plenário' } },
   ...over,
 });
 
@@ -68,6 +69,14 @@ describe('costurarEvidencia', () => {
     expect(tese.chunkContent).toContain('Enunciado da tese.');
     expect(tese.chunkContent).toContain('Trecho no voto do Acórdão 100/2020');
     expect(tese.chunkContent).toContain('guardar pertinência');
+  });
+
+  // Na lista de fontes do chat, a tese se apresenta como síntese e leva à sua
+  // própria página, na âncora do enunciado.
+  it('dá à tese título de síntese e link para a página do acórdão-líder', () => {
+    const [tese] = costurarEvidencia([resultado({ documentId: 'e1', sourceType: 'tese' })], [trecho()]);
+    expect(tese.documentTitle).toBe('Tese do TCU sobre o Acórdão 1441/2016');
+    expect(tese.url).toBe('/teses/1441-2016-plenario#e1');
   });
 
   it('tira do contexto a tese que ficou sem trecho', () => {

@@ -19,6 +19,7 @@ const {
 
 vi.mock('@/lib/auth', () => ({
   verifyAuth: (...args: unknown[]) => mockVerifyAuth(...args),
+  hasAnyActiveAccess: async () => false,
 }));
 
 vi.mock('@/lib/cache/redis-client', () => ({

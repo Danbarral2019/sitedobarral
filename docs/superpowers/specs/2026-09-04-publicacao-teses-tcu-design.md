@@ -410,6 +410,8 @@ Regra de recuperação complementar, reaproveitando o mecanismo de `answerContex
 
 A eficácia é medida (§11), não presumida.
 
+**Decisão de 30 de setembro de 2026: teses ligadas no assistente antes da medição.** Por decisão do usuário, o assistente (`/api/documents/query`) passou a incluir o ramo das teses sem a medição pareada de `eval/teses` (`npm run eval:teses`), que o plano da Onda 4 previa como condição. O recorte segue a regra das demais superfícies: acervo para quem tem acesso ativo, vitrine para os demais. A evidência obrigatória continua valendo (a tese entra no contexto só com o trecho do acórdão citante), e as teses ficam de fora quando o usuário restringe a busca ao TST ou a uma categoria. O limiar de aceitação continua sem valor fixado. A medição segue recomendada assim que a indexação terminar: se ela mostrar deslocamento relevante dos acórdãos, o ajuste previsto é reduzir o `limit` do ramo das teses ou aplicar desconto na `similarity` do ramo, e não desligar a funcionalidade.
+
 **Citação:** `sourceType: 'tese'` apontando para `/teses/[chave]` com âncora do enunciado, com o trecho-fonte viajando junto na resposta.
 
 ## 10. Publicação: acervo restrito e vitrine

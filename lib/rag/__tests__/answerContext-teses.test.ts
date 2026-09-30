@@ -67,6 +67,7 @@ describe('assembleAnswerContext: teses', () => {
       enunciadoId: 'e1', ordem: 0, trecho: 'O relator consignou a pertinência.',
       origemNumero: 100, origemAno: 2020, noVoto: true,
       origemDocumentId: 'd100', origemUrl: null, origemLinkPDF: null,
+      enunciado: { destilacao: { numeroAlvo: 1441, anoAlvo: 2016, colegiadoAlvo: 'Plenário' } },
     }]);
     mocks.documentFindMany.mockImplementation(async (args: { where: { id?: { in: string[] } } }) =>
       args.where.id?.in?.includes('d100')
@@ -102,5 +103,25 @@ describe('assembleAnswerContext: teses', () => {
     await assembleAnswerContext(entrada);
 
     expect(mocks.trechoFindMany).not.toHaveBeenCalled();
+  });
+
+  it('liga o ramo das teses no recorte recebido', async () => {
+    mocks.hybridSearch.mockResolvedValue({ results: [], totalFound: 0, cached: false, topVectorSimilarity: 0 });
+    await assembleAnswerContext({ ...entrada, tesesVisibilidade: 'acervo' });
+    expect(mocks.hybridSearch.mock.calls[0][0]).toMatchObject({ includeTeses: true, tesesVisibilidade: 'acervo' });
+  });
+
+  it('sem recorte, as teses ficam de fora (harness de eval)', async () => {
+    mocks.hybridSearch.mockResolvedValue({ results: [], totalFound: 0, cached: false, topVectorSimilarity: 0 });
+    await assembleAnswerContext(entrada);
+    expect(mocks.hybridSearch.mock.calls[0][0]).toMatchObject({ includeTeses: false });
+  });
+
+  it('fora das teses quando o usuário restringe ao TST ou a uma categoria', async () => {
+    mocks.hybridSearch.mockResolvedValue({ results: [], totalFound: 0, cached: false, topVectorSimilarity: 0 });
+    await assembleAnswerContext({ ...entrada, filters: { scope: 'tst-only' }, tesesVisibilidade: 'acervo' });
+    await assembleAnswerContext({ ...entrada, filters: { category: 'parecer' }, tesesVisibilidade: 'acervo' });
+    expect(mocks.hybridSearch.mock.calls[0][0]).toMatchObject({ includeTeses: false });
+    expect(mocks.hybridSearch.mock.calls[1][0]).toMatchObject({ includeTeses: false });
   });
 });
