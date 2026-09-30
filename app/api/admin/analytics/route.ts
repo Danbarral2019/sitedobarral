@@ -24,6 +24,7 @@ export const GET = withAdminApi(async () => {
         OR: [
           { isLifetime: true },
           { expiresAt: { gte: new Date() } },
+          { expiresAt: null }, // assinatura: a Stripe controla o fim
         ],
       },
     });
