@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       email: user.email,
       role: user.role as 'admin' | 'student',
+      tv: user.tokenVersion,
     });
 
     // Buscar usuário atualizado com enrollments

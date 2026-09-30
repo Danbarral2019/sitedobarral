@@ -8,6 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthPayloadSchema } from '../auth';
+import { prisma } from '@/lib/prisma';
 
 // Mock de next/headers — cookies() retorna Promise no Next.js 15
 // vi.hoisted() garante que a variável está disponível quando vi.mock é hoisted
@@ -55,16 +56,25 @@ vi.mock('jose', () => {
 });
 
 describe('Auth Module', () => {
+  // verifyToken confere a versão do token no banco; por padrão o usuário
+  // existe e está na versão 0 (a dos tokens do mock de jose, sem `tv`).
+  beforeEach(() => {
+    vi.mocked(prisma.user.findUnique).mockReset();
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ tokenVersion: 0 } as never);
+  });
+
   // Payload válido para testes
   const validPayload = {
     userId: 'user-123',
     role: 'student' as const,
     courseId: 'course-1',
+    tv: 0,
   };
 
   const adminPayload = {
     userId: 'admin-456',
     role: 'admin' as const,
+    tv: 0,
   };
 
   describe('AuthPayloadSchema - Validação de Payload', () => {
@@ -285,6 +295,7 @@ describe('Auth Module', () => {
       const invalidPayload = {
         userId: '',
         role: 'student' as const,
+        tv: 0,
       };
 
       await expect(generateToken(invalidPayload)).rejects.toThrow('Payload JWT inválido');
@@ -296,6 +307,7 @@ describe('Auth Module', () => {
       const invalidPayload = {
         userId: 'user-123',
         role: 'invalid' as 'student',
+        tv: 0,
       };
 
       await expect(generateToken(invalidPayload)).rejects.toThrow('Payload JWT inválido');
@@ -347,6 +359,7 @@ describe('Auth Module', () => {
       const token = await generateToken({
         userId: 'user-123',
         role: 'student',
+        tv: 0,
         validUntil: futureDate,
       });
       expect(token).toBe('mock.jwt.token');
@@ -359,6 +372,7 @@ describe('Auth Module', () => {
       await expect(generateToken({
         userId: 'user-123',
         role: 'student',
+        tv: 0,
         validUntil: pastDate,
       })).rejects.toThrow('Acesso expirado');
     });
@@ -369,6 +383,7 @@ describe('Auth Module', () => {
       await expect(generateToken({
         userId: 'user-123',
         role: 'student',
+        tv: 0,
         validUntil: 'invalid-date-format' as unknown as string,
       })).rejects.toThrow();
     });
@@ -580,6 +595,7 @@ describe('Auth Module', () => {
       const payload = {
         userId: 'user-123',
         role: 'student' as const,
+        tv: 0,
         courseId: 'course-1',
       };
 
@@ -602,6 +618,7 @@ describe('Auth Module', () => {
       const payload = {
         userId: 'user-123',
         role: 'student' as const,
+        tv: 0,
       };
 
       await createAuthSession(payload);
@@ -621,6 +638,7 @@ describe('Auth Module', () => {
       const payload = {
         userId: 'user-123',
         role: 'student' as const,
+        tv: 0,
         validUntil: futureDate,
       };
 
@@ -641,6 +659,7 @@ describe('Auth Module', () => {
       await createAuthSession({
         userId: 'user-123',
         role: 'student' as const,
+        tv: 0,
       });
 
       expect(mockCookieStore.set).toHaveBeenCalledWith(
@@ -659,8 +678,102 @@ describe('Auth Module', () => {
         createAuthSession({
           userId: '',
           role: 'student' as const,
+          tv: 0,
         }),
       ).rejects.toThrow('Payload JWT inválido');
+    });
+  });
+
+  describe('revogação de token (tokenVersion)', () => {
+    it('aceita token sem `tv` como versão 0 (tokens emitidos antes do deploy)', async () => {
+      const { verifyToken } = await import('../auth');
+
+      const result = await verifyToken('mock.jwt.token');
+      expect(result?.userId).toBe('user-123');
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'user-123' },
+        select: { tokenVersion: true },
+      });
+    });
+
+    it('rejeita token sem `tv` quando o usuário já está na versão 1', async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({ tokenVersion: 1 } as never);
+      const { verifyToken } = await import('../auth');
+
+      expect(await verifyToken('mock.jwt.token')).toBeNull();
+    });
+
+    it('rejeita token com `tv` antigo', async () => {
+      const jose = await import('jose');
+      vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+        payload: { userId: 'user-123', role: 'student', tv: 2 },
+        protectedHeader: { alg: 'HS256' },
+      } as never);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({ tokenVersion: 3 } as never);
+      const { verifyToken } = await import('../auth');
+
+      expect(await verifyToken('valid.old')).toBeNull();
+    });
+
+    it('aceita token com `tv` igual ao do banco', async () => {
+      const jose = await import('jose');
+      vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+        payload: { userId: 'user-123', role: 'student', tv: 3 },
+        protectedHeader: { alg: 'HS256' },
+      } as never);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({ tokenVersion: 3 } as never);
+      const { verifyToken } = await import('../auth');
+
+      const result = await verifyToken('valid.current');
+      expect(result?.tv).toBe(3);
+    });
+
+    it('rejeita token de usuário que não existe mais', async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+      const { verifyToken } = await import('../auth');
+
+      expect(await verifyToken('mock.jwt.token')).toBeNull();
+    });
+
+    it('falha fechada se o banco não responde', async () => {
+      vi.mocked(prisma.user.findUnique).mockRejectedValue(new Error('db down'));
+      const { verifyToken } = await import('../auth');
+
+      expect(await verifyToken('mock.jwt.token')).toBeNull();
+    });
+
+    it('verifyAuth e getCurrentUser também recusam o token revogado', async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({ tokenVersion: 1 } as never);
+      mockCookieStore.get.mockReturnValue({ value: 'mock.jwt.token' });
+      const { verifyAuth, getCurrentUser } = await import('../auth');
+
+      const nextRequest = {
+        cookies: { get: vi.fn().mockReturnValue({ value: 'mock.jwt.token' }) },
+        headers: new Headers(),
+      } as unknown as import('next/server').NextRequest;
+
+      expect((await verifyAuth(nextRequest)).valid).toBe(false);
+      expect(await getCurrentUser()).toBeNull();
+    });
+
+    it('verifyTokenSignature não consulta o banco', async () => {
+      const { verifyTokenSignature } = await import('../auth');
+
+      const result = await verifyTokenSignature('mock.jwt.token');
+      expect(result?.userId).toBe('user-123');
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('revokeUserTokens incrementa tokenVersion e devolve a versão nova', async () => {
+      vi.mocked(prisma.user.update).mockResolvedValueOnce({ tokenVersion: 5 } as never);
+      const { revokeUserTokens } = await import('../auth');
+
+      expect(await revokeUserTokens('user-123')).toBe(5);
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'user-123' },
+        data: { tokenVersion: { increment: 1 } },
+        select: { tokenVersion: true },
+      });
     });
   });
 

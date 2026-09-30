@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role as 'admin' | 'student',
       validUntil: thirtyDaysFromNow,
+      tv: user.tokenVersion,
     });
 
     // Registrar log de acesso

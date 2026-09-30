@@ -278,6 +278,17 @@ describe('POST /api/auth/login', () => {
       expect(setCookie).toContain('Path=/');
     });
 
+    it('deve emitir o token na versão atual do usuário (tokenVersion)', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ ...mockStudent, tokenVersion: 4 });
+      mockBcrypt.compare.mockResolvedValue(true as never);
+      const { generateToken } = await import('@/lib/auth');
+
+      const response = await POST(createRequest(validCredentials));
+
+      expect(response.status).toBe(200);
+      expect(generateToken).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-123', tv: 4 }));
+    });
+
     it('deve criar log de acesso', async () => {
       const request = createRequest(validCredentials);
       await POST(request);
