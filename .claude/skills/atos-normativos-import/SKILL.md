@@ -198,5 +198,5 @@ Endpoints admin já invalidam automaticamente. Scripts em `scripts/` que mexem e
 
 Pra forçar invalidação manual sem editar código:
 ```sh
-curl "https://www.profdanielbarral.com/api/legislative-acts?_revalidate=$CRON_SECRET&tab=atos&page=1"
+curl -H "Authorization: Bearer $CRON_SECRET" "https://www.profdanielbarral.com/api/legislative-acts?tab=atos&page=1"
 ```

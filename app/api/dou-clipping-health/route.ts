@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -82,8 +83,9 @@ export async function GET() {
       }),
     });
   } catch (error) {
+    apiLogger.error({ err: error }, 'dou-clipping-health: falha ao consultar o estado');
     return NextResponse.json(
-      { status: 'down', error: error instanceof Error ? error.message : 'unknown' },
+      { status: 'down', error: 'Erro ao consultar o estado do serviço' },
       { status: 500 },
     );
   }

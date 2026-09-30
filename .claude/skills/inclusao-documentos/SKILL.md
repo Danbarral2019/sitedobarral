@@ -51,7 +51,7 @@ description: Use ao inserir novos documentos no banco do Site do Barral — Docu
 ## Etapa 5 — Invalidação de cache
 
 1. O cache Redis tem TTL de 2 horas para atos legislativos.
-2. Para invalidação imediata: chamar a API com `?_revalidate=CRON_SECRET`.
+2. Para invalidação imediata: chamar `/api/legislative-acts` com o header `Authorization: Bearer <CRON_SECRET>` (o antigo `?_revalidate=CRON_SECRET` segue aceito, mas expõe o segredo em logs de URL).
 3. Ou aguardar a expiração natural do TTL.
 
 ## Etapa 6 — Deploy (se houve mudança de código)

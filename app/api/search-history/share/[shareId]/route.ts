@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
+import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 
 // GET /api/search-history/share/[shareId] - Buscar resposta compartilhada (público)
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ shareId: string }> }
 ) {
   try {
+    // Endpoint público: limita tentativas de adivinhar shareId
+    await enforceRateLimit(`search-share:${getClientIp(request)}`, 30, 60);
+
     const { shareId } = await params;
 
     const entry = await prisma.searchHistory.findFirst({

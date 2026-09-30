@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { sendContactNotification } from '@/lib/email';
@@ -8,6 +9,35 @@ import { AuthenticationError, AuthorizationError, ValidationError } from '@/lib/
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
 
+const optionalText = (max: number, label: string) =>
+  z
+    .string({ message: `${label} inválido` })
+    .trim()
+    .max(max, `${label} muito longo`)
+    .nullish()
+    .transform((v) => (v ? v : null));
+
+// Formulário público: tipos e tamanhos limitados antes de gravar e de montar o e-mail
+const contactSchema = z.object({
+  name: z
+    .string({ message: 'Nome, e-mail e mensagem são obrigatórios' })
+    .trim()
+    .min(1, 'Nome, e-mail e mensagem são obrigatórios')
+    .max(120, 'Nome muito longo'),
+  email: z
+    .string({ message: 'Nome, e-mail e mensagem são obrigatórios' })
+    .trim()
+    .min(1, 'Nome, e-mail e mensagem são obrigatórios')
+    .max(254, 'E-mail inválido')
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'E-mail inválido'),
+  phone: optionalText(40, 'Telefone'),
+  courseInterest: optionalText(200, 'Curso de interesse'),
+  message: z
+    .string({ message: 'Nome, e-mail e mensagem são obrigatórios' })
+    .trim()
+    .min(1, 'Nome, e-mail e mensagem são obrigatórios')
+    .max(5000, 'Mensagem muito longa (máximo de 5.000 caracteres)'),
+});
 
 // POST - Enviar mensagem de contato
 export async function POST(request: NextRequest) {
@@ -15,18 +45,12 @@ export async function POST(request: NextRequest) {
     // Rate limiting: 10 envios por minuto (Redis)
     const ip = getClientIp(request);
     await enforceRateLimit(`form:contact:${ip}`, 10, 60);
-    const { name, email, phone, courseInterest, message } = await request.json();
-
-    // Validações básicas
-    if (!name || !email || !message) {
-      throw new ValidationError('Nome, e-mail e mensagem são obrigatórios');
+    const body = await request.json().catch(() => null);
+    const parsed = contactSchema.safeParse(body ?? {});
+    if (!parsed.success) {
+      throw new ValidationError(parsed.error.issues[0]?.message ?? 'Dados inválidos');
     }
-
-    // Validação de e-mail
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new ValidationError('E-mail inválido');
-    }
+    const { name, email, phone, courseInterest, message } = parsed.data;
 
     // Salvar no banco de dados
     const contact = await prisma.contactForm.create({

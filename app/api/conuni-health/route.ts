@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { apiLogger } from '@/lib/logger';
 import { getLastSyncInfo } from '@/lib/conuni-sync';
 
 /**
@@ -52,8 +53,9 @@ export async function GET() {
       classificationCoverage,
     });
   } catch (error) {
+    apiLogger.error({ err: error }, 'conuni-health: falha ao consultar o estado');
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Erro ao consultar o estado do serviço' },
       { status: 500 },
     );
   }

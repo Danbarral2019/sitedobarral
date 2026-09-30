@@ -355,6 +355,33 @@ describe('Email Module', () => {
       expect(result).toBe(true);
     });
 
+    it('deve escapar HTML de todos os campos do formulario', async () => {
+      (process.env as Record<string, string>).NODE_ENV = 'production';
+      process.env.RESEND_API_KEY = 're_test';
+      mockSend.mockResolvedValueOnce({ data: { id: 'e1' }, error: null });
+
+      await sendContactNotification(
+        {
+          name: '<script>alert(1)</script>',
+          email: 'x"><img src=x onerror=alert(1)>@a.com',
+          phone: '<b>1</b>',
+          courseInterest: '<a href="javascript:alert(1)">curso</a>',
+          message: '<iframe src="https://evil"></iframe>',
+        },
+        'contact-<x>'
+      );
+
+      const html: string = mockSend.mock.calls[0][0].html;
+      expect(html).not.toContain('<script>');
+      expect(html).not.toContain('<img');
+      expect(html).not.toContain('<iframe');
+      expect(html).not.toContain('<b>1</b>');
+      expect(html).not.toContain('href="javascript:');
+      expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+      expect(html).toContain('&lt;iframe src=&quot;https://evil&quot;&gt;&lt;/iframe&gt;');
+      expect(html).toContain('contact-&lt;x&gt;');
+    });
+
     it('deve usar email padrao quando ADMIN_EMAIL nao configurado', async () => {
       delete process.env.ADMIN_EMAIL;
 

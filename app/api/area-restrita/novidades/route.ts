@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
 import { withUserApi } from '@/lib/api/handler';
 
 const FOURTEEN_DAYS_AGO = 14 * 24 * 60 * 60 * 1000;
@@ -68,6 +69,8 @@ async function handler() {
     prisma.documentVersion.findMany({
       where: {
         detectedAt: { gte: fourteenDaysAgo },
+        // Só versões de documentos públicos e fora do grafo/substrato interno
+        document: PUBLIC_DOCUMENT_WHERE,
       },
       select: {
         id: true,

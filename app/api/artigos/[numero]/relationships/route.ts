@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
+import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
 
 interface ArticleRelationship {
   articleNumber: string;
@@ -26,10 +27,11 @@ export async function GET(
     }
 
     const result = await withCache(
-      CacheKeys.articleDetails(articleNumber, 'rel'),
+      CacheKeys.articleDetails(articleNumber, 'rel-pub'),
       async () => {
         const documentsWithThisArticle = await prisma.document.findMany({
           where: {
+            ...PUBLIC_DOCUMENT_WHERE,
             leiArticlesArr: {
               has: articleNumber,
             },

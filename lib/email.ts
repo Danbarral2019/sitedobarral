@@ -529,6 +529,16 @@ export async function sendContactNotification(
 ): Promise<boolean> {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@profdanielbarral.com';
   const isTestimonial = contactData.courseInterest === 'depoimento';
+  // Todos os campos vêm de formulário público: escapar antes de interpolar no HTML.
+  const safe = {
+    name: escapeHtml(contactData.name),
+    email: escapeHtml(contactData.email),
+    emailHref: escapeHtml(encodeURIComponent(contactData.email).replace(/%40/g, '@')),
+    phone: contactData.phone ? escapeHtml(contactData.phone) : '',
+    courseInterest: contactData.courseInterest ? escapeHtml(contactData.courseInterest) : '',
+    message: escapeHtml(contactData.message),
+    contactId: escapeHtml(contactId),
+  };
 
   const html = `
     <!DOCTYPE html>
@@ -557,36 +567,36 @@ export async function sendContactNotification(
 
             <div class="field">
               <div class="field-label">Nome:</div>
-              <div class="field-value">${contactData.name}</div>
+              <div class="field-value">${safe.name}</div>
             </div>
 
             <div class="field">
               <div class="field-label">E-mail:</div>
-              <div class="field-value"><a href="mailto:${contactData.email}">${contactData.email}</a></div>
+              <div class="field-value"><a href="mailto:${safe.emailHref}">${safe.email}</a></div>
             </div>
 
             ${contactData.phone ? `
               <div class="field">
                 <div class="field-label">Telefone:</div>
-                <div class="field-value">${contactData.phone}</div>
+                <div class="field-value">${safe.phone}</div>
               </div>
             ` : ''}
 
             ${contactData.courseInterest && contactData.courseInterest !== 'depoimento' ? `
               <div class="field">
                 <div class="field-label">Curso de Interesse:</div>
-                <div class="field-value">${contactData.courseInterest}</div>
+                <div class="field-value">${safe.courseInterest}</div>
               </div>
             ` : ''}
 
             <div class="message-box">
               <div class="field-label">${isTestimonial ? 'Depoimento:' : 'Mensagem:'}</div>
-              <div class="field-value" style="white-space: pre-wrap;">${contactData.message}</div>
+              <div class="field-value" style="white-space: pre-wrap;">${safe.message}</div>
             </div>
 
             <div style="background: #eeeae4; padding: 15px; border-radius: 8px; margin-top: 20px;">
               <p style="margin: 0; color: #20364e; font-size: 14px;">
-                <strong>ID da Mensagem:</strong> ${contactId}<br>
+                <strong>ID da Mensagem:</strong> ${safe.contactId}<br>
                 <strong>Recebida em:</strong> ${new Date().toLocaleString('pt-BR')}
               </p>
             </div>

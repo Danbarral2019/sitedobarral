@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withUserApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
+import { AuthorizationError } from '@/lib/errors/api-error';
 import { BADGE_TYPES } from '@/lib/gamification';
 
 export const GET = withUserApi<{ courseId: string }>(async (
@@ -8,6 +9,23 @@ export const GET = withUserApi<{ courseId: string }>(async (
   ctx
 ) => {
   const { courseId } = ctx.params;
+
+  // Só aluno com matrícula válida no curso (admin passa direto)
+  if (ctx.user.role !== 'admin') {
+    const enrollment = await prisma.enrollment.findFirst({
+      where: {
+        userId: ctx.user.userId,
+        courseId,
+        OR: [
+          { isLifetime: true },
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!enrollment) throw new AuthorizationError('Acesso expirado ou inexistente para este curso.');
+  }
 
   // Top 20 by XP (opt-in only)
   const streaks = await prisma.userStreak.findMany({
