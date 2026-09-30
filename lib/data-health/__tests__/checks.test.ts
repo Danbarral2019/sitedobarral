@@ -5,6 +5,7 @@ import {
   isArtigoInexistente,
   revokerFromNote,
   contentMostraAlteracao,
+  descreverFalhaDeRaspagem,
 } from '../checks';
 
 describe('isArtigoMalFormatado', () => {
@@ -74,5 +75,16 @@ describe('contentMostraAlteracao', () => {
 
   it('retorna false quando o content não menciona alteração pelo revogador', () => {
     expect(contentMostraAlteracao('texto sem referência', '12.218')).toBe(false);
+  });
+});
+
+describe('descreverFalhaDeRaspagem', () => {
+  it('junta o ato e o motivo, encurtando o motivo longo', () => {
+    expect(descreverFalhaDeRaspagem('IN SEGES 65/2021', 'Validação falhou: Conteúdo vazio.')).toBe(
+      'IN SEGES 65/2021 (Validação falhou: Conteúdo vazio.)',
+    );
+    const longo = descreverFalhaDeRaspagem('Lei 1/2000', 'x'.repeat(300), 20);
+    expect(longo).toBe(`Lei 1/2000 (${'x'.repeat(19)}…)`);
+    expect(descreverFalhaDeRaspagem('Lei 1/2000', null)).toBe('Lei 1/2000 (sem motivo registrado)');
   });
 });
