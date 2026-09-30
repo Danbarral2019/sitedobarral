@@ -36,7 +36,7 @@ const LOTE = 25;
 
 function deveInterromper(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);
-  return isRateLimitError(e) || /spending|credit balance|billing|not configured|\b401\b|\b403\b|authentication|api key/i.test(msg);
+  return isRateLimitError(e) || /spending|usage limit|credit balance|billing|not configured|\b401\b|\b403\b|authentication|api key/i.test(msg);
 }
 
 function flagNumero(nome: string, padrao: number): number {

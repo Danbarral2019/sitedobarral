@@ -134,6 +134,22 @@ milhão de saída), ~US$ 0,05 por chamada, **US$ 8 a 16 no total** para as 207 c
 dobro do previsto antes da carga (~115 chamadas), por causa dos alvos novos das duas
 passadas.
 
+**Primeira rodada local (30/09/2026).** O Daniel rodou a classificação na máquina local. Ela
+gravou 2.382 alvos (187 pela área oficial do TCU e cerca de 2.195 pelo modelo), e o banco
+passou a ter 3.200 alvos classificados. Distribuição desta rodada: responsabilização 797 ·
+pessoal 444 · convênios e transferências 304 · processo de controle 294 · licitações e
+contratos 211 · obras e engenharia 204 · finanças e orçamento 50 · concessões e estatais 44 ·
+outros 34. A rodada esbarrou no limite de gasto configurado na conta da Anthropic (HTTP 400,
+"You have reached your specified API usage limits", com acesso de volta em 01/10/2026 à 00h
+UTC). Faltam 2.980 alvos para o modelo, uns 120 lotes.
+
+O script deveria ter parado no primeiro lote recusado, mas seguiu até o lote 207: a expressão
+de `deveInterromper` reconhecia "spending", "billing" e "api key", mas não "usage limit".
+Corrigido nesta branch (`scripts/classificar-temas-acordaos-tcu.ts`). As chamadas recusadas
+não são cobradas, então a falha só custou tempo. O `backfill-teses-tcu.ts` não tem guarda
+equivalente e seguiria tentando cada caso depois de um erro de cota; com lotes de algumas
+dezenas de casos o efeito é pequeno, mas vale a mesma proteção.
+
 ## Falhas
 
 As 353 falhas esgotaram as 3 tentativas. Plenário: 270; Primeira Câmara: 38; Segunda
@@ -500,8 +516,11 @@ afeta nenhuma decisão do script.
 
 ## Pendente
 
-1. Classificação por matéria: o Daniel roda localmente (`--min-no-voto=2`, 207 chamadas,
-   estimativa de US$ 8 a 16). O script para no primeiro erro de cota, gasto ou credencial.
+1. Classificação por matéria: completar os 2.980 alvos restantes (uns 120 lotes, US$ 5 a 9)
+   depois de 01/10/2026 à 00h UTC, com o mesmo comando; ele pula o que já foi gravado. Depois,
+   destilar o recorte de licitações e obras nas faixas A e B (`--min-no-voto=10
+   --tema=licitacoes-contratos,obras-engenharia`, 45 candidatos antes de completar a
+   classificação).
 2. Terceira geração de alvos (849): decidir se zera o cursor e caminha o feed de novo.
 3. Falhas (607 nas duas passadas): acórdãos legados em `.doc` (384, host bloqueado na
    nuvem e formato que o catalogador não extrai), outros 3 casos de HTTP 403, RTFs gigantes
