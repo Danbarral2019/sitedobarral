@@ -3,6 +3,17 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 
+/** Só URLs absolutas http(s) viram link (evita `javascript:` e afins vindos do histórico). */
+function safeHttpUrl(url: unknown): string | null {
+  if (typeof url !== 'string' || !url) return null;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 interface SharedSearchPageProps {
   params: Promise<{ shareId: string }>;
 }
@@ -102,17 +113,27 @@ export default async function SharedSearchPage({ params }: SharedSearchPageProps
           <div className="bg-white rounded-[6px] border border-border-subtle p-6 mb-6">
             <h2 className="text-sm font-bold text-ink-secondary mb-3">Fundamentacao Legal</h2>
             <div className="flex flex-wrap gap-2">
-              {legalSources.map((ls, i) => (
-                <a
-                  key={i}
-                  href={ls.url}
-                  target={ls.url.startsWith('http') ? '_blank' : undefined}
-                  rel={ls.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-brand-50 border border-brand-200 rounded-[6px] text-xs text-brand-800 hover:bg-brand-100 transition-colors"
-                >
-                  {ls.title}
-                </a>
-              ))}
+              {legalSources.map((ls, i) => {
+                const href = safeHttpUrl(ls.url);
+                return href ? (
+                  <a
+                    key={i}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand-50 border border-brand-200 rounded-[6px] text-xs text-brand-800 hover:bg-brand-100 transition-colors"
+                  >
+                    {ls.title}
+                  </a>
+                ) : (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand-50 border border-brand-200 rounded-[6px] text-xs text-brand-800"
+                  >
+                    {ls.title}
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}
