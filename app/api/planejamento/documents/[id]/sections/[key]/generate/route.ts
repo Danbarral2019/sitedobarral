@@ -100,11 +100,8 @@ export const POST = withUserApi<{ id: string; key: string }>(async (request, { p
     });
   } catch (err) {
     logger.error({ err }, "[planejamento/generate] falhou");
-    throw new ApiError(
-      500,
-      err instanceof Error ? err.message : "Erro ao gerar texto",
-      "GENERATION_FAILED",
-    );
+    // Detalhe fica no log; o cliente recebe mensagem genérica
+    throw new ApiError(500, "Erro ao gerar texto", "GENERATION_FAILED");
   }
 });
 
