@@ -1190,6 +1190,10 @@ model SearchHistory {
   feedbackAt   DateTime?
   isPublic     Boolean   @default(false)
   shareId      String?   @unique
+  // true quando `aiAnswer`/`sources` foram gravados pelo servidor no momento
+  // da consulta (/api/documents/query, /api/jurisprudencia/query). Só essas
+  // entradas podem ser compartilhadas: o que o cliente enviava não é confiável.
+  respostaDoServidor Boolean @default(false)
   createdAt    DateTime  @default(now())
 
   @@index([userId, createdAt])

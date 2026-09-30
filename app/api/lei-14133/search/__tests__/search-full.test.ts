@@ -38,11 +38,20 @@ vi.mock('@/lib/prisma', () => ({
     legislativeAct: { findMany: (...args: unknown[]) => mockLegislativeActFindMany(...args) },
   },
 }));
-vi.mock('@/lib/logger', () => ({
-  apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+vi.mock('@/lib/logger', () => {
+  const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: () => logger };
+  return { apiLogger: logger };
+});
+const authState = vi.hoisted(() => ({
+  user: { userId: 'user-1', email: 'aluno@x.com', role: 'student' } as
+    | { userId: string; email: string; role: string }
+    | null,
 }));
+vi.mock('@/lib/auth', () => ({ getCurrentUser: async () => authState.user }));
 
 import { POST } from '../route';
+
+const routeCtx = { params: Promise.resolve({}) };
 import { NextRequest } from 'next/server';
 
 function makeReq(body: Record<string, unknown>): NextRequest {
@@ -70,13 +79,13 @@ describe('/api/lei-14133/search — caminho completo', () => {
   });
 
   it('valida query curta (< 3 chars) com 400', async () => {
-    const res = await POST(makeReq({ query: 'ab' }));
+    const res = await POST(makeReq({ query: 'ab' }), routeCtx);
     expect(res.status).toBe(400);
     expect(mockQueryGeminiText).not.toHaveBeenCalled();
   });
 
   it('sintetiza e monta results a partir dos artigos citados pela IA', async () => {
-    const res = await POST(makeReq({ query: 'dispensa de licitação por valor' }));
+    const res = await POST(makeReq({ query: 'dispensa de licitação por valor' }), routeCtx);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.isAISearch).toBe(true);
@@ -92,7 +101,7 @@ describe('/api/lei-14133/search — caminho completo', () => {
     mockLegislativeActFindMany.mockResolvedValue([
       { id: 'act-1', title: 'IN SEGES 65', type: 'IN', fullNumber: 'IN 65/2021', summary: 'ementa', leiArticlesArr: ['75'] },
     ]);
-    const res = await POST(makeReq({ query: 'dispensa licitação' }));
+    const res = await POST(makeReq({ query: 'dispensa licitação' }), routeCtx);
     const body = await res.json();
     const docs = body.documents;
     expect(docs.find((d: { id: string }) => d.id === 'doc-1').relevance).toMatch(/Art\. 75/);
@@ -103,14 +112,14 @@ describe('/api/lei-14133/search — caminho completo', () => {
     mockDocumentFindMany.mockResolvedValue([
       { id: 'doc-x', title: 'Guia geral', category: 'apostila', type: 'pdf', summary: null, leiArticlesArr: [] },
     ]);
-    const res = await POST(makeReq({ query: 'licitação pública' }));
+    const res = await POST(makeReq({ query: 'licitação pública' }), routeCtx);
     const body = await res.json();
     expect(body.documents[0].relevance).toMatch(/termos da busca/i);
   });
 
   it('cai no fallback (isAISearch:false) quando a IA devolve JSON inválido', async () => {
     mockQueryGeminiText.mockResolvedValue({ response: 'isto não é json', cached: false });
-    const res = await POST(makeReq({ query: 'dispensa de licitação' }));
+    const res = await POST(makeReq({ query: 'dispensa de licitação' }), routeCtx);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.isAISearch).toBe(false);
@@ -134,7 +143,7 @@ describe('/api/lei-14133/search — caminho completo', () => {
     mockLegislativeActFindMany.mockResolvedValue([
       { id: 'act-nv', title: 'Portaria sobre licitação', type: 'Portaria', fullNumber: 'P 1/2021', summary: null, leiArticlesArr: [] },
     ]);
-    const res = await POST(makeReq({ query: 'licitação dispensa inexigibilidade' }));
+    const res = await POST(makeReq({ query: 'licitação dispensa inexigibilidade' }), routeCtx);
     const body = await res.json();
     // ordenado por score desc: 95 antes de 80
     expect(body.results.map((r: { score: number }) => r.score)).toEqual([95, 80]);
@@ -148,9 +157,23 @@ describe('/api/lei-14133/search — caminho completo', () => {
     mockLegislativeActFindMany.mockResolvedValue([
       { id: 'dup-1', title: 'Ato colidente', type: 'IN', fullNumber: 'IN 1', summary: null, leiArticlesArr: ['75'] },
     ]);
-    const res = await POST(makeReq({ query: 'dispensa licitação' }));
+    const res = await POST(makeReq({ query: 'dispensa licitação' }), routeCtx);
     const body = await res.json();
     expect(body.documents.filter((d: { id: string }) => d.id === 'dup-1')).toHaveLength(1);
+  });
+
+  it('usuário comum só recebe documentos públicos; admin recebe todos', async () => {
+    await POST(makeReq({ query: 'dispensa licitação' }), routeCtx);
+    expect(mockDocumentFindMany.mock.calls[0][0].where).toMatchObject({ isPublic: true });
+
+    authState.user = { userId: 'admin-1', email: 'adm@x.com', role: 'admin' };
+    try {
+      mockDocumentFindMany.mockClear();
+      await POST(makeReq({ query: 'dispensa licitação' }), routeCtx);
+      expect(mockDocumentFindMany.mock.calls[0][0].where).not.toHaveProperty('isPublic');
+    } finally {
+      authState.user = { userId: 'user-1', email: 'aluno@x.com', role: 'student' };
+    }
   });
 
   it('ignora artigos citados pela IA que não existem na base', async () => {
@@ -158,7 +181,7 @@ describe('/api/lei-14133/search — caminho completo', () => {
       response: JSON.stringify({ summary: 's', articles: [{ number: '99999', relevance: 'x', score: 50 }] }),
       cached: false,
     });
-    const res = await POST(makeReq({ query: 'tema inexistente qualquer' }));
+    const res = await POST(makeReq({ query: 'tema inexistente qualquer' }), routeCtx);
     const body = await res.json();
     expect(body.results).toHaveLength(0);
     expect(body.isAISearch).toBe(true);

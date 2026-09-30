@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { isLiteralSourceCategory } from '@/lib/literal-sources';
+import { ConviteLoginIA } from '@/components/ia/ConviteLoginIA';
 
 export interface AISearchResult {
   articleNumber: string;
@@ -57,9 +58,20 @@ interface LeiAISearchResultsProps {
   results: AISearchResponse | null;
   onClose: () => void;
   onResultClick: (articleNumber: string) => void;
+  /** A API respondeu 401: mostra o convite a entrar no lugar do erro. */
+  exigeLogin?: boolean;
+  /** Página de retorno após o login. */
+  returnTo?: string;
 }
 
-export function LeiAISearchResults({ isSearching, results, onClose, onResultClick }: LeiAISearchResultsProps) {
+export function LeiAISearchResults({
+  isSearching,
+  results,
+  onClose,
+  onResultClick,
+  exigeLogin = false,
+  returnTo,
+}: LeiAISearchResultsProps) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 px-4">
       <div className="bg-white rounded-[6px] w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col border border-border-subtle">
@@ -83,6 +95,8 @@ export function LeiAISearchResults({ isSearching, results, onClose, onResultClic
               <p className="text-ink-muted">Analisando sua pergunta com IA...</p>
               <p className="text-sm text-ink-muted mt-2">Isso pode levar alguns segundos</p>
             </div>
+          ) : exigeLogin ? (
+            <ConviteLoginIA returnTo={returnTo} />
           ) : results ? (
             <AIResultsContent results={results} onResultClick={onResultClick} />
           ) : (

@@ -9,9 +9,21 @@
  *     `buildLegalSources` (lib/legal-context.ts)
  *   - `buildContextForLLM`, `formatSources` (lib/embeddings/vector-search.ts)
  *   - LEI_14133_ARTIGOS (data/lei-14133-artigos.ts) para ementas dos artigos
+ *
+ * Acesso (auditoria de 30/09/2026): todo trecho de Document passa pela regra
+ * única de lib/search/acesso-documentos — no SQL da busca vetorial
+ * (`documentoVisivelSql`, antes do LIMIT) e de novo no resultado
+ * (`filtrarResultadosVisiveis`). Ninguém recebe trecho de documento privado
+ * de curso ao qual não tem acesso.
  */
 
+import { Prisma } from "@prisma/client";
 import { semanticSearch, type SearchResult } from "@/lib/embeddings/vector-search";
+import {
+  documentoVisivelSql,
+  filtrarResultadosVisiveis,
+  type AcessoDoUsuario,
+} from "@/lib/search/acesso-documentos";
 import { rerankResults } from "@/lib/embeddings/reranker";
 import {
   extractCitedArticles,
@@ -62,6 +74,11 @@ export interface PlanningSectionContext {
 }
 
 interface BuildOpts {
+  /**
+   * Acesso do usuário (getAcessoDoUsuario do payload do JWT). Obrigatório:
+   * decide quais trechos de Document podem entrar no contexto.
+   */
+  acesso: AcessoDoUsuario;
   /** Texto livre de entrada (descrição da contratação) */
   descricaoLivre: string;
   /** Texto já escrito na seção, quando existir — entra na query para refinar */
@@ -86,15 +103,19 @@ export async function buildSectionContext(
   const ragFilter = def.ragFilter;
   const limit = opts.limitOverride ?? ragFilter.limit ?? 10;
 
-  // 1) Busca semântica ampla (mais candidatos para o reranker)
+  // 1) Busca semântica ampla (mais candidatos para o reranker). A regra de
+  // acesso entra no SQL do ramo Document (o fragmento também compõe a chave
+  // de cache) e é reaplicada no resultado, como defesa em profundidade.
   const searchRes = await semanticSearch(query, {
     limit: Math.min(limit * 3, 30),
     threshold: ragFilter.minSimilarity,
     courseId: opts.courseId,
     includeTribunalDecisions: ragFilter.includeTribunalDecisions ?? false,
+    extraWhere: { document: Prisma.raw(documentoVisivelSql(opts.acesso, "d")) },
   });
 
-  const primaryHits = filterBySourceTypes(searchRes.results, ragFilter.sourceTypes);
+  const visiveis = filtrarResultadosVisiveis(searchRes.results, opts.acesso);
+  const primaryHits = filterBySourceTypes(visiveis, ragFilter.sourceTypes);
 
   // 2) Rerank
   const reranked =

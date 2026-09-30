@@ -3,6 +3,7 @@ import { withAssinanteApi } from "@/lib/api/handler";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { buildSectionContext } from "@/lib/planejamento/rag";
+import { getAcessoDoUsuario } from "@/lib/search/acesso-documentos";
 import { getTrailBySlug } from "@/data/planejamento/trails";
 import type { TrailDefinition } from "@/data/planejamento/types";
 import { NotFoundError, ConflictError } from "@/lib/errors/api-error";
@@ -55,7 +56,10 @@ export const GET = withAssinanteApi<{ id: string; key: string }>(async (_request
     });
   }
 
+  // Regra única de acesso: só trechos de documentos que o usuário pode ver.
+  const acesso = await getAcessoDoUsuario(ctx.user);
   const sectionCtx = await buildSectionContext(def, {
+    acesso,
     descricaoLivre: descricao,
     contentMd: section.contentMd,
   });

@@ -268,6 +268,8 @@ async function persistJurisprudenciaSearch(params: {
         filters: params.filters ? JSON.stringify(params.filters) : null,
         aiAnswer: params.aiAnswer,
         sources: params.sources ? JSON.stringify(params.sources) : null,
+        // Gravado aqui, no servidor: pode ser compartilhado (/busca/[shareId]).
+        respostaDoServidor: true,
       },
       select: { id: true },
     });

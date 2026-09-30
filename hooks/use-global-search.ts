@@ -323,28 +323,8 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
               { role: 'assistant' as const, content: answer },
             ]);
 
-            // Save to search history (fire-and-forget). Persistimos os
-            // filtros ativos pra reproduzir a busca exatamente no eval do
-            // golden set e para analytics por filtro.
-            fetch('/api/area-restrita/search-history', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                type: 'documents',
-                query: searchQuery,
-                aiAnswer: answer,
-                filters: {
-                  types: filters.types,
-                  ticMode,
-                },
-                sources: streamSources.map((r: AISource) => ({
-                  title: r.title,
-                  category: r.category,
-                  url: r.url,
-                })),
-                legalSources: streamLegalSources,
-              }),
-            }).catch(() => {}); // Silently ignore errors
+            // O histórico é gravado pelo servidor em /api/documents/query
+            // (evento `history`); o cliente não envia mais a resposta.
           }
         }
       } catch (err) {
@@ -362,7 +342,6 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [minQueryLength, ticMode]
   );
 

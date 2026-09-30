@@ -1,6 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { ConviteLoginIA } from '@/components/ia/ConviteLoginIA';
 import { ArrowLeft, Scale, Search, Sparkles, Filter, BookOpen, FileText, Target } from 'lucide-react';
 
 interface LeiPreviewHeaderProps {
@@ -20,8 +23,10 @@ export function LeiPreviewHeader({
   totalArticles,
   totalWithDocs,
 }: LeiPreviewHeaderProps) {
+  const { isAuthenticated } = useAuth();
+  const [mostrarConvite, setMostrarConvite] = useState(false);
   const coveragePct = totalArticles > 0 ? Math.round((totalWithDocs / totalArticles) * 100) : 0;
-  const aiDisabled = searchQuery.trim().length < 3;
+  const LEI_COM_IA = '/area-restrita/lei-comentada';
 
   return (
     <div className="bg-brand-700 text-white border border-border-subtle">
@@ -58,18 +63,29 @@ export function LeiPreviewHeader({
               className="w-full pl-10 pr-4 py-3 rounded-[6px] bg-white text-ink-primary placeholder-ink-muted focus:ring-2 focus:ring-brand-300"
             />
           </div>
-          <button
-            disabled={aiDisabled}
-            className={`px-4 py-3 rounded-[6px] flex items-center gap-2 transition-colors ${
-              aiDisabled
-                ? 'bg-brand-300 text-white cursor-not-allowed'
-                : 'bg-brand-600 text-white hover:bg-brand-700'
-            }`}
-            title="Busca semântica com IA"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span className="hidden sm:inline">Buscar com IA</span>
-          </button>
+          {/* A busca com IA exige login: quem está logado vai para a Lei
+              comentada da área restrita; o visitante vê o convite. */}
+          {isAuthenticated ? (
+            <Link
+              href={LEI_COM_IA}
+              className="px-4 py-3 rounded-[6px] flex items-center gap-2 transition-colors bg-brand-600 text-white hover:bg-brand-700"
+              title="Busca semântica com IA"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span className="hidden sm:inline">Buscar com IA</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setMostrarConvite((v) => !v)}
+              aria-expanded={mostrarConvite}
+              className="px-4 py-3 rounded-[6px] flex items-center gap-2 transition-colors bg-brand-600 text-white hover:bg-brand-700"
+              title="Busca semântica com IA (requer login)"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span className="hidden sm:inline">Buscar com IA</span>
+            </button>
+          )}
           <button
             onClick={onToggleOnlyWithDocs}
             className={`px-4 py-3 rounded-[6px] flex items-center gap-2 transition-colors ${
@@ -80,6 +96,12 @@ export function LeiPreviewHeader({
             <span className="hidden sm:inline">{onlyWithDocuments ? 'Mostrar todos' : 'Apenas com docs'}</span>
           </button>
         </div>
+
+        {mostrarConvite && !isAuthenticated && (
+          <div className="mt-4 bg-white rounded-[6px] border border-border-subtle">
+            <ConviteLoginIA returnTo={LEI_COM_IA} />
+          </div>
+        )}
 
         <div className="mt-4 flex gap-6 text-sm">
           <div className="flex items-center gap-2">

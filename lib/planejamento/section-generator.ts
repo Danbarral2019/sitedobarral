@@ -10,9 +10,12 @@ import { generate } from "@/lib/ai";
 import { buildSectionContext, classifyProvenance } from "./rag";
 import { getSystemPrompt } from "@/data/planejamento/prompts/system";
 import type { SectionDefinition, PlanningSectionSource } from "@/data/planejamento/types";
+import type { AcessoDoUsuario } from "@/lib/search/acesso-documentos";
 
 export interface GenerateSectionInput {
   def: SectionDefinition;
+  /** Acesso do usuário: filtra os trechos de Document do contexto RAG. */
+  acesso: AcessoDoUsuario;
   descricaoLivre: string;
   /** Rascunho atual da seção (quando `mode === 'refine'`) */
   contentMd?: string | null;
@@ -44,6 +47,7 @@ export async function generateSectionText(
 ): Promise<GenerateSectionOutput> {
   const start = Date.now();
   const ctx = await buildSectionContext(input.def, {
+    acesso: input.acesso,
     descricaoLivre: input.descricaoLivre,
     contentMd: input.contentMd,
   });

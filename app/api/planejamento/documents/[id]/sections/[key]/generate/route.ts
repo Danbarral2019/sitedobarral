@@ -4,6 +4,7 @@ import { ApiError, ConflictError, NotFoundError, ValidationError } from "@/lib/e
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/cache/rate-limit-helper";
 import { generateSectionText } from "@/lib/planejamento/section-generator";
+import { getAcessoDoUsuario } from "@/lib/search/acesso-documentos";
 import { getTrailBySlug } from "@/data/planejamento/trails";
 import type { TrailDefinition } from "@/data/planejamento/types";
 
@@ -63,9 +64,14 @@ export const POST = withAssinanteApi<{ id: string; key: string }>(async (request
     );
   }
 
+  // Regra única de acesso: o contexto só traz trechos de documentos que o
+  // usuário pode ver (fora do try: falha aqui não vira GENERATION_FAILED).
+  const acesso = await getAcessoDoUsuario(user);
+
   try {
     const result = await generateSectionText({
       def,
+      acesso,
       descricaoLivre: session.descricaoLivre,
       contentMd: mode === "refine" ? section.contentMd : null,
       mode,

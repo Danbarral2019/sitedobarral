@@ -22,11 +22,20 @@ vi.mock('@/lib/gemini/cached-client', () => ({
 
 vi.mock('@/lib/gemini/config', () => ({ PRIMARY_GEMINI_MODEL: 'gemini-test' }));
 vi.mock('@/lib/prisma', () => ({ prisma: {} }));
-vi.mock('@/lib/logger', () => ({
-  apiLogger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+vi.mock('@/lib/logger', () => {
+  const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), child: () => logger };
+  return { apiLogger: logger };
+});
+const authState = vi.hoisted(() => ({
+  user: { userId: 'user-1', email: 'aluno@x.com', role: 'student' } as
+    | { userId: string; email: string; role: string }
+    | null,
 }));
+vi.mock('@/lib/auth', () => ({ getCurrentUser: async () => authState.user }));
 
 import { POST } from '../route';
+
+const routeCtx = { params: Promise.resolve({}) };
 import { NextRequest } from 'next/server';
 
 function makeReq(body: Record<string, unknown>): NextRequest {
@@ -48,7 +57,7 @@ describe('/api/lei-14133/search — kill-switch global', () => {
   it('degrade-search → não chama o Gemini e retorna isAISearch=false', async () => {
     mockEnforceGlobalAiCap.mockResolvedValue({ action: 'degrade-search', reason: 'global' });
 
-    const res = await POST(makeReq({ query: 'dispensa de licitação' }));
+    const res = await POST(makeReq({ query: 'dispensa de licitação' }), routeCtx);
     const body = await res.json();
 
     expect(res.status).toBe(200);
@@ -58,7 +67,7 @@ describe('/api/lei-14133/search — kill-switch global', () => {
   });
 
   it('allow → sintetiza normalmente (Gemini chamado)', async () => {
-    await POST(makeReq({ query: 'dispensa de licitação' }));
+    await POST(makeReq({ query: 'dispensa de licitação' }), routeCtx);
     expect(mockEnforceRateLimit).toHaveBeenCalledWith(
       'lei-search:127.0.0.1',
       5,
