@@ -28,7 +28,7 @@ npx prisma generate            # After schema changes
 npx prisma studio              # Database GUI
 
 # Admin
-node scripts/create-admin.js email@example.com senha "Nome"
+npx tsx scripts/create-admin.ts email@example.com '<senha>' "Nome"
 
 # AGU/TCU Scrapers
 npx tsx scripts/test-versioning.ts
@@ -41,7 +41,7 @@ npx tsx scripts/migrate-to-embeddings.ts               # indexa docs pendentes n
 npx tsx scripts/index-legislative-acts.ts              # indexa atos legislativos
 ```
 
-**Test Credentials:** Student `aluno@teste.com` / `aluno123`, criado por `npx tsx scripts/create-test-student.ts` com a senha em `TEST_STUDENT_PASSWORD` (matrícula no primeiro curso de `data/courses.ts`; `npx tsx scripts/enroll-test-user.ts` matricula em todos) · Admin: criar via `node scripts/create-admin.js`.
+**Test Credentials:** Student `aluno@teste.com` / `aluno123`, criado por `npx tsx scripts/create-test-student.ts` com a senha em `TEST_STUDENT_PASSWORD` (matrícula no primeiro curso de `data/courses.ts`; `npx tsx scripts/enroll-test-user.ts` matricula em todos) · Admin: criar via `npx tsx scripts/create-admin.ts`.
 
 ## Architecture Quick Reference
 
@@ -238,7 +238,7 @@ cd "/Users/danba/Site do Barral/sitedobarral"
 npm install
 cp .env.example .env.local  # editar com seus valores
 npx prisma generate && npx prisma db push
-node scripts/create-admin.js admin@email.com password123 "Admin Name"
+npx tsx scripts/create-admin.ts admin@email.com '<senha>' "Admin Name"
 npm run dev
 ```
 
