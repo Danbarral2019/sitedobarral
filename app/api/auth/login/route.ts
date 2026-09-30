@@ -13,6 +13,13 @@ import {
 import { authLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
 
+/**
+ * Hash bcrypt (custo 10, o mesmo do cadastro) de uma senha aleatória que
+ * ninguém conhece. Usado quando o e-mail não existe, para que a resposta leve
+ * o mesmo tempo de uma senha errada.
+ */
+const DUMMY_PASSWORD_HASH = '$2b$10$TZ1XinCDV1jvicnU7thiCeulvifMy/9Qyc69aUkAwTjyRNx7ijbQ6';
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 tentativas de login por minuto (Redis)
@@ -36,23 +43,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // A senha é conferida antes de qualquer outra checagem, e também quando o
+    // usuário não existe (contra um hash fictício). Assim o tempo de resposta
+    // e a mensagem não revelam se o e-mail está cadastrado nem se é de admin.
+    const isValidPassword = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
+
     if (!user) {
       authLogger.warn({ email }, 'Login attempt: user not found');
       throw new AuthenticationError('Email ou senha incorretos');
     }
 
-    // Verificar se é um aluno (não admin)
-    if (user.role !== 'student') {
-      authLogger.warn({ email, role: user.role }, 'Login attempt: wrong role');
-      throw new AuthorizationError('Use o login administrativo para acessar');
-    }
-
-    // Verificar senha
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-
     if (!isValidPassword) {
       authLogger.warn({ email, userId: user.id }, 'Login attempt: invalid password');
       throw new AuthenticationError('Email ou senha incorretos');
+    }
+
+    // Só quem acertou a senha fica sabendo que a conta é administrativa.
+    if (user.role !== 'student') {
+      authLogger.warn({ email, role: user.role }, 'Login attempt: wrong role');
+      throw new AuthorizationError('Use o login administrativo para acessar');
     }
 
     // Verificar se o email foi verificado

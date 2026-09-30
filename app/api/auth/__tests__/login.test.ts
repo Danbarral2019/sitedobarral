@@ -194,11 +194,12 @@ describe('POST /api/auth/login', () => {
       });
     });
 
-    it('deve retornar 403 para usuário admin tentando logar', async () => {
+    it('deve retornar 403 para usuário admin tentando logar com a senha correta', async () => {
       mockPrisma.user.findUnique.mockResolvedValue({
         ...mockStudent,
         role: 'admin',
       } as never);
+      mockBcrypt.compare.mockResolvedValue(true as never);
 
       const request = createRequest(validCredentials);
       const response = await POST(request);
@@ -316,6 +317,46 @@ describe('POST /api/auth/login', () => {
 
       // Mensagens idênticas para evitar enumeração de usuários
       expect(data1.error).toBe(data2.error);
+    });
+
+    it('não deve revelar que o e-mail é de admin quando a senha está errada', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        ...mockStudent,
+        role: 'admin',
+      } as never);
+      mockBcrypt.compare.mockResolvedValue(false as never);
+
+      const response = await POST(createRequest(validCredentials));
+
+      expect(response.status).toBe(401);
+      const data = await response.json();
+      expect(data.error).toBe('Email ou senha incorretos');
+      expect(JSON.stringify(data)).not.toContain('administrativo');
+    });
+
+    it('deve rodar bcrypt.compare contra um hash fictício quando o usuário não existe', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null as never);
+      mockBcrypt.compare.mockResolvedValue(false as never);
+
+      const response = await POST(createRequest(validCredentials));
+
+      expect(response.status).toBe(401);
+      expect(mockBcrypt.compare).toHaveBeenCalledTimes(1);
+      const [senha, hash] = mockBcrypt.compare.mock.calls[0] as unknown as [string, string];
+      expect(senha).toBe(validCredentials.password);
+      // Hash bcrypt válido com o mesmo custo do cadastro (10)
+      expect(hash).toMatch(/^\$2[aby]\$10\$[./A-Za-z0-9]{53}$/);
+    });
+
+    it('não deve autenticar usuário inexistente mesmo se o compare do hash fictício retornasse true', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null as never);
+      mockBcrypt.compare.mockResolvedValue(true as never);
+
+      const response = await POST(createRequest(validCredentials));
+
+      expect(response.status).toBe(401);
+      const data = await response.json();
+      expect(data.error).toBe('Email ou senha incorretos');
     });
 
     it('não deve expor hash de senha na resposta', async () => {

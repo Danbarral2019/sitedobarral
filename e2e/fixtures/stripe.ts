@@ -61,6 +61,11 @@ export function checkoutCompleted(params: {
     id: stripeId('cs'),
     object: 'checkout.session',
     mode: 'subscription',
+    // Formato real da assinatura por cartão: a Stripe só conclui a sessão
+    // depois de cobrar a primeira fatura, e o webhook só libera acesso com
+    // payment_status 'paid' (ou 'no_payment_required').
+    status: 'complete',
+    payment_status: 'paid',
     customer: params.customerId,
     subscription: params.subscriptionId,
     payment_method_types: ['card'],

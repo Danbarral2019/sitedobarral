@@ -7,12 +7,21 @@ import { prisma } from '@/lib/prisma';
 import { ValidationError, ConflictError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
+import { courses } from '@/data/courses';
+
+// IDs numéricos do catálogo (`data/courses.ts`). O `courseId` vai para o
+// metadata da sessão e, no webhook, vira matrícula: um valor fora do catálogo
+// criaria matrícula em curso inexistente.
+const CATALOG_COURSE_IDS = new Set(courses.map((c) => c.id));
 
 const CheckoutSchema = z.object({
   plan: z.enum(['basico', 'premium']),
   billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
   method: z.enum(['card', 'pix']),
-  courseId: z.string().optional(),
+  courseId: z
+    .string()
+    .refine((id) => CATALOG_COURSE_IDS.has(id), { message: 'courseId inválido: curso fora do catálogo' })
+    .optional(),
 }).refine(
   (d) => d.plan !== 'basico' || !!d.courseId,
   { message: 'courseId obrigatório para plano Básico', path: ['courseId'] }
