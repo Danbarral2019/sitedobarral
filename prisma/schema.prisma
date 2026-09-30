@@ -413,6 +413,14 @@ model User {
   resetPasswordToken  String?   @unique
   resetPasswordExpiry DateTime?
 
+  // Revogação de sessão: o JWT carrega `tv` e só vale enquanto for igual a
+  // este número. Logout, troca e redefinição de senha incrementam.
+  tokenVersion Int @default(0)
+
+  // QR code (QRCode.id) informado no cadastro. A matrícula e o consumo da
+  // vaga só acontecem na verificação do email (app/api/auth/verify-email).
+  pendingQrCodeId String?
+
   // Relacionamento com cursos (para estudantes)
   enrollments Enrollment[]
 
