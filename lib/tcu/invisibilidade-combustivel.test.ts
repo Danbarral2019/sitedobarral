@@ -10,10 +10,9 @@ import { readFileSync } from 'node:fs';
  *
  * Por que cada superfície exclui, e por que os motivos NÃO são o mesmo:
  *
- *  • As duas rotas de busca **não filtram `isPublic` em nenhum ramo** — nem no
- *    de administrador, nem no de aluno. Ali a exclusão da categoria é o ÚNICO
- *    controle de acesso, e afrouxá-la vaza documento não-público para aluno.
- *    Esta é a razão forte, e não admite exceção por destino.
+ *  • As duas rotas de busca que não filtravam `isPublic` (`/api/search/unified`
+ *    e `/api/area-restrita/search-all`) foram removidas em 09/2026: nenhuma
+ *    tela as chamava, e o filtro de matrícula da primeira era sobrescrito.
  *
  *  • No admin de analytics e nas queries cacheadas o motivo é de contagem: 13
  *    mil registros invisíveis inflariam números que o professor lê como
@@ -36,8 +35,6 @@ const ler = (p: string) => readFileSync(p, 'utf8');
 const INCONDICIONAIS = [
   'app/api/admin/analytics/summary/route.ts',
   'lib/cached-queries.ts',
-  'app/api/search/unified/route.ts',
-  'app/api/area-restrita/search-all/route.ts',
 ];
 
 describe('invisibilidade do combustível do grafo', () => {
