@@ -29,8 +29,41 @@ import { LeiProfessorComment } from '@/components/lei-14133/LeiProfessorComment'
 import { LeiCuratedCrossRefs } from '@/components/lei-14133/LeiCuratedCrossRefs';
 import { LeiSuggestedReadings } from '@/components/lei-14133/LeiSuggestedReadings';
 import { useLei14133Preview } from '@/hooks/use-lei14133-preview';
+import type { ArtigoInicial } from '@/lib/lei-14133/artigo-inicial';
 
-function LeiComentadaContent() {
+/**
+ * Texto do artigo pedido em ?artigo=N enquanto a página carrega no cliente.
+ * Vem do servidor, para que o HTML inicial (e os buscadores) tenham o texto
+ * do artigo e não só o aviso de carregamento.
+ */
+function ArtigoPreCarregado({ artigo }: { artigo: ArtigoInicial }) {
+  return (
+    <div className="min-h-screen bg-surface-raised">
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 lg:col-start-5">
+            <div className="bg-surface-page rounded-[6px] border border-border-subtle p-6 md:p-8">
+              {(artigo.capituloCompleto || artigo.titulo) && (
+                <p className="font-label text-ink-muted mb-1">
+                  {[artigo.capituloCompleto, artigo.titulo].filter(Boolean).join(' · ')}
+                </p>
+              )}
+              <div className="max-w-[65ch]">
+                <ArticleFull numero={artigo.numero} ementa={artigo.ementa} comLink={false} />
+              </div>
+            </div>
+            <p className="mt-4 flex items-center gap-2 text-sm text-ink-muted">
+              <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
+              Carregando a estrutura da lei e os documentos relacionados…
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LeiComentadaContent({ artigoInicial }: { artigoInicial: ArtigoInicial | null }) {
   const reader = useLei14133Preview('/lei-14133');
 
   const handleSidebarSelect = (item: LeiArticleListItem) => {
@@ -39,6 +72,7 @@ function LeiComentadaContent() {
   };
 
   if (reader.loading) {
+    if (artigoInicial) return <ArtigoPreCarregado artigo={artigoInicial} />;
     return (
       <div className="min-h-screen bg-surface-raised flex items-center justify-center">
         <div className="text-center">
@@ -206,16 +240,24 @@ function LeiComentadaContent() {
   );
 }
 
-export default function LeiComentadaClient() {
+export default function LeiComentadaClient({
+  artigoInicial = null,
+}: {
+  artigoInicial?: ArtigoInicial | null;
+}) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-surface-raised flex items-center justify-center">
-          <Loader2 className="w-12 h-12 animate-spin text-brand-600" />
-        </div>
+        artigoInicial ? (
+          <ArtigoPreCarregado artigo={artigoInicial} />
+        ) : (
+          <div className="min-h-screen bg-surface-raised flex items-center justify-center">
+            <Loader2 className="w-12 h-12 animate-spin text-brand-600" />
+          </div>
+        )
       }
     >
-      <LeiComentadaContent />
+      <LeiComentadaContent artigoInicial={artigoInicial} />
     </Suspense>
   );
 }
