@@ -90,6 +90,26 @@ describe('GET /api/pagamento/status', () => {
     expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
   });
 
+  it('retorna 403 quando a session não tem metadata.userId', async () => {
+    mockSessionsRetrieve.mockResolvedValue({
+      metadata: {},
+      subscription: 'sub_abc',
+    });
+    const res = await GET(makeRequest('cs_sem_dono') as any, routeCtx);
+    expect(res.status).toBe(403);
+    expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('retorna 403 quando a session não tem metadata', async () => {
+    mockSessionsRetrieve.mockResolvedValue({
+      metadata: null,
+      subscription: 'sub_abc',
+    });
+    const res = await GET(makeRequest('cs_sem_metadata') as any, routeCtx);
+    expect(res.status).toBe(403);
+    expect(mockSubscriptionFindUnique).not.toHaveBeenCalled();
+  });
+
   it('retorna { subscription: null } quando a session ainda não tem subscription vinculada', async () => {
     mockSessionsRetrieve.mockResolvedValue({
       metadata: { userId: 'user-1' },

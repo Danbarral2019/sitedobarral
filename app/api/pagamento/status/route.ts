@@ -35,9 +35,13 @@ export const GET = withUserApi(async (request: NextRequest, ctx) => {
     throw new NotFoundError('Sessão de checkout não encontrada');
   }
 
-  if (session.metadata?.userId && session.metadata.userId !== ctx.user.userId) {
+  // Toda sessão criada por `createCheckoutSession` leva `metadata.userId`.
+  // Sessão sem esse campo não tem dono comprovável e é negada, assim como a
+  // sessão de outro usuário.
+  const sessionUserId = session.metadata?.userId;
+  if (!sessionUserId || sessionUserId !== ctx.user.userId) {
     apiLogger.warn(
-      { sessionId, sessionUser: session.metadata.userId, requester: ctx.user.userId },
+      { sessionId, sessionUser: sessionUserId ?? null, requester: ctx.user.userId },
       'User tried to poll status of another user session',
     );
     throw new AuthorizationError('Sessão não pertence ao usuário autenticado');
