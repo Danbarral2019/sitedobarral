@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import {
   Search,
   X,
@@ -15,6 +15,7 @@ import {
 // skeletons da SearchResultsList e nos botões IA/Modo TIC.
 import type { ContentType, GlobalSearchResponse } from '@/lib/types/global-search';
 import { trackClientEvent } from '@/lib/monitoring/track-client';
+import { isSearchShortcut, useModifierLabel } from './search-shortcut';
 
 interface GlobalSearchBarProps {
   query: string;
@@ -50,21 +51,49 @@ export function GlobalSearchBar({
   onTicToggle,
 }: GlobalSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const modifier = useModifierLabel();
+  const [isFocused, setIsFocused] = useState(false);
+  // Pulso curto no campo quando o foco vem do atalho (confirma o acionamento).
+  const [flash, setFlash] = useState(false);
+
+  const focusFromShortcut = useCallback(() => {
+    inputRef.current?.focus();
+    setFlash(true);
+    clearTimeout(flashTimer.current);
+    flashTimer.current = setTimeout(() => setFlash(false), 900);
+  }, []);
 
   // Focus on mount
   useEffect(() => {
+    // Redirecionamento de outra página (Ctrl+K): ?focus=search foca em qualquer
+    // largura e limpa o parâmetro da URL.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('focus') === 'search') {
+      focusFromShortcut();
+      params.delete('focus');
+      const qs = params.toString();
+      window.history.replaceState(
+        window.history.state,
+        '',
+        window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash,
+      );
+      return;
+    }
     // Don't auto-focus on mobile
     if (window.innerWidth >= 1024) {
       inputRef.current?.focus();
     }
-  }, []);
+  }, [focusFromShortcut]);
+
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
 
   // Keyboard shortcut: Ctrl+K or Cmd+K to focus
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if (isSearchShortcut(e)) {
         e.preventDefault();
-        inputRef.current?.focus();
+        focusFromShortcut();
       }
       // Escape to clear and blur
       if (e.key === 'Escape' && document.activeElement === inputRef.current) {
@@ -78,7 +107,7 @@ export function GlobalSearchBar({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [query, onClear]);
+  }, [query, onClear, focusFromShortcut]);
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -90,7 +119,11 @@ export function GlobalSearchBar({
 
   return (
     <div className="space-y-3">
-      <div className="bg-white rounded-[6px] border border-border-subtle">
+      <div
+        className={`bg-white rounded-[6px] border transition-shadow focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-200 ${
+          flash ? 'border-brand-400 ring-4 ring-brand-300' : 'border-border-subtle'
+        }`}
+      >
         {/* Search Input Row */}
         <div className="flex items-center gap-2 p-4">
           {/* Search Icon — fixo (não troca por spinner). Feedback de loading
@@ -106,6 +139,9 @@ export function GlobalSearchBar({
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleInputKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            aria-keyshortcuts="Control+K Meta+K"
             placeholder={placeholder}
             className="flex-1 text-base outline-none placeholder:text-ink-muted text-ink-primary"
           />
@@ -121,6 +157,16 @@ export function GlobalSearchBar({
               >
                 <X className="w-4 h-4" />
               </button>
+            )}
+
+            {/* Dica do atalho: só em desktop, com o campo vazio e sem foco */}
+            {!query && !isFocused && (
+              <kbd
+                className="hidden lg:inline-flex items-center px-1.5 py-0.5 bg-surface-deep border border-border-subtle rounded text-[10px] font-mono text-ink-muted"
+                aria-hidden="true"
+              >
+                {modifier} K
+              </kbd>
             )}
 
             {/* AI Toggle Button */}

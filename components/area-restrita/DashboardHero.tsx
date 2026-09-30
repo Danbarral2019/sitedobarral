@@ -1,17 +1,14 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useModifierLabel } from './search-shortcut';
 
 interface DashboardHeroProps {
   children: ReactNode;
 }
 
 export function DashboardHero({ children }: DashboardHeroProps) {
-  const [isMac, setIsMac] = useState(false);
-
-  useEffect(() => {
-    setIsMac(navigator.platform.toUpperCase().includes('MAC'));
-  }, []);
+  const modifier = useModifierLabel();
 
   return (
     <section className="bg-white rounded-[6px] p-6 lg:p-8 border border-border-subtle">
@@ -24,7 +21,7 @@ export function DashboardHero({ children }: DashboardHeroProps) {
       {children}
       <p className="text-xs text-ink-muted mt-2 hidden lg:block">
         <kbd className="px-1.5 py-0.5 bg-surface-deep border border-border-subtle rounded text-[10px] font-mono">
-          {isMac ? '⌘' : 'Ctrl'}
+          {modifier}
         </kbd>
         {' + '}
         <kbd className="px-1.5 py-0.5 bg-surface-deep border border-border-subtle rounded text-[10px] font-mono">
