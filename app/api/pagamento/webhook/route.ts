@@ -15,6 +15,8 @@ import {
 } from '@/lib/email-templates/subscription';
 import { getSiteUrl } from '@/lib/site-url';
 import { reportError, reportMessage } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, ValidationError } from '@/lib/errors/api-error';
 
 export const runtime = 'nodejs';
 
@@ -590,77 +592,86 @@ const HANDLERS: Record<string, (event: Stripe.Event) => Promise<void>> = {
 // ── POST /api/pagamento/webhook ───────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // 1. Fail-closed: require secret
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret) {
-    apiLogger.error('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook');
-    reportMessage('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook', 'pagamento');
-    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
-  }
-
-  // 2. Require signature header
-  const sig = request.headers.get('stripe-signature');
-  if (!sig) {
-    return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 });
-  }
-
-  // 3. Verify signature
-  let event: Stripe.Event;
+  // Contrato com a Stripe: 400 para assinatura ausente ou inválida (não
+  // adianta reenviar), 500 para configuração ausente e falha do handler (a
+  // Stripe reenvia), 200 para evento recebido, repetido ou ignorado.
   try {
-    const rawBody = await request.text();
-    event = getStripe().webhooks.constructEvent(rawBody, sig, secret);
-  } catch (err) {
-    apiLogger.warn({ err }, 'Webhook signature verification failed');
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-  }
+    // 1. Fail-closed: require secret
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) {
+      apiLogger.error('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook');
+      reportMessage('STRIPE_WEBHOOK_SECRET is not set — rejecting webhook', 'pagamento');
+      throw new ApiError(500, 'Server misconfigured', 'WEBHOOK_MISCONFIGURED');
+    }
 
-  // 4. Dedup
-  try {
-    await prisma.processedWebhookEvent.create({
-      data: {
-        stripeEventId: event.id,
-        eventType: event.type,
-      },
-    });
-  } catch (err) {
-    // Unique constraint violation = already processed
-    const prismaErr = err as { code?: string };
-    if (prismaErr?.code === 'P2002') {
-      apiLogger.info({ eventId: event.id }, 'Webhook event already processed (dedup)');
+    // 2. Require signature header
+    const sig = request.headers.get('stripe-signature');
+    if (!sig) {
+      throw new ValidationError('Missing stripe-signature header');
+    }
+
+    // 3. Verify signature
+    let event: Stripe.Event;
+    try {
+      const rawBody = await request.text();
+      event = getStripe().webhooks.constructEvent(rawBody, sig, secret);
+    } catch (err) {
+      apiLogger.warn({ err }, 'Webhook signature verification failed');
+      throw new ValidationError('Invalid signature');
+    }
+
+    // 4. Dedup
+    try {
+      await prisma.processedWebhookEvent.create({
+        data: {
+          stripeEventId: event.id,
+          eventType: event.type,
+        },
+      });
+    } catch (err) {
+      // Unique constraint violation = already processed
+      const prismaErr = err as { code?: string };
+      if (prismaErr?.code === 'P2002') {
+        apiLogger.info({ eventId: event.id }, 'Webhook event already processed (dedup)');
+        return NextResponse.json({ received: true });
+      }
+      throw err;
+    }
+
+    // 5. Ignored events
+    if (IGNORED_EVENTS.has(event.type)) {
+      apiLogger.debug({ eventType: event.type }, 'Ignored webhook event');
       return NextResponse.json({ received: true });
     }
-    throw err;
-  }
 
-  // 5. Ignored events
-  if (IGNORED_EVENTS.has(event.type)) {
-    apiLogger.debug({ eventType: event.type }, 'Ignored webhook event');
-    return NextResponse.json({ received: true });
-  }
-
-  // 6. Dispatch to handler
-  const handler = HANDLERS[event.type];
-  if (!handler) {
-    apiLogger.warn({ eventType: event.type }, 'Unknown webhook event type');
-    return NextResponse.json({ received: true });
-  }
-
-  try {
-    await handler(event);
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    // Rollback dedup record on handler failure
-    try {
-      await prisma.processedWebhookEvent.delete({
-        where: { stripeEventId: event.id },
-      });
-    } catch (rollbackErr) {
-      apiLogger.error({ rollbackErr, eventId: event.id }, 'Failed to rollback dedup record');
-      reportError(rollbackErr, 'pagamento', { eventId: event.id, etapa: 'rollback-dedup' });
+    // 6. Dispatch to handler
+    const handler = HANDLERS[event.type];
+    if (!handler) {
+      apiLogger.warn({ eventType: event.type }, 'Unknown webhook event type');
+      return NextResponse.json({ received: true });
     }
 
-    apiLogger.error({ err, eventType: event.type, eventId: event.id }, 'Webhook handler error');
-    reportError(err, 'pagamento', { eventType: event.type, eventId: event.id });
-    return NextResponse.json({ error: 'Handler failed' }, { status: 500 });
+    try {
+      await handler(event);
+      return NextResponse.json({ received: true });
+    } catch (err) {
+      // Rollback dedup record on handler failure
+      try {
+        await prisma.processedWebhookEvent.delete({
+          where: { stripeEventId: event.id },
+        });
+      } catch (rollbackErr) {
+        apiLogger.error({ rollbackErr, eventId: event.id }, 'Failed to rollback dedup record');
+        reportError(rollbackErr, 'pagamento', { eventId: event.id, etapa: 'rollback-dedup' });
+      }
+
+      apiLogger.error({ err, eventType: event.type, eventId: event.id }, 'Webhook handler error');
+      reportError(err, 'pagamento', { eventType: event.type, eventId: event.id });
+      // Sempre 500 (e não o status que o handleApiError daria ao erro
+      // original, como 404 para P2025): a Stripe precisa reenviar o evento.
+      throw new ApiError(500, 'Handler failed', 'WEBHOOK_HANDLER_FAILED');
+    }
+  } catch (error) {
+    return handleApiError(error);
   }
 }
