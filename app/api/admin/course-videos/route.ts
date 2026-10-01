@@ -2,38 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 // POST - Adicionar vídeo
 export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const body = await request.json();
     const { courseId, title, description, youtubeUrl } = body;
 
     if (!courseId || !title || !youtubeUrl) {
-      return NextResponse.json(
-        { error: 'Campos obrigatórios faltando' },
-        { status: 400 }
-      );
+      throw new ValidationError('Campos obrigatórios faltando');
     }
 
     // Extrair ID do YouTube da URL
     const youtubeId = extractYoutubeId(youtubeUrl);
     if (!youtubeId) {
-      return NextResponse.json(
-        { error: 'URL do YouTube inválida' },
-        { status: 400 }
-      );
+      throw new ValidationError('URL do YouTube inválida');
     }
 
     // Obter próxima ordem
@@ -60,11 +55,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ video }, { status: 201 });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao adicionar vídeo:');
-    return NextResponse.json(
-      { error: 'Erro ao adicionar vídeo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

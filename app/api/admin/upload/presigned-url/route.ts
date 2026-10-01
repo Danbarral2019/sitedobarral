@@ -4,8 +4,13 @@ import { verifyToken } from '@/lib/auth';
 import { generatePresignedUploadUrl } from '@/lib/storage/r2-client';
 import { randomUUID } from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  AuthenticationError,
+  AuthorizationError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/api-error';
 
 // ===========================
 // Types
@@ -97,16 +102,13 @@ export async function POST(req: NextRequest) {
     const token = cookieStore.get('auth-token');
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+      throw new AuthenticationError('Não autenticado');
     }
 
     const decoded = await verifyToken(token.value);
 
     if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Apenas administradores podem fazer upload' },
-        { status: 403 }
-      );
+      throw new AuthorizationError('Apenas administradores podem fazer upload');
     }
 
     // 2. Parse and validate request
@@ -114,7 +116,7 @@ export async function POST(req: NextRequest) {
     const validation = validateFileMetadata(body);
 
     if (!validation.valid) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+      throw new ValidationError(validation.error ?? 'Arquivo inválido');
     }
 
     // 3. Generate unique file ID and R2 key
@@ -140,19 +142,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Muitas requisições de upload. Aguarde alguns instantes.' },
-        { status: 429 }
+      return handleApiError(
+        new RateLimitError('Muitas requisições de upload. Aguarde alguns instantes.')
       );
     }
-    apiLogger.error({ err: error }, 'Presigned URL generation error:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao gerar URL de upload',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

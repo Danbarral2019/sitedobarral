@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { publishToSocialMedia } from '@/lib/social-publisher';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/social/publish
@@ -14,23 +15,20 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const payload = await verifyToken(token);
 
     if (!payload || payload.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     // Obter dados do body
     const { blogPostId, platforms } = await request.json();
 
     if (!blogPostId) {
-      return NextResponse.json(
-        { error: 'blogPostId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('blogPostId é obrigatório');
     }
 
     // Publicar nas redes sociais
@@ -40,12 +38,13 @@ export async function POST(request: NextRequest) {
     );
 
     if (!result.success) {
-      return NextResponse.json(
-        {
-          error: result.message || 'Erro ao publicar nas redes sociais',
-          results: result.results,
-        },
-        { status: 500 }
+      // Falha de publicação nas plataformas: mantém o 500 e o resultado por
+      // plataforma (agora em `details.results`).
+      throw new ApiError(
+        500,
+        result.message || 'Erro ao publicar nas redes sociais',
+        'SOCIAL_PUBLISH_FAILED',
+        { results: result.results }
       );
     }
 
@@ -56,13 +55,6 @@ export async function POST(request: NextRequest) {
       imageUrl: result.imageUrl,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao publicar nas redes sociais:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao processar publicação',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

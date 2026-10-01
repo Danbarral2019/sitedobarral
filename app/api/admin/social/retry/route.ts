@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { retryFailedPost } from '@/lib/social-publisher';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/social/retry
@@ -14,33 +15,27 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const payload = await verifyToken(token);
 
     if (!payload || payload.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     // Obter dados do body
     const { socialMediaPostId } = await request.json();
 
     if (!socialMediaPostId) {
-      return NextResponse.json(
-        { error: 'socialMediaPostId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('socialMediaPostId é obrigatório');
     }
 
     // Tentar republicar
     const result = await retryFailedPost(socialMediaPostId);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Erro ao republicar' },
-        { status: 500 }
-      );
+      throw new ApiError(500, result.error || 'Erro ao republicar', 'SOCIAL_RETRY_FAILED');
     }
 
     return NextResponse.json({
@@ -48,13 +43,6 @@ export async function POST(request: NextRequest) {
       message: 'Post republicado com sucesso!',
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao republicar:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao processar republicação',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
