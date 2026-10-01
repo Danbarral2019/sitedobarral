@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
 import { prisma } from '@/lib/prisma';
-import { apiLogger } from '@/lib/logger';
 import {
   requestNewsletterSubscription,
   SUBSCRIBE_GENERIC_MESSAGE,
   UNSUBSCRIBE_GENERIC_MESSAGE,
 } from '@/lib/newsletter/subscriptions';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, RateLimitError, ValidationError } from '@/lib/errors/api-error';
 
 // POST - Pedido de inscrição na newsletter (double opt-in).
 // A inscrição fica pendente até o clique no link enviado por e-mail. A resposta
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     try {
       body = (await request.json()) as Record<string, unknown>;
     } catch {
-      return NextResponse.json({ error: 'Requisição inválida' }, { status: 400 });
+      throw new ValidationError('Requisição inválida');
     }
     const { email, name, interests, source } = body ?? {};
 
@@ -40,18 +40,12 @@ export async function POST(request: NextRequest) {
       : null;
 
     if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { error: 'E-mail é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('E-mail é obrigatório');
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email.length > 254 || !emailRegex.test(email.trim())) {
-      return NextResponse.json(
-        { error: 'E-mail inválido' },
-        { status: 400 }
-      );
+      throw new ValidationError('E-mail inválido');
     }
 
     await requestNewsletterSubscription({
@@ -64,16 +58,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: SUBSCRIBE_GENERIC_MESSAGE, pendingConfirmation: true });
   } catch (error) {
     if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Você está enviando cadastros muito rapidamente. Por favor, aguarde alguns instantes.' },
-        { status: 429 }
+      return handleApiError(
+        new RateLimitError(
+          'Você está enviando cadastros muito rapidamente. Por favor, aguarde alguns instantes.'
+        )
       );
     }
-    apiLogger.error({ err: error }, 'Erro ao cadastrar newsletter');
-    return NextResponse.json(
-      { error: 'Erro ao cadastrar. Tente novamente.' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -84,7 +75,7 @@ export async function GET(request: NextRequest) {
     const { verifyAuth } = await import('@/lib/auth');
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const { searchParams } = new URL(request.url);
@@ -104,11 +95,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ subscribers });
   } catch (error) {
-    console.error('Erro ao listar inscritos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao carregar inscritos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

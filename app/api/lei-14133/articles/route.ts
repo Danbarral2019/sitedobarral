@@ -5,6 +5,7 @@ import { getLeiArticles } from '@/lib/lei-articles';
 import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
 import { ARTIGOS_ENUNCIADOS, ENUNCIADOS } from '@/data/enunciados';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 /**
  * GET /api/lei-14133/articles
@@ -286,14 +287,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('[Lei Articles API] Erro:', error);
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao buscar artigos da Lei 14.133',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

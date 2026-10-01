@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 // GET /api/glossary/search?q=termo - Buscar termos
 export async function GET(request: NextRequest) {
@@ -109,10 +110,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error searching glossary:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar termos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

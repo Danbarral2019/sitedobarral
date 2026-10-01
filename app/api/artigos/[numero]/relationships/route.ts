@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 interface ArticleRelationship {
   articleNumber: string;
@@ -20,10 +22,7 @@ export async function GET(
     const { numero: articleNumber } = await params;
 
     if (!articleNumber) {
-      return NextResponse.json(
-        { error: 'Número do artigo é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Número do artigo é obrigatório');
     }
 
     const result = await withCache(
@@ -91,10 +90,6 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao calcular relacionamentos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao calcular relacionamentos entre artigos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

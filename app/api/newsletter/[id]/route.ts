@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
 
 /**
  * DELETE /api/newsletter/[id]
@@ -15,10 +17,7 @@ export async function DELETE(
     const user = await getCurrentUser();
 
     if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Não autorizado');
     }
 
     const { id } = await context.params;
@@ -29,10 +28,7 @@ export async function DELETE(
     });
 
     if (!subscriber) {
-      return NextResponse.json(
-        { error: 'Inscrito não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Inscrito');
     }
 
     // Deletar o inscrito
@@ -45,10 +41,6 @@ export async function DELETE(
       message: `Inscrito ${subscriber.email} deletado com sucesso`,
     });
   } catch (error) {
-    console.error('Erro ao deletar inscrito da newsletter:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar inscrito' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthorizationError, NotFoundError } from '@/lib/errors/api-error';
 
 // GET /api/glossary/[slug] - Obter termo específico por slug
 export async function GET(
@@ -17,17 +19,11 @@ export async function GET(
     });
 
     if (!term) {
-      return NextResponse.json(
-        { error: 'Termo não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Termo');
     }
 
     if (!term.isPublic) {
-      return NextResponse.json(
-        { error: 'Termo não disponível' },
-        { status: 403 }
-      );
+      throw new AuthorizationError('Termo não disponível');
     }
 
     // Incrementar contador de visualizações (async, não espera)
@@ -111,10 +107,6 @@ export async function GET(
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
-    console.error('Error fetching glossary term:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar termo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

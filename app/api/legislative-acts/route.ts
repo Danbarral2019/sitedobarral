@@ -4,6 +4,7 @@ import { withCache, CacheKeys, CACHE_TTL, CacheInvalidation } from '@/lib/cache/
 import { getLeiArticles } from '@/lib/lei-articles';
 import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
 import { bearerToken, safeCompareSecret } from '@/lib/cron-auth';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 /**
  * GET /api/legislative-acts
@@ -77,11 +78,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao listar atos normativos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao listar atos normativos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

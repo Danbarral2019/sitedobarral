@@ -3,6 +3,8 @@ import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/lei-14133/article-docs/[numero]
@@ -174,7 +176,7 @@ export async function GET(
     const numeroStr = String(numero);
 
     if (!numeroStr || !/^\d+(-[A-Z])?$/.test(numeroStr)) {
-      return NextResponse.json({ error: 'Número de artigo inválido' }, { status: 400 });
+      throw new ValidationError('Número de artigo inválido');
     }
 
     const authResult = await verifyAuth(request);
@@ -365,10 +367,6 @@ export async function GET(
       relatedByTheme,
     });
   } catch (error) {
-    console.error('[article-docs] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar documentos do artigo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
