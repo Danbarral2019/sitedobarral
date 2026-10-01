@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { NotFoundError } from '@/lib/errors/api-error';
+import { ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CreateQuizSchema } from '@/lib/validation-schemas';
 
@@ -21,10 +21,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
       throw new NotFoundError('Lição');
     }
     if (lesson.quiz) {
-      return NextResponse.json(
-        { error: 'Esta lição já possui um quiz.' },
-        { status: 409 }
-      );
+      throw new ConflictError('Esta lição já possui um quiz.');
     }
 
     const quiz = await prisma.quiz.create({

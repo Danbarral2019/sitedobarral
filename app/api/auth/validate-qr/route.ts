@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { trackServerEvent } from '@/lib/monitoring/events';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ValidationError } from '@/lib/errors/api-error';
+import { AuthenticationError, AuthorizationError, ValidationError } from '@/lib/errors/api-error';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,28 +23,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (!qrCodeData) {
-      return NextResponse.json(
-        { error: 'Código QR inválido' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Código QR inválido');
     }
 
     // Verifica se o QR Code está válido
     if (new Date() > qrCodeData.validUntil) {
-      return NextResponse.json(
-        { error: 'Código QR expirado. Entre em contato com o professor.' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Código QR expirado. Entre em contato com o professor.');
     }
 
     // Verifica limite de usos (vagas da turma)
     if (qrCodeData.maxUses && qrCodeData.usedCount >= qrCodeData.maxUses) {
-      return NextResponse.json(
-        {
-          error: `Turma lotada! Este QR Code já foi usado por ${qrCodeData.usedCount} alunos (limite: ${qrCodeData.maxUses}).`,
-          isFull: true
-        },
-        { status: 403 }
+      throw new AuthorizationError(
+        `Turma lotada! Este QR Code já foi usado por ${qrCodeData.usedCount} alunos (limite: ${qrCodeData.maxUses}).`
       );
     }
 

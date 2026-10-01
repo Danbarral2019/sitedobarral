@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withPublicApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { unsubscribeNewsletterByToken } from '@/lib/newsletter/subscriptions';
 
 /**
@@ -39,10 +40,7 @@ export const POST = withPublicApi(async (request, ctx) => {
 
   if (status === 'invalid') {
     ctx.logger.warn('Descadastro da newsletter com token inválido');
-    return NextResponse.json(
-      { status, error: 'Link de descadastro inválido.' },
-      { status: 400 },
-    );
+    throw new ValidationError('Link de descadastro inválido.');
   }
 
   return NextResponse.json({ status });

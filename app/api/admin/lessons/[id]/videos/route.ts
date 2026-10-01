@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { NotFoundError, AuthorizationError } from '@/lib/errors/api-error';
+import { NotFoundError, AuthorizationError, ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { LinkLessonVideoSchema } from '@/lib/validation-schemas';
 
@@ -79,10 +79,7 @@ export async function DELETE(
     const videoId = searchParams.get('videoId');
 
     if (!videoId) {
-      return NextResponse.json(
-        { error: 'videoId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('videoId é obrigatório');
     }
 
     const existing = await prisma.lessonVideo.findUnique({

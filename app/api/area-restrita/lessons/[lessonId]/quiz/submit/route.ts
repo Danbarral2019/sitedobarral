@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withUserApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
-import { NotFoundError, AuthorizationError } from '@/lib/errors/api-error';
+import { NotFoundError, AuthorizationError, ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { SubmitQuizAttemptSchema } from '@/lib/validation-schemas';
 import { runAfterResponse } from '@/lib/api/after-response';
@@ -52,10 +52,7 @@ export const POST = withUserApi<{ lessonId: string }>(async (
       where: { quizId: quiz.id, userId: ctx.user.userId },
     });
     if (attemptCount >= quiz.maxAttempts) {
-      return NextResponse.json(
-        { error: 'Número máximo de tentativas atingido.' },
-        { status: 400 }
-      );
+      throw new ValidationError('Número máximo de tentativas atingido.');
     }
   }
 

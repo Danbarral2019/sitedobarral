@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
+import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -20,14 +21,14 @@ export const POST = withAdminApi(async (
   const body = await request.json();
     const docId = String(body.docId || '').trim();
     if (!docId) {
-      return NextResponse.json({ error: 'docId obrigatório' }, { status: 400 });
+      throw new ValidationError('docId obrigatório');
     }
 
     const doc = await prisma.document.findUnique({
       where: { id: docId },
       select: { id: true, aiClassification: true, category: true },
     });
-    if (!doc) return NextResponse.json({ error: 'Documento não encontrado' }, { status: 404 });
+    if (!doc) throw new NotFoundError('Documento');
 
     const ai = doc.aiClassification ? safeParseJson(doc.aiClassification) : {};
 
@@ -42,10 +43,7 @@ export const POST = withAdminApi(async (
     } else {
       const newValue = body.licitacoesContratos;
       if (typeof newValue !== 'boolean') {
-        return NextResponse.json(
-          { error: 'licitacoesContratos deve ser boolean' },
-          { status: 400 },
-        );
+        throw new ValidationError('licitacoesContratos deve ser boolean');
       }
       // Backup do valor da IA na primeira override (não sobrescreve em overrides repetidos)
       if (typeof ai.licitacoesContratosAi !== 'boolean') {

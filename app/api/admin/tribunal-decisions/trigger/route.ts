@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ValidationError } from '@/lib/errors/api-error';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 export const maxDuration = 300;
 
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const body = await request.json();

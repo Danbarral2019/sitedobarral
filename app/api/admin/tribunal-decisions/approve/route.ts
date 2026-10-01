@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { AuthenticationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { generateDecisionSummary } from '@/lib/tribunal-scrapers/classifier';
 import { apiLogger } from "@/lib/logger";
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const body = await request.json();

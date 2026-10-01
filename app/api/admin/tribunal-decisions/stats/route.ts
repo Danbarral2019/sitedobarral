@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/tribunal-decisions/stats
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const [

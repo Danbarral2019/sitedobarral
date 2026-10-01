@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAssinanteApi } from "@/lib/api/handler";
+import { ValidationError } from "@/lib/errors/api-error";
 import { prisma } from "@/lib/prisma";
 import { zCreateSnippetBody } from "@/data/planejamento/types";
 
@@ -31,10 +32,7 @@ export const POST = withAssinanteApi(async (request: NextRequest, ctx) => {
   const body = await request.json().catch(() => ({}));
   const parsed = zCreateSnippetBody.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Dados inválidos", issues: parsed.error.issues },
-      { status: 400 },
-    );
+    throw new ValidationError("Dados inválidos", parsed.error.issues);
   }
   const snippet = await prisma.planningLibrarySnippet.create({
     data: {
