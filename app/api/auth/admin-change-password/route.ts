@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateToken, verifyAuth } from '@/lib/auth';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
 import bcrypt from 'bcryptjs';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  ApiError,
+  AuthenticationError,
+  NotFoundError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/api-error';
 
 
 export async function POST(request: NextRequest) {
@@ -12,7 +19,7 @@ export async function POST(request: NextRequest) {
     // Verificar autenticação — apenas admins logados podem alterar senha
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     // Rate limiting: 5 tentativas por minuto por IP
@@ -24,17 +31,11 @@ export async function POST(request: NextRequest) {
 
     // Validações básicas
     if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: 'Senha atual e nova senha são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('Senha atual e nova senha são obrigatórios');
     }
 
     if (newPassword.length < 8) {
-      return NextResponse.json(
-        { error: 'A nova senha deve ter no mínimo 8 caracteres' },
-        { status: 400 }
-      );
+      throw new ValidationError('A nova senha deve ter no mínimo 8 caracteres');
     }
 
     // Buscar usuário admin pelo userId da sessão (não do body)
@@ -43,20 +44,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Usuário');
     }
 
     // Verificar senha atual
     const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
 
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: 'Senha atual incorreta' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Senha atual incorreta');
     }
 
     // Gerar hash da nova senha
@@ -92,16 +87,13 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Muitas tentativas. Aguarde antes de tentar novamente.' },
-        { status: 429 }
+      return handleApiError(
+        new RateLimitError('Muitas tentativas. Aguarde antes de tentar novamente.')
       );
     }
-    console.error('Erro ao alterar senha:', error);
-    reportError(error, 'auth', { rota: 'admin-change-password' });
-    return NextResponse.json(
-      { error: 'Erro ao processar solicitação' },
-      { status: 500 }
-    );
+    if (!(error instanceof ApiError)) {
+      reportError(error, 'auth', { rota: 'admin-change-password' });
+    }
+    return handleApiError(error);
   }
 }

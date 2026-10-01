@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withUserApi } from '@/lib/api/handler';
+import { InternalServerError, ValidationError } from '@/lib/errors/api-error';
 import {
   checkCertificateEligibility,
   issueCertificate,
@@ -34,21 +35,15 @@ export const POST = withUserApi<{ courseId: string }>(async (
   // Verificar elegibilidade primeiro
   const eligibility = await checkCertificateEligibility(ctx.user.userId, courseId);
   if (!eligibility.eligible) {
-    return NextResponse.json(
-      {
-        error: 'Você ainda não completou todos os requisitos para o certificado.',
-        ...eligibility,
-      },
-      { status: 400 }
+    throw new ValidationError(
+      'Você ainda não completou todos os requisitos para o certificado.',
+      eligibility
     );
   }
 
   const result = await issueCertificate(ctx.user.userId, courseId);
   if (!result.certificate) {
-    return NextResponse.json(
-      { error: 'Erro ao gerar certificado.' },
-      { status: 500 }
-    );
+    throw new InternalServerError('Erro ao gerar certificado.');
   }
 
   return NextResponse.json({

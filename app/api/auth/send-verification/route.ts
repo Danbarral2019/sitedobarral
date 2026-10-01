@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
 import { sendVerificationEmail } from '@/lib/email';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, RateLimitError, ValidationError } from '@/lib/errors/api-error';
 
 // Resposta única para e-mail inexistente, já verificado ou pendente: o
 // endpoint não pode servir para descobrir se uma conta existe ou em que
@@ -24,10 +25,7 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Email é obrigatório');
     }
 
     // Busca usuário
@@ -73,16 +71,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Muitas tentativas de envio. Por favor, aguarde alguns instantes.' },
-        { status: 429 }
+      return handleApiError(
+        new RateLimitError('Muitas tentativas de envio. Por favor, aguarde alguns instantes.')
       );
     }
-    console.error('Erro ao enviar código de verificação:', error);
-    reportError(error, 'auth', { rota: 'send-verification' });
-    return NextResponse.json(
-      { error: 'Erro ao processar solicitação' },
-      { status: 500 }
-    );
+    if (!(error instanceof ApiError)) {
+      reportError(error, 'auth', { rota: 'send-verification' });
+    }
+    return handleApiError(error);
   }
 }

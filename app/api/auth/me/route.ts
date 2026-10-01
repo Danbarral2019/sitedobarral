@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,20 +11,14 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Não autenticado');
     }
 
     // ✅ Verificar token usando função centralizada (com validação Zod)
     const authPayload = await verifyToken(token);
 
     if (!authPayload) {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido ou expirado');
     }
 
     // Buscar usuário no banco
@@ -46,10 +42,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Usuário');
     }
 
     return NextResponse.json({
@@ -63,11 +56,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Auth check error:', error);
-    reportError(error, 'auth', { rota: 'me' });
-    return NextResponse.json(
-      { error: 'Erro ao verificar autenticação' },
-      { status: 500 }
-    );
+    if (!(error instanceof ApiError)) {
+      reportError(error, 'auth', { rota: 'me' });
+    }
+    return handleApiError(error);
   }
 }
