@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -26,7 +27,7 @@ export async function PUT(
     // Verificar autenticação
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const { id } = await params;
@@ -49,10 +50,7 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Termo não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Termo');
     }
 
     // Preparar dados para atualização
@@ -71,10 +69,7 @@ export async function PUT(
       });
 
       if (slugConflict) {
-        return NextResponse.json(
-          { error: 'Já existe um termo com este nome' },
-          { status: 400 }
-        );
+        throw new ValidationError('Já existe um termo com este nome');
       }
     }
 
@@ -129,11 +124,7 @@ export async function PUT(
       message: 'Termo atualizado com sucesso',
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error updating glossary term:');
-    return NextResponse.json(
-      { error: 'Erro ao atualizar termo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -146,7 +137,7 @@ export async function DELETE(
     // Verificar autenticação
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const { id } = await params;
@@ -157,10 +148,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Termo não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Termo');
     }
 
     // Deletar termo
@@ -175,10 +163,6 @@ export async function DELETE(
       message: 'Termo deletado com sucesso',
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error deleting glossary term:');
-    return NextResponse.json(
-      { error: 'Erro ao deletar termo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

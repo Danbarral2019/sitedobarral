@@ -14,6 +14,8 @@ import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ConflictError, ValidationError } from '@/lib/errors/api-error';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
       apiLogger.error({ valid: authResult.valid, role: authResult.user?.role }, '[Aprovação] Autenticação falhou:');
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     // ✅ FIX #5: Capturar email do admin para audit trail
@@ -37,18 +39,12 @@ export async function POST(request: NextRequest) {
 
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
       apiLogger.error({ err: documentIds }, '[Aprovação] IDs inválidos:');
-      return NextResponse.json(
-        { error: 'IDs de documentos não fornecidos' },
-        { status: 400 }
-      );
+      throw new ValidationError('IDs de documentos não fornecidos');
     }
 
     if (action !== 'approve' && action !== 'reject') {
       apiLogger.error({ err: action }, '[Aprovação] Ação inválida:');
-      return NextResponse.json(
-        { error: 'Ação inválida. Use "approve" ou "reject"' },
-        { status: 400 }
-      );
+      throw new ValidationError('Ação inválida. Use "approve" ou "reject"');
     }
 
     // ✅ FIX #5: Usar transação para garantir atomicidade (approve + audit log)
@@ -117,12 +113,10 @@ export async function POST(request: NextRequest) {
       const alreadyProcessed = documentIds.length - result.count;
       console.warn(`[Aprovação] ⚠️ Conflito: ${alreadyProcessed} documento(s) já processados por outro admin`);
 
-      return NextResponse.json({
-        success: false,
-        error: `${alreadyProcessed} documento(s) já foram processados por outro administrador`,
-        processedCount: result.count,
-        conflictCount: alreadyProcessed,
-      }, { status: 409 }); // 409 Conflict
+      throw new ConflictError(
+        `${alreadyProcessed} documento(s) já foram processados por outro administrador`,
+        { processedCount: result.count, conflictCount: alreadyProcessed }
+      );
     }
 
     console.log(`[Aprovação] ✅ Sucesso: ${result.count} documentos ${action === 'approve' ? 'aprovados' : 'rejeitados'}`);
@@ -139,14 +133,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    apiLogger.error({ err: error }, '[Aprovação] ❌ Erro fatal:');
-    apiLogger.error({ err: error instanceof Error ? error.stack : 'N/A' }, '[Aprovação] Stack:');
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido ao processar aprovação',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

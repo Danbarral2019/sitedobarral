@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * PUT /api/admin/lei-14133/[numero]
@@ -17,16 +18,13 @@ export async function PUT(
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
     const body = await request.json();
 
     // Validar dados
     if (!body.ementa || !body.ementa.trim()) {
-      return NextResponse.json(
-        { error: 'O texto do artigo (ementa) é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('O texto do artigo (ementa) é obrigatório');
     }
 
     // Verificar se artigo existe
@@ -35,10 +33,7 @@ export async function PUT(
     });
 
     if (!artigoExistente) {
-      return NextResponse.json(
-        { error: `Artigo ${numero} não encontrado no banco de dados` },
-        { status: 404 }
-      );
+      throw new NotFoundError(`Artigo ${numero}`);
     }
 
     // Atualizar artigo no banco de dados
@@ -67,18 +62,7 @@ export async function PUT(
       }
     });
   } catch (error) {
-    apiLogger.error({
-            numero,
-            errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-            errorStack: error instanceof Error ? error.stack : undefined,
-          }, '[Lei 14.133 Edit] Error details:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao atualizar artigo',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -93,7 +77,7 @@ export async function GET(
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const { numero } = await params;
@@ -104,10 +88,7 @@ export async function GET(
     });
 
     if (!artigo) {
-      return NextResponse.json(
-        { error: `Artigo ${numero} não encontrado` },
-        { status: 404 }
-      );
+      throw new NotFoundError(`Artigo ${numero}`);
     }
 
     return NextResponse.json({
@@ -122,10 +103,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[Lei 14.133 Get] Error:');
-    return NextResponse.json(
-      { error: 'Erro ao buscar artigo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

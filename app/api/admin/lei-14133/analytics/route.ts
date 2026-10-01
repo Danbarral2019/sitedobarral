@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthorizationError } from '@/lib/errors/api-error';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +12,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Acesso negado' },
-        { status: 403 }
-      );
+      throw new AuthorizationError('Acesso negado');
     }
 
     // Parse query params para filtros opcionais
@@ -269,10 +267,6 @@ export async function GET(request: NextRequest) {
       topUsers: topUsersWithDetails,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao buscar analytics:');
-    return NextResponse.json(
-      { error: 'Erro ao processar analytics' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { wizardEnhance } from '@/lib/ai/wizard-enhance';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/documents/temp-enhance
@@ -14,17 +15,14 @@ export async function POST(request: NextRequest) {
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const body = await request.json();
     const { title, description, category } = body;
 
     if (!title) {
-      return NextResponse.json(
-        { error: 'Título é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Título é obrigatório');
     }
 
     console.log(`[Temp Enhance] Analisando: ${title}`);
@@ -56,14 +54,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[Temp Enhance] Erro:');
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao analisar documento com IA',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

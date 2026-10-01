@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getLeiArticles } from '@/lib/lei-articles';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/analytics/lei-cobertura
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     console.log('[Lei Cobertura] Calculando estatísticas...');
@@ -152,14 +153,6 @@ export async function GET(request: NextRequest) {
       distribuicaoPorTitulo,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[Lei Cobertura] Erro ao calcular cobertura:');
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao calcular cobertura da lei',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
