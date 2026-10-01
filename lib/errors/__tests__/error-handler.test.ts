@@ -272,18 +272,36 @@ describe('error-handler', () => {
       expect(body.code).toBe('TOKEN_CLAIM_INVALID');
     });
 
-    it('deve retornar 401 para erro com mensagem contendo "exp"', async () => {
-      const response = handleApiError(new Error('exp claim invalid'));
+    it('deve retornar 401 para assinatura JWS que não confere (jose)', async () => {
+      const jwsError = new Error('signature verification failed');
+      jwsError.name = 'JWSSignatureVerificationFailed';
+
+      const response = handleApiError(jwsError);
+      expect(response.status).toBe(401);
+      const body = await getResponseBody(response);
+      expect(body.code).toBe('TOKEN_INVALID');
+    });
+
+    it('deve reconhecer o erro do jose pelo código ERR_JWT_EXPIRED', async () => {
+      const jwtError = Object.assign(new Error('"exp" claim timestamp check failed'), {
+        code: 'ERR_JWT_EXPIRED',
+      });
+
+      const response = handleApiError(jwtError);
       expect(response.status).toBe(401);
       const body = await getResponseBody(response);
       expect(body.code).toBe('TOKEN_EXPIRED');
     });
 
-    it('deve retornar 401 para erro com mensagem contendo "signature"', async () => {
-      const response = handleApiError(new Error('Invalid signature verification'));
-      expect(response.status).toBe(401);
-      const body = await getResponseBody(response);
-      expect(body.code).toBe('TOKEN_INVALID');
+    it('não trata como JWT um erro comum cuja mensagem contém "exp" ou "signature"', async () => {
+      // SyntaxError de corpo JSON inválido: "Unexpected token ..." contém "exp".
+      const json = handleApiError(new SyntaxError('Unexpected token } in JSON at position 1'));
+      expect(json.status).toBe(500);
+
+      const generico = handleApiError(new Error('No signatures found matching the expected signature'));
+      expect(generico.status).toBe(500);
+      const body = await getResponseBody(generico);
+      expect(body.code).toBe('INTERNAL_SERVER_ERROR');
     });
   });
 
