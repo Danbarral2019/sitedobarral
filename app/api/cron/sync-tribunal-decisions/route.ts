@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { verifyCronAuth } from '@/lib/cron-auth';
 import { apiLogger } from '@/lib/logger';
 import { definirOrcamentoIA } from '@/lib/tribunal-scrapers/classifier';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
     const codigos = somente ? somente.split(',').map((c) => c.trim()).filter(Boolean) : null;
     const scrapers = getAllScrapers().filter((s) => (codigos ? codigos.includes(s.code) : !s.agendaPropria));
     if (codigos && scrapers.length !== codigos.length) {
-      return NextResponse.json({ error: `Scraper não encontrado em "${somente}"` }, { status: 400 });
+      throw new ValidationError(`Scraper não encontrado em "${somente}"`);
     }
     const results = [];
 
@@ -117,11 +119,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, summary, results });
   } catch (error) {
-    Sentry.captureException(error, { tags: { cron: 'sync-tribunal-decisions' } });
-    apiLogger.error({ err: error }, '[Sync Tribunal Decisions] Erro fatal:');
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    );
+    if (!(error instanceof ValidationError)) {
+      Sentry.captureException(error, { tags: { cron: 'sync-tribunal-decisions' } });
+    }
+    return handleApiError(error);
   }
 }

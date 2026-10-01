@@ -9,6 +9,8 @@ import { definirOrcamentoIA } from '@/lib/tribunal-scrapers/classifier';
 import { logScraperHealth } from '@/lib/tribunal-scrapers/utils';
 import { SCRAPER_CODE_STF } from '@/lib/stf/constantes';
 import type { StfDocumentoBruto, StfDecisaoNormalizada } from '@/lib/stf/types';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, ValidationError } from '@/lib/errors/api-error';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -30,10 +32,7 @@ export async function POST(request: NextRequest) {
       | null;
 
     if (!body || !Array.isArray(body.documentos)) {
-      return NextResponse.json(
-        { error: 'corpo inválido: esperado { documentos: [] }' },
-        { status: 400 }
-      );
+      throw new ValidationError('corpo inválido: esperado { documentos: [] }');
     }
 
     const recebidos = body.documentos.length;
@@ -46,10 +45,7 @@ export async function POST(request: NextRequest) {
         duration: Date.now() - inicio,
         errorMessage: 'lote vazio — coleta no STF não produziu documentos',
       });
-      return NextResponse.json(
-        { error: 'lote vazio', recebidos: 0 },
-        { status: 422 }
-      );
+      throw new ApiError(422, 'lote vazio', 'EMPTY_BATCH', { recebidos: 0 });
     }
 
     const normalizados = body.documentos
@@ -90,6 +86,11 @@ export async function POST(request: NextRequest) {
       erros: r.erros,
     });
   } catch (error) {
+    // 400/422 acima: já registrados quando preciso, vão direto ao handler.
+    if (error instanceof ApiError) {
+      return handleApiError(error);
+    }
+
     const mensagem = error instanceof Error ? error.message : 'Erro desconhecido';
     Sentry.captureException(error, { tags: { ingest: 'stf' } });
     apiLogger.error({ err: error }, '[Ingest STF] erro fatal');
@@ -99,6 +100,6 @@ export async function POST(request: NextRequest) {
       errorMessage: mensagem,
     });
 
-    return NextResponse.json({ error: mensagem }, { status: 500 });
+    return handleApiError(error);
   }
 }
