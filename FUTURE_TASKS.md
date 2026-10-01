@@ -1,13 +1,33 @@
 # Tarefas Futuras — Site do Prof. Daniel Barral
 
 > **Repositório central de melhorias, pendências e novas funcionalidades.**
-> Atualizado em: 2026-09-27
+> Atualizado em: 2026-10-01
 
 ---
 
-## 📌 Estado em 27/09/2026
+## 📌 Estado em 01/10/2026 (conferência-base de 27/09/2026)
 
 Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef3a`), o histórico completo do git (PRs até #231), os handoffs `docs/HANDOFF-*.md`, os relatórios de `docs/audits/` e os roadmaps. Nada foi verificado no banco de produção nem em serviço externo: onde a conclusão depende do dado (conteúdo populado, execução de cron, configuração na Vercel ou na Stripe), o item ficou como **dúvida** e não como concluído. As seções históricas abaixo foram mantidas, com a marca `✅ CONCLUÍDO (data)` e a evidência nos itens resolvidos. As dúvidas levantadas na conferência foram respondidas pelo Daniel no mesmo dia, com consulta ao banco de produção; as respostas estão incorporadas abaixo e resumidas em "Decisões e verificações de 27/09/2026".
+
+### Entregue entre 27/09 e 01/10/2026 (PRs #239 a #326)
+
+Conferido no histórico da `main` (`ad405d37`) e nos PRs; nada foi verificado no banco de produção nem na Vercel.
+
+- **Segurança (auditoria de rotas, item 1):** autenticação e pagamento (#309), formulários, métricas públicas e abuso (#311), regra única de acesso a documentos (#312), remoção das rotas de busca que expunham documentos privados (#299), Sentry nos erros tratados de pagamento, login e assistente (#314).
+- **Sessão e cadastro:** revogação de JWT por `User.tokenVersion` e cadastro sem vaga de QR antecipada nem 409 (#317), com E2E (#318). Migração `20260930180000_add_user_token_version_pending_qr`, aditiva; roda só no deploy de produção.
+- **IA exige login:** chat de artigo e busca da Lei 14.133 com IA, histórico de busca gravado pelo servidor e planejamento filtrado por curso (#316). Migração `20260930180000_add_search_history_resposta_do_servidor`, aditiva.
+- **Newsletter com double opt-in** e descadastro por link assinado (#315). Migração `20260930150000_newsletter_double_opt_in`, que marca os inscritos atuais como confirmados.
+- **Dependências:** `cheerio` 0.22 para 1.2 (#310) e `xlsx` por `exceljs` (#319); `npm audit --omit=dev` em 6.
+- **Fase 8:** cinco lotes de rotas (#320 a #324) e o resíduo dos 4xx crus (#325).
+- **Legislação:** relações entre atos e aviso de revogação (#277), listagem e filtros (#278), remoção da redação riscada do Planalto (#280, #281), cron diário dos atos (#286), vigência pela publicação no DOU (#289), validação do texto antes de gravar (#290), alerta de raspagem falha (#291), histórico do texto (#294).
+- **SEO e layout:** noindex em páginas de conta e na prévia da Lei 14.133 (#283, #285), canonicals e títulos (#282, #287), rolagem horizontal no celular (#279).
+- **Teses do TCU:** assistente com teses (#304), `--incluir-lote` na promoção à vitrine (#306), `--desfazer` no `retirar-teses` (#308).
+- **Higiene:** guias da raiz para `docs/` (#302), resíduos do backlog (#297), seeds do curso 1 arquivados (#293), aluno de teste e `create-admin` no Prisma 7 (#292, #295), CLAUDE.md sem a senha do aluno de teste (#305), import do Sentry em `@sentry/nextjs/config` e actions na v5 (#326).
+- **Mesclados do quadro anterior:** CNPJ no rodapé (#238), aposentadoria de `daily-tcu-clipping` e `sync-datajud` (#237), pausa do `social-publish` (#236), clipping com TCDF, TRF5 e TJDFT (#232), bundle e `vitest` (#233), carga de alvos citados (#229).
+
+**Em aberto no GitHub:** apenas o PR #296 (rascunho, RTFs do TCU).
+
+**Ações suas, fora do código:** conferir se as três migrações aditivas rodaram no deploy de produção; atualizar `CLIPPING_TRIBUNAIS_ENABLED` na Vercel; cadastrar `NEWSLETTER_TOKEN_SECRET` (hoje cai em `JWT_SECRET`, e a troca deste invalidaria os links de descadastro já enviados); decidir sobre o `.xls` recusado no upload do TCU Manager (PR #319).
 
 ### Aberto, por prioridade
 
@@ -15,7 +35,7 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 
 | Item | Situação | Evidência / próximo passo |
 |---|---|---|
-| P2. Verificação dos fluxos de lançamento | Aberto; testes E2E em construção em outra sessão | `docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`. Ficam fora dela a renderização da newsletter em Gmail/Outlook e o PIX |
+| P2. Verificação dos fluxos de lançamento | Parcial; E2E de registro, assinatura e revogação de sessão na CI | `docs/HANDOFF-2026-09-27-nuvem-e2e-lancamento.md`; `e2e/revogacao-sessao.spec.ts` entrou no PR #318 (30/09/2026) e roda só na CI. Ficam fora a renderização da newsletter em Gmail/Outlook, o PIX, o login de admin e a verificação de e-mail |
 | PIX (Pix Automático) | Bloqueio externo | Aguarda convite da Stripe; código atrás de `NEXT_PUBLIC_PIX_ENABLED` (seção P1) |
 | Indexar 1.519 decisões de tribunal aprovadas e fora da busca semântica | Aberto; o teto do Gemini, estourado em 26/09/2026, foi resolvido em 27/09/2026 (informação do Daniel) | `scripts/indexar-decisoes-pendentes.ts` (PR #231) para no primeiro erro de cota e devolve o lote a `pending`; o cron `process-index-jobs` sozinho levaria ~50 dias. Antes de rodar, levantar volume e custo |
 | CNPJ em destaque (art. 2º, I, do Decreto nº 7.962, de 15 de março de 2013) | ✅ CONCLUÍDO (2026-09-27) | PR #238: razão social, CNPJ e endereço no rodapé de todas as páginas, inclusive `/planos` (`components/layout/Footer.tsx`). Registro original: O CNPJ 53.875.260/0001-77 está em `app/termos/page.tsx` e `app/privacidade/page.tsx`, mas não no rodapé nem em `app/(acervo)/planos/page.tsx` (grep de 27/09). Falta exibi-lo onde a contratação acontece, com fácil visualização |
@@ -31,10 +51,10 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 | BIA-5. Buracos de dados | Parcial | Informativos do TCU voltaram via CSV (PR #138); Inf. 44/2010, Inf. 50/2011 e Enunciado IBDA nº 5 não foram reconferidos no banco |
 | `/api/area-restrita/search-all` sem filtro por matrícula | ✅ CONCLUÍDO (2026-09-30) | Rota removida, com `/api/search/unified`: nenhuma tela chamava as duas, e na segunda o filtro de acesso era sobrescrito pela condição de texto (qualquer usuário logado recebia título, link e conteúdo de documentos privados dos cursos). Registro original: nenhuma referência a matrícula na rota (medido em 27/09); `docs/HANDOFF-2026-08-18-stf-e-busca.md` §6(6) |
 | Teses do TCU: 20 cartões de reconferência e promoção à vitrine | Aberto; ação editorial do Daniel | `docs/HANDOFF-2026-09-09-heranca-editorial.md` §4 |
-| Teses do TCU: Onda 4 (busca por IA) | Plano escrito, não executado | PR #213 aberto desde 08/09/2026; o comando `prisma migrate diff` do plano usa flags removidas no Prisma 7.8 |
-| Acórdãos citados que não existem no acervo (alvos citados do TCU) | Em andamento em outra sessão | PR #229 (rascunho). Não mexer nos arquivos dela |
-| Clipping com TCDF, TRF5 e TJDFT | Em andamento | PR #232 (rascunho) |
-| Bundle do navegador e `vitest` varrendo `.claude/` | Em andamento | PR #233 (rascunho); `vitest.config.ts` ainda não exclui `.claude/**` na `main` |
+| Teses do TCU: Onda 4 (busca por IA) | ✅ CONCLUÍDO (2026-09-30) | Plano mesclado (PR #213, 28/09/2026) e execução no PR #304: o assistente passou a incluir as teses do TCU em 30/09/2026, antes da medição `npm run eval:teses` (registro na §9 da spec). Resta rodar a medição de deslocamento e registrar o resultado |
+| Acórdãos citados que não existem no acervo (alvos citados do TCU) | Em andamento | Carga mesclada (PR #229, 27/09/2026) e relatório (PR #253, 30/09/2026). Das 607 falhas, 220 são RTFs; o PR #296 (rascunho, aberto) recupera RTFs com imagem embutida e fontes que o parser recusava, com 215 falhas ainda em reprocessamento. Documentos seguem `isPublic: false` e `embeddingStatus: 'skipped'`; a promoção a acervo público depende de `scripts/promover-grafo-licitacao.ts` |
+| Clipping com TCDF, TRF5 e TJDFT | Código ✅ (PR #232, 27/09/2026); falta a variável na Vercel | O default novo é `TCU,TCE-PE,TCDF,STF,STJ,TRF5,TJDFT`, mas `CLIPPING_TRIBUNAIS_ENABLED` na Vercel (antes `TCU,TCE-PE,STF,STJ`) sobrepõe o default. Remover ou atualizar a variável; não conferi o painel |
+| Bundle do navegador e `vitest` varrendo `.claude/` | ✅ CONCLUÍDO (2026-09-27) | PR #233: JavaScript inicial de 192 para 146 KB e `vitest.config.ts` com `**/.claude/**` excluído (linha 42) |
 | STJ: demais resíduos do conector | Aberto; dumps de 2022 e 2023 sob demanda | `docs/HANDOFF-2026-08-19-stj-e-clipping.md` §8: 7 dumps de 2022 e 2023 perdidos por WAF (`npm run stj:coletar -- --tudo`), dois `scraperCode` para o mesmo conector, cobertura nunca medida, guard de mojibake sem fixture real. A primeira execução do `sync-stj` na Vercel (05/09) não foi conferida |
 | Eval: adaptador não espelha produção | Aberto | `baselineSearch` não aplica `detectQueryDomain`; as 10 anotações de jurisprudência do golden set são derivadas de metadados e a conferência humana está pendente (decisão de 27/09/2026) (`docs/HANDOFF-2026-08-18-stf-e-busca.md` §5) |
 | FAQ: faltam 4 perguntas | Parcial | 26 publicadas de 30 previstas (banco, 27/09/2026). Glossário cumprido: 95 termos públicos |
@@ -46,8 +66,8 @@ Conferência item a item feita em 27/09/2026 contra o código da `main` (`ffa6ef
 
 | Item | Situação | Evidência |
 |---|---|---|
-| Rotas fora do padrão Fase 8 | Em revisão (lotes de 01/10, aguardando merge) | Branches `claude/fase8-lote-1-area-restrita-auth`, `-lote-2-publico-conteudo`, `-lote-3-admin-conteudo`, `-lote-4-admin-midia-social` e `-lote-5-webhooks-crons` levam 76 rotas ao padrão. Medido com os cinco lotes aplicados: 36 de 295 `route.ts` sem `handleApiError` nem os wrappers, dos quais 33 são crons com `verifyCronAuth` + `withCronTelemetry`/`withCronRoute` (padrão próprio) e 3 não têm resposta de erro (`auth/logout` e os pixels `clipping/track` e `newsletter/track`). Fora dos lotes: as rotas TCU e de importação de Excel (`admin/analyze-tcu-file`, `admin/convert-tcu`, `admin/tcu-manager/**`, `admin/import-excel/**`), em outra frente; e 25 rotas que já usam o padrão, mas ainda devolvem um 4xx cru em algum ramo. Os lotes também corrigem o `handleApiError`, que tratava como JWT expirado (401) qualquer erro com "exp" na mensagem, como o `SyntaxError` de JSON inválido |
-| `console.error` versus Sentry | Aberto (medido em 27/09) | 239 `console.error` para 41 `Sentry.capture*` em `app/`, `lib/`, `components/` e `hooks/`, sem testes (≈5,8:1) |
+| Rotas fora do padrão Fase 8 | Lotes ✅ mesclados (PRs #320 a #325, 30/09 a 01/10/2026); resíduo | Medido em 01/10/2026: 53 de 295 `route.ts` sem `handleApiError` nem os wrappers, dos quais 32 são crons (padrão próprio, `verifyCronAuth` + `withCronTelemetry`/`withCronRoute`) e 21 não são: as rotas TCU e de importação de Excel (`admin/analyze-tcu-file`, `admin/convert-tcu`, `admin/tcu-manager/**`, `admin/import-excel/**`) e as que não têm resposta de erro (`auth/logout`, `clipping/track`, `newsletter/track`). Cinco rotas usam o padrão e mantêm um 4xx cru por contrato de frontend (`admin/faq` e `admin/faq/[id]` com 422, `auth/login` 403, `newsletter/confirm` 400, `certificates/verify/[numero]` 404). O `handleApiError` deixou de tratar como JWT expirado qualquer erro com "exp" na mensagem |
+| `console.error` versus Sentry | Aberto (medido em 01/10/2026) | 189 `console.error` para 45 linhas com `Sentry.capture*` em `app/`, `lib/`, `components/` e `hooks/` (≈4,2:1, contra 5,8:1 em 27/09); o PR #314 levou ao Sentry os erros tratados de pagamento, login e assistente |
 | Chunk compartilhado de 402 KB na home | Aberto | `docs/audits/2026-08-31-desempenho-remedicao.md` |
 | Redirecionamento apex → www em um salto | Aberto; configuração da Vercel, fora do repositório | Conferido em 27/09/2026: `http://profdanielbarral.com` → 308 → `https://profdanielbarral.com` → **307 (temporário)** → `https://www.profdanielbarral.com`. Ajustar no painel de domínios para um único redirecionamento permanente |
 | Check mensal da newsletter na nuvem | Aberto; configuração do ambiente | O alerta de 02/09 foi bloqueio de rede do ambiente; liberar os domínios do site na política de rede da sessão |

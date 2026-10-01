@@ -163,7 +163,7 @@ Ver `.env.example` e `SETUP.md`. Chat RAG lê a `GEMINI_API_KEY` do ambiente (`.
 
 **Estado atual (set/2026):** produto em produção. Assistente de IA usa **Claude Sonnet 5 + Citations API**; síntese (BIA-1) e cobertura de dados (BIA-5) melhoradas. **Trilha de tuning de retrieval FECHADA com evidência** — recall@5 ~65% é o teto do dataset; próximos ganhos vêm de answer-quality ou mais dados, não tuning (ver `docs/ROADMAP_BUSCA_QUALIDADE.md`).
 - **Acervo (ago-set/2026):** teses do TCU com herança editorial e vitrine pública (`/teses`); jurisprudência do STF (coleta mensal manual, WAF), STJ (Espelhos de Acórdãos), TCDF, TRF5 e TJDFT, com julgamento por IA calibrada dos pendentes; acórdãos do grafo de precedentes que citam lei de licitações viram acervo público; inteiro teor do DECOR com OCR. Handoffs em `docs/HANDOFF-*.md`.
-- **Quadro de pendências:** topo de `FUTURE_TASKS.md` ("Estado em 27/09/2026"), conferido contra o código.
+- **Quadro de pendências:** topo de `FUTURE_TASKS.md` ("Estado em 01/10/2026"), conferido contra o histórico da `main`.
 - **Pagamentos:** Stripe **LIVE e cobrando por cartão** (smoke E2E validado jul/2026). Único gap = **PIX** (Pix Automático é "invite only"; código pronto atrás de `NEXT_PUBLIC_PIX_ENABLED`, aguarda convite da Stripe).
 - **Pré-lançamento:** coming-soon **ativado** (`COMING_SOON_ENABLED`). 
 - **Backlog:** `FUTURE_TASKS.md` · **Changelog:** `docs/PROJECT_HISTORY.md` + git.
