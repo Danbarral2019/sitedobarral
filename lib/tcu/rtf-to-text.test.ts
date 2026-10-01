@@ -125,3 +125,27 @@ describe('rtfToText', () => {
     expect(t).toMatch(/4851\/2017[\s\S]*TCU[\s\S]*1ª C[âa]mara/);
   });
 });
+
+describe('rtfToText: casos que derrubavam o rtf-parser (30/09/2026)', () => {
+  it('extrai o texto com imagem embutida no meio do parágrafo, sem perder o parágrafo', async () => {
+    const rtf = `{\\rtf1\\ansi\\ansicpg1252\\deff0\n\\pard Texto antes {\\pict\\pngblip ${'89504e47'.repeat(50)}} e depois.\\par\n}`;
+    expect(await rtfToText(Buffer.from(rtf, 'latin1'))).toBe('Texto antes  e depois.');
+  });
+
+  it('aceita fonte Symbol (\\fcharset2) e charset desconhecido (\\fcharset79)', async () => {
+    const rtf = String.raw`{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\froman Times;}{\f1\fnil\fcharset2 Symbol;}{\f2\fnil\fcharset79 Estranha;}}
+\pard\f0 Ac\'f3rd\'e3o\par
+}`;
+    expect(await rtfToText(Buffer.from(rtf, 'latin1'))).toBe('Acórdão');
+  });
+
+  it('aceita subentrada de índice (\\:) e caractere de fórmula (\\|)', async () => {
+    const rtf = String.raw`{\rtf1\ansi\ansicpg1252\deff0
+\pard Licita\'e7\'e3o{\xe {Contratos\:Aditivos}}\par
+\pard F\|im\par
+}`;
+    const texto = await rtfToText(Buffer.from(rtf, 'latin1'));
+    expect(texto).toContain('Licitação');
+    expect(texto).toContain('Fim');
+  });
+});

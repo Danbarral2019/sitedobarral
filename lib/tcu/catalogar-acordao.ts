@@ -86,19 +86,24 @@ export interface OpcoesCatalogacao {
    * Medido em 27/09/2026: um RTF de 15 MB do Plenário levou 200 s para descer.
    */
   timeoutMs?: number;
+  /** Descarta imagens do RTF durante o download (ver fetchInteiroTeor). Padrão: não. */
+  filtrarBinarios?: boolean;
 }
 
 export async function catalogarAcordao(
   doc: AcordaoParaCatalogar,
   opcoes: OpcoesCatalogacao = {}
 ): Promise<ResultadoCatalogacao> {
-  const { enfileirarEmbedding = true, promover = true, timeoutMs } = opcoes;
+  const { enfileirarEmbedding = true, promover = true, timeoutMs, filtrarBinarios } = opcoes;
   if (!doc.tcuLinkPDF) {
     await marcarFalha(doc.id, 'tcuLinkPDF ausente');
     return { status: 'falha', erro: 'tcuLinkPDF ausente' };
   }
 
-  const r = await fetchInteiroTeor(doc.tcuLinkPDF, timeoutMs ? { timeoutMs } : undefined);
+  const r = await fetchInteiroTeor(
+    doc.tcuLinkPDF,
+    timeoutMs || filtrarBinarios ? { ...(timeoutMs ? { timeoutMs } : {}), filtrarBinarios } : undefined
+  );
   if (!r.ok) {
     await marcarFalha(doc.id, r.erro);
     return { status: 'falha', erro: r.erro };

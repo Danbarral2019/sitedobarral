@@ -11,6 +11,7 @@
  * Ref.: docs/superpowers/specs/2026-07-15-tcu-inteiro-teor-relevancia-design.md
  */
 import * as rtfParser from 'rtf-parser';
+import { descartarGruposBinarios } from './rtf-filtro-binario';
 
 /**
  * Parágrafo que é dump hexadecimal de imagem (EMF/WMF), não texto.
@@ -54,9 +55,41 @@ function neutralizarHifensInquebráveis(rtf: string): string {
   return rtf.replace(/\\\\|\\[_-]/g, (m) => (m === '\\\\' ? m : m === '\\_' ? '-' : ''));
 }
 
+/**
+ * Mesma família de bug: `rtf-parser@1.3.3` chama `emitIndexSubEntry` (`\:`,
+ * subentrada de índice) e `emitFormula` (`\|`), que não existem, e a extração
+ * inteira rejeita. Os dois só aparecem em campos de índice, sem texto útil.
+ * Mesma guarda do `\\` literal da função acima.
+ */
+function neutralizarSimbolosSemHandler(rtf: string): string {
+  return rtf.replace(/\\\\|\\[:|]/g, (m) => (m === '\\\\' ? m : m === '\\:' ? ':' : ''));
+}
+
+/**
+ * `\fcharsetN` que o parser não sabe decodificar vira `\fcharset0` (ANSI).
+ * O `rtf-parser` mapeia 2 (Symbol) para uma codificação que o iconv-lite não
+ * conhece, e rejeita códigos fora da tabela (visto: 79). Em 30/09/2026 isso
+ * derrubava 17 acórdãos inteiros só por declararem uma fonte dessas na tabela
+ * de fontes. Decodificar esses trechos como ANSI troca, no máximo, um símbolo
+ * ou uma letra grega por outro caractere; o resto do texto não muda.
+ */
+const CHARSETS_DECODIFICAVEIS = new Set([0, 1, 77, 128, 129, 134, 136, 161, 162, 163, 177, 178, 186, 204, 222, 254]);
+
+function normalizarCharsets(rtf: string): string {
+  return rtf.replace(/\\fcharset(\d+)/g, (m, n: string) =>
+    CHARSETS_DECODIFICAVEIS.has(Number(n)) ? m : '\\fcharset0'
+  );
+}
+
 export async function rtfToText(buf: Buffer): Promise<string> {
+  // Imagens e objetos embutidos saem antes do parser: são quase todo o peso
+  // dos RTFs grandes e o que estourava a pilha dele (rtf-filtro-binario.ts).
   // O RTF do TCU é cp1252; latin1 preserva os bytes para a lib decodificar \'hh.
-  const rtf = neutralizarHifensInquebráveis(buf.toString('latin1'));
+  const rtf = normalizarCharsets(
+    neutralizarSimbolosSemHandler(
+      neutralizarHifensInquebráveis(descartarGruposBinarios(buf).toString('latin1'))
+    )
+  );
 
   // rtf-parser não valida o formato: para entrada sem cabeçalho RTF, ele
   // devolve doc.content com o texto cru (sem erro), o que mascararia um
