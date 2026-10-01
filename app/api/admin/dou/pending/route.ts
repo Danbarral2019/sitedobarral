@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/dou/pending
@@ -12,10 +13,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação de admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Unauthorized');
     }
 
     // Buscar documentos pendentes
@@ -59,10 +57,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    apiLogger.error({ err: error }, '[DOU Pending] Error:');
-    return NextResponse.json(
-      { error: 'Failed to fetch pending documents' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -5,6 +5,13 @@ import { classifyDocumentEnhanced, bulkClassify } from '@/lib/auto-classifier';
 import { courses } from '@/data/courses';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  ValidationError,
+} from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/documents/batch-classify
@@ -23,12 +30,12 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+      throw new AuthorizationError('Acesso negado');
     }
 
     // Parse do body
@@ -36,19 +43,13 @@ export async function POST(request: NextRequest) {
     const { documentIds, useAI = true, autoApply = false } = body;
 
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
-      return NextResponse.json(
-        { error: 'documentIds deve ser um array não vazio' },
-        { status: 400 }
-      );
+      throw new ValidationError('documentIds deve ser um array não vazio');
     }
 
     // Limite de documentos por request (evitar timeout)
     const MAX_BATCH_SIZE = 50;
     if (documentIds.length > MAX_BATCH_SIZE) {
-      return NextResponse.json(
-        { error: `Máximo ${MAX_BATCH_SIZE} documentos por vez` },
-        { status: 400 }
-      );
+      throw new ValidationError(`Máximo ${MAX_BATCH_SIZE} documentos por vez`);
     }
 
     // Buscar documentos
@@ -67,10 +68,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (documents.length === 0) {
-      return NextResponse.json(
-        { error: 'Nenhum documento encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Documento');
     }
 
     // Classificar documentos
@@ -191,10 +189,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao classificar documentos em lote:');
-    return NextResponse.json(
-      { error: 'Erro ao classificar documentos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/dou/auto-approved
@@ -17,10 +18,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação de admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Unauthorized');
     }
 
     // Buscar documentos auto-aprovados não validados
@@ -68,13 +66,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    apiLogger.error({ err: error }, '[DOU Auto-Approved] Error:');
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch auto-approved documents',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

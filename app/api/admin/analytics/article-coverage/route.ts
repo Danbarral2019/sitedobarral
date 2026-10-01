@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getLeiArticles } from '@/lib/lei-articles';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/analytics/article-coverage?articles=1,6,75
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     // 2. Extrair artigos da query string
@@ -24,10 +25,7 @@ export async function GET(request: NextRequest) {
     const articlesParam = searchParams.get('articles');
 
     if (!articlesParam) {
-      return NextResponse.json(
-        { error: 'Parâmetro "articles" é obrigatório (ex: ?articles=1,6,75)' },
-        { status: 400 }
-      );
+      throw new ValidationError('Parâmetro "articles" é obrigatório (ex: ?articles=1,6,75)');
     }
 
     const requestedArticles = articlesParam.split(',').map((n) => n.trim());
@@ -92,14 +90,6 @@ export async function GET(request: NextRequest) {
       total: requestedArticles.length,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[Article Coverage] Erro:');
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao calcular cobertura de artigos',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
