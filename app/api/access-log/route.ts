@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
+import { NotFoundError } from '@/lib/errors/api-error';
 import { getAcessoDoUsuario, podeVerDocumento } from '@/lib/search/acesso-documentos';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /** Teto do histórico devolvido pelo GET. */
 const LIMITE_MAXIMO = 200;

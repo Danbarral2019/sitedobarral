@@ -3,7 +3,13 @@ import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { getPublicR2Url, fileExistsInR2 } from '@/lib/storage/r2-client';
 import { prisma } from '@/lib/prisma';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  ValidationError,
+} from '@/lib/errors/api-error';
 
 // ===========================
 // Types
@@ -35,36 +41,27 @@ export async function POST(req: NextRequest) {
     const token = cookieStore.get('auth-token');
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+      throw new AuthenticationError('Não autenticado');
     }
 
     const decoded = await verifyToken(token.value);
 
     if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Apenas administradores podem confirmar uploads' },
-        { status: 403 }
-      );
+      throw new AuthorizationError('Apenas administradores podem confirmar uploads');
     }
 
     // 2. Parse request
     const body: ConfirmUploadRequest = await req.json();
 
     if (!body.fileId || !body.r2Key || !body.fileName) {
-      return NextResponse.json(
-        { error: 'Dados incompletos (fileId, r2Key, fileName obrigatórios)' },
-        { status: 400 }
-      );
+      throw new ValidationError('Dados incompletos (fileId, r2Key, fileName obrigatórios)');
     }
 
     // 3. Verify file exists in R2 (optional but recommended)
     const exists = await fileExistsInR2(body.r2Key);
 
     if (!exists) {
-      return NextResponse.json(
-        { error: 'Arquivo não encontrado no storage' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Arquivo no storage');
     }
 
     // 4. Generate public URL
@@ -117,27 +114,7 @@ export async function POST(req: NextRequest) {
       message: 'Upload confirmado e documento criado com sucesso',
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Upload confirmation error:');
-
-    // If it's a Prisma error, provide more details
-    if (error && typeof error === 'object' && 'code' in error) {
-      return NextResponse.json(
-        {
-          error: 'Erro ao criar documento no banco de dados',
-          details: (error as { message?: string }).message,
-          code: (error as { code?: string }).code,
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao confirmar upload',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

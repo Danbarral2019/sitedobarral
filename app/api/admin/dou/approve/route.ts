@@ -4,6 +4,13 @@ import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { setLeiArticles } from '@/lib/lei-articles';
 import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  AuthenticationError,
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from '@/lib/errors/api-error';
 
 /**
  * Type para DOUStagingDocument usado neste endpoint
@@ -51,10 +58,7 @@ export async function POST(request: NextRequest) {
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Unauthorized');
     }
 
     const adminEmail = authResult.user.email;
@@ -65,24 +69,15 @@ export async function POST(request: NextRequest) {
 
     // 3. Validações básicas
     if (!documentId || typeof documentId !== 'string') {
-      return NextResponse.json(
-        { error: 'documentId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('documentId é obrigatório');
     }
 
     if (!action || !['approve', 'reject'].includes(action)) {
-      return NextResponse.json(
-        { error: 'action deve ser "approve" ou "reject"' },
-        { status: 400 }
-      );
+      throw new ValidationError('action deve ser "approve" ou "reject"');
     }
 
     if (action === 'approve' && (!courseIds || courseIds.length === 0)) {
-      return NextResponse.json(
-        { error: 'Selecione pelo menos um curso para vincular o documento' },
-        { status: 400 }
-      );
+      throw new ValidationError('Selecione pelo menos um curso para vincular o documento');
     }
 
     // 4. Buscar documento no staging
@@ -101,10 +96,7 @@ export async function POST(request: NextRequest) {
 
     if (!stagingDoc) {
       console.warn('[DOU Approve] Documento não encontrado:', documentId);
-      return NextResponse.json(
-        { error: 'Documento não encontrado no staging. Pode ter sido removido ou já processado.' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Documento no staging');
     }
 
     // 5. Verificar se já foi aprovado/rejeitado
@@ -115,14 +107,13 @@ export async function POST(request: NextRequest) {
         reviewedAt: stagingDoc.reviewedAt,
       });
 
-      return NextResponse.json(
+      throw new ConflictError(
+        `Documento já foi ${stagingDoc.finalDecision === 'approved' ? 'aprovado' : 'rejeitado'} anteriormente`,
         {
-          error: `Documento já foi ${stagingDoc.finalDecision === 'approved' ? 'aprovado' : 'rejeitado'} anteriormente`,
           decision: stagingDoc.finalDecision,
           reviewedBy: stagingDoc.reviewedBy,
           reviewedAt: stagingDoc.reviewedAt,
-        },
-        { status: 409 }
+        }
       );
     }
 
@@ -138,29 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    apiLogger.error({ err: error }, '[DOU Approve] ERRO CRÍTICO:');
-
-    // Log detalhado do erro
-    if (error instanceof Error) {
-      apiLogger.error({ err: error.name }, '[DOU Approve] Error name:');
-      apiLogger.error({ err: error.message }, '[DOU Approve] Error message:');
-      apiLogger.error({ err: error.stack }, '[DOU Approve] Error stack:');
-    }
-
-    // Log do erro completo como objeto
-    if (error && typeof error === 'object') {
-      apiLogger.error({ err: JSON.stringify(error, Object.getOwnPropertyNames(error), 2) }, '[DOU Approve] Error object:');
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao processar aprovação/rejeição',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-        errorType: error instanceof Error ? error.name : typeof error,
-        debugInfo: process.env.NODE_ENV === 'development' ? error : undefined,
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -187,13 +156,9 @@ async function handleApproval(
     });
 
     if (existingDoc) {
-      return NextResponse.json(
-        {
-          error: 'Documento já existe no acervo',
-          existingDocumentId: existingDoc.id,
-        },
-        { status: 409 }
-      );
+      throw new ConflictError('Documento já existe no acervo', {
+        existingDocumentId: existingDoc.id,
+      });
     }
 
     // Parse da data de publicação (DD/MM/YYYY → DateTime)

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { NON_PUBLIC_LISTING_CATEGORIES, PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 const PERIODS = new Set(['30d', '6m', '1y', 'all']);
 const CATEGORY_PATTERN = /^[a-z0-9_-]{1,64}$/i;
@@ -44,17 +46,11 @@ export async function GET(
       category &&
       (!CATEGORY_PATTERN.test(category) || NON_PUBLIC_LISTING_CATEGORIES.includes(category))
     ) {
-      return NextResponse.json(
-        { error: 'Categoria inválida' },
-        { status: 400 }
-      );
+      throw new ValidationError('Categoria inválida');
     }
 
     if (!articleNumber) {
-      return NextResponse.json(
-        { error: 'Número do artigo é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Número do artigo é obrigatório');
     }
 
     const result = await withCache(
@@ -181,10 +177,6 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar timeline:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar timeline do artigo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -6,6 +6,8 @@ import { LEI_14133_ARTIGOS } from '@/data/lei-14133-artigos';
 import type { ContentType, ContentTreeNode, ContentTreeResponse } from '@/lib/types/global-search';
 import { ATO_VISIVEL } from '@/lib/legislacao/visibilidade';
 import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
 
 // Categorias que devem ser agrupadas sob "Pareceres"
 const PARECER_CATEGORIES = ['parecer', 'parecer-vinculante', 'decor'];
@@ -57,12 +59,12 @@ export async function GET(request: NextRequest) {
     // Verify authentication
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const authPayload = await verifyToken(token);
     if (!authPayload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const isAdmin = authPayload.role === 'admin';
@@ -85,7 +87,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      throw new NotFoundError('Usuário');
     }
 
     // Get enrolled course IDs
@@ -395,7 +397,6 @@ export async function GET(request: NextRequest) {
       totalCount,
     } as ContentTreeResponse);
   } catch (error) {
-    console.error('[Content Tree] Error:', error);
-    return NextResponse.json({ error: 'Failed to build content tree' }, { status: 500 });
+    return handleApiError(error);
   }
 }

@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { Prisma } from '@prisma/client';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 // Função helper para gerar slug
 function generateSlug(term: string): string {
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
     // Verificar autenticação
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -79,11 +80,7 @@ export async function GET(request: NextRequest) {
       categories,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error fetching glossary terms (admin):');
-    return NextResponse.json(
-      { error: 'Erro ao buscar termos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -93,7 +90,7 @@ export async function POST(request: NextRequest) {
     // Verificar autenticação
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const body = await request.json();
@@ -111,10 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Validações
     if (!term || !definition) {
-      return NextResponse.json(
-        { error: 'Termo e definição são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('Termo e definição são obrigatórios');
     }
 
     // Gerar slug
@@ -128,10 +122,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json(
-        { error: 'Já existe um termo com este nome' },
-        { status: 400 }
-      );
+      throw new ValidationError('Já existe um termo com este nome');
     }
 
     // Preparar dados para salvar
@@ -172,10 +163,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error creating glossary term:');
-    return NextResponse.json(
-      { error: 'Erro ao criar termo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

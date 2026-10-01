@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 
 // GET /api/favorites - Listar favoritos do usuário
@@ -9,12 +11,12 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const { searchParams } = new URL(request.url);
@@ -33,8 +35,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ favorites });
   } catch (error) {
-    console.error('Erro ao listar favoritos:', error);
-    return NextResponse.json({ error: 'Erro ao listar favoritos' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -44,22 +45,19 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const body = await request.json();
     const { documentId, courseId } = body;
 
     if (!documentId) {
-      return NextResponse.json(
-        { error: 'documentId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('documentId é obrigatório');
     }
 
     // Verifica se já existe
@@ -85,8 +83,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ favorite }, { status: 201 });
   } catch (error) {
-    console.error('Erro ao adicionar favorito:', error);
-    return NextResponse.json({ error: 'Erro ao adicionar favorito' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -96,19 +93,19 @@ export async function DELETE(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value || request.cookies.get('auth_token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const { searchParams } = new URL(request.url);
     const documentId = searchParams.get('documentId');
 
     if (!documentId) {
-      return NextResponse.json({ error: 'documentId é obrigatório' }, { status: 400 });
+      throw new ValidationError('documentId é obrigatório');
     }
 
     await prisma.favorite.deleteMany({
@@ -120,7 +117,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'Favorito removido com sucesso' });
   } catch (error) {
-    console.error('Erro ao remover favorito:', error);
-    return NextResponse.json({ error: 'Erro ao remover favorito' }, { status: 500 });
+    return handleApiError(error);
   }
 }

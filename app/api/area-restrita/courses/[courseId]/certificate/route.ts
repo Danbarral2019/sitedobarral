@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withUserApi } from '@/lib/api/handler';
-import { ValidationError } from '@/lib/errors/api-error';
+import { InternalServerError, ValidationError } from '@/lib/errors/api-error';
 import {
   checkCertificateEligibility,
   issueCertificate,
@@ -43,10 +43,7 @@ export const POST = withUserApi<{ courseId: string }>(async (
 
   const result = await issueCertificate(ctx.user.userId, courseId);
   if (!result.certificate) {
-    return NextResponse.json(
-      { error: 'Erro ao gerar certificado.' },
-      { status: 500 }
-    );
+    throw new InternalServerError('Erro ao gerar certificado.');
   }
 
   return NextResponse.json({

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { getAcessoDoUsuario, whereDocumentoVisivel } from '@/lib/search/acesso-documentos';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/area-restrita/batch-data
@@ -27,18 +29,12 @@ export async function GET(request: NextRequest) {
     // Verificação de autenticação
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Não autenticado');
     }
 
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido');
     }
 
     // Parse courseIds from query params
@@ -46,10 +42,7 @@ export async function GET(request: NextRequest) {
     const courseIdsParam = searchParams.get('courseIds');
 
     if (!courseIdsParam) {
-      return NextResponse.json(
-        { error: 'courseIds parameter required' },
-        { status: 400 }
-      );
+      throw new ValidationError('courseIds parameter required');
     }
 
     // O parâmetro só pode estreitar: não-admin recebe apenas os cursos em que
@@ -300,10 +293,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro ao buscar dados batch da área restrita:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar dados' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

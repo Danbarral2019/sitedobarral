@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 export async function GET(req: NextRequest) {
   try {
     const authResult = await verifyAuth(req);
     if (!authResult.valid || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const history = await prisma.searchHistory.findMany({
@@ -17,8 +19,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ history });
   } catch (error) {
-    console.error('Error fetching search history:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -31,27 +32,26 @@ export async function DELETE(req: NextRequest) {
   try {
     const authResult = await verifyAuth(req);
     if (!authResult.valid || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+      throw new ValidationError('ID is required');
     }
 
     // Verify ownership
     const entry = await prisma.searchHistory.findUnique({ where: { id } });
     if (!entry || entry.userId !== authResult.user.userId) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      throw new NotFoundError('Registro');
     }
 
     await prisma.searchHistory.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting search history:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return handleApiError(error);
   }
 }

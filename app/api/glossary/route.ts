@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 
 import { Prisma } from '@prisma/client';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 const DEFAULT_PAGE_SIZE = 30;
 const MAX_PAGE_SIZE = 30;
@@ -27,11 +29,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * pageSize;
 
     if (letter && !/^[A-Z]$/.test(letter)) {
-      return NextResponse.json({ error: 'Letra inválida' }, { status: 400 });
+      throw new ValidationError('Letra inválida');
     }
 
     if ((category?.length ?? 0) > 100 || (query?.length ?? 0) > 200) {
-      return NextResponse.json({ error: 'Filtro inválido' }, { status: 400 });
+      throw new ValidationError('Filtro inválido');
     }
 
     // Generate cache key based on filters
@@ -167,10 +169,6 @@ export async function GET(request: NextRequest) {
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
-    console.error('Error fetching glossary terms:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar termos do glossário' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

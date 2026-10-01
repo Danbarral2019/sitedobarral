@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { wizardEnhance } from '@/lib/ai/wizard-enhance';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/documents/[id]/enhance
@@ -29,7 +30,7 @@ export async function POST(
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     // 2. Buscar documento
@@ -48,10 +49,7 @@ export async function POST(
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Documento não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Documento');
     }
 
     console.log(`[Enhance] Enriquecendo documento: ${document.title}`);
@@ -88,21 +86,6 @@ export async function POST(
       },
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[Enhance] Erro ao enriquecer documento:');
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          error: 'Erro ao enriquecer documento com IA',
-          details: error.message,
-        },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Erro desconhecido ao enriquecer documento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

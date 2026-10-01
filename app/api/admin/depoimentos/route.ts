@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
 import { withAdminApi } from '@/lib/api/handler';
-import { ApiError, ValidationError } from '@/lib/errors/api-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/depoimentos
@@ -54,11 +54,7 @@ export const GET = withAdminApi(async (request: NextRequest) => {
       },
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao buscar depoimentos:');
-    return NextResponse.json(
-      { error: 'Erro ao carregar depoimentos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -93,12 +89,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
 
     return NextResponse.json({ success: true, testimonial }, { status: 201 });
   } catch (error) {
-    if (error instanceof ApiError) throw error;
-    apiLogger.error({ err: error }, 'Erro ao criar depoimento:');
-    return NextResponse.json(
-      { error: 'Erro ao criar depoimento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -131,12 +122,7 @@ export const PATCH = withAdminApi(async (request: NextRequest) => {
       testimonial,
     });
   } catch (error) {
-    if (error instanceof ApiError) throw error;
-    apiLogger.error({ err: error }, 'Erro ao atualizar depoimento:');
-    return NextResponse.json(
-      { error: 'Erro ao atualizar depoimento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });
 
@@ -164,11 +150,6 @@ export const DELETE = withAdminApi(async (request: NextRequest) => {
       message: 'Depoimento deletado com sucesso',
     });
   } catch (error) {
-    if (error instanceof ApiError) throw error;
-    apiLogger.error({ err: error }, 'Erro ao deletar depoimento:');
-    return NextResponse.json(
-      { error: 'Erro ao deletar depoimento' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 });

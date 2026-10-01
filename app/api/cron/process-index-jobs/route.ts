@@ -6,12 +6,14 @@ import { processLegislativeAct } from '@/lib/embeddings/legislative-act-processo
 import { reconciliarTeses } from '@/lib/embeddings/tese-reconciliacao';
 import { apiLogger } from '@/lib/logger';
 import { withCronTelemetry } from '@/lib/cron-telemetry';
+import { verifyCronAuth } from '@/lib/cron-auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 // ===========================
 // Configuration
 // ===========================
 
-const CRON_SECRET = process.env.CRON_SECRET;
 // 2026-04-24: subiu de 10→50 porque TribunalDecisions ficavam starved
 // quando Documents enchiam a fila. FIFO + batches paralelos de 10 com
 // time budget evitam regressão.
@@ -254,13 +256,8 @@ async function reconciliarIndiceDasTeses(): Promise<void> {
 
 export async function GET(req: NextRequest) {
   // Auth fora do telemetry (auth != falha de cron)
-  const authHeader = req.headers.get('authorization');
-  if (!CRON_SECRET) {
-    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 500 });
-  }
-  if (authHeader !== `Bearer ${CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   let responseBody: Record<string, unknown> = {};
   try {
@@ -577,30 +574,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Verify cron secret
-    const authHeader = req.headers.get('authorization');
-
-    if (!CRON_SECRET) {
-      return NextResponse.json(
-        { error: 'Cron secret not configured' },
-        { status: 500 }
-      );
-    }
-
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const authError = verifyCronAuth(req);
+    if (authError) return authError;
 
     const body = await req.json();
     const { documentIds, forceReprocess = false } = body;
 
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
-      return NextResponse.json(
-        { error: 'documentIds array required' },
-        { status: 400 }
-      );
+      throw new ValidationError('documentIds array required');
     }
 
     console.log(`🔄 Manual processing of ${documentIds.length} documents...`);
@@ -638,13 +619,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(summary);
   } catch (error) {
-    apiLogger.error({ err: error }, '❌ Manual processing error:');
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

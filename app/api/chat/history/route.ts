@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 type QuestionSource = 'article' | 'assistant';
 
@@ -44,12 +46,12 @@ export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+      throw new AuthenticationError('Não autenticado');
     }
 
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const userId = payload.userId;
@@ -154,11 +156,7 @@ export async function GET(request: NextRequest) {
       data: { questions: grouped, stats },
     });
   } catch (error) {
-    console.error('Erro ao buscar histórico:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar histórico' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -174,12 +172,12 @@ export async function DELETE(request: NextRequest) {
   try {
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+      throw new AuthenticationError('Não autenticado');
     }
 
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const userId = payload.userId;
@@ -211,10 +209,6 @@ export async function DELETE(request: NextRequest) {
       deleted: a.count + b.count,
     });
   } catch (error) {
-    console.error('Erro ao deletar histórico:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar histórico' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

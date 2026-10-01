@@ -9,14 +9,15 @@ import {
   DateRangePreset,
   RELEVANT_ORGAOS,
 } from '@/lib/dou-classifier';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const body = await request.json();
@@ -226,13 +227,6 @@ export async function POST(request: NextRequest) {
       filterStats,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[DOU Search Filtered] Erro:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao buscar documentos',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

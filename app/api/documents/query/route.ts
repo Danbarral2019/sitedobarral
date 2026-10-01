@@ -24,6 +24,14 @@ import { isRateLimitError } from '@/lib/ai/error-detection';
 import type { LegalSource } from '@/lib/legal-context';
 import { registrarBuscaNoHistorico } from '@/lib/search/historico-da-busca';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  ApiError,
+  AuthenticationError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/api-error';
+
 
 // ===========================
 // Types
@@ -66,10 +74,7 @@ export async function POST(req: NextRequest) {
     const authResult = await verifyAuth(req);
 
     if (!authResult.valid || !authResult.user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Unauthorized');
     }
 
     const userId = authResult.user.userId;
@@ -85,13 +90,7 @@ export async function POST(req: NextRequest) {
       );
 
       if (!rateLimitResult.allowed) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Rate limit exceeded. Maximum 10 queries per minute.'
-          },
-          { status: 429 }
-        );
+        throw new RateLimitError('Rate limit exceeded. Maximum 10 queries per minute.');
       }
     }
 
@@ -118,23 +117,11 @@ export async function POST(req: NextRequest) {
 
     // 4. Validate query
     if (!query || query.trim().length < 3) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Query must be at least 3 characters long'
-        },
-        { status: 400 }
-      );
+      throw new ValidationError('Query must be at least 3 characters long');
     }
 
     if (maxResults < 1 || maxResults > 40) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'maxResults must be between 1 and 40'
-        },
-        { status: 400 }
-      );
+      throw new ValidationError('maxResults must be between 1 and 40');
     }
 
     // 4a. BIA-0c: acesso do usuário para filtrar o retrieval (regra única de
@@ -146,10 +133,7 @@ export async function POST(req: NextRequest) {
     // O filtro de categoria vem do cliente e não pode abrir o grafo de
     // precedentes, que é invisível a não-admin.
     if (!acesso.isAdmin && filters.category === CATEGORIA_GRAFO) {
-      return NextResponse.json(
-        { success: false, error: 'Categoria inválida' },
-        { status: 400 }
-      );
+      throw new ValidationError('Categoria inválida');
     }
 
     // 4a'. Recorte das teses do TCU (spec §9): acervo para quem tem acesso
@@ -461,6 +445,10 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
+    // Erros semânticos (401/400/429 acima) seguem direto para o handler.
+    if (error instanceof ApiError) {
+      return handleApiError(error);
+    }
     apiLogger.error({ error }, 'Document query failed');
     if (!isRateLimitError(error)) reportError(error, 'assistente', { etapa: 'consulta' });
 
@@ -469,32 +457,15 @@ export async function POST(req: NextRequest) {
     // esconder card IA e mostrar mensagem amigável; resultados textuais
     // via /api/area-restrita/global-search seguem funcionando.
     if (isRateLimitError(error)) {
-      return NextResponse.json<QueryResponse>(
-        {
-          success: false,
-          code: 'QUOTA_EXHAUSTED',
-          error: 'Síntese IA temporariamente indisponível por excesso de uso. A busca textual segue funcionando — tente novamente em alguns minutos.',
-          results: [],
-          totalDocuments: 0,
-          cached: false,
-          latency: Date.now() - startTime,
-          query: '',
-        },
-        { status: 503 }
+      return handleApiError(
+        new ApiError(
+          503,
+          'Síntese IA temporariamente indisponível por excesso de uso. A busca textual segue funcionando — tente novamente em alguns minutos.',
+          'QUOTA_EXHAUSTED',
+        )
       );
     }
 
-    return NextResponse.json<QueryResponse>(
-      {
-        success: false,
-        results: [],
-        totalDocuments: 0,
-        cached: false,
-        latency: Date.now() - startTime,
-        query: '',
-        error: error instanceof Error ? error.message : 'Internal server error',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

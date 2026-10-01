@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/dou/save-staging
@@ -34,10 +35,7 @@ export async function POST(request: NextRequest) {
     // 1. Verificar autenticação admin
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Unauthorized');
     }
 
     // 2. Parse do body
@@ -57,10 +55,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Validações básicas
     if (!title || !url || !section || !publishDate) {
-      return NextResponse.json(
-        { error: 'Campos obrigatórios: title, url, section, publishDate' },
-        { status: 400 }
-      );
+      throw new ValidationError('Campos obrigatórios: title, url, section, publishDate');
     }
 
     // 4. Verificar se documento já existe (por douId, que é unique)
@@ -106,20 +101,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    apiLogger.error({ err: error }, '[DOU Save Staging] Error:');
-
-    // Log completo do erro para debug
-    if (error && typeof error === 'object') {
-      apiLogger.error({ err: JSON.stringify(error, null, 2) }, '[DOU Save Staging] Error details:');
-    }
-
-    return NextResponse.json(
-      {
-        error: 'Erro ao salvar documento temporário',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-        debugInfo: process.env.NODE_ENV === 'development' ? error : undefined,
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

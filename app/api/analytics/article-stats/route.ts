@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { getLeiArticles } from '@/lib/lei-articles';
 import { PUBLIC_DOCUMENT_WHERE } from '@/lib/document-categories';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 // GET /api/analytics/article-stats - Estatísticas de documentos por artigo
 export async function GET() {
@@ -120,10 +121,6 @@ export async function GET() {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar estatísticas de artigos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar estatísticas' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

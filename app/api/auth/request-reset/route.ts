@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomBytes } from 'crypto';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
 import { sendPasswordResetEmail } from '@/lib/email';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, RateLimitError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/auth/request-reset
@@ -18,10 +19,7 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('Email é obrigatório');
     }
 
     // Busca o usuário pelo email
@@ -72,16 +70,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Muitas tentativas de reset de senha. Por favor, aguarde alguns instantes.' },
-        { status: 429 }
+      return handleApiError(
+        new RateLimitError('Muitas tentativas de reset de senha. Por favor, aguarde alguns instantes.')
       );
     }
-    console.error('Erro ao solicitar reset de senha:', error);
-    reportError(error, 'auth', { rota: 'request-reset' });
-    return NextResponse.json(
-      { error: 'Erro ao processar solicitação' },
-      { status: 500 }
-    );
+    if (!(error instanceof ApiError)) {
+      reportError(error, 'auth', { rota: 'request-reset' });
+    }
+    return handleApiError(error);
   }
 }

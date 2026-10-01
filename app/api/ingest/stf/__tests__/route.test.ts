@@ -82,11 +82,15 @@ describe('POST /api/ingest/stf', () => {
       })
     );
     expect(mockPersistir).not.toHaveBeenCalled();
+    // Um único registro de falha: o 422 não passa de novo pelo registro do catch.
+    expect(mockHealth).toHaveBeenCalledTimes(1);
+    expect((await res.json()).details).toEqual({ recebidos: 0 });
   });
 
   it('rejeita corpo malformado', async () => {
     const res = await POST(req({ nada: true }));
     expect(res.status).toBe(400);
+    expect(mockHealth).not.toHaveBeenCalled();
   });
 
   it('registra partial_failure quando há erros de persistência', async () => {

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getSocialMediaStats } from '@/lib/social-publisher';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/social/posts
@@ -15,13 +16,13 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const payload = await verifyToken(token);
 
     if (!payload || payload.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     // Obter filtros da query
@@ -60,13 +61,6 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao listar publicações sociais:');
-    return NextResponse.json(
-      {
-        error: 'Erro ao carregar publicações',
-        details: error instanceof Error ? error.message : 'Erro desconhecido',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

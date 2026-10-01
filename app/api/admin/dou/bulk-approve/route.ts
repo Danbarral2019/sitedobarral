@@ -3,7 +3,8 @@ import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { setLeiArticles } from '@/lib/lei-articles';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/admin/dou/bulk-approve
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const adminEmail = authResult.user.email;
@@ -31,24 +32,15 @@ export async function POST(request: NextRequest) {
     const { documentIds, action, courseIds, importAs, adminNotes } = body;
 
     if (!Array.isArray(documentIds) || documentIds.length === 0) {
-      return NextResponse.json(
-        { error: 'documentIds deve ser um array não vazio' },
-        { status: 400 }
-      );
+      throw new ValidationError('documentIds deve ser um array não vazio');
     }
 
     if (!action || !['approve', 'reject'].includes(action)) {
-      return NextResponse.json(
-        { error: 'action deve ser "approve" ou "reject"' },
-        { status: 400 }
-      );
+      throw new ValidationError('action deve ser "approve" ou "reject"');
     }
 
     if (action === 'approve' && (!courseIds || courseIds.length === 0)) {
-      return NextResponse.json(
-        { error: 'Selecione pelo menos um curso para aprovação em lote' },
-        { status: 400 }
-      );
+      throw new ValidationError('Selecione pelo menos um curso para aprovação em lote');
     }
 
     const validImportAs = ['ato_normativo', 'boa_pratica'];
@@ -106,11 +98,7 @@ export async function POST(request: NextRequest) {
       details,
     });
   } catch (error) {
-    apiLogger.error({ err: error }, '[DOU Bulk] Error:');
-    return NextResponse.json(
-      { error: 'Erro ao processar operação em lote' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
