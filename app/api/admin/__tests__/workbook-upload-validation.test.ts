@@ -2,17 +2,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { MAX_WORKBOOK_BYTES, MAX_WORKBOOK_SHEETS } from '@/lib/excel-processor';
+import { XLS_NOT_SUPPORTED_MESSAGE } from '@/lib/excel/workbook';
 
 const mocks = vi.hoisted(() => ({
   read: vi.fn(),
   sheetToJson: vi.fn(),
 }));
 
-vi.mock('xlsx', () => ({
-  read: mocks.read,
-  utils: {
-    sheet_to_json: mocks.sheetToJson,
-  },
+vi.mock('@/lib/excel/workbook', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/excel/workbook')>()),
+  readWorkbook: mocks.read,
+  sheetToJson: mocks.sheetToJson,
 }));
 vi.mock('@/lib/api/handler', () => ({
   withAdminApi: (handler: unknown) => handler,
@@ -67,7 +67,7 @@ describe.each(handlers)('POST /api/admin/%s', (_name, handler) => {
     mocks.sheetToJson.mockReturnValue([]);
   });
 
-  it('rejeita arquivo grande antes de chamar o parser xlsx', async () => {
+  it('rejeita arquivo grande antes de chamar o parser de planilha', async () => {
     const file = new File(
       [new Uint8Array(MAX_WORKBOOK_BYTES + 1)],
       'entrada.xlsx',
@@ -84,7 +84,7 @@ describe.each(handlers)('POST /api/admin/%s', (_name, handler) => {
       { length: MAX_WORKBOOK_SHEETS + 1 },
       (_, index) => `Aba ${index + 1}`,
     );
-    mocks.read.mockReturnValue({
+    mocks.read.mockResolvedValue({
       SheetNames,
       Sheets: Object.fromEntries(SheetNames.map((name) => [name, { '!ref': 'A1' }])),
     });
@@ -97,5 +97,17 @@ describe.each(handlers)('POST /api/admin/%s', (_name, handler) => {
     await expect(handler(makeRequest(file), context))
       .rejects.toThrow('A planilha excede o limite de 25 abas.');
     expect(mocks.sheetToJson).not.toHaveBeenCalled();
+  });
+
+  it('recusa .xls antes de chamar o parser de planilha', async () => {
+    const file = new File(
+      [new Uint8Array([0xd0, 0xcf, 0x11, 0xe0])],
+      'pesquisaExportada.xls',
+      { type: 'application/vnd.ms-excel' },
+    );
+
+    await expect(handler(makeRequest(file), context))
+      .rejects.toThrow(XLS_NOT_SUPPORTED_MESSAGE);
+    expect(mocks.read).not.toHaveBeenCalled();
   });
 });

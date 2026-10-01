@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
-import * as xlsx from 'xlsx';
 import { apiLogger } from "@/lib/logger";
 import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
+import { jsonToAoa, readWorkbook, sheetToJson, writeWorkbook } from '@/lib/excel/workbook';
 
 // Mapeamento inteligente de Area/Tema para Cursos
 const CURSO_MAPPING: Record<string, string> = {
@@ -206,22 +206,16 @@ export const POST = withAdminApi(async (request) => {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // Lê o Excel com configuração para arquivos antigos (.xls)
+  // Lê o Excel (.xlsx; o .xls é recusado em validateWorkbookUpload)
   let workbook;
   try {
-    // Tenta ler com suporte a arquivos .xls antigos (CFB)
-    workbook = xlsx.read(buffer, {
-      type: 'buffer',
-      cellDates: true,
-      cellNF: false,
-      cellText: false,
-    });
+    workbook = await readWorkbook(buffer, { cellDates: true });
     validateWorkbookShape(workbook);
   } catch (error) {
     if (error instanceof ValidationError) throw error;
     apiLogger.error({ err: error }, '[Convert TCU] Erro ao ler arquivo:');
     throw new ValidationError(
-      'Erro ao ler arquivo. Por favor, converta o arquivo .xls para .xlsx no Excel/LibreOffice antes de importar.',
+      'Erro ao ler arquivo. Por favor, salve a planilha como .xlsx no Excel/LibreOffice antes de importar.',
       { details: error instanceof Error ? error.message : String(error) }
     );
   }
@@ -229,7 +223,7 @@ export const POST = withAdminApi(async (request) => {
   const worksheet = workbook.Sheets[sheetName];
 
   // Converte para JSON
-  let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
+  let data = sheetToJson(worksheet);
 
   console.log(`[Convert TCU] Total de linhas: ${data.length}`);
 
@@ -265,9 +259,6 @@ export const POST = withAdminApi(async (request) => {
     });
   });
 
-  // Cria novo workbook
-  const newWorkbook = xlsx.utils.book_new();
-
   // Aba 1: Instruções
   const instrucoes = [
     ['INSTRUCOES PARA IMPORTACAO'],
@@ -288,12 +279,6 @@ export const POST = withAdminApi(async (request) => {
     ['- Publico: SIM (acordaos sao publicos)'],
     ['- URL: Link para o acordao no site do TCU'],
   ];
-  const wsInstrucoes = xlsx.utils.aoa_to_sheet(instrucoes);
-  xlsx.utils.book_append_sheet(newWorkbook, wsInstrucoes, 'Instrucoes');
-
-  // Aba 2: Dados
-  const wsDados = xlsx.utils.json_to_sheet(linhasConvertidas);
-  xlsx.utils.book_append_sheet(newWorkbook, wsDados, 'Dados');
 
   // Aba 3: Estatísticas
   const estatisticas = [
@@ -308,11 +293,13 @@ export const POST = withAdminApi(async (request) => {
       .sort((a, b) => b[1] - a[1])
       .map(([curso, count]) => [CURSO_NAMES[curso] || curso, count]),
   ];
-  const wsStats = xlsx.utils.aoa_to_sheet(estatisticas);
-  xlsx.utils.book_append_sheet(newWorkbook, wsStats, 'Estatisticas');
 
-  // Gera buffer do Excel convertido
-  const outputBuffer = xlsx.write(newWorkbook, { type: 'buffer', bookType: 'xlsx' });
+  // Gera o Excel convertido: Instrucoes, Dados (json_to_sheet) e Estatisticas
+  const outputBuffer = await writeWorkbook([
+    { name: 'Instrucoes', rows: instrucoes },
+    { name: 'Dados', rows: jsonToAoa(linhasConvertidas) },
+    { name: 'Estatisticas', rows: estatisticas },
+  ]);
 
   console.log('[Convert TCU] Conversão concluída. Stats:', stats);
 

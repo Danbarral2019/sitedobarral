@@ -8,13 +8,10 @@ import { generateExcelTemplate } from '@/lib/excel-processor';
  */
 export const GET = withAdminApi(async () => {
   // Gera o template
-  const buffer = generateExcelTemplate();
-
-  // Converte Buffer para Uint8Array (compatível com NextResponse)
-  const uint8Array = new Uint8Array(buffer);
+  const buffer = await generateExcelTemplate();
 
   // Retorna como arquivo para download
-  return new NextResponse(uint8Array, {
+  return new NextResponse(buffer, {
     status: 200,
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

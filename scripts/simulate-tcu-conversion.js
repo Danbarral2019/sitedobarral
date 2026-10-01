@@ -1,9 +1,13 @@
 /**
  * Simula a conversão completa do arquivo TCU
  * Mostra como os dados serão convertidos para o formato do sistema
+ *
+ * Uso: npx tsx scripts/simulate-tcu-conversion.js
+ * (o tsx é necessário porque o leitor de planilhas fica em lib/excel/workbook.ts)
  */
 
-const xlsx = require('xlsx');
+const fs = require('fs');
+const { readWorkbook, sheetToJson } = require('../lib/excel/workbook');
 
 const filePath = 'C:\\Users\\Administrador\\Downloads\\pesquisaExportada (4).xlsx';
 
@@ -83,12 +87,13 @@ function construirUrlTCU(acordao) {
   return `https://pesquisa.apps.tcu.gov.br/doc/acordao-completo/${numero}/${ano}/${encodeURIComponent('Plenário')}`;
 }
 
+(async () => {
 try {
-  const workbook = xlsx.readFile(filePath, { cellDates: true });
+  const workbook = await readWorkbook(fs.readFileSync(filePath), { cellDates: true });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
-  let data = xlsx.utils.sheet_to_json(worksheet);
+  let data = sheetToJson(worksheet);
 
   // Limpar colunas
   data = data.map(row => {
@@ -216,3 +221,4 @@ try {
   console.error('\n❌ ERRO:', error.message);
   process.exit(1);
 }
+})();

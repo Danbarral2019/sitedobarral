@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   // Garante que módulos server-only não sejam incluídos no bundle do cliente
-  serverExternalPackages: ['qrcode', 'bcryptjs', 'jsonwebtoken', 'xlsx'],
+  serverExternalPackages: ['qrcode', 'bcryptjs', 'jsonwebtoken', 'exceljs'],
 
   // Tree-shake barrel exports de pacotes pesados
   experimental: {

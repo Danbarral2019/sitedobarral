@@ -14,7 +14,7 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import * as xlsx from 'xlsx';
+import { readWorkbook, sheetToJson } from '../lib/excel/workbook';
 import * as fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 import Anthropic from '@anthropic-ai/sdk';
@@ -593,7 +593,7 @@ async function main() {
 
   // 1. Ler planilha
   console.log('Lendo planilha...');
-  const workbook = xlsx.readFile(filePath);
+  const workbook = await readWorkbook(fs.readFileSync(filePath));
   const sheetName = 'Relatorio';
 
   if (!workbook.SheetNames.includes(sheetName)) {
@@ -601,7 +601,7 @@ async function main() {
     process.exit(1);
   }
 
-  const rawData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]) as Record<string, unknown>[];
+  const rawData = sheetToJson(workbook.Sheets[sheetName]);
   console.log(`${rawData.length} linhas encontradas na aba "${sheetName}"`);
 
   // Mostrar colunas

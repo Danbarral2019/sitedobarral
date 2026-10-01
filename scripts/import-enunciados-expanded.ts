@@ -10,7 +10,7 @@
  *   npx tsx scripts/import-enunciados-expanded.ts [--dry-run] [--entity=IBDA] [--skip-ai] [--limit=10]
  */
 
-import * as xlsx from 'xlsx';
+import { readWorkbook, sheetToJson, type WorkbookData } from '../lib/excel/workbook';
 import * as fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 
@@ -223,7 +223,7 @@ interface EnunciadoRow {
 
 /** Extrai rows de uma aba do Excel */
 function extrairRowsDaAba(
-  workbook: xlsx.WorkBook,
+  workbook: WorkbookData,
   sheetName: string,
 ): EnunciadoRow[] {
   const sheet = workbook.Sheets[sheetName];
@@ -232,7 +232,7 @@ function extrairRowsDaAba(
     return [];
   }
 
-  const rawRows = xlsx.utils.sheet_to_json(sheet) as Record<string, unknown>[];
+  const rawRows = sheetToJson(sheet);
   if (rawRows.length === 0) return [];
 
   // Determinar entityType a partir do nome da aba
@@ -309,7 +309,7 @@ async function main() {
   }
 
   // Ler workbook
-  const workbook = xlsx.readFile(EXCEL_PATH);
+  const workbook = await readWorkbook(fs.readFileSync(EXCEL_PATH));
   console.log(`Abas encontradas: ${workbook.SheetNames.join(', ')}\n`);
 
   // Determinar quais abas processar

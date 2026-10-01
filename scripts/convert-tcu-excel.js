@@ -17,11 +17,14 @@
  * - Tipo do processo
  *
  * Uso:
- *   node scripts/convert-tcu-excel.js caminho/para/TCU_Acordaos.xlsx
- *   node scripts/convert-tcu-excel.js caminho/para/TCU_Acordaos.xlsx --output=saida.xlsx
+ *   npm run convert-tcu -- caminho/para/TCU_Acordaos.xlsx
+ *   npx tsx scripts/convert-tcu-excel.js caminho/para/TCU_Acordaos.xlsx --output=saida.xlsx
+ *
+ * Roda com o tsx (e não com o node puro) porque importa o leitor/escritor de
+ * planilhas em TypeScript de lib/excel/workbook.ts (exceljs). Aceita só .xlsx.
  */
 
-const xlsx = require('xlsx');
+const { jsonToAoa, readWorkbook, sheetToJson, writeWorkbook } = require('../lib/excel/workbook');
 const path = require('path');
 const fs = require('fs');
 
@@ -226,18 +229,18 @@ function converterLinha(row, index) {
 /**
  * Converte Excel do TCU
  */
-function converterExcelTCU(inputPath, outputPath) {
+async function converterExcelTCU(inputPath, outputPath) {
   console.log('📂 Lendo arquivo do TCU:', inputPath);
 
   // Le arquivo
-  const workbook = xlsx.readFile(inputPath);
+  const workbook = await readWorkbook(fs.readFileSync(inputPath));
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
   console.log(`📊 Planilha encontrada: ${sheetName}`);
 
   // Converte para JSON
-  const data = xlsx.utils.sheet_to_json(worksheet);
+  const data = sheetToJson(worksheet);
 
   console.log(`📋 Total de linhas: ${data.length}`);
 
@@ -291,9 +294,6 @@ function converterExcelTCU(inputPath, outputPath) {
       console.log(`   ${nome}: ${count}`);
     });
 
-  // Cria novo workbook
-  const newWorkbook = xlsx.utils.book_new();
-
   // Aba 1: Instrucoes
   const instrucoes = [
     ['INSTRUCOES PARA IMPORTACAO'],
@@ -318,12 +318,6 @@ function converterExcelTCU(inputPath, outputPath) {
     ['As colunas iniciadas com _ contem metadados do TCU para referencia.'],
     ['Elas NAO serao importadas, servem apenas para consulta.'],
   ];
-  const wsInstrucoes = xlsx.utils.aoa_to_sheet(instrucoes);
-  xlsx.utils.book_append_sheet(newWorkbook, wsInstrucoes, 'Instrucoes');
-
-  // Aba 2: Dados
-  const wsDados = xlsx.utils.json_to_sheet(linhasConvertidas);
-  xlsx.utils.book_append_sheet(newWorkbook, wsDados, 'Dados');
 
   // Aba 3: Estatisticas
   const estatisticas = [
@@ -338,11 +332,14 @@ function converterExcelTCU(inputPath, outputPath) {
       .sort((a, b) => b[1] - a[1])
       .map(([curso, count]) => [CURSO_NAMES[curso] || curso, count]),
   ];
-  const wsStats = xlsx.utils.aoa_to_sheet(estatisticas);
-  xlsx.utils.book_append_sheet(newWorkbook, wsStats, 'Estatisticas');
 
-  // Salva arquivo
-  xlsx.writeFile(newWorkbook, outputPath);
+  // Salva arquivo: Instrucoes, Dados (uma linha por acordao) e Estatisticas
+  const bytes = await writeWorkbook([
+    { name: 'Instrucoes', rows: instrucoes },
+    { name: 'Dados', rows: jsonToAoa(linhasConvertidas) },
+    { name: 'Estatisticas', rows: estatisticas },
+  ]);
+  fs.writeFileSync(outputPath, bytes);
 
   console.log('\n✅ Conversao concluida!');
   console.log(`📄 Arquivo salvo em: ${outputPath}`);
@@ -353,10 +350,10 @@ function converterExcelTCU(inputPath, outputPath) {
 const args = process.argv.slice(2);
 
 if (args.length === 0) {
-  console.log('Uso: node scripts/convert-tcu-excel.js <arquivo-entrada.xlsx> [--output=arquivo-saida.xlsx]');
+  console.log('Uso: npx tsx scripts/convert-tcu-excel.js <arquivo-entrada.xlsx> [--output=arquivo-saida.xlsx]');
   console.log('\nExemplo:');
-  console.log('  node scripts/convert-tcu-excel.js TCU_Acordaos.xlsx');
-  console.log('  node scripts/convert-tcu-excel.js TCU_Acordaos.xlsx --output=convertido.xlsx');
+  console.log('  npx tsx scripts/convert-tcu-excel.js TCU_Acordaos.xlsx');
+  console.log('  npx tsx scripts/convert-tcu-excel.js TCU_Acordaos.xlsx --output=convertido.xlsx');
   process.exit(1);
 }
 
@@ -380,10 +377,8 @@ if (outputPath) {
 }
 
 // Executa conversao
-try {
-  converterExcelTCU(inputPath, outputPath);
-} catch (error) {
+converterExcelTCU(inputPath, outputPath).catch((error) => {
   console.error('❌ Erro ao converter:', error.message);
   console.error(error);
   process.exit(1);
-}
+});

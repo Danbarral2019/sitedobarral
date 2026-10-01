@@ -285,13 +285,26 @@ export function useTcuManager() {
   const handleDownloadForEdit = async () => {
     if (!validationResult) return;
     try {
-      const XLSX = await import('xlsx');
+      const { jsonToAoa, writeWorkbook } = await import('@/lib/excel/workbook');
       const excelData = buildValidationExcelData(validationResult.documents);
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Validação');
-      ws['!cols'] = [...VALIDATION_EXCEL_COLUMN_WIDTHS];
-      XLSX.writeFile(wb, `tcu-validacao-${new Date().toISOString().split('T')[0]}.xlsx`);
+      const bytes = await writeWorkbook([
+        {
+          name: 'Validação',
+          rows: jsonToAoa(excelData),
+          columnWidths: VALIDATION_EXCEL_COLUMN_WIDTHS.map((col) => col.wch),
+        },
+      ]);
+      const blob = new Blob([bytes], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tcu-validacao-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
     } catch {
       alert('Erro ao gerar arquivo para download');
     }
