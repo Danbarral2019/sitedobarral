@@ -2,7 +2,17 @@
  * Processador de arquivos Excel para importação de documentos
  */
 
-import * as XLSX from 'xlsx';
+import {
+  decodeRange,
+  jsonToAoa,
+  readWorkbook,
+  sheetToJson,
+  writeWorkbook,
+  XLS_NOT_SUPPORTED_MESSAGE,
+  type CellRange,
+  type SheetData,
+  type WorkbookData,
+} from './excel/workbook';
 import { autoClassifyDocument, suggestCategory, extractTags } from './auto-classifier';
 import { apiLogger } from "@/lib/logger";
 import { ValidationError } from '@/lib/errors/api-error';
@@ -13,7 +23,6 @@ export const MAX_WORKBOOK_CELLS = 100_000;
 
 const WORKBOOK_MIME_BY_EXTENSION: Record<string, string> = {
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  '.xls': 'application/vnd.ms-excel',
 };
 
 export function validateWorkbookUpload(input: {
@@ -26,8 +35,13 @@ export function validateWorkbookUpload(input: {
   }
 
   const extension = input.filename.toLowerCase().match(/\.[^.]+$/)?.[0];
+  // O .xls (BIFF, Excel 97-2003) era lido pelo SheetJS, removido por
+  // vulnerabilidades; o exceljs não tem leitor para esse formato.
+  if (extension === '.xls') {
+    throw new ValidationError(XLS_NOT_SUPPORTED_MESSAGE);
+  }
   if (!extension || !(extension in WORKBOOK_MIME_BY_EXTENSION)) {
-    throw new ValidationError('Formato de planilha não permitido. Use .xlsx ou .xls.');
+    throw new ValidationError('Formato de planilha não permitido. Use .xlsx.');
   }
 
   if (input.mimeType.toLowerCase() !== WORKBOOK_MIME_BY_EXTENSION[extension]) {
@@ -35,7 +49,7 @@ export function validateWorkbookUpload(input: {
   }
 }
 
-export function validateWorkbookShape(workbook: XLSX.WorkBook): void {
+export function validateWorkbookShape(workbook: WorkbookData): void {
   if (workbook.SheetNames.length > MAX_WORKBOOK_SHEETS) {
     throw new ValidationError('A planilha excede o limite de 25 abas.');
   }
@@ -45,9 +59,9 @@ export function validateWorkbookShape(workbook: XLSX.WorkBook): void {
     const reference = workbook.Sheets[sheetName]?.['!ref'];
     if (!reference) continue;
 
-    let range: XLSX.Range;
+    let range: CellRange;
     try {
-      range = XLSX.utils.decode_range(reference);
+      range = decodeRange(reference);
     } catch {
       throw new ValidationError('A planilha contém intervalo de células inválido.');
     }
@@ -115,19 +129,18 @@ export interface ImportValidationResult {
 /**
  * Valida se o arquivo Excel tem o formato correto
  */
-function validateExcelStructure(worksheet: XLSX.WorkSheet): {
+function validateExcelStructure(worksheet: SheetData): {
   isValid: boolean;
   errors: string[];
 } {
   const errors: string[] = [];
 
   // Pega os headers (primeira linha)
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+  const range = decodeRange(worksheet['!ref'] || 'A1');
   const headers: string[] = [];
 
   for (let col = range.s.c; col <= range.e.c; col++) {
-    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-    const cell = worksheet[cellAddress];
+    const cell = worksheet.cell?.(0, col);
     if (cell && cell.v) {
       headers.push(String(cell.v).toLowerCase().trim());
     }
@@ -373,7 +386,7 @@ export async function processExcelFile(
 ): Promise<ImportValidationResult> {
   try {
     // Lê o arquivo Excel
-    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+    const workbook = await readWorkbook(fileBuffer);
     validateWorkbookShape(workbook);
 
     // Pega a primeira planilha
@@ -405,7 +418,7 @@ export async function processExcelFile(
     }
 
     // Converte para JSON
-    const rows: ExcelDocumentRow[] = XLSX.utils.sheet_to_json(worksheet, {
+    const rows = sheetToJson<ExcelDocumentRow>(worksheet, {
       header: ['titulo', 'descricao', 'categoria', 'curso', 'publico', 'tags', 'artigos', 'url', 'arquivo'],
       range: 1 // Pula a primeira linha (headers)
     });
@@ -458,7 +471,7 @@ export async function processExcelFile(
 /**
  * Gera template Excel para download
  */
-export function generateExcelTemplate(): Buffer {
+export async function generateExcelTemplate(): Promise<Uint8Array<ArrayBuffer>> {
   const headers = [
     'Titulo',
     'Descricao',
@@ -518,25 +531,22 @@ export function generateExcelTemplate(): Buffer {
     }
   ];
 
-  // Cria workbook
-  const worksheet = XLSX.utils.json_to_sheet(exampleRows, { header: headers });
-
-  // Define largura das colunas
-  worksheet['!cols'] = [
-    { wch: 50 }, // Titulo
-    { wch: 60 }, // Descricao
-    { wch: 12 }, // Categoria
-    { wch: 30 }, // Curso
-    { wch: 8 },  // Publico
-    { wch: 30 }, // Tags
-    { wch: 20 }, // Artigos
-    { wch: 40 }, // URL
-    { wch: 30 }  // Arquivo
-  ];
-
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Documentos');
-
-  // Gera buffer
-  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+  // Cria workbook (aba "Documentos", cabeçalho na primeira linha)
+  return writeWorkbook([
+    {
+      name: 'Documentos',
+      rows: jsonToAoa(exampleRows, headers),
+      columnWidths: [
+        50, // Titulo
+        60, // Descricao
+        12, // Categoria
+        30, // Curso
+        8,  // Publico
+        30, // Tags
+        20, // Artigos
+        40, // URL
+        30, // Arquivo
+      ],
+    },
+  ]);
 }

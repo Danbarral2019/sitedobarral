@@ -38,7 +38,7 @@ export function TCUStepUpload({
           >
             <FileText className="w-12 h-12 text-blue-600 mx-auto mb-3" />
             <h3 className="font-bold text-gray-900 mb-2">Planilha TCU</h3>
-            <p className="text-sm text-gray-600">Upload de arquivo exportado do site do TCU (.xls/.xlsx)</p>
+            <p className="text-sm text-gray-600">Upload de arquivo exportado do site do TCU (.xlsx; salve o .xls como .xlsx antes)</p>
           </button>
 
           <button
@@ -72,7 +72,7 @@ export function TCUStepUpload({
           </div>
 
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors">
-            <input type="file" accept=".xls,.xlsx" onChange={onFileSelect} className="hidden" id="file-upload" />
+            <input type="file" accept=".xlsx" onChange={onFileSelect} className="hidden" id="file-upload" />
             <label htmlFor="file-upload" className="cursor-pointer">
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               {selectedFile ? (
@@ -84,7 +84,7 @@ export function TCUStepUpload({
               ) : (
                 <div>
                   <p className="text-lg font-medium text-gray-900">Clique para selecionar arquivo</p>
-                  <p className="text-sm text-gray-600">Formatos: .xls, .xlsx</p>
+                  <p className="text-sm text-gray-600">Formato: .xlsx</p>
                 </div>
               )}
             </label>

@@ -5,7 +5,8 @@
  * para facilitar análise e ajustes estruturais.
  */
 
-import * as XLSX from 'xlsx';
+import { writeFileSync } from 'fs';
+import { jsonToAoa, writeWorkbook } from '../lib/excel/workbook';
 import { LEI_14133_GRUPOS } from '../data/lei-14133-grupos';
 
 // Preparar dados para a planilha
@@ -36,29 +37,22 @@ data.push({
   'Descrição': `${LEI_14133_GRUPOS.length} grupos temáticos totais`,
 });
 
-// Criar workbook e worksheet
-const wb = XLSX.utils.book_new();
-const ws = XLSX.utils.json_to_sheet(data);
-
-// Definir larguras das colunas
-ws['!cols'] = [
-  { wch: 4 },   // Nº
-  { wch: 25 },  // ID
-  { wch: 35 },  // Título
-  { wch: 6 },   // Emoji
-  { wch: 10 },  // Cor
-  { wch: 40 },  // Artigos
-  { wch: 10 },  // Quantidade
-  { wch: 10 },  // Primeiro
-  { wch: 10 },  // Último
-  { wch: 80 },  // Descrição
+// Larguras das colunas da primeira aba
+const gruposColumnWidths = [
+  4,   // Nº
+  25,  // ID
+  35,  // Título
+  6,   // Emoji
+  10,  // Cor
+  40,  // Artigos
+  10,  // Quantidade
+  10,  // Primeiro
+  10,  // Último
+  80,  // Descrição
 ];
 
-// Adicionar worksheet ao workbook
-XLSX.utils.book_append_sheet(wb, ws, 'Grupos Temáticos');
-
 // Criar segunda aba com artigos expandidos (um por linha)
-const artigosExpandidos: any[] = [];
+const artigosExpandidos: Record<string, string | number>[] = [];
 LEI_14133_GRUPOS.forEach((group) => {
   group.articles.forEach((artigo) => {
     artigosExpandidos.push({
@@ -72,16 +66,14 @@ LEI_14133_GRUPOS.forEach((group) => {
   });
 });
 
-const wsArtigos = XLSX.utils.json_to_sheet(artigosExpandidos);
-wsArtigos['!cols'] = [
-  { wch: 10 },  // Artigo
-  { wch: 25 },  // Grupo ID
-  { wch: 35 },  // Grupo
-  { wch: 6 },   // Emoji
-  { wch: 10 },  // Cor
-  { wch: 80 },  // Descrição Grupo
+const artigosColumnWidths = [
+  10,  // Artigo
+  25,  // Grupo ID
+  35,  // Grupo
+  6,   // Emoji
+  10,  // Cor
+  80,  // Descrição Grupo
 ];
-XLSX.utils.book_append_sheet(wb, wsArtigos, 'Artigos Expandidos');
 
 // Criar terceira aba com estatísticas
 const stats = [
@@ -94,20 +86,30 @@ const stats = [
   { 'Métrica': 'Média de Artigos por Grupo', 'Valor': (artigosExpandidos.length / LEI_14133_GRUPOS.length).toFixed(2) },
 ];
 
-const wsStats = XLSX.utils.json_to_sheet(stats);
-wsStats['!cols'] = [
-  { wch: 35 },  // Métrica
-  { wch: 50 },  // Valor
+const statsColumnWidths = [
+  35,  // Métrica
+  50,  // Valor
 ];
-XLSX.utils.book_append_sheet(wb, wsStats, 'Estatísticas');
 
-// Salvar arquivo
-const fileName = 'Lei-14133-Grupos-Tematicos.xlsx';
-XLSX.writeFile(wb, fileName);
+async function main() {
+  // Salvar arquivo
+  const fileName = 'Lei-14133-Grupos-Tematicos.xlsx';
+  const bytes = await writeWorkbook([
+    { name: 'Grupos Temáticos', rows: jsonToAoa(data), columnWidths: gruposColumnWidths },
+    { name: 'Artigos Expandidos', rows: jsonToAoa(artigosExpandidos), columnWidths: artigosColumnWidths },
+    { name: 'Estatísticas', rows: jsonToAoa(stats), columnWidths: statsColumnWidths },
+  ]);
+  writeFileSync(fileName, bytes);
 
-console.log('✅ Planilha Excel criada com sucesso!');
-console.log(`📁 Arquivo: ${fileName}`);
-console.log(`📊 Abas criadas:`);
-console.log(`   1. Grupos Temáticos (${LEI_14133_GRUPOS.length} grupos)`);
-console.log(`   2. Artigos Expandidos (${artigosExpandidos.length} linhas)`);
-console.log(`   3. Estatísticas (7 métricas)`);
+  console.log('✅ Planilha Excel criada com sucesso!');
+  console.log(`📁 Arquivo: ${fileName}`);
+  console.log(`📊 Abas criadas:`);
+  console.log(`   1. Grupos Temáticos (${LEI_14133_GRUPOS.length} grupos)`);
+  console.log(`   2. Artigos Expandidos (${artigosExpandidos.length} linhas)`);
+  console.log(`   3. Estatísticas (7 métricas)`);
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

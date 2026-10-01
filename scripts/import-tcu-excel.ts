@@ -7,11 +7,14 @@
  * Uso:
  *   cd sitedobarral
  *   export $(grep DATABASE_URL .env.local | xargs)
- *   npx tsx scripts/import-tcu-excel.ts "/caminho/para/planilha.xls"
- *   npx tsx scripts/import-tcu-excel.ts "/caminho/para/planilha.xls" --dry-run
+ *   npx tsx scripts/import-tcu-excel.ts "/caminho/para/planilha.xlsx"
+ *   npx tsx scripts/import-tcu-excel.ts "/caminho/para/planilha.xlsx" --dry-run
+ *
+ * Aceita só .xlsx (leitura pelo exceljs, em lib/excel/workbook.ts). A planilha
+ * .xls exportada pelo TCU deve ser salva antes como .xlsx no Excel/LibreOffice.
  */
 
-import * as xlsx from 'xlsx';
+import { readWorkbook, sheetToJson } from '../lib/excel/workbook';
 import * as path from 'path';
 import * as fs from 'fs';
 import { PrismaClient } from '@prisma/client';
@@ -249,9 +252,9 @@ async function main() {
 
   // 1. Ler planilha
   console.log(`Lendo planilha: ${path.basename(inputPath)}`);
-  const workbook = xlsx.readFile(inputPath);
+  const workbook = await readWorkbook(fs.readFileSync(inputPath));
   const sheetName = workbook.SheetNames[0];
-  const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]) as Record<string, unknown>[];
+  const data = sheetToJson(workbook.Sheets[sheetName]);
   console.log(`${data.length} linhas encontradas na aba "${sheetName}"\n`);
 
   if (data.length === 0) {

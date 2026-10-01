@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { ValidationError } from '@/lib/errors/api-error';
-import * as xlsx from 'xlsx';
 import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
+import { readWorkbook, sheetToJson } from '@/lib/excel/workbook';
 
 // Reutiliza a lógica do conversor TCU existente
 const CURSO_MAPPING: Record<string, string> = {
@@ -157,16 +157,13 @@ export const POST = withAdminApi(async (request) => {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const workbook = xlsx.read(buffer, {
-    type: 'buffer',
-    cellDates: true,
-  });
+  const workbook = await readWorkbook(buffer, { cellDates: true });
   validateWorkbookShape(workbook);
 
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
-  let data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
+  let data = sheetToJson(worksheet);
 
   // Limpar nomes de colunas (trim)
   data = data.map(row => {

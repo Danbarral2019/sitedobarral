@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
-import * as xlsx from 'xlsx';
 import { ValidationError } from '@/lib/errors/api-error';
 import { validateWorkbookShape, validateWorkbookUpload } from '@/lib/excel-processor';
+import { readWorkbook, sheetToJson } from '@/lib/excel/workbook';
 
 /**
  * POST /api/admin/analyze-tcu-file
@@ -25,17 +25,14 @@ export const POST = withAdminApi(async (request: NextRequest) => {
   const buffer = Buffer.from(arrayBuffer);
 
   // Lê o Excel
-  const workbook = xlsx.read(buffer, {
-    type: 'buffer',
-    cellDates: true,
-  });
+  const workbook = await readWorkbook(buffer, { cellDates: true });
   validateWorkbookShape(workbook);
 
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
   // Converte para JSON
-  const data = xlsx.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
+  const data = sheetToJson(worksheet);
 
   console.log(`[Analyze TCU] Total de linhas: ${data.length}`);
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type * as XLSX from 'xlsx';
+import type { WorkbookData } from '../excel/workbook';
+import { XLS_NOT_SUPPORTED_MESSAGE } from '../excel/workbook';
 import {
   MAX_WORKBOOK_BYTES,
   MAX_WORKBOOK_CELLS,
@@ -11,12 +12,12 @@ import {
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const XLS_MIME = 'application/vnd.ms-excel';
 
-function makeWorkbook(sheetRefs: string[]): XLSX.WorkBook {
+function makeWorkbook(sheetRefs: string[]): WorkbookData {
   const SheetNames = sheetRefs.map((_, index) => `Aba ${index + 1}`);
   const Sheets = Object.fromEntries(
     SheetNames.map((name, index) => [name, { '!ref': sheetRefs[index] }]),
   );
-  return { SheetNames, Sheets } as XLSX.WorkBook;
+  return { SheetNames, Sheets };
 }
 
 describe('validateWorkbookUpload', () => {
@@ -28,12 +29,12 @@ describe('validateWorkbookUpload', () => {
     })).toThrow('A planilha excede o limite de 5 MiB.');
   });
 
-  it('rejeita extensão que não seja xlsx ou xls', () => {
+  it('rejeita extensão que não seja xlsx', () => {
     expect(() => validateWorkbookUpload({
       filename: 'entrada.csv',
       mimeType: 'text/csv',
       size: 1024,
-    })).toThrow('Formato de planilha não permitido. Use .xlsx ou .xls.');
+    })).toThrow('Formato de planilha não permitido. Use .xlsx.');
   });
 
   it('rejeita MIME incompatível com a extensão', () => {
@@ -44,17 +45,26 @@ describe('validateWorkbookUpload', () => {
     })).toThrow('O tipo do arquivo não corresponde à extensão .xlsx.');
   });
 
-  it('aceita uploads xlsx e xls com MIME correspondente', () => {
+  it('aceita upload xlsx com MIME correspondente', () => {
     expect(() => validateWorkbookUpload({
       filename: 'entrada.xlsx',
       mimeType: XLSX_MIME,
       size: MAX_WORKBOOK_BYTES,
     })).not.toThrow();
     expect(() => validateWorkbookUpload({
+      filename: 'ENTRADA.XLSX',
+      mimeType: XLSX_MIME,
+      size: 1024,
+    })).not.toThrow();
+  });
+
+  it('recusa .xls (Excel 97-2003) com orientação para salvar como .xlsx', () => {
+    // O exceljs não lê o formato BIFF; o SheetJS, que lia, foi removido.
+    expect(() => validateWorkbookUpload({
       filename: 'entrada.XLS',
       mimeType: XLS_MIME,
       size: 1024,
-    })).not.toThrow();
+    })).toThrow(XLS_NOT_SUPPORTED_MESSAGE);
   });
 });
 
