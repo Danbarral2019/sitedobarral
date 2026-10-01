@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/artigos/[numero]/blog-posts
@@ -16,10 +18,7 @@ export async function GET(
     // Valida número do artigo
     const articleNum = parseInt(numero);
     if (isNaN(articleNum) || articleNum < 1 || articleNum > 193) {
-      return NextResponse.json(
-        { error: 'Número de artigo inválido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Número de artigo inválido');
     }
 
     const result = await withCache(
@@ -59,10 +58,6 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar posts do artigo:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar posts' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

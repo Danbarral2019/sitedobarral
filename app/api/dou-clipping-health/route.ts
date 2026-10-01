@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { apiLogger } from '@/lib/logger';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -83,10 +83,10 @@ export async function GET() {
       }),
     });
   } catch (error) {
-    apiLogger.error({ err: error }, 'dou-clipping-health: falha ao consultar o estado');
-    return NextResponse.json(
-      { status: 'down', error: 'Erro ao consultar o estado do serviço' },
-      { status: 500 },
-    );
+    // A routine de monitoramento alerta por `status != healthy`
+    // (docs/RUNBOOK_DOU_CLIPPING.md): o corpo de erro mantém `status: 'down'`.
+    const resposta = handleApiError(error);
+    const corpo = await resposta.json();
+    return NextResponse.json({ status: 'down', ...corpo }, { status: resposta.status });
   }
 }

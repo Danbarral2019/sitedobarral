@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,10 +10,7 @@ export async function GET(request: NextRequest) {
     const courseId = searchParams.get('courseId');
 
     if (!courseId) {
-      return NextResponse.json(
-        { error: 'courseId is required' },
-        { status: 400 }
-      );
+      throw new ValidationError('courseId is required');
     }
 
     const result = await withCache(
@@ -49,10 +48,6 @@ export async function GET(request: NextRequest) {
       headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     });
   } catch (error) {
-    console.error('Erro ao buscar sites recomendados:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar sites recomendados' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

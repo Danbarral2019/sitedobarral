@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { handleApiError } from '@/lib/errors/error-handler';
 
 /**
  * GET /api/lei-14133/artigos
@@ -39,13 +40,6 @@ export async function GET() {
       artigos: artigosMap,
     });
   } catch (error) {
-    console.error('[Lei 14.133 Artigos API] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Erro ao buscar artigos',
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

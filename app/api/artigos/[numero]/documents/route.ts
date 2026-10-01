@@ -4,6 +4,8 @@ import { withCache, CacheKeys, CACHE_TTL } from '@/lib/cache/redis-client';
 import { verifyAuth } from '@/lib/auth';
 import { INTERNAL_ONLY_CATEGORIES } from '@/lib/document-categories';
 import { CATEGORIA_GRAFO } from '@/lib/tcu/backfill-retroativo';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/artigos/[numero]/documents
@@ -19,10 +21,7 @@ export async function GET(
     // Valida número do artigo
     const articleNum = parseInt(numero);
     if (isNaN(articleNum) || articleNum < 1 || articleNum > 195) {
-      return NextResponse.json(
-        { error: 'Número de artigo inválido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Número de artigo inválido');
     }
 
     // Rota pública: documento privado só para admin (mesmo padrão de
@@ -142,10 +141,6 @@ export async function GET(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Erro ao buscar documentos do artigo:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar documentos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
