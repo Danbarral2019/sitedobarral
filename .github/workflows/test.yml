@@ -190,11 +190,13 @@ jobs:
       # Os eventos da Stripe são assinados localmente com segredo fixo de
       # teste; STRIPE_TEST_SECRET_KEY é opcional e só habilita o teste que cria
       # a sessão de checkout no modo teste da Stripe.
-      - name: Run launch flows (registro, verificação e assinatura)
+      # revogacao-sessao.spec.ts faz login real (rota com rate limit no Redis).
+      - name: Run launch flows (registro, verificação, assinatura e revogação de sessão)
         run: >-
           npm run test:e2e --
           e2e/fluxo-registro.spec.ts
           e2e/fluxo-assinatura.spec.ts
+          e2e/revogacao-sessao.spec.ts
         env:
           TEST_DATABASE_URL: ${{ steps.banco.outputs.db_url }}
           E2E_UPSTASH_REDIS_REST_URL: http://127.0.0.1:8079
