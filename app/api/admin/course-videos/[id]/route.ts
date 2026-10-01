@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 export async function DELETE(
   request: NextRequest,
@@ -12,12 +13,12 @@ export async function DELETE(
     const { id } = await params;
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     await prisma.courseVideo.delete({
@@ -29,10 +30,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Vídeo removido com sucesso' });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Erro ao remover vídeo:');
-    return NextResponse.json(
-      { error: 'Erro ao remover vídeo' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

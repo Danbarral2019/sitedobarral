@@ -3,7 +3,8 @@ import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { deleteTestimonial } from '@/lib/depoimentos';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
-import { apiLogger } from "@/lib/logger";
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 export async function GET(
   request: NextRequest,
@@ -12,19 +13,18 @@ export async function GET(
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
     const { id } = await params;
     const testimonial = await prisma.testimonial.findUnique({ where: { id } });
 
     if (!testimonial) {
-      return NextResponse.json({ error: 'Depoimento não encontrado' }, { status: 404 });
+      throw new NotFoundError('Depoimento');
     }
 
     return NextResponse.json({ testimonial });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error fetching testimonial:');
-    return NextResponse.json({ error: 'Failed to fetch testimonial' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -35,7 +35,7 @@ export async function PUT(
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
     const { id } = await params;
     const body = await request.json();
@@ -43,7 +43,7 @@ export async function PUT(
     const { name, email, phone, role, text, rating, avatar, color, status, rejectionReason } = body;
 
     if (!name || !email || !role || !text) {
-      return NextResponse.json({ error: 'Nome, email, cargo e texto são obrigatórios' }, { status: 400 });
+      throw new ValidationError('Nome, email, cargo e texto são obrigatórios');
     }
 
     const testimonial = await prisma.testimonial.update({
@@ -70,8 +70,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, testimonial });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error updating testimonial:');
-    return NextResponse.json({ error: 'Failed to update testimonial' }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
@@ -82,7 +81,7 @@ export async function DELETE(
   try {
     const authResult = await verifyAuth(request);
     if (!authResult.valid || authResult.user?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
     const { id } = await params;
     await deleteTestimonial(id);
@@ -91,7 +90,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    apiLogger.error({ err: error }, 'Error deleting testimonial:');
-    return NextResponse.json({ error: 'Failed to delete testimonial' }, { status: 500 });
+    return handleApiError(error);
   }
 }
