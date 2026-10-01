@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
-import { AuthenticationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
+import { AuthenticationError, AuthorizationError, ValidationError, NotFoundError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { trackServerEvent } from '@/lib/monitoring/events';
 
@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
 
     // Apenas admins podem conceder acesso vitalício
     if (auth.user.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Apenas administradores podem conceder acesso vitalício' },
-        { status: 403 }
-      );
+      throw new AuthorizationError('Apenas administradores podem conceder acesso vitalício');
     }
 
     const body = await request.json();

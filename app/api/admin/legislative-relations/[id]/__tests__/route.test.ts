@@ -6,22 +6,30 @@ const { mockUpdate, mockDelete } = vi.hoisted(() => ({
   mockDelete: vi.fn(),
 }));
 
-// Mock withAdminApi como identity — testes focam na lógica do handler,
+// Mock withAdminApi sem autenticação — testes focam na lógica do handler,
 // não na autenticação (essa é coberta pelo middleware testes próprios).
-// O ctx.user e ctx.params são injetados direto pelo teste.
-vi.mock('@/lib/api/handler', () => ({
-  withAdminApi: (handler: unknown) => handler,
-}));
+// O ctx.user e ctx.params são injetados direto pelo teste; o erro lançado
+// passa pelo handleApiError real, como no wrapper.
+vi.mock('@/lib/api/handler', async () => {
+  const { handleApiError } = await vi.importActual<typeof import('@/lib/errors/error-handler')>(
+    '@/lib/errors/error-handler',
+  );
+  return {
+    withAdminApi:
+      (handler: (req: Request, ctx: unknown) => Promise<Response>) =>
+      async (req: Request, ctx: unknown) => {
+        try {
+          return await handler(req, ctx);
+        } catch (err) {
+          return handleApiError(err);
+        }
+      },
+  };
+});
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     legislativeActRelation: { update: mockUpdate, delete: mockDelete },
-  },
-}));
-
-vi.mock('@/lib/errors/error-handler', () => ({
-  handleApiError: (err: unknown) => {
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
   },
 }));
 
@@ -81,6 +89,7 @@ describe('PATCH /api/admin/legislative-relations/[id]', () => {
   it('retorna 400 pra action inválida', async () => {
     const res = await PATCH(makeRequest({ action: 'invalido' }) as never, adminContext('r1') as never);
     expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe('Invalid action. Use "confirm" or "reject".');
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 });

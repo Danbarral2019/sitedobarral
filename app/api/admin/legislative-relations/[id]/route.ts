@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ export const PATCH = withAdminApi<{ id: string }>(async (
   const body = await request.json();
 
   if (body.action !== 'confirm' && body.action !== 'reject') {
-    return NextResponse.json({ error: 'Invalid action. Use "confirm" or "reject".' }, { status: 400 });
+    throw new ValidationError('Invalid action. Use "confirm" or "reject".');
   }
 
   const reviewStatus = body.action === 'confirm' ? 'confirmed' : 'rejected';

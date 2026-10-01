@@ -5,6 +5,7 @@ import {
   type JurisprudenciaFilters,
 } from '@/lib/jurisprudencia/unified-query';
 import { handleApiError } from '@/lib/errors/error-handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { verifyAuth } from '@/lib/auth';
 import { getAcessoDoUsuario } from '@/lib/search/acesso-documentos';
@@ -63,10 +64,7 @@ export async function GET(request: NextRequest) {
     const parsed = querySchema.safeParse(raw);
 
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Parâmetros inválidos', details: parsed.error.flatten() },
-        { status: 400 }
-      );
+      throw new ValidationError('Parâmetros inválidos', parsed.error.flatten());
     }
 
     const { page, pageSize, sort, ...filters } = parsed.data;

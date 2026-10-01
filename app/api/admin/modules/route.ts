@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAdminApi } from '@/lib/api/handler';
 import { prisma } from '@/lib/prisma';
+import { ValidationError } from '@/lib/errors/api-error';
 import { apiLogger } from '@/lib/logger';
 import { CreateModuleSchema } from '@/lib/validation-schemas';
 
@@ -13,10 +14,7 @@ export const GET = withAdminApi(async (request: NextRequest) => {
     const courseId = searchParams.get('courseId');
 
     if (!courseId) {
-      return NextResponse.json(
-        { error: 'courseId é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('courseId é obrigatório');
     }
 
     const modules = await prisma.module.findMany({

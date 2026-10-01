@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withUserApi } from '@/lib/api/handler';
+import { ValidationError } from '@/lib/errors/api-error';
 import {
   checkCertificateEligibility,
   issueCertificate,
@@ -34,12 +35,9 @@ export const POST = withUserApi<{ courseId: string }>(async (
   // Verificar elegibilidade primeiro
   const eligibility = await checkCertificateEligibility(ctx.user.userId, courseId);
   if (!eligibility.eligible) {
-    return NextResponse.json(
-      {
-        error: 'Você ainda não completou todos os requisitos para o certificado.',
-        ...eligibility,
-      },
-      { status: 400 }
+    throw new ValidationError(
+      'Você ainda não completou todos os requisitos para o certificado.',
+      eligibility
     );
   }
 

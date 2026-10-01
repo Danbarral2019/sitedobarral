@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { CacheInvalidation } from '@/lib/cache/redis-client';
 import { apiLogger } from "@/lib/logger";
 import { withAdminApi } from '@/lib/api/handler';
+import { ApiError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/admin/depoimentos
@@ -71,10 +72,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
     const { name, email, phone, role, text, rating, avatar, color, status } = body;
 
     if (!name || !email || !role || !text) {
-      return NextResponse.json(
-        { error: 'Nome, email, cargo e texto são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('Nome, email, cargo e texto são obrigatórios');
     }
 
     const testimonial = await prisma.testimonial.create({
@@ -95,6 +93,7 @@ export const POST = withAdminApi(async (request: NextRequest) => {
 
     return NextResponse.json({ success: true, testimonial }, { status: 201 });
   } catch (error) {
+    if (error instanceof ApiError) throw error;
     apiLogger.error({ err: error }, 'Erro ao criar depoimento:');
     return NextResponse.json(
       { error: 'Erro ao criar depoimento' },
@@ -112,17 +111,11 @@ export const PATCH = withAdminApi(async (request: NextRequest) => {
     const { id, status } = await request.json();
 
     if (!id || !status) {
-      return NextResponse.json(
-        { error: 'ID e status são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('ID e status são obrigatórios');
     }
 
     if (!['approved', 'rejected', 'pending'].includes(status)) {
-      return NextResponse.json(
-        { error: 'Status inválido' },
-        { status: 400 }
-      );
+      throw new ValidationError('Status inválido');
     }
 
     const testimonial = await prisma.testimonial.update({
@@ -138,6 +131,7 @@ export const PATCH = withAdminApi(async (request: NextRequest) => {
       testimonial,
     });
   } catch (error) {
+    if (error instanceof ApiError) throw error;
     apiLogger.error({ err: error }, 'Erro ao atualizar depoimento:');
     return NextResponse.json(
       { error: 'Erro ao atualizar depoimento' },
@@ -155,10 +149,7 @@ export const DELETE = withAdminApi(async (request: NextRequest) => {
     const { id } = await request.json();
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID é obrigatório' },
-        { status: 400 }
-      );
+      throw new ValidationError('ID é obrigatório');
     }
 
     await prisma.testimonial.delete({
@@ -173,6 +164,7 @@ export const DELETE = withAdminApi(async (request: NextRequest) => {
       message: 'Depoimento deletado com sucesso',
     });
   } catch (error) {
+    if (error instanceof ApiError) throw error;
     apiLogger.error({ err: error }, 'Erro ao deletar depoimento:');
     return NextResponse.json(
       { error: 'Erro ao deletar depoimento' },
