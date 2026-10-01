@@ -95,9 +95,14 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
   }
 
   // 4. JWT errors (jose library)
+  // Identificados pelo nome/código da classe do jose, nunca pela mensagem: o
+  // teste antigo por substring ('exp', 'signature') transformava em 401 erros
+  // comuns como o SyntaxError "Unexpected token" de um corpo JSON inválido.
   if (error instanceof Error) {
+    const joseCode = (error as Error & { code?: unknown }).code;
+
     // JWT Expired
-    if (error.name === 'JWTExpired' || error.message.includes('exp')) {
+    if (error.name === 'JWTExpired' || joseCode === 'ERR_JWT_EXPIRED') {
       return NextResponse.json(
         {
           error: 'Token expirado. Faça login novamente.',
@@ -112,7 +117,10 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
     if (
       error.name === 'JWTInvalid' ||
       error.name === 'JWSInvalid' ||
-      error.message.includes('signature')
+      error.name === 'JWSSignatureVerificationFailed' ||
+      joseCode === 'ERR_JWT_INVALID' ||
+      joseCode === 'ERR_JWS_INVALID' ||
+      joseCode === 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED'
     ) {
       return NextResponse.json(
         {
@@ -125,7 +133,10 @@ export function handleApiError(error: unknown, includeStackTrace = false): NextR
     }
 
     // JWT Claim validation failed
-    if (error.name === 'JWTClaimValidationFailed') {
+    if (
+      error.name === 'JWTClaimValidationFailed' ||
+      joseCode === 'ERR_JWT_CLAIM_VALIDATION_FAILED'
+    ) {
       return NextResponse.json(
         {
           error: 'Token inválido ou expirado',

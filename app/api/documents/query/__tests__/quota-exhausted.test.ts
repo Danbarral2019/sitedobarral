@@ -132,22 +132,19 @@ describe('/api/documents/query — quota exhausted', () => {
     expect(res.status).toBe(503);
 
     const body = await res.json();
-    expect(body.success).toBe(false);
     expect(body.code).toBe('QUOTA_EXHAUSTED');
     expect(body.error).toMatch(/temporariamente indisponível/i);
-    expect(body.results).toEqual([]);
   });
 
-  it('non-stream: mantém 500 quando erro não é quota', async () => {
-    mockHybridSearch.mockRejectedValue(new Error('boom unexpected'));
+  it('non-stream: mantém 500 quando erro não é quota, sem vazar a mensagem interna', async () => {
+    mockHybridSearch.mockRejectedValue(new Error('boom no banco'));
 
     const res = await POST(makeReq({ query: 'dispensa de licitação', stream: false }));
     expect(res.status).toBe(500);
 
     const body = await res.json();
-    expect(body.success).toBe(false);
-    expect(body.code).toBeUndefined();
-    expect(body.error).toBe('boom unexpected');
+    expect(body.code).toBe('INTERNAL_SERVER_ERROR');
+    expect(body.error).toBe('Erro interno do servidor');
   });
 
   it('stream: emite evento error com code=QUOTA_EXHAUSTED quando generateStream lança 429', async () => {

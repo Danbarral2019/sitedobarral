@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError } from '@/lib/errors/api-error';
 
 /**
  * POST /api/legislative-acts/[id]/favorite
@@ -17,18 +19,12 @@ export async function POST(
     const token = cookieStore.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Não autenticado');
     }
 
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido');
     }
 
     const userId = payload.userId as string;
@@ -40,10 +36,7 @@ export async function POST(
     });
 
     if (!act) {
-      return NextResponse.json(
-        { error: 'Ato normativo não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Ato normativo');
     }
 
     // Verificar se já é favorito
@@ -84,11 +77,7 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error('Erro ao favoritar ato:', error);
-    return NextResponse.json(
-      { error: 'Erro ao processar favorito' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 

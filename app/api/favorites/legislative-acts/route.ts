@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 import { getLeiArticles } from '@/lib/lei-articles';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError } from '@/lib/errors/api-error';
 
 /**
  * GET /api/favorites/legislative-acts
@@ -15,18 +17,12 @@ export async function GET() {
     const token = cookieStore.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Não autenticado');
     }
 
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido');
     }
 
     const userId = payload.userId as string;
@@ -78,10 +74,6 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Erro ao buscar favoritos:', error);
-    return NextResponse.json(
-      { error: 'Erro ao buscar favoritos' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

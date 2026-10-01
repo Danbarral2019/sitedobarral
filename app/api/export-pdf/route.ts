@@ -4,6 +4,8 @@ import { verifyToken } from '@/lib/auth';
 import { getAcessoDoUsuario, whereDocumentoVisivel } from '@/lib/search/acesso-documentos';
 import jsPDF from 'jspdf';
 import { getSiteUrl } from '@/lib/site-url';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * Sanitiza texto para o jsPDF (Helvetica/WinANSI).
@@ -52,19 +54,13 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Não autenticado');
     }
 
     // Verifica JWT (verifyToken exige JWT_SECRET, sem segredo de fallback)
     const payload = await verifyToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Token inválido');
     }
     const userId = payload.userId;
 
@@ -75,10 +71,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Usuário não encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Usuário');
     }
 
     // 3. Recebe IDs dos documentos e contexto
@@ -86,10 +79,7 @@ export async function POST(request: NextRequest) {
     const { documentIds, mode = 'custom', searchContext } = body;
 
     if (!Array.isArray(documentIds) || documentIds.length === 0) {
-      return NextResponse.json(
-        { error: 'Lista de documentos inválida' },
-        { status: 400 }
-      );
+      throw new ValidationError('Lista de documentos inválida');
     }
 
     // 4. Busca documentos — só os que o usuário pode ver (lib/search/acesso-documentos)
@@ -107,10 +97,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (documents.length === 0) {
-      return NextResponse.json(
-        { error: 'Nenhum documento encontrado' },
-        { status: 404 }
-      );
+      throw new NotFoundError('Documento');
     }
 
     // 5. Gera PDF
@@ -426,10 +413,6 @@ Email: contato@profdanielbarral.com.br
     });
 
   } catch (error) {
-    console.error('[Export PDF] Erro:', error);
-    return NextResponse.json(
-      { error: 'Erro ao gerar PDF' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

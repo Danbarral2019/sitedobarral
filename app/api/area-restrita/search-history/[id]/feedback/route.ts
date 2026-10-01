@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { AuthenticationError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 
 /**
  * PATCH /api/area-restrita/search-history/[id]/feedback
@@ -19,7 +21,7 @@ export async function PATCH(
   try {
     const authResult = await verifyAuth(req);
     if (!authResult.valid || !authResult.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new AuthenticationError('Unauthorized');
     }
 
     const { id } = await params;
@@ -31,16 +33,10 @@ export async function PATCH(
       feedback !== 1 &&
       feedback !== -1
     ) {
-      return NextResponse.json(
-        { error: 'feedback must be 1, -1, or null' },
-        { status: 400 },
-      );
+      throw new ValidationError('feedback must be 1, -1, or null');
     }
     if (note !== undefined && typeof note !== 'string') {
-      return NextResponse.json(
-        { error: 'note must be a string' },
-        { status: 400 },
-      );
+      throw new ValidationError('note must be a string');
     }
     const trimmedNote =
       typeof note === 'string' ? note.trim().slice(0, 500) || null : undefined;
@@ -50,7 +46,7 @@ export async function PATCH(
       select: { userId: true },
     });
     if (!entry || entry.userId !== authResult.user.userId) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      throw new NotFoundError('Registro');
     }
 
     await prisma.searchHistory.update({
@@ -64,10 +60,6 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating search history feedback:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }

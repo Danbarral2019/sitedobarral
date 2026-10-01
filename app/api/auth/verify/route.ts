@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 import { checkAccessStatus } from '@/lib/enrollment-utils';
 import { prisma } from '@/lib/prisma';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import { ApiError, AuthenticationError, AuthorizationError } from '@/lib/errors/api-error';
+
 
 
 export async function GET() {
@@ -10,7 +13,7 @@ export async function GET() {
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ authenticated: false }, { status: 401 });
+      throw new AuthenticationError('Não autenticado');
     }
 
     // Para estudantes via QR Code, verifica acesso pelo enrollment
@@ -25,33 +28,24 @@ export async function GET() {
       });
 
       if (!dbUser) {
-        return NextResponse.json({ authenticated: false, error: 'Usuário não encontrado' }, { status: 401 });
+        throw new AuthenticationError('Usuário não encontrado');
       }
 
       // Verifica se tem matrícula no curso
       const enrollment = dbUser.enrollments[0];
       if (!enrollment) {
-        return NextResponse.json(
-          { authenticated: false, error: 'Você não está matriculado neste curso' },
-          { status: 403 }
-        );
+        throw new AuthorizationError('Você não está matriculado neste curso');
       }
 
       // Verifica status do acesso
       const accessStatus = checkAccessStatus(enrollment);
 
       if (accessStatus.isExpired) {
-        return NextResponse.json(
-          { authenticated: false, error: 'Acesso expirado', expired: true },
-          { status: 403 }
-        );
+        throw new ApiError(403, 'Acesso expirado', 'ACCESS_EXPIRED', { expired: true });
       }
 
       if (!accessStatus.hasAccess) {
-        return NextResponse.json(
-          { authenticated: false, error: 'Sem acesso ao curso' },
-          { status: 403 }
-        );
+        throw new AuthorizationError('Sem acesso ao curso');
       }
     }
 
@@ -65,11 +59,9 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Erro ao verificar autenticação:', error);
-    reportError(error, 'auth', { rota: 'verify' });
-    return NextResponse.json(
-      { authenticated: false, error: 'Erro ao verificar acesso' },
-      { status: 500 }
-    );
+    if (!(error instanceof ApiError)) {
+      reportError(error, 'auth', { rota: 'verify' });
+    }
+    return handleApiError(error);
   }
 }

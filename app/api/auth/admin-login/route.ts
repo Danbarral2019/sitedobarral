@@ -4,8 +4,14 @@ import { generateToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { enforceRateLimit, getClientIp } from '@/lib/cache/rate-limit-helper';
-import { RateLimitError } from '@/lib/errors/api-error';
 import { reportError } from '@/lib/monitoring/report-error';
+import { handleApiError } from '@/lib/errors/error-handler';
+import {
+  ApiError,
+  AuthenticationError,
+  RateLimitError,
+  ValidationError,
+} from '@/lib/errors/api-error';
 
 
 export async function POST(request: NextRequest) {
@@ -17,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'E-mail e senha são obrigatórios' },
-        { status: 400 }
-      );
+      throw new ValidationError('E-mail e senha são obrigatórios');
     }
 
     // Busca usuário admin no banco de dados
@@ -31,20 +34,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (!admin || admin.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Credenciais inválidas' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Credenciais inválidas');
     }
 
     // Verifica senha
     const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
 
     if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Credenciais inválidas' },
-        { status: 401 }
-      );
+      throw new AuthenticationError('Credenciais inválidas');
     }
 
     // Gera token JWT para admin
@@ -75,16 +72,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof RateLimitError) {
-      return NextResponse.json(
-        { error: 'Muitas tentativas de login. Tente novamente em alguns instantes.' },
-        { status: 429 }
+      return handleApiError(
+        new RateLimitError('Muitas tentativas de login. Tente novamente em alguns instantes.')
       );
     }
-    console.error('Erro no login admin:', error);
-    reportError(error, 'auth', { rota: 'admin-login' });
-    return NextResponse.json(
-      { error: 'Erro ao processar login' },
-      { status: 500 }
-    );
+    if (!(error instanceof ApiError)) {
+      reportError(error, 'auth', { rota: 'admin-login' });
+    }
+    return handleApiError(error);
   }
 }

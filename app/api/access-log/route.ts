@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { handleApiError } from '@/lib/errors/error-handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { getAcessoDoUsuario, podeVerDocumento } from '@/lib/search/acesso-documentos';
+import { AuthenticationError, ValidationError } from '@/lib/errors/api-error';
 
 /** Teto do histórico devolvido pelo GET. */
 const LIMITE_MAXIMO = 200;
@@ -14,19 +15,19 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const body = await request.json();
     const { action, courseId, documentId } = body;
 
     if (!action) {
-      return NextResponse.json({ error: 'action é obrigatório' }, { status: 400 });
+      throw new ValidationError('action é obrigatório');
     }
 
     // Só entra no histórico documento que existe e que o usuário pode ver:
@@ -70,12 +71,12 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      throw new AuthenticationError('Não autorizado');
     }
 
     const decoded = await verifyToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
+      throw new AuthenticationError('Token inválido');
     }
 
     const { searchParams } = new URL(request.url);
@@ -96,7 +97,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ logs });
   } catch (error) {
-    console.error('Erro ao listar acessos:', error);
-    return NextResponse.json({ error: 'Erro ao listar acessos' }, { status: 500 });
+    return handleApiError(error);
   }
 }
